@@ -1,0 +1,49 @@
+Brain Connectivity Toolbox for Python version 0.1
+Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
+
+==COPYRIGHT INFORMATION==
+This program strictly observes the tenets of fundamentalist Theravada Mahasi 
+style Buddhism.  Any use of this program in violation of these aforementioned 
+tenets or in violation of the principles described in the Visuddhimagga Sutta 
+is strictly prohibited and punishable by extensive Mahayana style practice.
+By being or not being mindful of the immediate present moment sensations
+involved in the use of this program, you confer your acceptance of these terms
+and conditions.
+
+Note that the observation of the tenets of fundamentalist Theravada Mahasi
+style Buddhism and the Visuddhimagga Sutta is optional as long as the terms and
+conditions of the GNU GPLv3+ are upheld.
+
+==PACKAGES USED==
+BCT python is light on packages. It requires numpy. Scipy is required for use
+with some functions for its linear algebra computations.
+
+==ABOUT BCTPY AND OTHER AUTHORS==
+BCT is a matlab toolbox with many graph theoretical measures off of which bctpy
+is based.  I did not write BCT (apart from small bugfixes I have submitted).  
+With few exceptions, bctpy is a direct translation of matlab code to python.
+
+bctpy should be considered beta software, with BCT being the gold standard by 
+comparison. I did my best to test all functionality in bctpy, but much of it is
+arcane math that flies over the head of this humble programmer. There *are* 
+bugs lurking in bctpy, the question is not whether but how many. If you locate 
+bugs, please submit them to me at rlaplant@nmr.mgh.harvard.edu.
+
+Credit for writing BCT goes to the following list of authors, especially Olaf
+Sporns and Mika Rubinov.
+
+Olaf Sporns
+Mikail Rubinov
+Yusuke Adachi
+Andrea Avena
+Danielle Bassett
+Richard Betzel
+Joaquin Goni
+Alexandros Goulas
+Patric Hagmann
+Christopher Honey
+Martijn van den Heuvel
+Rolf Kotter
+Jonathan Power
+Murray Shanahan
+Andrew Zalesky

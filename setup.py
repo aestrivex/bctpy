@@ -12,6 +12,7 @@ setuptools.setup(
 	description=("Brain Connectivity Toolbox for Python"),
 	license="Visuddhimagga Sutta; GPLv3+",
 	long_description=read('README'),
+	datafiles=[('',['README','LICENSE'])],
 	classifiers=[
 		"Development Status :: 3 - Alpha",
 		"Environment :: X11 Applications",
@@ -21,6 +22,8 @@ setuptools.setup(
 		"Programming Language :: Python :: 2.7",
 		"Topic :: Scientific/Engineering :: Information Analysis",
 	],
+	url="https://github.com/aestrivex/bctpy",
 	platforms=['any'],
+	packages=['bct'],
 	requires=["numpy","scipy"]
 )

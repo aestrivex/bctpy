@@ -1,4 +1,4 @@
-Brain Connectivity Toolbox for Python version 0.1
+Brain Connectivity Toolbox for Python version 0.2
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 
 ==COPYRIGHT INFORMATION==
@@ -15,8 +15,10 @@ style Buddhism and the Visuddhimagga Sutta is optional as long as the terms and
 conditions of the GNU GPLv3+ are upheld.
 
 ==PACKAGES USED==
-BCT python is light on packages. It requires numpy. Scipy is required for use
-with some functions for its linear algebra computations.
+BCTPY is written in pure python and requires only scipy and numpy. scipy is 
+required for a couple of functions for its statistical and linear algebra 
+packages which have some features not available in numpy alone. If you don't
+have scipy, most functions that do not need scipy functionality will still work.
 
 ==ABOUT BCTPY AND OTHER AUTHORS==
 BCT is a matlab toolbox with many graph theoretical measures off of which bctpy
@@ -29,8 +31,11 @@ arcane math that flies over the head of this humble programmer. There *are*
 bugs lurking in bctpy, the question is not whether but how many. If you locate 
 bugs, please submit them to me at rlaplant@nmr.mgh.harvard.edu.
 
-Credit for writing BCT goes to the following list of authors, especially Olaf
-Sporns and Mika Rubinov.
+Many thanks to Stefan Fuertinger for his assistance tracking down a number of
+bugs.
+
+Credit for writing BCT (the matlab version) goes to the following list of 
+authors, especially Olaf Sporns and Mika Rubinov.
 
 Olaf Sporns
 Mikail Rubinov
@@ -48,6 +53,3 @@ Jonathan Power
 Murray Shanahan
 Andrew Zalesky
 
-Thanks to the following people for pointing out bugs.
-
-Stefan Fuertinger

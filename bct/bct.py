@@ -5034,7 +5034,7 @@ NOTE: 'avgdeg' backfill is handled slightly differently than in Hagmann
 	n=len(CIJ)
 	if not np.all(CIJ==CIJ.T):
 		raise BCTParamError('backbone_wu can only be computed for undirected '
-			'matrices')
+			'matrices.  If your matrix is has noise, correct it with np.around')
 	CIJtree=np.zeros((n,n))
 
 	#find strongest edge (if multiple edges are tied, use only first one)

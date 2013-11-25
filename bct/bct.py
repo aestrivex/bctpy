@@ -679,7 +679,7 @@ Output:     C,      clustering coefficient vector
 	C=cyc3/(K*(K-1))
 	return C
 
-def get_components():
+def get_components(A):
 	'''	
 Returns the components of an undirected graph specified by the binary and 
 undirected adjacency matrix adj. Components and their constitutent nodes are 
@@ -693,12 +693,31 @@ Outputs:      comps,    vector of component assignments for each node
 
 Note: disconnected nodes will appear as components with a component
 size of 1
+
+Warning: This function requires networkx
 	'''
-	#FIXME Straightforward translation of this function requires a python/numpy
-	#implementation of the. Dulmage-Mendelsohn decomposition.
-	#It could probably be implemented some other way but this would require
-	#math.
-	raise NotImplementedError
+	#nonsquare matrices cannot be symmetric; no need to check
+
+	if not np.all(A==A.T):			#ensure matrix is undirected
+		raise BCTParamError('get_components can only be computed for undirected'
+			' matrices.  If your matrix is noisy, correct it with np.around')
+
+	A=binarize(A,copy=True)
+	n=len(A)
+	A[np.where(np.eye(n))]=1	
+
+	import networkx as nx
+	net=nx.from_numpy_matrix(A)
+	cpts=nx.connected_components(net)
+	
+	cptvec=np.zeros((n,))
+	cptsizes=np.zeros(len(cpts))
+	for i,cpt in enumerate(cpts):
+		cptsizes[i]=len(cpt)
+		for node in cpt:
+			cptvec[node]=i+1
+
+	return cptvec,cptsizes
 	
 def nbs_bct():
 	#FIXME This may be worthwhile to include at some point

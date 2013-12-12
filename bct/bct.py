@@ -3152,7 +3152,7 @@ Output: W,		thresholded connectivity matrix
 
 	en=np.round((n*n-n)*p/ud)		# number of links to be preserved
 
-	W[(ind[0][I][:-en],ind[1][I][:-en])]=0	# apply threshold
+	W[(ind[0][I][-en:],ind[1][I][-en:])]=0	# apply threshold
 
 	if ud==2:						# if symmetric matrix
 		W=W+W.T						# reconstruct symmetry

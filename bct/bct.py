@@ -3133,11 +3133,13 @@ If copy is not set, this function will *modify W in place.*
 Inputs: W,      weighted or binary connectivity matrix
 		p,      proportion of weights to preserve
 					range:  p=1 (all weights preserved) to
-							p=0 (no weights removed)
+							p=0 (no weights preserved)
 		copy,	copy W to avoid side effects, defaults to False
 
 Output: W,		thresholded connectivity matrix
 	'''
+	if p>1 or p<0:
+		raise BCTParamError('Threshold must be in [0,1]')
 	if copy: W=W.copy()
 	n=len(W)						# number of nodes
 	W[xrange(n),xrange(n)]=0		# clear diagonal
@@ -3152,7 +3154,7 @@ Output: W,		thresholded connectivity matrix
 
 	I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-	en=np.round((n*n-n)*p/ud)		# number of links to be preserved
+	en=np.round((n*n-n)*(1-p)/ud)	# number of links to be preserved
 
 	W[(ind[0][I][-en:],ind[1][I][-en:])]=0	# apply threshold
 

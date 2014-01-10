@@ -3154,9 +3154,9 @@ Output: W,		thresholded connectivity matrix
 
 	I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-	en=np.round((n*n-n)*(1-p)/ud)	# number of links to be preserved
+	en=np.round((n*n-n)*p/ud)	# number of links to be preserved
 
-	W[(ind[0][I][-en:],ind[1][I][-en:])]=0	# apply threshold
+	W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
 
 	if ud==2:						# if symmetric matrix
 		W=W+W.T						# reconstruct symmetry

@@ -655,7 +655,9 @@ The above reduces to symmetric and/or binary versions of the clustering
 coefficient for respective graphs.
 	'''
 	A=np.logical_not(W==0)					#adjacency matrix
-	S=W**(1/3)+W.T**(1/3)					#symmetrize weights matrix ^1/3
+	ws=np.sign(W)*np.abs(W)**(1/3)
+	wst=np.sign(W.T)*np.abs(W.T)**(1/3)
+	S=ws+wst								#symmetrize weights matrix ^1/3
 	K=np.sum(A+A.T,axis=1,dtype=float)		#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
@@ -672,8 +674,8 @@ Input:      W,      weighted undirected connection matrix
 
 Output:     C,      clustering coefficient vector
 	'''
-	K=np.array(np.sum(np.logical_not(W==.2),axis=1),dtype=float)
-	ws=W**(1/3)
+	K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
+	ws=np.sign(W)*np.abs(W)**(1/3)
 	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
 	K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, make C=0
 	C=cyc3/(K*(K-1))
@@ -4896,6 +4898,45 @@ def corr_all_dir(a1,a2):
 	ix=np.logical_not(np.eye(n))
 	return np.corrcoef(a1[ix].flat,a2[ix].flat)[0][1]
 
+def comodularity_und(a1,a2):
+	'''
+	Returns the comodularity, an experimental measure I am developing.
+	The comodularity evaluates the correspondence between two community
+	structures A and B.  Let F be the set of nodes that are co-modular (in the
+	same module) in at least one of these community structures.  Let f be the
+	set of nodes that are co-modular in both of these community structures.
+	The comodularity is |f|/|F|
+	'''
+
+	ma,qa=modularity_und(a1)
+	mb,qb=modularity_und(a2)
+
+	n=len(ma)
+	if len(mb)!=n:
+		raise BCTParamError('Comodularity must be done on equally sized '
+			'matrices')
+
+	F=0
+	f=0
+
+	print ma,mb
+
+	for e1 in xrange(n):
+		for e2 in xrange(n):
+			if e2>=e1: continue
+
+			comod_a = ma[e1]==ma[e2] 
+			comod_b = mb[e1]==mb[e2]
+
+			if comod_a or comod_b:
+				F+=1
+			if comod_a and comod_b:
+				f+=1
+	print f,F
+	print 'f/F', f/F
+	print 'f/F*sqrt(qa*qb)', f*np.sqrt(qa*qb)/F
+	return f/F
+			
 ###############################################################################
 # VISUALIZATION
 ###############################################################################

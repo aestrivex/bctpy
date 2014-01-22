@@ -377,7 +377,7 @@ output:     fc,     flow coefficient for each node
 		nb,=np.where(CIJ[v,:]+CIJ[:,v].T)
 		fc[v]=0
 		if np.where(nb)[0].size:
-			CIJflo=-CIJ[nb].T[nb]
+			CIJflo=-CIJ[np.ix_(nb,nb)]
 			for i in xrange(len(nb)):
 				for j in xrange(len(nb)):
 					if CIJ[nb[i],v] and CIJ[v,nb[j]]:
@@ -444,23 +444,33 @@ output:    coreness,        node coreness.
 
 	return coreness,kn
 
-def module_degree_zscore(W,Ci):
+def module_degree_zscore(W,Ci,flag=0):
 	'''
 The within-module degree z-score is a within-module version of degree
 centrality.
 
 Inputs:     W,      binary/weighted, directed/undirected connection matrix
 		   Ci,      community affiliation vector
+		 flag,		0: undirected graph = default
+					1: directed graph in degree
+					2: directed graph out degree
+					3: directed graph in and out degree
 
 Output:     Z,      within-module degree z-score.
 
 Note: The output for directed graphs is the "out-neighbor" z-score.
 	'''
+
+	if flag==2:
+		W=W.copy(); W=W.T
+	elif flag==3:
+		W=W.copy(); W=W+W.T
+
 	n=len(W)
 	Z=np.zeros((n,))					#number of vertices
 	for i in xrange(int(np.max(Ci))):
 		i+=1							#1-based indexing for compatibility
-		Koi=np.sum(W[Ci==i].T[Ci==i],axis=1)
+		Koi=np.sum(W[np.ix_(Ci==i,Ci==i)],axis=1)
 		Z[np.where(Ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
 
 	Z[np.where(np.isnan(Z))]=0
@@ -588,6 +598,35 @@ Outputs:     Cs,        subgraph centrality
 # CLUSTERING
 ###############################################################################
 
+def agreement(ci,buffsz=None):
+	'''
+    Takes as input a set of vertex partitions CI of
+    dimensions [vertex x partition]. Each column in CI contains the
+    assignments of each vertex to a class/community/module. This function
+    aggregates the partitions in CI into a square [vertex x vertex]
+    agreement matrix D, whose elements indicate the number of times any two
+    vertices were assigned to the same class.
+ 
+    In the case that the number of nodes and partitions in CI is large
+    (greater than ~1000 nodes or greater than ~1000 partitions), the script
+    can be made faster by computing D in pieces. The optional input BUFFSZ
+    determines the size of each piece. Trial and error has found that
+    BUFFSZ ~ 150 works well.
+ 
+    Inputs,     CI,     set of (possibly) degenerate partitions
+                BUFFSZ, optional second argument to set buffer size
+ 
+    Outputs:    D,      agreement matrix
+	'''
+	n=len(ci)
+
+	if buffsz is None: buffsz=1000	
+
+	if n<=buffsz: pass
+
+def agreement_weighted(ci,wts):
+	NotImplemented #FIXME
+
 def clustering_coef_bd(A):
 	'''
 The clustering coefficient is the fraction of triangles around a node
@@ -632,7 +671,7 @@ Output:     C,      clustering coefficient vector
 		V=np.where(G[u,:])
 		k=len(V)
 		if k>=2:						#degree must be at least 2
-			S=G[V].T[V]
+			S=G[np.ix_(V,V)]
 			C[u]=np.sum(S)/(k*k-k)
 
 	return C
@@ -654,10 +693,11 @@ The weighted modification is as follows:
 The above reduces to symmetric and/or binary versions of the clustering 
 coefficient for respective graphs.
 	'''
+	#correctly handle cube root of negative weights
+	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
+
 	A=np.logical_not(W==0)					#adjacency matrix
-	ws=np.sign(W)*np.abs(W)**(1/3)
-	wst=np.sign(W.T)*np.abs(W.T)**(1/3)
-	S=ws+wst								#symmetrize weights matrix ^1/3
+	S=cuberoot(W)+cuberoot(W.T)				#symmetrize weights matrix ^1/3
 	K=np.sum(A+A.T,axis=1,dtype=float)		#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
@@ -674,10 +714,12 @@ Input:      W,      weighted undirected connection matrix
 
 Output:     C,      clustering coefficient vector
 	'''
+	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
+
 	K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
-	ws=np.sign(W)*np.abs(W)**(1/3)
+	ws=cuberoot(W)
 	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
-	K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, make C=0
+	K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
 	C=cyc3/(K*(K-1))
 	return C
 
@@ -849,6 +891,48 @@ and Sporns (2010) NeuroImage.
 		np.sum(.5*(degi*degi+degj*degj))/K - np.square(sum(.5*(degi+degj))/K))
 	return r
 
+def assortativity_wei(CIJ,flag):
+	'''
+The assortativity coefficient is a correlation coefficient between the
+strengths (weighted degrees) of all nodes on two opposite ends of a link.
+A positive assortativity coefficient indicates that nodes tend to link to
+other nodes with the same or similar strength.
+
+Inputs:     CIJ,    weighted directed/undirected connection matrix
+		   flag,   0, undirected graph: strength/strength correlation
+				   1, directed graph: out-strength/in-strength correlation
+				   2, directed graph: in-strength/out-strength correlation
+				   3, directed graph: out-strength/out-strength correlation
+				   4, directed graph: in-strength/in-strength correlation
+
+Outputs:    r,      assortativity coefficient
+
+Notes: The function accepts weighted networks, but all connection
+weights are ignored. The main diagonal should be empty. For flag 1
+   the function computes the directed assortativity described in Rubinov
+   and Sporns (2010) NeuroImage.
+	'''
+	if flag==0:							#undirected version
+		str=strengths_und(CIJ)
+		i,j=np.where(np.triu(CIJ,1)>0)
+		K=len(i)
+		stri=str[i]
+		strj=str[j]
+	else:
+		ist,ost=strengths_dir(CIJ)		#directed version
+		i,j=np.where(CIJ>0)
+		K=len(i)
+		
+		if flag==1: stri=ost[i]; strj=ist[j]
+		elif flag==2: stri=ist[i]; strj=ost[j]
+		elif flag==3: stri=ost[i]; strj=ost[j]
+		elif flag==4: stri=ist[i]; strj=ost[j]
+		else: raise ValueError('Flag must be 0-4')
+
+	#compute assortativity
+	r=(( np.sum(stri*strj)/K - np.square(np.sum(.5*(stri+strj))/K)) /
+		np.sum(.5*(stri*stri+strj*strj))/K - np.square(sum(.5*(stri+strj))/K))
+
 def kcore_bd(CIJ,k,peel=False):
 	'''
 The k-core is the largest subnetwork comprising nodes of degree at
@@ -1014,7 +1098,7 @@ Output:       R,        vector of rich-club coefficients for levels
 	Nk=np.zeros((klevel,))
 	Ek=np.zeros((klevel,))
 	for k in xrange(klevel):
-		SmallNodes,=np.where(deg<=k+1)		#get smal nodes with degree <=k
+		SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
 		subCIJ=np.delete(CIJ,SmallNodes,axis=0)
 		subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
 		Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
@@ -1022,6 +1106,79 @@ Output:       R,        vector of rich-club coefficients for levels
 		R[k]=E[k]/(Nk[k]*(Nk[k]-1))			#unweighted rich club coefficient
 
 	return R,Nk,Ek
+	
+def rich_club_wd(CIJ,klevel=None):
+	'''
+  inputs:
+       CIJ:       weighted directed connection matrix
+       k-level:   max level of RC(k). defaults to max degree.
+                 
+  output:
+       Rw:        rich-club curve
+	'''
+	nr_nodes = len(CIJ)
+	#degree of each node is defined here as in+out
+	deg = np.sum((CIJ != 0),axis=0)+np.sum((CIJ.T != 0),axis=0)
+
+	if klevel is None: klevel = np.max(deg)
+	Rw=np.zeros((klevel,))
+
+	#sort the weights of the network, with the strongest connection first
+	wrank = np.sort(CIJ.flat)[::-1]
+
+	for k in xrange(klevel):
+		SmallNodes,=np.where(deg<k+1)
+		if np.size(SmallNodes) == 0:
+			Rw[k]=np.nan
+			continue
+
+		#remove small nodes with node degree < k
+		cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+		#total weight of connections in subset E>r
+		Wr = np.sum(cutCIJ)
+		#total number of connections in subset E>r
+		Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+		#E>r number of connections with max weight in network
+		wrank_r = wrank[:Er]
+		#weighted rich-club coefficient
+		Rw[k] = Wr/np.sum(wrank_r)
+	return Rw
+
+def rich_club_wu(CIJ,klevel=None):
+	'''
+  inputs:
+       CIJ:       weighted directed connection matrix
+       k-level:   max level of RC(k). defaults to max degree.
+                 
+  output:
+       Rw:        rich-club curve
+	'''
+	nr_nodes = len(CIJ)
+	deg = np.sum((CIJ != 0),axis=0)
+
+	if klevel is None: klevel = np.max(deg)
+	Rw=np.zeros((klevel,))
+
+	#sort the weights of the network, with the strongest connection first
+	wrank = np.sort(CIJ.flat)[::-1]
+
+	for k in xrange(klevel):
+		SmallNodes,=np.where(deg<k+1)
+		if np.size(SmallNodes) == 0:
+			Rw[k]=np.nan
+			continue
+
+		#remove small nodes with node degree < k
+		cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+		#total weight of connections in subset E>r
+		Wr = np.sum(cutCIJ)
+		#total number of connections in subset E>r
+		Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+		#E>r number of connections with max weight in network
+		wrank_r = wrank[:Er]
+		#weighted rich-club coefficient
+		Rw[k] = Wr/np.sum(wrank_r)
+	return Rw
 	
 def score_wu(CIJ,s):
 	'''
@@ -1341,8 +1498,6 @@ Outputs:    fcyc,   fraction of all paths that are cycles for each path
 
 def distance_bin(G):
 	'''	
-D = distance_bin(A);
-
 The distance matrix contains lengths of shortest paths between all
 pairs of nodes. An entry (u,v) represents the length of shortest path 
 from node u to node v. The average shortest path length is the 
@@ -1358,6 +1513,7 @@ Notes:
 
 Algorithm: Algebraic shortest paths.
 	'''
+	G=binarize(G,copy=True)
 	D=np.eye(len(G))
 	n=1
 	nPATH=G.copy()						#n path matrix
@@ -1370,7 +1526,7 @@ Algorithm: Algebraic shortest paths.
 		L=(nPATH!=0)*(D==0)
 
 	D[D==0]=np.inf						#disconnected nodes are assigned d=inf
-	D=D-np.eye(len(G))
+	D[np.where(np.eye(len(G)))]=0
 	return D
 
 def distance_wei(G):
@@ -1460,6 +1616,9 @@ Output:     Eglob,          global efficiency (scalar) OR
 			n+=1
 			nPATH=np.dot(nPATH,g)
 			L=(nPATH!=0)*(D==0)
+		D[np.logical_not(D)]=np.inf
+		D=1/D
+		D[np.where(np.eye(len(g)))]=0
 		return D
 
 	n=len(G)							#number of nodes
@@ -1467,11 +1626,26 @@ Output:     Eglob,          global efficiency (scalar) OR
 		E=np.zeros((n,))				#local efficiency	
 
 		for u in xrange(n):
-			V,=np.where(G[u,:])			#neighbors
-			k=len(V)					#degree
-			if k>=2:					#degree must be at least 2
-				e=distance_inv(G[V].T[V])
-				E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
+			#V,=np.where(G[u,:])			#neighbors
+			#k=len(V)					#degree
+			#if k>=2:					#degree must be at least 2
+			#	e=distance_inv(G[V].T[V])
+			#	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
+
+			#find pairs of neighbors 
+			V,=np.where(np.logical_or(G[u,:], G[u,:].T))
+			#inverse distance matrix
+			e=distance_inv(G[np.ix_(V,V)])
+			#symmetrized inverse distance matrix
+			se=e+e.T
+
+			#symmetrized adjacency vector
+			sa=G[u,V]+G[V,u].T
+			numer = np.sum(np.dot(sa.T,sa)*se)/2
+			if numer!=0:
+				denom = np.sum(sa)**2 - np.sum(sa*sa)
+				E[u] = numer/denom		#local efficiency
+
 	else:
 		e=distance_inv(G)
 		E=np.sum(e)/(n*n-n)				#global efficiency
@@ -1509,6 +1683,8 @@ efficiency is hence not a strict generalization of the binary variant.
 
 Algorithm:  Dijkstra's algorithm
 	'''
+	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
+
 	def distance_inv_wei(G):
 		n=len(G)
 		D=np.zeros((n,n))				#distance matrix
@@ -1540,14 +1716,33 @@ Algorithm:  Dijkstra's algorithm
 
 	n=len(Gw)
 	Gl=invert(Gw,copy=True)				#connection length matrix
+	A=np.array((Gw!=0),dtype=int)
 	if local:
 		E=np.zeros((n,))				#local efficiency
 		for u in xrange(n):
-			V,=np.where(Gw[u,:])		#neighbors
-			k=len(V)					#degree
-			if k>=2:					#degree must be at least 2
-				e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
-				E[u]=np.sum(e)/(k*k-k)
+			#V,=np.where(Gw[u,:])		#neighbors
+			#k=len(V)					#degree
+			#if k>=2:					#degree must be at least 2
+			#	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
+			#	E[u]=np.sum(e)/(k*k-k)
+			
+			#find pairs of neighbors
+			V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
+			#symmetrized vector of weights
+			sw=cuberoot(Gw[u,V])+cuberoot(Gw[V,u].T)
+			#inverse distance matrix
+			e=distance_inv_wei(Gl[np.ix_(V,V)])
+			#symmetrized inverse distance matrix
+			se=cuberoot(e)+cuberoot(e.T)
+
+			numer=np.sum(np.outer(sw.T,sw)*se)/2
+			if numer!=0:
+				#symmetrized adjacency vector
+				sa=A[u,V]+A[V,u].T
+				denom=np.sum(sa)**2 - np.sum(sa*sa)
+				print numer,denom
+				E[u] = numer/denom		#local efficiency
+				
 	else:
 		e=distance_inv_wei(Gl)
 		E=np.sum(e)/(n*n-n)
@@ -1809,7 +2004,7 @@ def ls2ci(ls,zeroindexed=False):
 			ci[ls[i][j]]=i+z
 	return ci
 
-def modularity_dir(A):
+def modularity_dir(A,gamma=1,kci=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -1818,6 +2013,10 @@ The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups. 
 
 Input:      W,      directed (weighted or binary) connection matrix.
+			gamma,	modularity resolution parameter
+					gamma>1:	detects smaller modules
+					0<=gamma<1:	detects larger modules
+					gamma=1:	no scaling of module size (default)
 			kci		existing ci.  If specified, only calculates the
 					modularity on the given community structure.  If None
 					(default), generates optimal ci by modularity maximization
@@ -1837,7 +2036,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 	ki=np.sum(A,axis=0)					#in degree
 	ko=np.sum(A,axis=1)					#out degree
 	m=np.sum(ki)						#number of edges
-	b=A-np.outer(ko,ki)/m
+	b=A-gamma*np.outer(ko,ki)/m
 	B=b+b.T								#directed modularity matrix
 
 	init_mod=np.array(xrange(n))		#initial one big module
@@ -1848,7 +2047,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 		modmat=B[module][:,module]
 
 		vals,vecs=linalg.eig(modmat)	#biggest eigendecomposition
-		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(vals))])
+		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
 		if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
 			max_eigvec=max_eigvec[:,0]
 		mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
@@ -1880,6 +2079,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 		else:							#change in modularity was negative or 0
 			modules.append(np.array(module).tolist())
 
+	#adjustment to one-based indexing occurs in ls2ci
 	if kci is None:
 		recur(init_mod)
 		ci=ls2ci(modules)
@@ -1888,6 +2088,48 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 	s=np.tile(ci,(n,1))
 	q=np.sum(np.logical_not(s-s.T)*B/(2*m))
 	return ci,q
+
+def modularity_finetune_dir(W,ci,gamma=1):
+	'''
+    The optimal community structure is a subdivision of the network into
+    nonoverlapping groups of nodes in a way that maximizes the number of
+    within-group edges, and minimizes the number of between-group edges.
+    The modularity is a statistic that quantifies the degree to which the
+    network may be subdivided into such clearly delineated groups.
+ 
+    This algorithm is inspired by the Kernighan-Lin fine-tuning algorithm
+    and is designed to refine a previously detected community structure.
+ 
+    Input:      W,      directed (weighted or binary) connection matrix
+ 
+                Ci0,    initial community affiliation vector (optional)
+ 
+                gamma,  modularity resolution parameter (optional)
+                            gamma>1     detects smaller modules
+                            0<=gamma<1  detects larger modules
+                            gamma=1     no scaling of module size (default)
+ 
+ 
+    Output:     Ci,     refined community affiliation vector
+                Q,      modularity
+ 
+    Note: Ci and Q may vary from run to run, due to heuristics in the
+    algorithm. Consequently, it may be worth to compare multiple runs.
+	'''
+	n=len(W)							#number of nodes
+	if ci is None:
+		ci=np.array(xrange(10))
+	else:
+		_,ci=np.unique(ci,return_inverse=True)
+
+	s=np.sum(W)							#weight of edges
+	knm_o=np.zeros((n,n))				#node-to-module out degree
+	knm_i=np.zeros((n,n))				#node-to-module in degree
+
+#	for m in 
+
+def modularity_finetune_und(W,ci,gamma):
+	NotImplemented #FIXME
 
 def modularity_finetune_und_sign(W,qtype='sta',ci=None):
 	'''
@@ -1923,7 +2165,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
 	n=len(W)							#number of nodes/modules
 	if ci is None:
-		ci=np.array(xrange(10))
+		ci=np.array(xrange(n))
 	else:
 		_,ci=np.unique(ci,return_inverse=True);
 
@@ -1934,7 +2176,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	Knm0=np.zeros((n,n))				#positive node-to-module-degree
 	Knm1=np.zeros((n,n))				#negative node-to-module degree
 
-	for m in xrange(int(np.max(ci)+1)):	#loop over modules
+	for m in xrange(int(np.max(ci))):	#loop over modules
 		Knm0[:,m]=np.sum(W0[:,ci==m],axis=1)
 		Knm1[:,m]=np.sum(W1[:,ci==m],axis=1)
 
@@ -1995,7 +2237,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	return ci,q
 
-def modularity_louvain_und(W,hierarchy=False):
+def modularity_louvain_dir(W,gamma):
+	NotImplemented #FIXME
+
+def modularity_louvain_und(W,gamma=1,hierarchy=False):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2008,6 +2253,10 @@ algorithm (as of writing). The algorithm may also be used to detect
 hierarchical community structure.
 
 Input:      W       	undirected (weighted or binary) connection matrix.
+			gamma,		modularity resolution parameter
+						gamma>1:	detects smaller modules
+						0<=gamma<1:	detects larger modules
+						gamma=1:	no scaling of module size (default)
 		    hierarchy	enables hierarchical output, false by default
 
 Outputs:    1. Classic
@@ -2054,43 +2303,49 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 			for i in np.random.permutation(n):	#loop over nodes in random order
 				#algorithm condition
-				dQ=(Knm[i,:]-Knm[i,m[i]]+W[i,i])-k[i]*(Km-Km[m[i]]+k[i])/s
+				dQ=((Knm[i,:]-Knm[i,m[i]]+W[i,i])-
+					gamma*k[i]*(Km-Km[m[i]]+k[i])/s)
 				dQ[m[i]]=0
 
 				max_dq=np.max(dQ)		#find maximal modularity increase
 				if max_dq>1e-10:		#if maximal increase positive
 					j=np.argmax(dQ)		#take only one value			
+					#print max_dq,j,dQ[j]
 
 					Knm[:,j]+=W[:,i]	#change node-to-module degrees
 					Knm[:,m[i]]-=W[:,i]
 
 					Km[j]+=k[i]			#change module degrees
-					Km[m[i]]=k[i]
+					Km[m[i]]-=k[i]
 
 					m[i]=j				#reassign module
 					flag=True
 
 		_,m=np.unique(m,return_inverse=True)	#new module assignments
+		#print m,h
 		h+=1
 		ci.append(np.zeros((n0,)))
 		for i,mi in enumerate(m):		#loop through initial module assignments
-			ci[h][np.where(ci[h-1]==i+1)]=m[i]	#assign new modules
+			#print i,mi,m[i],h
+			#print np.where(ci[h-1]==i+1)
+			ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
 
 		n=np.max(m)+1					#new number of modules
 		W1=np.zeros((n,n))				#new weighted matrix
 		for i in xrange(n):
 			for j in xrange(n):
-				wp=np.sum(W[m==i].T[m==j])	#pool weights of nodes in same module
+				wp=np.sum(W[np.ix_(m==i,m==j)])	#pool weights of nodes in same module
 				W1[i,j]=wp
 				W1[j,i]=wp
 		W=W1
 
 		q.append(0)
 		#compute modularity
-		q[h]=np.sum(np.diag(W))/s-np.sum(np.dot(W/s,W/s))
+		q[h]=np.trace(W)/s-gamma*np.sum(np.dot(W/s,W/s))
 		if q[h]-q[h-1]<1e-10:			#if modularity does not increase
 			break
 
+	ci=np.array(ci)+1
 	if hierarchy:
 		ci=ci[1:-1]; q=q[1:-1]
 		return ci,q
@@ -2214,8 +2469,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		
 		for u in xrange(nh):
 			for v in xrange(nh):
-				wn0[u,v]=np.sum(W0[m==u].T[m==v])
-				wn1[u,v]=np.sum(W1[m==u].T[m==v])
+				wn0[u,v]=np.sum(W0[np.ix_(m==u,m==v)])
+				wn1[u,v]=np.sum(W1[np.ix_(m==u,m==v)])
 				wn0[v,u]=wn0[u,v]
 				wn1[v,u]=wn1[v,u]
 
@@ -2228,7 +2483,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		q1=np.sum(np.diag(W1))-np.sum(np.dot(W1,W1))/s0
 		q[h]=d0*q0-d1*q1
 
-	return ci[-1],q[-1]
+	_,ci_ret=np.unique(ci[-1],return_inverse=True)
+	ci_ret+=1
+
+	return ci_ret,q[-1]
 				
 def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45):
 	'''
@@ -2333,9 +2591,9 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
 	q=d0*np.sum(q0)-d1*np.sum(q1)
 
-	return ci,q
+	return ci+1,q
 
-def modularity_und(A,kci=None):
+def modularity_und(A,gamma=1,kci=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2344,6 +2602,10 @@ The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.
 
 Input:      W,      undirected (weighted or binary) connection matrix.
+			gamma,	modularity resolution parameter
+					gamma>1:	detects smaller modules
+					0<=gamma<1:	detects larger modules
+					gamma=1:	no scaling of module size (default)
 			kci		existing ci.  If specified, only calculates the
 					modularity on the given community structure.  If None
 					(default), generates optimal ci by modularity maximization
@@ -2363,7 +2625,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 	k=np.sum(A,axis=0)					#degree
 	m=np.sum(k)							#number of edges (each undirected edge
 											#is counted twice)
-	B=A-np.outer(k,k)/m					#initial modularity matrix
+	B=A-gamma*np.outer(k,k)/m			#initial modularity matrix
 
 	init_mod=np.array(xrange(n))		#initial one big module
 	modules=[]							#output modules list
@@ -2374,7 +2636,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 		modmat-=np.diag(np.sum(modmat,axis=0))
 
 		vals,vecs=linalg.eigh(modmat)	#biggest eigendecomposition
-		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(vals))])
+		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
 		if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
 			max_eigvec=max_eigvec[:,0]
 		mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
@@ -2407,6 +2669,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 		else:							#change in modularity was negative or 0
 			modules.append(np.array(module).tolist())
 				
+	#adjustment to one-based indexing occurs in ls2ci
 	if kci is None:
 		recur(init_mod)
 		ci=ls2ci(modules)
@@ -2771,7 +3034,7 @@ def motif3struct_wei(W):
 Structural motifs are patterns of local connectivity. Motif frequency
 is the frequency of occurrence of motifs around a node. Motif intensity
 and coherence are weighted generalizations of motif frequency. 
-
+m
 Input:      W,      weighted directed connection matrix
 				   (all weights must be between 0 and 1)
 
@@ -3366,7 +3629,7 @@ Note: n=5000 was used in Bassett et al. 2010 in PLoS CB.
 		L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
 		if np.size(L):
 			#count edges crossing at the boundary of the cube
-			E[count]=np.sum(A[L].T[np.setdiff1d(xrange(m),L)])
+			E[count]=np.sum(A[np.ix_(L,np.setdiff1d(xrange(m),L))])
 			#count nodes inside of the cube
 			N[count]=np.size(L)
 			count+=1
@@ -3401,7 +3664,7 @@ Output:     Rlatt,  latticized network in original node ordering
 	
 	ind_rp=np.random.permutation(n)		#random permutation of nodes
 	R=R.copy()
-	R=R[ind_rp].T[ind_rp]
+	R=R[np.ix_(ind_rp,ind_rp)]
 
 	#create distance to diagonal matrix if not specified by user
 	if D is None:
@@ -3473,7 +3736,7 @@ Output:     Rlatt,  latticized network in original node ordering
 						break
 			att+=1
 
-	Rlatt=R[ind_rp[::-1]].T[ind_rp[::-1]]		#reverse random permutation
+	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
 
 	return Rlatt,R,ind_rp,eff
 
@@ -3498,7 +3761,7 @@ Output:     Rlatt,  latticized network in original node ordering
 
 	ind_rp=np.random.permutation(n)		#randomly reorder matrix
 	R=R.copy()
-	R=R[ind_rp].T[ind_rp]
+	R=R[np.ix_(ind_rp,ind_rp)]
 
 	#create distance to diagonal matrix if not specified by user
 	if D is None:
@@ -3548,7 +3811,7 @@ Output:     Rlatt,  latticized network in original node ordering
 					break
 			att+=1
 
-	Rlatt=R[ind_rp[::-1]].T[ind_rp[::-1]]		#reverse random permutation
+	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
 
 	return Rlatt,R,ind_rp,eff
 
@@ -3576,7 +3839,7 @@ Output:     Rlatt,  latticized network in original node ordering
 
 	ind_rp=np.random.permutation(n)		#randomly reorder matrix
 	R=R.copy()
-	R=R[ind_rp].T[ind_rp]
+	R=R[np.ix_(ind_rp,ind_rp)]
 
 	if D is None:
 		D=np.zeros((n,n))
@@ -3652,7 +3915,7 @@ Output:     Rlatt,  latticized network in original node ordering
 						break
 			att+=1
 
-	Rlatt=R[ind_rp[::-1]].T[ind_rp[::-1]]
+	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
 	return Rlatt,R,ind_rp,eff
 
 def latmio_und(R,iter,D=None):
@@ -3676,7 +3939,7 @@ Output:     Rlatt,  latticized network in original node ordering
 
 	ind_rp=np.random.permutation(n)		#randomly reorder matrix
 	R=R.copy()
-	R=R[ind_rp].T[ind_rp]
+	R=R[np.ix_(ind_rp,ind_rp)]
 
 	if D is None:
 		D=np.zeros((n,n))
@@ -3732,7 +3995,7 @@ Output:     Rlatt,  latticized network in original node ordering
 					break
 			att+=1
 
-	Rlatt=R[ind_rp[::-1]].T[ind_rp[::-1]]
+	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
 	return Rlatt,R,ind_rp,eff
 
 def makeevenCIJ(n,k,sz_cl):
@@ -4020,6 +4283,7 @@ Note: no connections are placed on the main diagonal.
 
 	return CIJ
 
+#FIXME I'm pretty sure these changes don't need to be ported but just in case
 def null_model_dir_sign(W,bin_swaps=5,wei_freq=.1):
 	'''
 This function randomizes an directed network with positive and
@@ -4031,10 +4295,10 @@ Inputs: W,          Directed weighted connection matrix
 					   bin_swap=5 is the default (each edge rewired 5 times)
 					   bin_swap=0 implies no binary randomization 
 	   wei_freq,   Frequency of weight sorting in weighted randomization
-					   wei_freq should range between 0 and 1
+					   0 <= wei_freq < 1
 					   wei_freq=1 implies that weights are sorted at each step
-					   wei_freq=0.1 implies that weights are sorted at each 10th
-							step (faster, default value)
+					   wei_freq=0.1 implies that weights are sorted at each 
+							10th step (faster, default value)
 					   wei_freq=0 implies no sorting of weights
 						   (not recommended)
 
@@ -4121,6 +4385,7 @@ formal tests (such as the Kolmogorov-Smirnov test) if desired.
 	rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
 	return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
 
+#FIXME I'm pretty sure these changes don't need to be ported but just in case
 def null_model_und_sign(W,bin_swaps=5,wei_freq=1):
 	'''
 This function randomizes an undirected network with positive and
@@ -4458,10 +4723,8 @@ Output:     R,      randomized network
 		att=0
 		while att<=max_attempts:			#while not rewired
 			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
+				e1,e2=np.random.randint(k,size=(2,))
+				while e1==e2: e2=np.random.randint(k)
 				a=i[e1]; b=j[e1]
 				c=i[e2]; d=j[e2]
 
@@ -4548,6 +4811,58 @@ Output:     R,      randomized network
 
 	return R
 
+def randomize_graph_partial_und(A,B,maxswap):
+	'''
+A = RANDOMIZE_GRAPH_PARTIAL_UND(A,B,MAXSWAP) takes adjacency matrices A 
+and B and attempts to randomize matrix A by performing MAXSWAP 
+rewirings. The rewirings will avoid any spots where matrix B is 
+nonzero.
+
+Inputs:       A,      adjacency matrix to randomize
+			  B,      edges to avoid
+	    MAXSWAP,      number of rewirings
+
+Outputs:      A,      randomized matrix
+
+Notes:
+1. Graph may become disconnected as a result of rewiring. Always
+  important to check.
+2. A can be weighted, though the weighted degree sequence will not be
+  preserved.
+3. A must be undirected.
+	'''
+	A=A.copy()
+	i,j=np.where(np.triu(A,1))
+	m=len(i)
+
+	nswap=0
+	while nswap < maxswap: 
+		while True:
+			e1,e2=np.random.randint(m,size=(2,));
+			while e1==e2: e2=np.random.randint(m)
+			a=i[e1]; b=j[e1]
+			c=i[e2]; d=j[e2]
+		
+			if a!=c and a!=d and b!=c and b!=d:
+				break					#all 4 vertices must be different
+
+		if np.random.random()>.5:
+			i.setflags(write=True); j.setflags(write=True)
+			i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
+			c=i[e2]; d=j[e2]			#to explore all potential rewirings
+			
+		#rewiring condition
+		if not (A[a,d] or A[c,b] or B[a,d] or B[c,b]): #avoid specified ixes
+			A[a,d]=A[a,b]; A[a,b]=0
+			A[d,a]=A[b,a]; A[b,a]=0
+			A[c,b]=A[c,d]; A[c,d]=0
+			A[b,c]=A[d,c]; A[d,c]=0
+
+			j.setflags(write=True)
+			j[e1]=d; j[e2]=b			#reassign edge indices
+			nswap+=1
+			break
+
 def randomizer_bin_und(R,alpha):
 	'''
 This function randomizes a binary undirected network, while preserving 
@@ -4608,7 +4923,7 @@ Outputs:    R,          randomized network
 		#we can only use edges with connection to neither node
 		i_intersect=np.intersect1d(alliholes,alljholes)
 		#find which of these nodes are connected
-		ii,jj=np.where(R[i_intersect].T[i_intersect])
+		ii,jj=np.where(R[np.ix_(i_intersect,i_intersect)])
 
 		#if there is an edge to switch
 		if np.size(ii):
@@ -4845,6 +5160,46 @@ Notes:
 
 	return Min,Mout,Mall 
 
+def matching_ind_und(CIJ0):
+	'''
+    M0 = MATCHING_IND_UND(CIJ) computes matching index for undirected
+    graph specified by adjacency matrix CIJ. Matching index is a measure of
+    similarity between two nodes' connectivity profiles (excluding their
+    mutual connection, should it exist).
+ 
+    Inputs:     CIJ,    undirected adjacency matrix
+ 
+    Outputs:    M0,     matching index matrix.
+	'''
+	K=np.sum(CIJ0,axis=0) 
+	n=len(CIJ0)
+	R=(K!=0)
+	N=np.sum(R)
+	xR,=np.where(R==0)
+	CIJ=np.delete(np.delete(CIJ0,xR,axis=0),xR,axis=1)
+	I=np.logical_not(np.eye(N))
+	M=np.zeros((N,N))
+
+	for i in xrange(N):
+		c1=CIJ[i,:]
+		use=np.logical_or(c1,CIJ)
+		use[:,i]=0
+		use*=I
+
+		ncon1=c1*use
+		ncon2=c1*CIJ
+		ncon=np.sum(ncon1+ncon2,axis=1)
+		print ncon
+
+		M[:,i] = 2*np.sum(np.logical_and(ncon1,ncon2),axis=1)/ncon
+
+	M*=I
+	M[np.isnan(M)]=0
+	M0=np.zeros((n,n))
+	yR,=np.where(R)
+	M0[np.ix_(yR,yR)]=M
+	return M0
+
 def dice_pairwise_und(a1,a2):
 	'''
 	Calculates pairwise dice similarity for each vertex between two matrices.  
@@ -4871,7 +5226,7 @@ def dice_pairwise_und(a1,a2):
 
 	return d
 
-def corr_all_und(a1,a2):
+def corr_flat_und(a1,a2):
 	'''
 	Returns the correlation coefficient between two flattened adjacency
 	matrices.  Only the upper triangular part is used to avoid double counting
@@ -4883,10 +5238,13 @@ def corr_all_und(a1,a2):
 	output:	r, correlation coefficient describing the similarity of a1 and a2
 	'''
 	n=len(a1)
+	if len(a2)!=n:
+		raise BCTParamError("Cannot calculate flattened correlation on "
+			"matrices of different size")
 	triu_ix=np.where(np.triu(np.ones((n,n)),1))
 	return np.corrcoef(a1[triu_ix].flat,a2[triu_ix].flat)[0][1]
 
-def corr_all_dir(a1,a2):
+def corr_flat_dir(a1,a2):
 	'''
 	Returns the correlation coefficient between two flattened adjacency
 	matrices.  Similarity metric for weighted matrices.
@@ -4897,8 +5255,44 @@ def corr_all_dir(a1,a2):
 	output: r, correlation coefficient describing similarity of a1 and a2
 	'''
 	n=len(a1)
+	if len(a2)!=n:
+		raise BCTParamError("Cannot calculate flattened correlation on "
+			"matrices of different size")
 	ix=np.logical_not(np.eye(n))
 	return np.corrcoef(a1[ix].flat,a2[ix].flat)[0][1]
+
+def cross_corr_und(a1,a2):
+	'''
+	Returns the 2D cross correlation between two adjacency matrices.
+	
+	input:	a1, matrix 1 of size NxN
+			a2, matrix 2 of size NxN
+	output: r, correlation coefficient describing the normalized cross
+			correlation
+	'''
+	from scipy import signal
+
+	n=len(a1)
+	if len(a2)!=n:
+		raise BCTParamError("Cannot calculate cross correlation on matrices "
+			"of different size")
+	
+	a1=a1.copy()
+	a2=a2.copy()
+	ixes=np.where(np.triu(np.ones((n,n)),1))
+	a1 -= np.mean(a1[ixes])
+	a2 -= np.mean(a2[ixes])
+	a1[xrange(n),xrange(n)]=0
+	a2[xrange(n),xrange(n)]=0
+
+	# note that allclose(fftconvolve(x,y[::-1,::-1]),correlate2d(x,y)) -> #t
+
+	#xc2 = signal.correlate2d(a1,a2)
+	xc2 = signal.fftconvolve(a1,a2[::-1])
+	cc = xc2[n-1,n-1]/np.sqrt(np.sum(np.dot(a1,a1)[xrange(10),xrange(10)])*
+		np.sum(np.dot(a2,a2)[xrange(10),xrange(10)]))
+	
+	return cc
 
 def comodularity_und(a1,a2):
 	'''
@@ -4918,30 +5312,207 @@ def comodularity_und(a1,a2):
 		raise BCTParamError('Comodularity must be done on equally sized '
 			'matrices')
 
-	F=0
-	f=0
-
-	print ma,mb
+	E,F,f,G,g,H,h=(0,)*7
 
 	for e1 in xrange(n):
 		for e2 in xrange(n):
 			if e2>=e1: continue
 
+			#node pairs
 			comod_a = ma[e1]==ma[e2] 
 			comod_b = mb[e1]==mb[e2]
 
+			#node pairs sharing a module in at least one graph
 			if comod_a or comod_b:
 				F+=1
+			#node pairs sharing a module in both graphs
 			if comod_a and comod_b:
 				f+=1
-	print f,F
+
+			#edges in either graph common to any module
+			if a1[e1,e2] != 0 or a2[e1,e2] != 0:
+				#edges that exist in at least one graph which prepend a shared
+				#module in at least one graph:
+				#EXTREMELY NOT USEFUL SINCE THE SHARED MODULE MIGHT BE THE OTHER
+				#GRAPH WITH NO EDGE!
+				if comod_a or comod_b:
+					G+=1
+				#edges that exist in at least one graph which prepend a shared
+				#module in both graphs:
+				if comod_a and comod_b:
+					g+=1
+
+				#edges that exist at all
+				E+=1
+
+			#edges common to a module in both graphs
+			if a1[e1,e2] != 0 and a2[e1,e2] != 0:
+				#edges that exist in both graphs which prepend a shared module
+				#in at least one graph
+				if comod_a or comod_b:
+					H+=1
+				#edges that exist in both graphs which prepend a shared module
+				#in both graphs
+				if comod_a and comod_b:
+					h+=1
+
+
+	m1 = np.max(ma)
+	m2 = np.max(mb)
+	P=m1+m2-1
+
+	#print f,F
+	print m1,m2
 	print 'f/F', f/F
-	print 'f/F*sqrt(qa*qb)', f*np.sqrt(qa*qb)/F
+	print '(f/F)*p', f*P/F
+	print 'g/E', g/E
+	print '(g/E)*p', g*P/E
+	print 'h/E', h/E
+	print '(h/E)*p', h*P/E
+	print 'h/H', h/H
+	print '(h/H)*p', h*P/E
+	print 'q1, q2', qa, qb
+	#print 'f/F*sqrt(qa*qb)', f*np.sqrt(qa*qb)/F
 	return f/F
-			
+
+def comod_test(a1,a2):
+	ma,qa=modularity_und(a1)
+	mb,qb=modularity_und(a2)
+
+	n=len(ma)
+	if len(mb)!=n:
+		raise BCTParamError('Comodularity must be done on equally sized '
+			'matrices')
+
+	f,F=(0,)*2
+
+	for e1 in xrange(n):
+		for e2 in xrange(n):
+			if e2>=e1: continue
+
+			#node pairs
+			comod_a = ma[e1]==ma[e2] 
+			comod_b = mb[e1]==mb[e2]
+
+			#node pairs sharing a module in at least one graph
+			if comod_a or comod_b:
+				F+=1
+			#node pairs sharing a module in both graphs
+			if comod_a and comod_b:
+				f+=1
+
+	m1=np.max(ma)
+	m2=np.max(mb)
+	eta=[]
+	gamma=[]
+	for i in xrange(m1):
+		eta.append(np.size(np.where(ma==i+1)))
+	for i in xrange(m2):
+		gamma.append(np.size(np.where(mb==i+1)))
+
+	scale,conscale = (0,)*2
+	for h in eta:
+		for g in gamma:
+			#print h,g
+			conscale += (h*g)/(n*(h+g)-h*g)
+			scale+= (h*h*g*g)/(n**3*(h+g)-n*h*g)
+
+	print m1,m2
+#	print conscale
+	print scale
+	return (f/F)/scale
+
 ###############################################################################
 # VISUALIZATION
 ###############################################################################
+
+def adjacency_plot_und(A,coor):
+	'''
+	This function in matlab is a visualization helper which translates an
+	adjacency matrix and an Nx3 matrix of spatial coordinates, and plots a
+	3D isometric network connecting the undirected unweighted nodes using a
+	specific plotting format. Including the formatted output is not useful at
+	all for bctpy since matplotlib will not be able to plot it in quite the
+	same way.
+
+	Instead of doing this, I have included code that will plot the adjacency
+	matrix onto nodes at the given spatial coordinates in mayavi.  This is a
+	less featureful version of cvu, the connectome visualization utility 
+	which I also maintain.  cvu uses freesurfer surfaces and
+	annotations to get the node coordinates (rather than leaving them up to
+	the user) and has many other interactive visualization tools.
+
+	Because this function uses mayavi, it has dependencies not present
+	elsewhere in bctpy including traits and mayavi.
+
+	Inputs:		A = Adjacency matrix
+			 coor = Nx3 matrix of node coordinates in the same order as A
+	Outputs:  fig, A handle to a mayavi figure.
+
+	To display the output interactively, call
+
+	fig=adjacency_plot_und(A,coor)
+	from mayavi import mlab
+	mlab.show(figure=fig)
+
+	Note: Thresholding the matrix is strongly recommended.  It is recommended
+	that the input matrix have fewer than 5000 total connections in order to
+	achieve reasonable performance and noncluttered visualization.
+	'''
+	from mayavi import mlab
+
+	n = len(A)
+	nr_edges = (n*n-1)//2
+
+	#starts = np.zeros((nr_edges,3))
+	#vecs = np.zeros((nr_edges,3))
+	#adjdat = np.zeros((nr_edges,))
+
+	ixes, = np.where(np.triu(np.ones((n,n)),1).flat)
+
+	#i=0
+	#for r2 in xrange(n):
+	#	for r1 in xrange(r2):
+	#		starts[i,:] = coor[r1,:]
+	#		vecs[i,:] = coor[r2,:] - coor[r1,:]
+	#		adjdat[i,:]
+	#		i+=1
+
+	adjdat = A.flat[ixes]
+
+	A_r = np.tile(coor,(n,1,1))
+	starts = np.reshape(A_r,(n*n,3))[ixes,:]
+
+	vecs = np.reshape(A_r - np.transpose(A_r,(1,0,2)),(n*n,3))[ixes,:]
+
+	#plotting
+	fig=mlab.figure()
+	
+	nodesource = mlab.pipeline.scalar_scatter(
+		coor[:,0],coor[:,1],coor[:,2],figure=fig)
+
+	nodes = mlab.pipeline.glyph(nodesource, scale_mode='none',
+		scale_factor=3., mode='sphere', figure=fig)
+	nodes.glyph.color_mode='color_by_scalar'
+
+	vectorsrc = mlab.pipeline.vector_scatter(
+		starts[:,0],starts[:,1],starts[:,2],vecs[:,0],vecs[:,1],vecs[:,2],
+		figure=fig)
+	vectorsrc.mlab_source.dataset.point_data.scalars=adjdat
+
+	thres=mlab.pipeline.threshold(vectorsrc,
+		low=0.0001,up=np.max(A),figure=fig)
+		
+	vectors=mlab.pipeline.vectors(thres, colormap='YlOrRd', 
+		scale_mode='vector', figure=fig)
+	vectors.glyph.glyph_source.glyph_source.glyph_type='dash'
+	vectors.glyph.glyph.clamping=False
+	vectors.actor.property.opacity=.7
+	vectors.glyph.glyph.color_mode='color_by_scalar'
+	vectors.glyph.color_mode='color_by_scalar'
+	vectors.glyph.glyph_source.glyph_position='head'
+
+	return fig
 
 def align_matrices(m1,m2,dfun='sqrdiff',verbose=False,H=1e6,Texp=1,
 	T0=1e-3,Hbrk=10):
@@ -5042,7 +5613,7 @@ instead.
 			r2=np.random.randint(n)
 		atmp[r1]=anew[r2]
 		atmp[r2]=anew[r1]
-		m2atmp=m2[atmp].T[atmp]
+		m2atmp=m2[np.ix_(atmp,atmp)]
 		if dfun in ('absdiff','absdff'):
 			costnew=np.sum(np.abs(m1-m2atmp))/maxcost
 		elif dfun in ('sqrdiff','sqrdff'):
@@ -5067,7 +5638,7 @@ instead.
 	if verbose:
 		print 'step %i ... final lowest cost = %f' % (h,mincost)
 
-	M_reordered=m2[amin].T[amin]
+	M_reordered=m2[np.ix_(amin,amin)]
 	M_indices=amin
 	cost=mincost
 	return M_reordered,M_indices,cost
@@ -5111,7 +5682,7 @@ NOTE: 'avgdeg' backfill is handled slightly differently than in Hagmann
 
 	#repeat n-2 times
 	for ix in xrange(n-2):
-		CIJ_io=CIJ[in_].T[out].T
+		CIJ_io=CIJ[np.ix_(in_,out)]
 		i,j=np.where(np.max(CIJ_io)==CIJ_io)
 		#i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
 		print i,j
@@ -5139,6 +5710,51 @@ NOTE: 'avgdeg' backfill is handled slightly differently than in Hagmann
 		CIJclus=CIJtree+CIJnotintree*(CIJnotintree>=thr)
 
 	return CIJtree,CIJclus
+
+def grid_communities(c):
+	'''
+    (X,Y,INDSORT) = GRID_COMMUNITIES(C) takes a vector of community
+    assignments C and returns three output arguments for visualizing the
+    communities. The third is INDSORT, which is an ordering of the vertices
+    so that nodes with the same community assignment are next to one
+    another. The first two arguments are vectors that, when overlaid on the
+    adjacency matrix using the PLOT function, highlight the communities.
+
+    Inputs:     C,       community assignments
+ 
+    Outputs:    bounds,  list containing the communities
+                INDSORT, indices
+
+	Note: This function returns considerably different values than in
+	matlab due to differences between matplotlib and matlab.  This function
+	has been designed to work with matplotlib, as in the following example:
+	
+	ci,_=modularity_und(adj)
+	bounds,ixes=grid_communities(ci)
+	pylab.imshow(adj[np.ix_(ixes,ixes)],interpolation='none',cmap='BuGn')	
+	for b in bounds:
+	  pylab.axvline(x=b,color='red')
+	  pylab.axhline(y=b,color='red')
+
+	Note that I adapted the idea from the matlab function of the same name,
+	and have not tested the functionality extensively.
+	'''
+	c=c.copy()
+	nr_c=np.max(c)
+	ixes=np.argsort(c)
+	c=c[ixes]
+
+	bounds=[]
+
+	for i in xrange(nr_c):
+		ind=np.where(c==i+1)
+		if np.size(ind):
+			mn=np.min(ind)-.5
+			mx=np.max(ind)+.5
+			bounds.extend([mn,mx])
+
+	bounds=np.unique(bounds)
+	return bounds,ixes
 
 def reorderMAT(m,H=5000,cost='line'):
 	'''
@@ -5186,17 +5802,17 @@ Note: I'm not 100% sure how the algorithms between this and reorder_matrix
 		r1,r2=np.random.randint(n,size=(2,))
 		a[r1]=r2
 		a[r2]=r1
-		costnew=np.sum((m[a].T[a])*costf)
+		costnew=np.sum((m[np.ix_(a,a)])*costf)
 		#if this reduced the overall cost
 		if costnew<lowcost:
-			m=m[a].T[a]
+			m=m[np.ix_(a,a)]
 			r2_swap=starta[r2]
 			r1_swap=starta[r1]
 			starta[r1]=r2_swap
 			starta[r2]=r1_swap
 			lowcost=costnew
 
-	M_reordered=m_start[starta].T[starta]
+	M_reordered=m_start[np.ix_(starta,starta)]
 	m_indices=starta
 	cost=lowcost
 	return M_reordered,m_indices,cost
@@ -5287,7 +5903,7 @@ instead.
 			r2=np.random.randint(n)
 		atmp[r1]=anew[r2]
 		atmp[r2]=anew[r1]	
-		costnew=np.sum((m1[atmp].T[atmp])*costf)/maxcost
+		costnew=np.sum((m1[np.ix_(atmp,atmp)])*costf)/maxcost
 		#annealing
 		if costnew<lowcost or np.random.random()<np.exp(-(costnew-lowcost)/T):
 			anew=atmp
@@ -5303,7 +5919,7 @@ instead.
 	if verbose:
 		print 'step %i ... final lowest cost = %f' % (h,mincost)
 
-	M_reordered=m1[amin].T[amin]
+	M_reordered=m1[np.ix_(amin,amin)]
 	M_indices=amin
 	cost=mincost
 	return M_reordered,M_indices,cost
@@ -5409,7 +6025,8 @@ Outputs:    On,         new node order
 		#to rewrite sortrows to do lexsort plus negative indices; the algorithm
 		#cant be further simplified.
 
-		ord=np.lexsort(knm[ind,:].T[mod_imp[::-1]])
+		ord=np.lexsort(knm[np.ix_(ind,mod_imp[::-1])])
+		#ord=np.lexsort(knm[ind,:].T[mod_imp[::-1]])
 		if signs[mod_imp[0]]==-1:
 			ord=ord[::-1]
 			#reverse just the principal level and punt on the other levels.
@@ -5418,7 +6035,7 @@ Outputs:    On,         new node order
 		on[ind[ord]]=y*int(max_module_size)+np.arange(nm[x-1],dtype=int)
 		
 	on=np.argsort(on)
-	ar=A[on].T[on]
+	ar=A[np.ix_(on,on)]
 
 	return on,ar
 

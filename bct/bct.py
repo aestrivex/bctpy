@@ -469,7 +469,6 @@ Note: The output for directed graphs is the "out-neighbor" z-score.
 	n=len(W)
 	Z=np.zeros((n,))					#number of vertices
 	for i in xrange(int(np.max(Ci))):
-		i+=1							#1-based indexing for compatibility
 		Koi=np.sum(W[np.ix_(Ci==i,Ci==i)],axis=1)
 		Z[np.where(Ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
 
@@ -519,7 +518,7 @@ nodes around 1000 or less)
 	r/=np.sum(r)
 	return r
 
-def participation_coef(W,Ci):
+def participation_coef(W,ci):
 	'''
 Participation coefficient is a measure of diversity of intermodular
 connections of individual nodes.
@@ -532,13 +531,15 @@ Output:     P,      participation coefficient
 Note: The output for directed graphs is the "out-neighbor"
 	 participation coefficient.
 	'''
+	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
+
 	n=len(W)						#number of vertices
 	Ko=np.sum(W,axis=1)				#(out) degree
-	Gc=np.dot((W!=0),np.diag(Ci))	#neighbor community affiliation
+	Gc=np.dot((W!=0),np.diag(ci))	#neighbor community affiliation
 	Kc2=np.zeros((n,))				#community-specific neighbors
 
-	for i in xrange(int(np.max(Ci))):
-		i+=1						#1-based indexing for compatibility
+	for i in xrange(int(np.max(ci))):
 		Kc2+=np.square(np.sum(W*(Gc==i),axis=1))
 
 	P=np.ones((n,))-Kc2/np.square(Ko)
@@ -546,7 +547,7 @@ Note: The output for directed graphs is the "out-neighbor"
 
 	return P
 
-def participation_coef_sign(W,Ci):
+def participation_coef_sign(W,ci):
 	'''
 Participation coefficient is a measure of diversity of intermodular
 connections of individual nodes.
@@ -558,15 +559,17 @@ Inputs:     W,      undirected connection matrix with positive and
 Output:     Ppos,   participation coefficient from positive weights
 		    Pneg,   participation coefficient from negative weights
 	'''	
+	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
+
 	n=len(W)						#number of vertices
 
 	def pcoef(W_):
 		S=np.sum(W_,axis=1)			#strength
-		Gc=np.dot(np.logical_not(W_),np.diag(Ci)) #neighbor community affil.
+		Gc=np.dot(np.logical_not(W_),np.diag(ci)) #neighbor community affil.
 		Sc2=np.zeros((n,))
 		
-		for i in xrange(int(np.max(Ci))):
-			i+=1					#1-based indexing for compatibility
+		for i in xrange(int(np.max(ci))):
 			Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
 
 		P=np.ones((n,))-Sc2/np.square(S)
@@ -1487,7 +1490,7 @@ Outputs:    fcyc,   fraction of all paths that are cycles for each path
 	#note: pcyc[2] is equal to the fraction of reciprocal connections
 	#note: there are no non-cyclic paths of length N and no cycles of len N+1
 	pcyc=np.zeros(np.size(Pq,axis=2))
-	for q in xrange(1,np.size(Pq,axis=2)):
+	for q in xrange(np.size(Pq,axis=2)):
 		if np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1]))>0:
 			pcyc[q]=(np.sum(np.diag(Pq[:,:,q-1]))/
 				np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1])))
@@ -1899,7 +1902,7 @@ Notes: Wq grows very quickly for larger N,K,q. Weights are discarded.
 	Wq=np.zeros((n,n,n))
 	CIJpwr=CIJ.copy()
 	Wq[:,:,1]=CIJ
-	for q in xrange(1,n):
+	for q in xrange(n):
 		CIJpwr=np.dot(CIJpwr,CIJ)
 		Wq[:,:,q]=CIJpwr
 
@@ -1967,7 +1970,7 @@ Note: faster but more memory intensive than "breadthdist.m".
 # MODULARITY
 ###############################################################################
 
-def ci2ls(ci,zeroindexed=False):
+def ci2ls(ci):
 	'''
 	Convert from a community index vector to a 2D python list of modules
 	The list is a pure python list, not requiring numpy.
@@ -1977,13 +1980,14 @@ def ci2ls(ci,zeroindexed=False):
 	Output: ls,			2D pure python list with lowest value 0
 	'''
 	if not np.size(ci): return ci #list is empty
+	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
 	nr_indices=int(max(ci))
 	ls=[]
 	for c in range(nr_indices):
 		ls.append([])
-	z=int(not zeroindexed)
 	for i,x in enumerate(ci):
-		ls[int(ci[i])-z].append(i)
+		ls[ci[i]-1].append(i)
 	return ls
 
 def ls2ci(ls,zeroindexed=False):
@@ -2024,12 +2028,10 @@ Input:      W,      directed (weighted or binary) connection matrix.
 Outputs:    Ci,     optimal community structure
 		   Q,      maximized modularity
 
-Note: Ci and Q may vary from run to run, due to heuristics in the 
-algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is not true. This algorithm is deterministic. ~~rlaplant)
-
-Also see Good et al. (2010) Phys. Rev. E 81:046106.
+Note: This algorithm is deterministic. The matlab function bearing this name 
+incorrectly disclaims that the outcome depends on heuristics involving a random
+seed. The louvain method does depend on a random seed, but this function uses
+a modularity maximization algorithm which does not.
 	'''
 	from scipy import linalg
 	n=len(A)							#number of vertices
@@ -2039,7 +2041,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 	b=A-gamma*np.outer(ko,ki)/m
 	B=b+b.T								#directed modularity matrix
 
-	init_mod=np.array(xrange(n))		#initial one big module
+	init_mod=np.arange(n)				#initial one big module
 	modules=[]							#output modules list
  
 	def recur(module):
@@ -2089,7 +2091,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 	q=np.sum(np.logical_not(s-s.T)*B/(2*m))
 	return ci,q
 
-def modularity_finetune_dir(W,ci,gamma=1):
+def modularity_finetune_dir(W,ci=None,gamma=1):
 	'''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2118,7 +2120,7 @@ def modularity_finetune_dir(W,ci,gamma=1):
 	'''
 	n=len(W)							#number of nodes
 	if ci is None:
-		ci=np.array(xrange(10))
+		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True)
 
@@ -2126,10 +2128,132 @@ def modularity_finetune_dir(W,ci,gamma=1):
 	knm_o=np.zeros((n,n))				#node-to-module out degree
 	knm_i=np.zeros((n,n))				#node-to-module in degree
 
-#	for m in 
+	for m in xrange(np.max(ci)):
+		knm_o[:,m]=np.sum(W[:,ci==m],axis=1)	
+		knm_i[:,m]=np.sum(W[ci==m,:],axis=0)
 
-def modularity_finetune_und(W,ci,gamma):
-	NotImplemented #FIXME
+	k_o=np.sum(knm_o,axis=1)			#node out-degree
+	k_i=np.sum(knm_i,axis=1)			#node in-degree
+	km_o=np.sum(knm_o,axis=0)			#module out-degree
+	km_i=np.sum(knm_i,axis=1)			#module out-degree
+
+	flag=True
+	while flag:
+		flag=False
+		for u in np.random.permutation(n):	#loop over nodes in random order
+			ma=ci[u]-1					#current module of u
+			#algorithm condition
+			dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
+				gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
+			dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-
+				gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
+			dq = (dq_o+dq_i)/2
+			dq[ma]=0
+
+			max_dq=np.max(dq)			#find maximal modularity increase
+			if max_dq>1e-10:			#if maximal increase positive
+				mb=np.argmax(dq)		#take only one value
+				#print max_dq,mb
+
+				knm_o[:,mb]+=W[u,:].T	#change node-to-module out-degrees
+				knm_o[:,ma]-=W[u,:].T
+				knm_i[:,mb]+=W[u,:]		#change node-to-module in-degrees
+				knm_i[:,ma]-=W[u,:]
+				km_o[mb]+=k_o[u]		#change module out-degrees
+				km_o[ma]-=k_o[u]
+				km_i[mb]+=k_i[u]		#change module in-degrees
+				km_i[ma]-=k_i[u]
+
+				ci[u]=mb+1				#reassign module
+				flag=True
+
+	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
+	m=np.max(ci)						#new number of modules
+	w=np.zeros((m,m))					#new weighted matrix
+
+	for u in xrange(m):
+		for v in xrange(m):
+			#pool weights of nodes in same module
+			w[u,v]=np.sum(W[np.ix_(ci==u,ci==v)]) 
+
+	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
+	return ci,q
+
+def modularity_finetune_und(W,ci=None,gamma=1):
+	'''
+    The optimal community structure is a subdivision of the network into
+    nonoverlapping groups of nodes in a way that maximizes the number of
+    within-group edges, and minimizes the number of between-group edges. 
+    The modularity is a statistic that quantifies the degree to which the
+    network may be subdivided into such clearly delineated groups. 
+ 
+    This algorithm is inspired by the Kernighan-Lin fine-tuning algorithm
+    and is designed to refine a previously detected community structure.
+ 
+    Input:      W,      undirected (weighted or binary) connection matrix
+                Ci,    initial community affiliation vector (optional)
+                gamma,  modularity resolution parameter (optional)
+                            gamma>1     detects smaller modules
+                            0<=gamma<1  detects larger modules
+                            gamma=1     no scaling of module size (default)
+ 
+ 
+    Output:     Ci,     refined community affiliation vector
+                Q,      modularity
+ 
+    Note: Ci and Q may vary from run to run, due to heuristics in the
+    algorithm. Consequently, it may be worth to compare multiple runs.
+	'''
+	n=len(W)							#number of nodes
+	if ci is None:
+		ci=np.arange(n)+1
+	else:
+		_,ci=np.unique(ci,return_inverse=True)
+
+	s=np.sum(W)							#total weight of edges
+	knm=np.zeros((n,n))					#node-to-module degree
+	for m in xrange(int(np.max(ci))):
+		knm[:,m]=np.sum(W[:,ci==m],axis=1)
+	k=np.sum(knm,axis=1)				#node degree
+	km=np.sum(knm,axis=0)				#module degree
+
+	flag=True							
+	while flag:
+		flag=False
+
+		for u in np.random.permutation(n):
+			ma=ci[u]-1
+			#algorithm condition
+			dq=(knm[u,:]-knm[u,ma]+W[u,u])-gamma*k[u]*(km-km[ma]+k[u])/s
+			dq[ma]=0
+
+			max_dq=np.max(dq)			#find maximal modularity increase
+			if max_dq>1e-10:			#if maximal increase positive
+				mb=np.argmax(dq)		#take only one value
+
+				knm[:,mb]+=W[:,u]		#change node-to-module degrees	
+				knm[:,ma]-=W[:,u]
+				km[mb]+=k[u]			#change module degrees
+				km[ma]-=k[u]
+
+				ci[u]=mb+1
+				flag=True
+
+	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
+
+	m=np.max(ci)
+	w=np.zeros((m,m))
+	for u in xrange(m):
+		for v in xrange(m):
+			#pool weights of nodes in same module
+			wm=np.sum(W[np.ix_(ci==u,ci==v)])
+			w[u,v]=wm
+			w[v,u]=wm
+
+	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
+	return ci,q
 
 def modularity_finetune_und_sign(W,qtype='sta',ci=None):
 	'''
@@ -2160,12 +2284,10 @@ Output:     Ci,     refined community affiliation vector
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is true.  The algorithm depends on a random seed. ~~rlaplant)
 	'''
 	n=len(W)							#number of nodes/modules
 	if ci is None:
-		ci=np.array(xrange(n))
+		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True);
 
@@ -2205,7 +2327,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			raise BCTParamError('Modularity infinite loop style D')
 		flag=False
 		for u in np.random.permutation(n):	#loop over nodes in random order
-			ma=ci[u]						#current module of u
+			ma=ci[u]-1						#current module of u
 			dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
 			dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
 			dq=d0*dq0-d1*dq1			#rescaled changes in modularity
@@ -2218,7 +2340,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			if max_dq>1e-10:			#if maximal increase is positive
 				#print h,max_dq,mb,u
 				flag=True
-				ci[u]=mb				#reassign module
+				ci[u]=mb+1				#reassign module
 
 				Knm0[:,mb]+=W0[:,u]
 				Knm0[:,ma]-=W0[:,u]
@@ -2237,8 +2359,30 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	return ci,q
 
-def modularity_louvain_dir(W,gamma):
-	NotImplemented #FIXME
+def modularity_louvain_dir(W,gamma=1):
+	'''
+%   The optimal community structure is a subdivision of the network into
+%   nonoverlapping groups of nodes in a way that maximizes the number of
+%   within-group edges, and minimizes the number of between-group edges.
+%   The modularity is a statistic that quantifies the degree to which the
+%   network may be subdivided into such clearly delineated groups.
+%
+%   The Louvain algorithm is a fast and accurate community detection
+%   algorithm (as of writing). The algorithm may also be used to detect
+%   hierarchical community structure.
+%
+%   Input:      W       directed (weighted or binary) connection matrix.
+%               gamma,  modularity resolution parameter (optional)
+%                           gamma>1     detects smaller modules
+%                           0<=gamma<1  detects larger modules
+%                           gamma=1     (default) leads to the 'classic' modularity function
+%
+%   Outputs:    Ci,     community structure
+%               Q,      modularity
+%
+%   Note: Ci and Q may vary from run to run, due to heuristics in the
+%   algorithm. Consequently, it may be worth to compare multiple runs.
+	'''
 
 def modularity_louvain_und(W,gamma=1,hierarchy=False):
 	'''
@@ -2270,14 +2414,12 @@ Outputs:    1. Classic
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is true.  The algorithm depends on a random seed. ~~rlaplant)
 	'''
 	n=len(W)							#number of nodes
 	s=np.sum(W)							#weight of edges
 	h=0									#hierarchy index
 	ci=[]
-	ci.append(np.array(xrange(n))+1)	#hierarchical module assignments
+	ci.append(np.arange(n)+1)			#hierarchical module assignments
 	q=[]
 	q.append(-1)						#hierarchical modularity values
 	n0=n
@@ -2290,7 +2432,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		Km=k.copy()						#module degree
 		Knm=W.copy()					#node-to-module degree
 
-		m=np.array(xrange(n))			#initial module assignments
+		m=np.arange(n)+1				#initial module assignments
 
 		flag=True						#flag for within-hierarchy search
 		it=0
@@ -2302,10 +2444,11 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			flag=False
 
 			for i in np.random.permutation(n):	#loop over nodes in random order
+				ma=m[i]-1
 				#algorithm condition
-				dQ=((Knm[i,:]-Knm[i,m[i]]+W[i,i])-
-					gamma*k[i]*(Km-Km[m[i]]+k[i])/s)
-				dQ[m[i]]=0
+				dQ=((Knm[i,:]-Knm[i,ma]+W[i,i])-
+					gamma*k[i]*(Km-Km[ma]+k[i])/s)
+				dQ[ma]=0
 
 				max_dq=np.max(dQ)		#find maximal modularity increase
 				if max_dq>1e-10:		#if maximal increase positive
@@ -2313,28 +2456,30 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 					#print max_dq,j,dQ[j]
 
 					Knm[:,j]+=W[:,i]	#change node-to-module degrees
-					Knm[:,m[i]]-=W[:,i]
+					Knm[:,ma]-=W[:,i]
 
 					Km[j]+=k[i]			#change module degrees
-					Km[m[i]]-=k[i]
+					Km[ma]-=k[i]
 
-					m[i]=j				#reassign module
+					m[i]=j+1			#reassign module
 					flag=True
 
 		_,m=np.unique(m,return_inverse=True)	#new module assignments
 		#print m,h
+		m+=1
 		h+=1
 		ci.append(np.zeros((n0,)))
-		for i,mi in enumerate(m):		#loop through initial module assignments
+		for i,mi in enumerate(m):	#loop through initial module assignments
 			#print i,mi,m[i],h
 			#print np.where(ci[h-1]==i+1)
-			ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
+			ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
 
-		n=np.max(m)+1					#new number of modules
+		n=np.max(m)						#new number of modules
 		W1=np.zeros((n,n))				#new weighted matrix
 		for i in xrange(n):
 			for j in xrange(n):
-				wp=np.sum(W[np.ix_(m==i,m==j)])	#pool weights of nodes in same module
+				#pool weights of nodes in same module
+				wp=np.sum(W[np.ix_(m==i,m==j)])
 				W1[i,j]=wp
 				W1[j,i]=wp
 		W=W1
@@ -2383,8 +2528,6 @@ Output:     Ci,     community affiliation vector
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is true.  The algorithm depends on a random seed. ~~rlaplant)
 	'''
 	n=len(W)							#number of nodes
 
@@ -2407,7 +2550,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	h=1									#hierarchy index
 	nh=n								#number of nodes in hierarchy
-	ci=[None,np.array(xrange(10))+1]	#hierarchical module assignments
+	ci=[None,np.arange(n)+1]			#hierarchical module assignments
 	q=[-1,0]							#hierarchical modularity values
 	while q[h]-q[h-1]>1e-10:
 		if h>300: 
@@ -2420,7 +2563,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		knm0=W0.copy()					#positive node-to-module degree
 		knm1=W0.copy()					#negative node-to-module degree
 
-		m=np.array(xrange(nh))			#initial module assignments
+		m=np.arange(nh)+1				#initial module assignments
 		flag=True						#flag for within hierarchy search
 		it=0
 		while flag:
@@ -2431,7 +2574,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 				'The Louvain method only works on undirected matrices')
 			flag=False
 			for u in np.random.permutation(nh):	#loop over nodes in random order
-				ma=m[u]
+				ma=m[u]-1
 				dQ0=(knm0[u,:]+W0[u,u]-knm0[u,ma])-kn0[u]*(
 					km0+kn0[u]-km0[ma])/s0	#positive dQ
 				dQ1=(knm1[u,:]+W1[u,u]-knm1[u,ma])-kn1[u]*(
@@ -2454,16 +2597,17 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 					km1[mb]+=kn1[u]		#change negative module degrees
 					km1[ma]-=kn1[u]
 
-					m[u]=mb				#reassign module
+					m[u]=mb+1			#reassign module
 
 		h+=1
 		ci.append(np.zeros((n,)))
 		_,m=np.unique(m,return_inverse=True)
+		m+=1
 		
-		for u in xrange(nh):			#loop through initial module assignments
-			ci[h][np.where(ci[h-1]==u+1)]=m[u]+1	#assign new modules
+		for u in xrange(nh):		#loop through initial module assignments
+			ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
 
-		nh=np.max(m)+1					#number of new nodes
+		nh=np.max(m)					#number of new nodes
 		wn0=np.zeros((nh,nh))			#new positive weights matrix
 		wn1=np.zeros((nh,nh))
 		
@@ -2522,12 +2666,10 @@ Output:     Ci,     refined community affiliation vector
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is true.  The algorithm depends on a random seed ~~rlaplant)
 	'''
 	n=len(W)
 	if ci is None:
-		ci=np.array(xrange(n))
+		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True)
 
@@ -2538,7 +2680,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	Knm0=np.zeros((n,n))					#positive node-to-module degree
 	Knm1=np.zeros((n,n))					#negative node-to-module degree
 
-	for m in xrange(int(np.max(ci)+1)):		#loop over initial modules
+	for m in xrange(int(np.max(ci))):		#loop over initial modules
 		Knm0[:,m]=np.sum(W0[:,ci==m],axis=1)
 		Knm1[:,m]=np.sum(W1[:,ci==m],axis=1)
 
@@ -2560,10 +2702,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		s1=1; d1=0
 
 	for u in np.random.permutation(n):		#loop over nodes in random order
-		ma=ci[u]							#current module
+		ma=ci[u]-1							#current module
 		r=np.random.random()<p
 		if r:
-			mb=np.random.randint(n)			#select new module randomly
+			mb=np.random.randint(n)		 #select new module randomly
 		else:
 			dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
 			dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
@@ -2574,7 +2716,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			mb=np.argmax(dq)
 
 		if r or max_dq>1e-10:
-			ci[u]=mb
+			ci[u]=mb+1
 
 			Knm0[:,mb]+=W0[:,u]
 			Knm0[:,ma]-=W0[:,u]
@@ -2586,12 +2728,13 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			Km1[ma]-=Kn1[u]
 
 	_,ci=np.unique(ci,return_inverse=True)
+	ci+=1
 	m=np.tile(ci,(n,1))
 	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
 	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
 	q=d0*np.sum(q0)-d1*np.sum(q1)
 
-	return ci+1,q
+	return ci,q
 
 def modularity_und(A,gamma=1,kci=None):
 	'''
@@ -2613,12 +2756,10 @@ Input:      W,      undirected (weighted or binary) connection matrix.
 Outputs:    Ci,     optimal community structure
 		    Q,      maximized modularity
 
-Note: Ci and Q may vary from run to run, due to heuristics in the
-algorithm. Consequently, it may be worth to compare multiple runs.
-
-(This is not true.  The algorithm is deterministic.  ~~rlaplant)
-
-Also see Good et al. (2010) Phys. Rev. E 81:046106.
+Note: This algorithm is deterministic. The matlab function bearing this name 
+incorrectly disclaims that the outcome depends on heuristics involving a random
+seed.  The louvain method does depend on a random seed, but this function uses
+a modularity maximization algorithm which does not.
 '''
 	from scipy import linalg
 	n=len(A)							#number of vertices
@@ -2627,7 +2768,7 @@ Also see Good et al. (2010) Phys. Rev. E 81:046106.
 											#is counted twice)
 	B=A-gamma*np.outer(k,k)/m			#initial modularity matrix
 
-	init_mod=np.array(xrange(n))		#initial one big module
+	init_mod=np.arange(n)				#initial one big module
 	modules=[]							#output modules list
 
 	def recur(module):
@@ -2781,7 +2922,7 @@ other motif computations.
 		M=np.zeros((54,6),dtype=bool)	#isomorphs
 		CL=np.zeros((54,6),dtype=np.uint8)#canonical labels (predecssors of IDs)
 		cl=np.zeros((6,),dtype=np.uint8)
-		for i in xrange (2**6):			#loop through all subgraphs
+		for i in xrange(2**6):			#loop through all subgraphs
 			m='{0:b}'.format(i)
 			m=str().zfill(6-len(m))+m
 			G=np.array(((0,m[2],m[4]),(m[0],0,m[5]),(m[1],m[3],0)),dtype=int)
@@ -5289,8 +5430,8 @@ def cross_corr_und(a1,a2):
 
 	#xc2 = signal.correlate2d(a1,a2)
 	xc2 = signal.fftconvolve(a1,a2[::-1])
-	cc = xc2[n-1,n-1]/np.sqrt(np.sum(np.dot(a1,a1)[xrange(10),xrange(10)])*
-		np.sum(np.dot(a2,a2)[xrange(10),xrange(10)]))
+	cc = xc2[n-1,n-1]/np.sqrt(np.sum(np.dot(a1,a1)[xrange(n),xrange(n)])*
+		np.sum(np.dot(a2,a2)[xrange(n),xrange(n)]))
 	
 	return cc
 

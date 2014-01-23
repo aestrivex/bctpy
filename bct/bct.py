@@ -2175,7 +2175,7 @@ def modularity_finetune_dir(W,ci=None,gamma=1):
 	for u in xrange(m):
 		for v in xrange(m):
 			#pool weights of nodes in same module
-			w[u,v]=np.sum(W[np.ix_(ci==u,ci==v)]) 
+			w[u,v]=np.sum(W[np.ix_(ci==u+1,ci==v+1)]) 
 
 	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
 	return ci,q
@@ -2248,7 +2248,7 @@ def modularity_finetune_und(W,ci=None,gamma=1):
 	for u in xrange(m):
 		for v in xrange(m):
 			#pool weights of nodes in same module
-			wm=np.sum(W[np.ix_(ci==u,ci==v)])
+			wm=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
 			w[u,v]=wm
 			w[v,u]=wm
 
@@ -2359,30 +2359,115 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	return ci,q
 
-def modularity_louvain_dir(W,gamma=1):
+def modularity_louvain_dir(W,gamma=1,hierarchy=False):
 	'''
-%   The optimal community structure is a subdivision of the network into
-%   nonoverlapping groups of nodes in a way that maximizes the number of
-%   within-group edges, and minimizes the number of between-group edges.
-%   The modularity is a statistic that quantifies the degree to which the
-%   network may be subdivided into such clearly delineated groups.
-%
-%   The Louvain algorithm is a fast and accurate community detection
-%   algorithm (as of writing). The algorithm may also be used to detect
-%   hierarchical community structure.
-%
-%   Input:      W       directed (weighted or binary) connection matrix.
-%               gamma,  modularity resolution parameter (optional)
-%                           gamma>1     detects smaller modules
-%                           0<=gamma<1  detects larger modules
-%                           gamma=1     (default) leads to the 'classic' modularity function
-%
-%   Outputs:    Ci,     community structure
-%               Q,      modularity
-%
-%   Note: Ci and Q may vary from run to run, due to heuristics in the
-%   algorithm. Consequently, it may be worth to compare multiple runs.
+    The optimal community structure is a subdivision of the network into
+    nonoverlapping groups of nodes in a way that maximizes the number of
+    within-group edges, and minimizes the number of between-group edges.
+    The modularity is a statistic that quantifies the degree to which the
+    network may be subdivided into such clearly delineated groups.
+ 
+    The Louvain algorithm is a fast and accurate community detection
+    algorithm (as of writing). The algorithm may also be used to detect
+    hierarchical community structure.
+ 
+    Input:      W       directed (weighted or binary) connection matrix.
+                gamma,  modularity resolution parameter (optional)
+                            gamma>1     detects smaller modules
+                            0<=gamma<1  detects larger modules
+                            gamma=1     no scaling of module size (default)
+			 hierarchy, enables hierarchical output (default false)
+ 
+    Outputs:    Ci,     community structure
+                Q,      modularity
+ 
+    Note: Ci and Q may vary from run to run, due to heuristics in the
+    algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	n=len(W)							#number of nodes
+	s=np.sum(W)							#total weight of edges
+	h=0									#hierarchy index
+	ci=[]
+	ci.append(np.arange(n)+1)			#hierarchical module assignments
+	q=[]
+	q.append(-1)						#hierarchical modularity index
+	n0=n
+
+	while True:	
+		if h>300:
+			raise BCTParamError('Modularity Infinite Loop Style E.  Please '
+				'contact the developer with this error.')
+		k_o=np.sum(W,axis=1)			#node in/out degrees
+		k_i=np.sum(W,axis=0)
+		km_o=k_o.copy()					#module in/out degrees
+		km_i=k_i.copy()
+		knm_o=W.copy()					#node-to-module in/out degrees
+		knm_i=W.copy()
+
+		m=np.arange(n)+1				#initial module assignments
+
+		flag=True						#flag for within hierarchy search
+		it=0
+		while flag:
+			it+=1
+			if it>1000:
+				raise BCTParamError('Modularity Infintie Loop Style F.  Please '
+					'contact the developer with this error.')
+			flag=False
+			
+			#loop over nodes in random order
+			for u in np.random.permutation(n):
+				ma=m[u]-1
+				#algorithm condition
+				dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
+					gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
+				dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-	
+					gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
+				dq = (dq_o+dq_i)/2
+				dq[ma]=0
+
+				max_dq=np.max(dq)		#find maximal modularity increase
+				if max_dq>1e-10:		#if maximal increase positive
+					mb=np.argmax(dq)	#take only one value
+
+					knm_o[:,mb]+=W[u,:].T	#change node-to-module degrees
+					knm_o[:,ma]-=W[u,:].T
+					knm_i[:,mb]+=W[u,:]
+					knm_i[:,ma]-=W[u,:]
+					km_o[mb]+=k_o[u]		#change module out-degrees
+					km_o[ma]-=k_o[u]
+					km_i[mb]+=k_i[u]
+					km_i[ma]-=k_i[u]
+					
+					m[u]=mb+1			#reassign module
+					flag=True
+
+		_,m=np.unique(m,return_inverse=True)
+		m+=1
+		h+=1
+		ci.append(np.zeros((n0,)))
+		for i,mi in enumerate(m):		#loop through module assignments
+			ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+
+		n=np.max(m)						#new number of modules
+		W1=np.zeros((n,n))				#new weighted matrix
+		for i in xrange(n):
+			for j in xrange(n):
+				#pool weights of nodes in same module
+				W1[i,j]=np.sum(W[np.ix_(m==i+1,m==j+1)])
+
+		q.append(0)
+		#compute modularity
+		q[h]=np.trace(W1)/s-gamma*np.sum(np.dot(W1/s,W1/s))
+		if q[h]-q[h-1]<1e-10:			#if modularity does not increase
+			break
+
+	ci=np.array(ci)+1
+	if hierarchy:
+		ci=ci[1:-1]; q=q[1:-1]
+		return ci,q
+	else:
+		return ci[h-1],q[h-1]
 
 def modularity_louvain_und(W,gamma=1,hierarchy=False):
 	'''
@@ -2443,7 +2528,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 				'contact the developer with this error.')
 			flag=False
 
-			for i in np.random.permutation(n):	#loop over nodes in random order
+			#loop over nodes in random order
+			for i in np.random.permutation(n):	
 				ma=m[i]-1
 				#algorithm condition
 				dQ=((Knm[i,:]-Knm[i,ma]+W[i,i])-
@@ -2479,7 +2565,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		for i in xrange(n):
 			for j in xrange(n):
 				#pool weights of nodes in same module
-				wp=np.sum(W[np.ix_(m==i,m==j)])
+				wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
 				W1[i,j]=wp
 				W1[j,i]=wp
 		W=W1

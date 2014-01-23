@@ -621,14 +621,53 @@ def agreement(ci,buffsz=None):
  
     Outputs:    D,      agreement matrix
 	'''
-	n=len(ci)
+	m,n=ci.shape
 
 	if buffsz is None: buffsz=1000	
 
-	if n<=buffsz: pass
+	if m<=buffsz:
+		ind=dummyvar(ci)
+		D=np.dot(ind,ind.T)
+	else:
+		a=np.arange(0,m,buffsz)
+		b=np.arange(buffsz,m,buffsz)
+		if len(a)!=len(b):
+			b=np.append(b,m)
+		D=np.zeros((n,))
+		for i,j in zip(a,b):
+			y=ci[:,i:j+1]
+			ind=dummyvar(y)
+			D+=np.dot(ind,ind.T)
+
+	D[xrange(n),xrange(n)]=0
+	return D
 
 def agreement_weighted(ci,wts):
-	NotImplemented #FIXME
+	'''
+    D = AGREEMENT_WEIGHTED(CI,WTS) is identical to AGREEMENT, with the 
+    exception that each partitions contribution is weighted according to 
+    the corresponding scalar value stored in the vector WTS. As an example,
+    suppose CI contained partitions obtained using some heuristic for 
+    maximizing modularity. A possible choice for WTS might be the Q metric
+    (Newman's modularity score). Such a choice would add more weight to 
+    higher modularity partitions.
+ 
+    NOTE: Unlike AGREEMENT, this script does not have the input argument
+    BUFFSZ.
+ 
+    Inputs:     CI,     set of partitions (size MxN)
+                WTS,    relative weight of each partition (size Mx1)
+ 
+    Outputs:    D,      weighted agreement matrix
+	'''
+	m,n=ci.shape
+	wts=np.array(wts)/np.sum(wts)
+
+	D=np.zeros((n,n))
+	for i in xrange(m):
+		d=dummyvar(ci[i,:].reshape(1,n))
+		D+=np.dot(d,d.T)*wts[i]
+	return D
 
 def clustering_coef_bd(A):
 	'''
@@ -766,10 +805,6 @@ Warning: This function requires networkx
 
 	return cptvec,cptsizes
 	
-def nbs_bct():
-	#FIXME This may be worthwhile to include at some point
-	raise NotImplementedError
-
 def transitivity_bd(A):
 	'''
 Transitivity is the ratio of 'triangles to triplets' in the network.
@@ -4510,7 +4545,6 @@ Note: no connections are placed on the main diagonal.
 
 	return CIJ
 
-#FIXME I'm pretty sure these changes don't need to be ported but just in case
 def null_model_dir_sign(W,bin_swaps=5,wei_freq=.1):
 	'''
 This function randomizes an directed network with positive and
@@ -4612,7 +4646,6 @@ formal tests (such as the Kolmogorov-Smirnov test) if desired.
 	rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
 	return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
 
-#FIXME I'm pretty sure these changes don't need to be ported but just in case
 def null_model_und_sign(W,bin_swaps=5,wei_freq=1):
 	'''
 This function randomizes an undirected network with positive and
@@ -6286,3 +6319,38 @@ Inputs:     CIJ,        adjacency matrix
 			for j in xrange(n):
 				if CIJ[i,j]!=0:
 					fd.write('%i %i %.6f \r' % (i+1,j+1,CIJ[i,j]))
+
+##############################################################################
+# MISCELLANEOUS
+##############################################################################
+def dummyvar(cis):
+	'''
+	This is an efficient implementation of matlab's "dummyvar" command
+	using sparse matrices.
+
+	input: partitions, MxN array-like containing M partitions of N nodes
+		into <=N distinct communities
+
+	output: dummyvar, an NxR matrix containing R column variables (indicator
+		variables) with N entries, where R is the total number of communities
+		summed across each of the M partitions.
+
+		i.e.
+		r = sum((max(len(unique(partitions[i]))) for i in range(m)))
+	'''
+	#num_rows is not affected by partition indexes
+	n=np.size(cis,axis=1)
+	m=np.size(cis,axis=0)
+	r=np.sum((np.max(len(np.unique(cis[i])))) for i in range(m))
+	nnz=np.prod(cis.shape)
+
+	ix=np.argsort(cis,axis=1)
+	s_cis=np.sort(cis,axis=1)
+
+	mask=np.hstack((((True,),)*m,s_cis[:,:-1]!=s_cis[:,1:]))
+	indptr,=np.where(mask.flat)
+	indptr=np.append(indptr,nnz)
+	
+	import scipy.sparse as sp
+	dv=sp.csc_matrix((np.repeat((1,),nnz),ix.flat,indptr),shape=(n,r))
+	return dv.toarray()

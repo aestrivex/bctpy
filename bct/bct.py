@@ -765,6 +765,9 @@ Output:     C,      clustering coefficient vector
 	C=cyc3/(K*(K-1))
 	return C
 
+def consensus_und():
+	raise NotImplementedError() #FIXME
+
 def get_components(A):
 	'''	
 Returns the components of an undirected graph specified by the binary and 

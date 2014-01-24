@@ -1,0 +1,229 @@
+This file describes the authorship and change history of each function in BCT.
+At least, as much authorship that is noted in the documentation.
+
+In addition references to scientific literature are provided where available
+
+ADJACENCY_PLOT_UND
+	Richard Betzel			Indiana University		2013
+AGREEMENT 
+(agreement agreement_weighted)
+	Richard Betzel			Indiana University		2013
+ALIGN_MATRICES
+	Yusuke Adachi			University of Tokyo		2010
+	Olaf Sporns				Indiana University		2010
+ASSORTATIVITY 
+(assortativity_bin assortativity_wei)
+	Olaf Sporns				Indiana University		2007/2008
+	Vassilis Tsiaras		University of Crete		2009
+	Murray Shanahan			Imperial College London	2012
+	Mika Rubinov			University of Cambridge	2012
+		Newman (2002) Phys Rev Lett 89:208701
+		Foster et al. (2010) PNAS 107:1081510820
+BACKBONE_WU
+	Olaf Sporns				Indiana University		2007/2008/2010/2012
+		Hidalgo et al. (2007) Science 317, 482.
+		Hagmann et al. (2008) PLoS Biol
+BETWEENNESS
+(betweenness_bin betweenness_wei)
+	Mika Rubinov			UNSW/Cambridge			2007-2012
+		Brandes (2001) J Math Sociol 25:163-177.
+		Kintali (2008) arXiv:0809.1906v2 [cs.DS]
+BREADTH
+(breadth breadthdist reachdist)
+	Olaf Sporns				Indiana University		2002/2007/2008
+CHARPATH
+	Olaf Sporns				Indiana University		2002/2007/2008
+	Mika Rubinov 			U New South Wales		2010
+CLUSTERING_COEF
+(clustering_coef_bd clustering_coef_bu clustering_coef_wd clustering_coef_wu)
+	Mika Rubinov			U New South Wales		2007-2010
+		Watts and Strogatz (1998) Nature 393:440-442.
+		Onnela et al. (2005) Phys Rev E 71:065103
+		Fagiolo (2007) Phys Rev E 76:026107.
+CONSENSUS_UND
+	Richard Betzel			Indiana University		2013
+		Lancichinetti & Fortunato (2012). Scientific Reports.
+CYCPROB
+	Olaf Sporns				Indiana University		2002/2007/2008
+DEGREES
+(degrees_dir degrees_und)
+	Olaf Sporns				Indiana University		2002/2006/2008
+DENSITY
+(density_dir density_und)
+	Olaf Sporns				Indiana University		2002/2007/2008
+	Tony Herdman			SFU						2009/2010
+DISTANCE
+(distance_bin distance_wei)
+	Mika Rubinov			UNSW/Cambridge			2007-2012
+	Richard Betzel			Indiana University		2012
+	Andrea Avena			Indiana University		2012
+	Jonathan Clayden		UCL						2013
+DIVERSITY_COEF_SIGN
+	Mika Rubinov			UNSW/Cambridge			2011
+	Alex Fornito									2012
+	Martin Monti									2012
+		Shannon CE (1948) Bell Syst Tech J 27, 379423.
+		Rubinov and Sporns (2011) NeuroImage.
+EDGE_BETWEENNESS
+(edge_betweenness_bin edge_betweenness_wei)
+	Mika Rubinov			UNSW/Cambridge			2007-2012
+		Brandes (2001) J Math Sociol 25:163-177.
+EDGE_NEI_OVERLAP
+(edge_nei_overlap_bd edge_nei_overlap_bu)
+	Olaf Sporns				Indiana University		2012
+		Easley and Kleinberg (2010) Networks, Crowds, and Markets. 
+EFFICIENCY
+(efficiency_bin efficiency_wei)
+	Mika Rubinov			UNSW/Cambridge			2008-2013
+	Jonathan Clayden		UCL						2013
+		Latora and Marchiori (2001) Phys Rev Lett 87:198701.
+		Onnela et al. (2005) Phys Rev E 71:065103
+		Fagiolo (2007) Phys Rev E 76:026107.
+		Rubinov M, Sporns O (2010) NeuroImage 52:1059-69
+EIGENVECTOR_CENTRALITY
+	Xi-Nian Zuo				Chinese Acad. Sciences	2010
+	Richard Betzel			Indiana University		2012
+		Newman, MEJ (2002). The mathematics of networks.
+ERANGE
+	Olaf Sporns				Indiana University		2002/2007/2008
+FINDPATHS
+(findpaths findwalks)
+	Olaf Sporns				Indiana University		2002/2007/2008/2010
+	Steve Williams									2010
+FLOW_COEF
+	Olaf Sporns				Indiana University		2007/2010/2012
+		Honey et al. (2007) Proc Natl Acad Sci USA
+GET_COMPONENTS
+	J Goni					U Navarra/ Indiana U	2009/2011
+GRID_COMMUNITIES
+	Richard Betzel			Indiana University		2012
+GTOM
+	J Goni					U Navarra/ Indiana U	2009/2011
+		Yip & Horvath (2007) BMC Bioinformatics 2007, 8:22
+		Ravasz et al (2002) Science 297 (5586), 1551.
+JDEGREE
+	Olaf Sporns				Indiana University		2002/2006/2008
+KCORE
+(kcore_bd kcore_bu kcoreness_centrality_bd kcoreness_centrality_bu)
+	Olaf Sporns				Indiana University		2007-2012
+		Hagmann et al. (2008) PLoS Biology
+LATMIO
+(latmio_dir latmio_dir_connected latmio_und latmio_und_connected)
+	Mika Rubinov			UNSW					2007-2010
+	Jonathan Power			Washington U St Louis	2008
+	Olaf Sports				Indiana University		2012
+		Maslov and Sneppen (2002) Science 296:910
+		Sporns and Zwi (2004) Neuroinformatics 2:145
+MAKE VARIOUS REGULAR/RANDOM NETWORKS
+(makeevenCIJ makefractalCIJ makelatticeCIJ makerandCIJ_dir makerandCIJ_und
+makerandCIJdegreesfixes makeringlatticeCIJ maketoeplitzCIJ)
+	Olaf Sporns				Indiana University		2005/2007/2008
+MATCHING_IND
+(matching_ind matching_ind_und)
+	Olaf Sporns				Indiana University		2002/2007/2008
+	Richard Betzel			Indiana University		2013
+MODULARITY
+(modularity_dir modularity_und)
+	Mika Rubinov			UNSW/Cambridge			2008-2013
+	Jonathan Power			Washington U St Louis	2008
+	Dani Bassett			UC Santa Barbara		2010
+	Alexandros Goulas		Maastricht University
+	Mason Porter			Oxford University
+	Jack Setford			Oxford University
+		Leicht and Newman (2008) Phys Rev Lett 100:118703.
+		Reichardt and Bornholdt (2006) Phys Rev E 74:016110.
+		Also see Good et al. (2010) Phys. Rev. E 81:046106.
+MODULARITY_FINETUNE
+(modularity_finetune_dir modularity_finetune_und modularity_finetune_und_sign
+modularity_probtune_und_sign)
+	Mika Rubinov			UNSW/Cambridge			2011/2013
+		Sun et al. (2008)  Europhysics Lett 86, 28004.
+		Rubinov and Sporns (2011) NeuroImage.
+MODULARITY_LOUVAIN
+(modularity_louvain_dir modularity_louvain_und modularity_louvain_und_sign)
+	Mika Rubinov			UNSW/Cambridge			2010/2011/2013
+		Blondel et al. (2008)  J. Stat. Mech. P10008.
+		Reichardt and Bornholdt (2006) Phys. Rev. E 74, 016110. 
+		Rubinov and Sporns (2011) NeuroImage.
+MODULE_DEGREE_ZSCORE
+	Mika Rubinov			UNSW					2008-2010
+		Guimera R, Amaral L. Nature (2005) 433:895-900.
+MOTIFS
+	Mika Rubinov			UNSW					2007/2008
+		Onnela et al. (2005) Phys Rev E 71:065103
+NBS
+	Andrew Zalesky			U Melbourne				2010
+		Zalesky A, Fornito A, Bullmore ET (2010) NeuroImage.10.1016
+NULL_MODEL
+(null_model_dir_sign null_model_und_sign)
+	Mika Rubinov			U Cambridge				2011/2012
+		Rubinov and Sporns (2011) Neuroimage 56:2068-79
+PAGERANK_CENTRALITY
+	Xi-Nian Zuo				Chinese Acad. Sciences	2011
+	Richard Betzel			Indiana University		2012
+		Morrison JL et al (2005) BMC Bioinformatics, 6:233
+		Boldi P, Santini M, Vigna S (2009) ACM Trans Inf Syst 27, 1-23.
+PARTICIPATION_COEF
+(participation_coef participation_coef_sign)
+	Mika Rubinov			UNSW/Cambridge			2008
+	Alex Fornito			U Melbourne				2011-2012
+	Martin Monti									2012
+		Guimera R, Amaral L. Nature (2005) 433:895-900.
+PARTITION_DISTANCE
+	Mika Rubinov			UNSW/Cambridge			2011
+		Meila M (2007) J Multivar Anal 98, 873-895.
+RANDMIO
+(randmio_dir randmio_dir_connected randmio_und randmio_und_connected
+randmio_und_signed)
+	Mika Rubinov			UNSW/Cambridge			2007
+	Jonathan Power			Washington U St Louis	2008
+	Dani Bassett			UC Santa Barbara		2011
+	Olaf Sporns				Indiana University		2012
+		Maslov and Sneppen (2002) Science 296:910
+RANDOMIZE_GRAPH_PARTIAL_UND
+	Richard Betzel			Indiana University		2013
+RANDOMIZER_BIN_UND
+	Jonathan Power			Washington U St Louis	2010
+		Maslov and Sneppen (2002) Science 296:910
+RENTIAN_SCALING
+	Danielle Bassett		UC Santa Barbara		2010
+		Bassett DS et al. (2010) PLoS Comput Biol 6(4):e1000748
+REORDER_MAT
+(reorder_MAT reorder_matrix reorder_mod)
+	Yusuke Adachi			University of Tokyo		2010
+	Olaf Sporns				Indiana University		2010
+	Mika Rubinov			UNSW/Cambridge			2011
+RICH_CLUB
+(rich_club_bd rich_club_bu rich_club_wd rich_club_wu)
+	Martijn van den Heuvel	Univ. Med. Ctr. Utrecht	2011
+		Colizza et al. (2006) Nat. Phys. 2:110.
+		Opsahl et al. Phys Rev Lett, 2008, 101(16)
+		Martijn van den Heuvel, University Medical Center Utrecht, 2011
+SCORE
+	Olaf Sporns				Indiana University		2007/2008/2010/2012
+STRENGTHS
+(strengths_dir strengths_und strengths_und_sign)
+	Olaf Sporns				Indiana University		2002/2006/2008
+	Mika Rubinov			UNSW/Cambridge			2011
+SUBGRAPH_CENTRALITY
+	Xi-Nian Zuo				Chinese Acad. Sciences	2010
+	Richard Betzel			Indiana University		2012
+		Estrada and Rodriguez-Velasquez (2005) Phys Rev E 71, 056103
+		Estrada and Higham (2010) SIAM Rev 52, 696.
+THRESHOLD
+(threshold_absolute threshold_proportional)
+	Mika Rubinov			UNSW/Cambridge			2009-2010
+	Roan LaPlante			Martinos Ctr, MGH		2012
+TRANSITIVITY
+(transitivity_bd transitivity_bu transitivity_wd transitivity_wu)
+	Mika Rubinov			UNSW/Cambridge			2007
+	Alexandros Goulas		Maastricht U			2010
+	Christoph Schmidt		F. Schiller U. Jena		2013
+		Rubinov M, Sporns O (2010) NeuroImage 52:1059-69
+		Onnela et al. (2005) Phys Rev E 71:065103
+		Fagiolo (2007) Phys Rev E 76:026107.
+		Humphries et al. (2008) Plos ONE 3: e0002051
+WEIGHT_CONVERSION
+	Mika Rubinov			U Cambridge				2012
+WRITE_TO_PAJ
+	Christopher Honey		Indiana University		2007

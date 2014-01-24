@@ -1,0 +1,8 @@
+BCT 0.3
+
+- Added NBS
+- Added in all of the new functions from the Dec 2013 release of BCT
+- Fixed numerous bugs having to do with indexing errors in modularity
+- Fixed several odd bugs with clustering_coef, efficiency, distance 
+
+For the next release, I clearly need a real test suite.

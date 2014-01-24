@@ -20,6 +20,11 @@ required for a couple of functions for its statistical and linear algebra
 packages which have some features not available in numpy alone. If you don't
 have scipy, most functions that do not need scipy functionality will still work.
 
+A small number of functions (notably including network-based statistics, a
+nonparametric test for differences in undirected weighted graphs from different
+populations) currently require networkx, though this should be changed at some
+point in the future.
+
 ==ABOUT BCTPY AND OTHER AUTHORS==
 BCT is a matlab toolbox with many graph theoretical measures off of which bctpy
 is based.  I did not write BCT (apart from small bugfixes I have submitted).  

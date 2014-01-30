@@ -6,7 +6,7 @@ def read(fname):
 
 setuptools.setup(
 	name="bctpy",
-	version="0.2",
+	version="0.3",
 	maintainer="Roan LaPlante",
 	maintainer_email="rlaplant@nmr.mgh.harvard.edu",
 	description=("Brain Connectivity Toolbox for Python"),
@@ -25,5 +25,5 @@ setuptools.setup(
 	url="https://github.com/aestrivex/bctpy",
 	platforms=['any'],
 	packages=['bct'],
-	requires=["numpy","scipy"]
+	requires=["numpy","scipy","networkx"]
 )

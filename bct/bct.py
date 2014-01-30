@@ -4649,7 +4649,7 @@ formal tests (such as the Kolmogorov-Smirnov test) if desired.
 	rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
 	return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
 
-def null_model_und_sign(W,bin_swaps=5,wei_freq=1):
+def null_model_und_sign(W,bin_swaps=5,wei_freq=.1):
 	'''
 This function randomizes an undirected network with positive and
 negative weights, while preserving the degree and strength
@@ -4685,12 +4685,14 @@ Notes:
 	strength-sequence accuracy and one could implement more formal tests
 	(such as the Kolmogorov-Smirnov test) if desired. 
 	'''
+	if not np.all(W==W.T):
+		raise BCTParamError("Input must be undirected")
 	W=W.copy()
 	n=len(W)
 	W[np.where(np.eye(n))]=0					#clear diagonal
-	Ap=(W>0)										#positive adjmat
+	Ap=(W>0)									#positive adjmat
 	if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
-		Ap_r,_=randmio_und(Ap,bin_swaps)			#randomized Ap
+		Ap_r,_=randmio_und(Ap,bin_swaps)		#randomized Ap
 	else:
 		Ap_r=Ap.copy()
 
@@ -4704,10 +4706,10 @@ Notes:
 		else:
 			Acur=An; A_rcur=An_r
 
-		S=np.sum(W*Acur,axis=0)				#strengths
-		Wv=np.sort(W[Acur].flat)				#sorted weights vector
-		i,j=np.where(A_rcur)
-		Lij,=np.where(A_rcur.flat)				#weights indices
+		S=np.sum(W*Acur,axis=0)					#strengths
+		Wv=np.sort(W[np.where(np.triu(Acur))])	#sorted weights vector
+		i,j=np.where(np.triu(A_rcur))
+		Lij,=np.where(np.triu(A_rcur).flat)		#weights indices
 
 		P=np.outer(S,S)
 
@@ -4743,7 +4745,8 @@ Notes:
 				Lij=np.delete(Lij,O)
 				i=np.delete(i,O)
 				j=np.delete(j,O)
-				Wv=np.delete(Wv,O)
+				Wv=np.delete(Wv,R)
+
 	W0=W0+W0.T
 
 	rpos_in=np.corrcoef(np.sum(W*(W>0),axis=0),np.sum(W0*(W0>0),axis=0))
@@ -4892,6 +4895,8 @@ Input:      W,      undirected (binary/weighted) connection matrix
 Output:     R,      randomized network
 		    eff,    number of actual rewirings carried out
 	'''
+	if not np.all(R==R.T):
+		raise BCTParamError("Input must be undirected")
 	R=R.copy()
 	n=len(R)
 	i,j=np.where(np.tril(R))
@@ -4971,6 +4976,8 @@ Input:      W,      undirected (binary/weighted) connection matrix
 Output:     R,      randomized network
 		    eff,    number of actual rewirings carried out
 	'''
+	if not np.all(R==R.T):
+		raise BCTParamError("Input must be undirected")
 	R=R.copy()
 	n=len(R)
 	i,j=np.where(np.tril(R))
@@ -4996,8 +5003,8 @@ Output:     R,      randomized network
 
 			if np.random.random()>.5:
 				i.setflags(write=True); j.setflags(write=True)
-				i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
-				c=i[e2]; d=j[e2]			#to explore all potential rewirings
+				i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
+				c=i[e2]; d=j[e2]		#to explore all potential rewirings
 
 			#rewiring condition
 			if not (R[a,d] or R[c,b]):
@@ -5027,6 +5034,8 @@ Input:      W,      undirected (binary/weighted) connection matrix
 
 Output:     R,      randomized network
 	'''
+	if not np.all(R==R.T):
+		raise BCTParamError("Input must be undirected")
 	R=R.copy()
 	i,j=np.where(np.tril(R))
 	i_p,j_p=np.where(np.tril(R)>0)

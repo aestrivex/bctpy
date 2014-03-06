@@ -427,7 +427,7 @@ input:          CIJ,        connection/adjacency matrix (binary, undirected)
 output:    coreness,        node coreness.
 				 kn,        size of k-core
 	'''
-	n=len(CIJ)
+	N=len(CIJ)
 
 	#determine if the network is undirected -- if not, compute coreness
 	#on the corresponding undirected network

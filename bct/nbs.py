@@ -198,6 +198,6 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 	pvals=np.zeros((nr_components,))
 	#calculate p-vals
 	for i in xrange(nr_components):
-		pval[i]=np.size(np.where(null>=sz_links[i]))/k
+		pvals[i]=np.size(np.where(null>=sz_links[i]))/k
 
 	return pvals,adj,null

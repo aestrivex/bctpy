@@ -1,3 +1,8 @@
+BCT 0.3.1
+
+- Fix bug in NBS
+- Fix series of bugs in null_models
+
 BCT 0.3
 
 - Added NBS

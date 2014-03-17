@@ -6,7 +6,7 @@ def read(fname):
 
 setuptools.setup(
 	name="bctpy",
-	version="0.3",
+	version="0.3.1",
 	maintainer="Roan LaPlante",
 	maintainer_email="rlaplant@nmr.mgh.harvard.edu",
 	description=("Brain Connectivity Toolbox for Python"),
@@ -14,7 +14,7 @@ setuptools.setup(
 	long_description=read('README'),
 	datafiles=[('',['README','LICENSE'])],
 	classifiers=[
-		"Development Status :: 3 - Alpha",
+		"Development Status :: 4 - Beta",
 		"Environment :: X11 Applications",
 		"Intended Audience :: Science/Research",
 		"License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",

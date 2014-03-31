@@ -1,3 +1,13 @@
+BCT 0.3.2
+
+- Change several functions including threshold_proportional and binarize to
+    have copy=True as default argument
+- Fix bug in threshold_proportional where copying behavior did not work for
+    symmetric matrices.
+- Fix minor quirk in threshold_proportional where np.round rounds to nearest
+    even number (optimizes floating point) which is discrepant with BCT
+- Add a test suite with some functions
+
 BCT 0.3.1
 
 - Fix bug in NBS

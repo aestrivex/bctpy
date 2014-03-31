@@ -3682,7 +3682,7 @@ Output: W,		thresholded connectivity matrix
 
 	I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-	en=np.round((n*n-n)*p/ud)		# number of links to be preserved
+	en=round((n*n-n)*p/ud)			# number of links to be preserved
 
 	W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
 

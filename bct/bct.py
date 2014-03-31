@@ -3631,7 +3631,7 @@ Note: Average intensity and coherence are given by I./F and Q./F.
 # OTHER
 ###############################################################################
 
-def threshold_absolute(W,thr,copy=False):
+def threshold_absolute(W,thr,copy=True):
 	'''
 This function thresholds the connectivity matrix by absolute weight
 magnitude. All weights below the given threshold, and all weights
@@ -3641,7 +3641,7 @@ If copy is not set, this function will *modify W in place.*
 
 Inputs: W           weighted or binary connectivity matrix
 	    thr         weight threshold
-		copy		copy W to avoid side effects, defaults to False
+		copy		copy W to avoid side effects, defaults to True
 
 Output: thresholded connectivity matrix
 	'''
@@ -3650,7 +3650,7 @@ Output: thresholded connectivity matrix
 	W[W<thr]=0							#apply threshold
 	return W
 
-def threshold_proportional(W,p,copy=False):
+def threshold_proportional(W,p,copy=True):
 	'''
 This function "thresholds" the connectivity matrix by preserving a
 proportion p (0<p<1) of the strongest weights. All other weights, and
@@ -3662,7 +3662,7 @@ Inputs: W,      weighted or binary connectivity matrix
 		p,      proportion of weights to preserve
 					range:  p=1 (all weights preserved) to
 							p=0 (no weights preserved)
-		copy,	copy W to avoid side effects, defaults to False
+		copy,	copy W to avoid side effects, defaults to True
 
 Output: W,		thresholded connectivity matrix
 	'''
@@ -3673,7 +3673,7 @@ Output: W,		thresholded connectivity matrix
 	W[xrange(n),xrange(n)]=0		# clear diagonal
 
 	if np.all(W==W.T):				# if symmetric matrix
-		W=np.triu(W)				# ensure symmetry is preserved
+		W[np.tril_indices(n)]=0		# ensure symmetry is preserved
 		ud=2						# halve number of removed links
 	else:
 		ud=1
@@ -3682,16 +3682,16 @@ Output: W,		thresholded connectivity matrix
 
 	I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-	en=np.round((n*n-n)*p/ud)	# number of links to be preserved
+	en=np.round((n*n-n)*p/ud)		# number of links to be preserved
 
 	W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
 
 	if ud==2:						# if symmetric matrix
-		W=W+W.T						# reconstruct symmetry
+		W[:,:]=W+W.T						# reconstruct symmetry
 
 	return W
 
-def weight_conversion(W,wcm,copy=False):
+def weight_conversion(W,wcm,copy=True):
 	'''
 W_bin = weight_conversion(W, 'binarize');
 W_nrm = weight_conversion(W, 'normalize');
@@ -3721,7 +3721,7 @@ Inputs: W           weighted connectivity matrix
 					   'binarize'      binarize weights
 					   'normalize'     normalize weights
 					   'lengths'       convert weights to lengths
-		copy		copy W to avoid side effects, defaults to False
+		copy		copy W to avoid side effects, defaults to True
 
 Output: W           connectivity matrix with converted weights
 	'''
@@ -3730,13 +3730,13 @@ Output: W           connectivity matrix with converted weights
 	elif wcm=='lengths': return invert(W,copy)
 	else: raise NotImplementedError('Unknown weight conversion command.')
 
-def binarize(W,copy=False):
+def binarize(W,copy=True):
 	'''
 	Binarizes an input weighted connection matrix.  If copy is not set, this
 	function will *modify W in place.*
 
 	Inputs:	W		weighted connectivity matrix
-			copy	copy W to avoid side effects, defaults to False
+			copy	copy W to avoid side effects, defaults to True
 		
 	Output: W		binary connectivity matrix
 	'''
@@ -3744,13 +3744,13 @@ def binarize(W,copy=False):
 	W[W!=0]=1
 	return W
 
-def normalize(W,copy=False):
+def normalize(W,copy=True):
 	'''
 	Normalizes an input weighted connection matrix.  If copy is not set, this
 	function will *modify W in place.*
 
 	Inputs: W		weighted connectivity matrix
-		 	copy	copy W to avoid side effects, defaults to False
+		 	copy	copy W to avoid side effects, defaults to True
 
 	Output: W		normalized connectivity matrix
 	'''
@@ -3758,7 +3758,7 @@ def normalize(W,copy=False):
 	W/=np.max(np.abs(W))
 	return W
 
-def invert(W,copy=False):
+def invert(W,copy=True):
 	'''
 	Inverts elementwise the weights in an input connection matrix. 
 	In other words, change the from the matrix of internode strengths to the 
@@ -3767,7 +3767,7 @@ def invert(W,copy=False):
 	If copy is not set, this function will *modify W in place.*
 
 	Inputs: W		weighted connectivity matrix
-			copy	copy W to avoid side effects, defaults to False
+			copy	copy W to avoid side effects, defaults to True
 
 	Output: W		inverted connectivity matrix
 	'''

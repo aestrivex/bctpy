@@ -2243,16 +2243,18 @@ def modularity_finetune_und(W,ci=None,gamma=1):
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	import time
 	n=len(W)							#number of nodes
 	if ci is None:
 		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True)
+		ci+=1
 
 	s=np.sum(W)							#total weight of edges
 	knm=np.zeros((n,n))					#node-to-module degree
 	for m in xrange(int(np.max(ci))):
-		knm[:,m]=np.sum(W[:,ci==m],axis=1)
+		knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
 	k=np.sum(knm,axis=1)				#node degree
 	km=np.sum(knm,axis=0)				#module degree
 
@@ -2261,14 +2263,19 @@ def modularity_finetune_und(W,ci=None,gamma=1):
 		flag=False
 
 		for u in np.random.permutation(n):
+		#for u in np.arange(n):
 			ma=ci[u]-1
+			#time.sleep(1)
 			#algorithm condition
 			dq=(knm[u,:]-knm[u,ma]+W[u,u])-gamma*k[u]*(km-km[ma]+k[u])/s
+			#print np.sum(knm[u,:],knm[u,ma],W[u,u],gamma,k[u],np.sum(km),km[ma],k[u],s
 			dq[ma]=0
 
 			max_dq=np.max(dq)			#find maximal modularity increase
 			if max_dq>1e-10:			#if maximal increase positive
 				mb=np.argmax(dq)		#take only one value
+
+				#print max_dq, mb
 
 				knm[:,mb]+=W[:,u]		#change node-to-module degrees	
 				knm[:,ma]-=W[:,u]
@@ -5553,8 +5560,7 @@ def adjacency_plot_und(A,coor):
 	annotations to get the node coordinates (rather than leaving them up to
 	the user) and has many other interactive visualization tools.
 
-	Because this function uses mayavi, it has dependencies not present
-	elsewhere in bctpy including traits and mayavi.
+	Note that unlike other bctpy functions, this function depends on mayavi.
 
 	Inputs:		A = Adjacency matrix
 			 coor = Nx3 matrix of node coordinates in the same order as A

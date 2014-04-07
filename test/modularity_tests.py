@@ -52,8 +52,9 @@ def test_modularity_finetune_und_actually_finetune():
 	#slightly larger increase dependent on order occurred in both matlab and
 	#bctpy around ~0.6% of the time. Due to numerical instability arising
 	#from something different between matlab and scipy, these values were not 
-	#the same across languages, but were extremely stable.
+	#the same across languages, but both languages showed bistable transitions.
 	#they were extremely stable. The values were about .0015 apart.
 
 	#also the matlab and python versions of modularity_und return slightly
-	#different modular structure, but the instability is present despite this.
+	#different modular structure, but the instability is present despite this
+	#(i.e. it is unstable both when the modular structure is identical and not)

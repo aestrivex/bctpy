@@ -1144,7 +1144,7 @@ Output:       R,        vector of rich-club coefficients for levels
 		subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
 		Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
 		Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
-		R[k]=E[k]/(Nk[k]*(Nk[k]-1))			#unweighted rich club coefficient
+		R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
 
 	return R,Nk,Ek
 	
@@ -3782,6 +3782,68 @@ def invert(W,copy=True):
 	E=np.where(W)
 	W[E]=1./W[E]
 	return W
+
+###############################################################################
+# SMALL WORLD
+###############################################################################
+
+def small_world_bd(W):
+
+	'''
+	An implementation of small worldness. Returned is the coefficient cc/lambda,
+	the ratio of the clustering coefficient to the characteristic path length.
+	This ratio is >>1 for small world networks.
+
+	inputs: W		weighted undirected connectivity matrix
+	
+	output: s		small world coefficient
+	'''
+	cc = clustering_coef_bd(W)
+	_lambda,_,_,_,_ = charpath(W)
+	return np.mean(cc)/_lambda
+
+def small_world_bu(W):
+	'''
+	An implementation of small worldness. Returned is the coefficient cc/lambda,
+	the ratio of the clustering coefficient to the characteristic path length.
+	This ratio is >>1 for small world networks.
+
+	inputs: W		weighted undirected connectivity matrix
+	
+	output: s		small world coefficient
+	'''
+	cc = clustering_coef_bu(W)
+	_lambda,_,_,_,_ = charpath(W)
+	return np.mean(cc)/_lambda
+
+def small_world_wd(W):
+	'''
+	An implementation of small worldness. Returned is the coefficient cc/lambda,
+	the ratio of the clustering coefficient to the characteristic path length.
+	This ratio is >>1 for small world networks.
+
+	inputs: W		weighted undirected connectivity matrix
+	
+	output: s		small world coefficient
+	'''
+	cc = clustering_coef_wd(W)
+	_lambda,_,_,_,_ = charpath(W)
+	return np.mean(cc)/_lambda
+
+def small_world_wu(W):
+	'''
+	An implementation of small worldness. Returned is the coefficient cc/lambda,
+	the ratio of the clustering coefficient to the characteristic path length.
+	This ratio is >>1 for small world networks.
+
+	inputs: W		weighted undirected connectivity matrix
+	
+	output: s		small world coefficient
+	'''
+	cc = clustering_coef_wu(W)
+	_lambda,_,_,_,_ = charpath(W)
+	return np.mean(cc)/_lambda
+
 
 ###############################################################################
 # PHYSICAL CONNECTIVITY

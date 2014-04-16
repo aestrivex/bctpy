@@ -40,7 +40,6 @@ def test_modularity_finetune_und():
 def test_modularity_finetune_und_actually_finetune():
 	x = _load_sample()
 	oci,oq = bct.modularity_und(x)
-	qsum=0
 	for i in xrange(100):
 		ci,q = bct.modularity_finetune_und(x,ci=oci)
 		assert np.allclose(q, .25, atol=0.002)
@@ -58,3 +57,4 @@ def test_modularity_finetune_und_actually_finetune():
 	#also the matlab and python versions of modularity_und return slightly
 	#different modular structure, but the instability is present despite this
 	#(i.e. it is unstable both when the modular structure is identical and not)
+

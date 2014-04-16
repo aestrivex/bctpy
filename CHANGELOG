@@ -7,6 +7,9 @@ BCT 0.3.2
 - Fix minor quirk in threshold_proportional where np.round rounds to nearest
     even number (optimizes floating point) which is discrepant with BCT
 - Add a test suite with some functions
+- Fix typo in rich_club_bu
+- Refactor x[range(n),range(n)] to np.fill_diagonal
+- Fix off-by-one bug in moduality_[prob/fine]tune_und_sign
 
 BCT 0.3.1
 

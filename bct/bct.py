@@ -793,7 +793,7 @@ Warning: This function requires networkx
 
 	A=binarize(A,copy=True)
 	n=len(A)
-	A[np.where(np.eye(n))]=1	
+	np.fill_diagonal(A, 1)
 
 	import networkx as nx
 	net=nx.from_numpy_matrix(A)
@@ -1369,7 +1369,7 @@ Output:     Spos/Sneg,      nodal strength of positive/negative weights
 	'''
 	W=W.copy()
 	n=len(W)
-	W[np.where(np.eye(n))]=0			#clear diagonal
+	np.fill_diagonal(W, 0)				#clear diagonal
 	Spos=W*(W>0)						#positive strengths
 	Sneg=W*(W<0)						#negative strengths
 
@@ -1495,7 +1495,7 @@ the main diagonal.
 	#efficiency: mean of inverse entries of D[G]
 	n=len(D)
 	D=1/D								#invert distance
-	D[np.where(np.eye(n))]=0			#set diagonal to 0
+	np.fill_diagonal(D, 0)				#set diagonal to 0
 	efficiency=np.sum(D)/(n*(n-1))		#compute global efficiency
 
 	return lambda_,efficiency,ecc,radius,diameter
@@ -1567,7 +1567,7 @@ Algorithm: Algebraic shortest paths.
 		L=(nPATH!=0)*(D==0)
 
 	D[D==0]=np.inf						#disconnected nodes are assigned d=inf
-	D[np.where(np.eye(len(G)))]=0
+	np.fill_diagonal(D, 0)
 	return D
 
 def distance_wei(G):
@@ -1659,7 +1659,7 @@ Output:     Eglob,          global efficiency (scalar) OR
 			L=(nPATH!=0)*(D==0)
 		D[np.logical_not(D)]=np.inf
 		D=1/D
-		D[np.where(np.eye(len(g)))]=0
+		np.fill_diagonal(D, 0)
 		return D
 
 	n=len(G)							#number of nodes
@@ -1750,9 +1750,9 @@ Algorithm:  Dijkstra's algorithm
 					break
 				V,=np.where(D[u,:]==minD)
 		
-		D[np.where(np.eye(n))]=1
+		np.fill_diagonal(D, 1)
 		D=1/D
-		D[np.where(np.eye(n))]=0
+		np.fill_diagonal(D, 0)
 		return D
 
 	n=len(Gw)
@@ -2095,7 +2095,7 @@ a modularity maximization algorithm which does not.
 	
 		if q>0:							#change in modularity was positive
 			qmax=q
-			modmat[np.where(np.eye(n))]=0
+			np.fill_diagonal(modmat, 0)
 			it=np.ma.masked_array(np.ones((n,)),False)
 			mod_asgn_iter=mod_asgn.copy()
 			while np.any(it):			#do some iterative fine tuning
@@ -2161,6 +2161,7 @@ def modularity_finetune_dir(W,ci=None,gamma=1):
 		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True)
+		ci+=1
 
 	s=np.sum(W)							#weight of edges
 	knm_o=np.zeros((n,n))				#node-to-module out degree
@@ -2335,6 +2336,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True);
+		ci+=1
 
 	W0=W*(W>0)							#positive weights matrix
 	W1=-W*(W<0)							#negative weights matrix
@@ -2344,8 +2346,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	Knm1=np.zeros((n,n))				#negative node-to-module degree
 
 	for m in xrange(int(np.max(ci))):	#loop over modules
-		Knm0[:,m]=np.sum(W0[:,ci==m],axis=1)
-		Knm1[:,m]=np.sum(W1[:,ci==m],axis=1)
+		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
 	Kn0=np.sum(Knm0,axis=1)				#positive node degree
 	Kn1=np.sum(Knm1,axis=1)				#negative node degree
@@ -2758,6 +2760,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		q1=np.sum(np.diag(W1))-np.sum(np.dot(W1,W1))/s0
 		q[h]=d0*q0-d1*q1
 
+		print q0,d0,s0,q1,d1,s1
+
 	_,ci_ret=np.unique(ci[-1],return_inverse=True)
 	ci_ret+=1
 
@@ -2782,7 +2786,7 @@ Input:      W,      undirected (weighted or binary) connection matrix
 				    with positive and negative weights
 
 		    qtype,  modularity type (see Rubinov and Sporns, 2011)
-					   'sta',  Q_* (default if qtype is empty)
+					   'sta',  Q_* (default)
 					   'pos',  Q_+
 					   'smp',  Q_simple
 					   'gja',  Q_GJA
@@ -2803,6 +2807,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		ci=np.arange(n)+1
 	else:
 		_,ci=np.unique(ci,return_inverse=True)
+		ci+=1
 
 	W0=W*(W>0)								#positive weights matrix
 	W1=-W*(W<0)								#negative weights matrix
@@ -2812,8 +2817,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	Knm1=np.zeros((n,n))					#negative node-to-module degree
 
 	for m in xrange(int(np.max(ci))):		#loop over initial modules
-		Knm0[:,m]=np.sum(W0[:,ci==m],axis=1)
-		Knm1[:,m]=np.sum(W1[:,ci==m],axis=1)
+		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
 	Kn0=np.sum(Knm0,axis=1)					#positive node degree
 	Kn1=np.sum(Knm1,axis=1)					#negative node degree
@@ -2916,7 +2921,7 @@ a modularity maximization algorithm which does not.
 
 		if q>0:							#change in modularity was positive
 			qmax=q
-			modmat[np.where(np.eye(n))]=0
+			np.fill_diagonal(modmat, 0)
 			it=np.ma.masked_array(np.ones((n,)),False)
 			mod_asgn_iter=mod_asgn.copy()
 			while np.any(it):			#do some iterative fine tuning
@@ -2949,6 +2954,70 @@ a modularity maximization algorithm which does not.
 		ci=kci
 	s=np.tile(ci,(n,1))
 	q=np.sum(np.logical_not(s-s.T)*B/m)
+	return ci,q
+
+def modularity_und_sign(W,ci,qtype='sta'):
+	'''
+This function simply calculates the signed modularity for a given partition.
+It does not do automatic partition generation
+
+Inputs:		w, weighted and potentially signed adjacency matrix
+			ci, community partition
+		    qtype,  modularity type (see Rubinov and Sporns, 2011)
+					   'sta',  Q_* (default)
+					   'pos',  Q_+
+					   'smp',  Q_simple
+					   'gja',  Q_GJA
+					   'neg',  Q_-
+Outputs:	ci, the same partition that was input (for api consistency)
+			q, signed modularity
+	'''
+	n=len(W)
+	_,ci=np.unique(ci, return_inverse=True)
+	ci+=1
+
+	W0=W*(W>0)								#positive weights matrix
+	W1=-W*(W<0)								#negative weights matrix
+	s0=np.sum(W0)							#positive sum of weights
+	s1=np.sum(W1)							#negative sum of weights
+	Knm0=np.zeros((n,n))					#positive node-to-module degree
+	Knm1=np.zeros((n,n))					#negative node-to-module degree
+
+	for m in xrange(int(np.max(ci))):		#loop over initial modules
+		
+		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+
+	print np.sum(Knm0)
+
+	Kn0=np.sum(Knm0,axis=1)					#positive node degree
+	Kn1=np.sum(Knm1,axis=1)					#negative node degree
+	Km0=np.sum(Knm0,axis=0)					#positive module degree
+	Km1=np.sum(Knm1,axis=0)					#negaitve module degree
+
+	if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
+	elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
+	elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
+	elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
+	elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
+	else: raise KeyError('modularity type unknown')
+
+	if not s0:							#adjust for absent positive weights
+		s0=1; d0=0
+	if not s1:							#adjust for absent negative weights
+		s1=1; d1=0
+
+	ci+=1
+	m=np.tile(ci,(n,1))
+
+	print np.sum(Kn0)
+
+	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
+	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
+	q=d0*np.sum(q0)-d1*np.sum(q1)
+
+	print np.sum(q0),d0,s0,np.sum(q1),d1,s1
+
 	return ci,q
 
 def partition_distance(cx,cy):
@@ -3653,7 +3722,7 @@ Inputs: W           weighted or binary connectivity matrix
 Output: thresholded connectivity matrix
 	'''
 	if copy: W=W.copy()
-	W[np.where(np.diag(np.diag(W)))]=0	#clear diagonal
+	np.fill_diagonal(W, 0)				#clear diagonal
 	W[W<thr]=0							#apply threshold
 	return W
 
@@ -3677,7 +3746,7 @@ Output: W,		thresholded connectivity matrix
 		raise BCTParamError('Threshold must be in [0,1]')
 	if copy: W=W.copy()
 	n=len(W)						# number of nodes
-	W[xrange(n),xrange(n)]=0		# clear diagonal
+	np.fill_diagonal(W, 0)			# clear diagonal
 
 	if np.all(W==W.T):				# if symmetric matrix
 		W[np.tril_indices(n)]=0		# ensure symmetry is preserved
@@ -3798,8 +3867,8 @@ def small_world_bd(W):
 	
 	output: s		small world coefficient
 	'''
-	cc = clustering_coef_bd(W)
-	_lambda,_,_,_,_ = charpath(W)
+	cc = bct.clustering_coef_bd(W)
+	_lambda,_,_,_,_ = bct.charpath(W)
 	return np.mean(cc)/_lambda
 
 def small_world_bu(W):
@@ -3812,8 +3881,8 @@ def small_world_bu(W):
 	
 	output: s		small world coefficient
 	'''
-	cc = clustering_coef_bu(W)
-	_lambda,_,_,_,_ = charpath(W)
+	cc = bct.clustering_coef_bu(W)
+	_lambda,_,_,_,_ = bct.charpath(W)
 	return np.mean(cc)/_lambda
 
 def small_world_wd(W):
@@ -3826,8 +3895,8 @@ def small_world_wd(W):
 	
 	output: s		small world coefficient
 	'''
-	cc = clustering_coef_wd(W)
-	_lambda,_,_,_,_ = charpath(W)
+	cc = bct.clustering_coef_wd(W)
+	_lambda,_,_,_,_ = bct.charpath(W)
 	return np.mean(cc)/_lambda
 
 def small_world_wu(W):
@@ -3840,8 +3909,8 @@ def small_world_wu(W):
 	
 	output: s		small world coefficient
 	'''
-	cc = clustering_coef_wu(W)
-	_lambda,_,_,_,_ = charpath(W)
+	cc = bct.clustering_coef_wu(W)
+	_lambda,_,_,_,_ = bct.charpath(W)
 	return np.mean(cc)/_lambda
 
 
@@ -4655,15 +4724,17 @@ formal tests (such as the Kolmogorov-Smirnov test) if desired.
 	'''
 	W=W.copy()
 	n=len(W)
-	W[np.where(np.eye(n))]=0					#clear diagonal
-	Ap=(W>0)										#positive adjmat
+	np.fill_diagonal(W, 0)						#clear diagonal
+	Ap=(W>0)									#positive adjmat
 	if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
 		Ap_r,_=randmio_dir(Ap,bin_swaps)			#randomized Ap
 	else:
 		Ap_r=Ap.copy()
 
-	An=np.logical_not(Ap); An[np.where(np.eye(n))]=0	#negative adjmat
-	An_r=np.logical_not(Ap_r); An_r[np.where(np.eye(n))]=0	#randomized An
+	An=np.logical_not(Ap) 						#negative adjmat
+	np.fill_diagonal(An, 0)
+	An_r=np.logical_not(Ap_r) 					#randomized An
+	np.fill_diagonal(An_r, 0)
 
 	W0=np.zeros((n,n))
 	for s in (1,-1):
@@ -4758,15 +4829,17 @@ Notes:
 		raise BCTParamError("Input must be undirected")
 	W=W.copy()
 	n=len(W)
-	W[np.where(np.eye(n))]=0					#clear diagonal
+	np.fill_diagonal(W, 0)						#clear diagonal
 	Ap=(W>0)									#positive adjmat
 	if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
 		Ap_r,_=randmio_und(Ap,bin_swaps)		#randomized Ap
 	else:
 		Ap_r=Ap.copy()
 
-	An=np.logical_not(Ap); An[np.where(np.eye(n))]=0	#negative adjmat
-	An_r=np.logical_not(Ap_r); An_r[np.where(np.eye(n))]=0	#randomized An
+	An=np.logical_not(Ap) 						#negative adjmat
+	np.fill_diagonal(An, 0)
+	An_r=np.logical_not(Ap_r) 					#randomized An
+	np.fill_diagonal(An_r, 0)
 
 	W0=np.zeros((n,n))
 	for s in (1,-1):
@@ -5224,7 +5297,7 @@ Outputs:    R,          randomized network
 	nr_poss_edges=(np.dot(ax,ax)-ax)/2			#find maximum possible edges
 
 	savediag=np.diag(R)
-	R[np.where(np.eye(ax))]=np.inf			#replace diagonal with high value
+	np.fill_diagonal(R, np.inf)				#replace diagonal with high value
 	
 	#if there are more edges than non-edges, invert the matrix to reduce
 	#computation time.  "invert" means swap meaning of 0 and 1, not matrix
@@ -5235,7 +5308,7 @@ Outputs:    R,          randomized network
 	if k>nr_poss_edges/2:
 		swap=True
 		R=np.logical_not(R)
-		R[np.where(np.eye(ax))]=np.inf
+		np.fill_diagonal(R, np.inf)
 		i,j=np.where(np.triu(R,1))
 		k=len(i)
 	else: swap=False
@@ -5245,7 +5318,7 @@ Outputs:    R,          randomized network
 		np.sum(np.triu(R,1),axis=1).T)==(ax-1))
 	if np.size(fullnodes):
 		R[fullnode,:]=0; R[:,fullnode]=0
-		R[np.where(np.eye(ax))]=np.inf
+		np.fill_diagonal(R, np.inf)
 		i,j=np.where(np.triu(R,1))
 		k=len(i)
 
@@ -5302,7 +5375,7 @@ Outputs:    R,          randomized network
 		R=np.logical_not(R)
 
 	#restore diagonal
-	R[np.where(np.eye(ax))]=0
+	np.fill_diagonal(R, 0)
 	R+=savediag
 
 	return np.array(R,dtype=int)
@@ -5555,8 +5628,8 @@ def dice_pairwise_und(a1,a2):
 	a2=binarize(a2,copy=True)			#ensure matrices are binary
 
 	n=len(a1)
-	a1[np.where(np.eye(n))]=0
-	a2[np.where(np.eye(n))]=0			#set diagonals to 0
+	np.fill_diagonal(a1, 0)
+	np.fill_diagonal(a2, 0)				#set diagonals to 0
 
 	d=np.zeros((n,))					#dice similarity
 
@@ -5958,7 +6031,7 @@ Note: I'm not 100% sure how the algorithms between this and reorder_matrix
 	from scipy import linalg,stats
 	m=m.copy()
 	n=len(m)
-	m[np.where(np.eye(n))]=0
+	np.fill_diagonal(m, 0)
 
 	#generate cost function
 	if cost=='line':

@@ -7,17 +7,20 @@ def _load_sample():
 
 def test_modularity_und():
 	x = _load_sample()
-	ci,q = bct.modularity_und(x)
-	print q
+	_,q = bct.modularity_und(x)
 	assert np.allclose(q, 0.24253272, atol=0.0025)
 	#matlab and bctpy appear to return different results due to the cross-
 	#package numerical instability of eigendecompositions
 
+def test_modularity_louvain_und_seed():
+	x = _load_sample()
+	seed = 38429004
+	_,q = bct.modularity_louvain_und(x, seed=seed)
+	assert np.allclose(q, 0.25892588, atol=1e-8)
+
 def test_modularity_louvain_und():
 	#this algorithm depends on a random seed so we will run 100 times and make
 	#sure the modularities are relatively close each time
-	#
-	#performance is very similar to matlab
 	x = _load_sample()
 	fails = 0
 	for i in xrange(100):
@@ -64,5 +67,7 @@ def _load_signed_sample():
 	return np.load('sample_signed.npy')
 
 def test_modularity_louvain_und_sign():
-	# performance is not that close to matlab
+	#performance is same as matlab if randomness is quashed
 	x = _load_signed_sample()
+
+	

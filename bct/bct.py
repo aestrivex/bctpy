@@ -2129,7 +2129,7 @@ a modularity maximization algorithm which does not.
 	q=np.sum(np.logical_not(s-s.T)*B/(2*m))
 	return ci,q
 
-def modularity_finetune_dir(W,ci=None,gamma=1):
+def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
 	'''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2156,6 +2156,8 @@ def modularity_finetune_dir(W,ci=None,gamma=1):
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(seed)
+
 	n=len(W)							#number of nodes
 	if ci is None:
 		ci=np.arange(n)+1
@@ -2219,7 +2221,7 @@ def modularity_finetune_dir(W,ci=None,gamma=1):
 	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
 	return ci,q
 
-def modularity_finetune_und(W,ci=None,gamma=1):
+def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
 	'''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2236,6 +2238,7 @@ def modularity_finetune_und(W,ci=None,gamma=1):
                             gamma>1     detects smaller modules
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
+				seed,	random seed. Default None, seed from /dev/urandom
  
  
     Output:     Ci,     refined community affiliation vector
@@ -2244,7 +2247,9 @@ def modularity_finetune_und(W,ci=None,gamma=1):
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
-	import time
+	np.random.seed(seed)
+
+	#import time
 	n=len(W)							#number of nodes
 	if ci is None:
 		ci=np.arange(n)+1
@@ -2301,7 +2306,7 @@ def modularity_finetune_und(W,ci=None,gamma=1):
 	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
 	return ci,q
 
-def modularity_finetune_und_sign(W,qtype='sta',ci=None):
+def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2323,6 +2328,7 @@ Input:      W,      undirected (weighted or binary) connection matrix
 					   'neg',  Q_-
 
 		    ci,     initial community affiliation vector (optional)
+			seed,	random seed. Default None, seed from /dev/urandom
 
 
 Output:     Ci,     refined community affiliation vector
@@ -2331,6 +2337,8 @@ Output:     Ci,     refined community affiliation vector
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(seed)
+
 	n=len(W)							#number of nodes/modules
 	if ci is None:
 		ci=np.arange(n)+1
@@ -2406,7 +2414,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	return ci,q
 
-def modularity_louvain_dir(W,gamma=1,hierarchy=False):
+def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
 	'''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2424,6 +2432,7 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False):
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
 			 hierarchy, enables hierarchical output (default false)
+				seed,	random seed. Default None, seed from /dev/urandom
  
     Outputs:    Ci,     community structure
                 Q,      modularity
@@ -2431,6 +2440,8 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False):
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(seed)
+
 	n=len(W)							#number of nodes
 	s=np.sum(W)							#total weight of edges
 	h=0									#hierarchy index
@@ -2516,7 +2527,7 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False):
 	else:
 		return ci[h-1],q[h-1]
 
-def modularity_louvain_und(W,gamma=1,hierarchy=False):
+def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2534,6 +2545,7 @@ Input:      W       	undirected (weighted or binary) connection matrix.
 						0<=gamma<1:	detects larger modules
 						gamma=1:	no scaling of module size (default)
 		    hierarchy	enables hierarchical output, false by default
+			seed,		random seed. Default None, seed from /dev/urandom
 
 Outputs:    1. Classic
 				   Ci,     community structure
@@ -2547,6 +2559,8 @@ Outputs:    1. Classic
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(seed)
+
 	n=len(W)							#number of nodes
 	s=np.sum(W)							#weight of edges
 	h=0									#hierarchy index
@@ -2630,7 +2644,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 	else:
 		return ci[h-1],q[h-1]
 
-def modularity_louvain_und_sign(W,qtype='sta'):
+def modularity_louvain_und_sign(W,qtype='sta',seed=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2656,12 +2670,16 @@ Input:      W       undirected (weighted or binary) connection matrix
 					   'gja',  Q_GJA
 					   'neg',  Q_-
 
+			seed,	random seed. Default None, seed from /dev/urandom
+
 Output:     Ci,     community affiliation vector
 		    Q,      modularity (qtype dependent)
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(seed)
+
 	n=len(W)							#number of nodes
 
 	W0=W*(W>0)							#positive weights matrix
@@ -2694,7 +2712,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		km0=kn0.copy()					#positive module degree
 		km1=kn1.copy()					#negative module degree
 		knm0=W0.copy()					#positive node-to-module degree
-		knm1=W0.copy()					#negative node-to-module degree
+		knm1=W1.copy()					#negative node-to-module degree
 
 		m=np.arange(nh)+1				#initial module assignments
 		flag=True						#flag for within hierarchy search
@@ -2736,8 +2754,6 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		_,m=np.unique(m,return_inverse=True)
 		m+=1
 
-		print m
-		
 		for u in xrange(nh):		#loop through initial module assignments
 			ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
 
@@ -2766,7 +2782,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 	return ci_ret,q[-1]
 				
-def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45):
+def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
 	'''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
@@ -2791,9 +2807,9 @@ Input:      W,      undirected (weighted or binary) connection matrix
 					   'gja',  Q_GJA
 					   'neg',  Q_-
 
-		    ci,    initial community affiliation vector (optional)
-		    p,      probability of random node moves
-
+		    ci,     initial community affiliation vector (optional)
+		    p,      probability of random node moves (default .45)
+			seed,	random seed. Default None, seed from /dev/urandom
 
 Output:     Ci,     refined community affiliation vector
 		    Q,      modularity (qtype dependent)
@@ -2801,6 +2817,8 @@ Output:     Ci,     refined community affiliation vector
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
+	np.random.seed(None)
+
 	n=len(W)
 	if ci is None:
 		ci=np.arange(n)+1

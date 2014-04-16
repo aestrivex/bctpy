@@ -2760,8 +2760,6 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s0
 		q[h]=d0*q0-d1*q1
 
-		print q0,d0,s0,q1,d1,s1
-
 	_,ci_ret=np.unique(ci[-1],return_inverse=True)
 	ci_ret+=1
 
@@ -2959,7 +2957,7 @@ a modularity maximization algorithm which does not.
 def modularity_und_sign(W,ci,qtype='sta'):
 	'''
 This function simply calculates the signed modularity for a given partition.
-It does not do automatic partition generation
+It does not do automatic partition generation right now.
 
 Inputs:		w, weighted and potentially signed adjacency matrix
 			ci, community partition
@@ -2984,11 +2982,8 @@ Outputs:	ci, the same partition that was input (for api consistency)
 	Knm1=np.zeros((n,n))					#negative node-to-module degree
 
 	for m in xrange(int(np.max(ci))):		#loop over initial modules
-		
 		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
 		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
-
-	print np.sum(Knm0)
 
 	Kn0=np.sum(Knm0,axis=1)					#positive node degree
 	Kn1=np.sum(Knm1,axis=1)					#negative node degree
@@ -3009,13 +3004,9 @@ Outputs:	ci, the same partition that was input (for api consistency)
 
 	m=np.tile(ci,(n,1))
 
-	print np.sum(Kn0)
-
 	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
 	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
 	q=d0*np.sum(q0)-d1*np.sum(q1)
-
-	print np.sum(q0),d0,s0,np.sum(q1),d1,s1
 
 	return ci,q
 
@@ -3680,7 +3671,7 @@ Note: Average intensity and coherence are given by I./F and Q./F.
 						A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
 						A[v2,v3]))
 					s=np.uint64(np.sum(np.power(10,np.arange(11,-1,-1))*a))
-					print np.shape(s),np.shape(m4n)
+					#print np.shape(s),np.shape(m4n)
 					ix=np.squeeze(s==m4n)
 				
 					w=np.array((W[v1,u],W[v2,u],W[v3,u],W[u,v1],W[v2,v1],

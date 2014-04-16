@@ -12,16 +12,13 @@ def test_modularity_und():
 	#matlab and bctpy appear to return different results due to the cross-
 	#package numerical instability of eigendecompositions
 
-def test_modularity_louvain_und_seed():
+def test_modularity_louvain_und():
 	x = _load_sample()
+
 	seed = 38429004
 	_,q = bct.modularity_louvain_und(x, seed=seed)
-	assert np.allclose(q, 0.25892588, atol=1e-8)
+	assert np.allclose(q, 0.25892588)
 
-def test_modularity_louvain_und():
-	#this algorithm depends on a random seed so we will run 100 times and make
-	#sure the modularities are relatively close each time
-	x = _load_sample()
 	fails = 0
 	for i in xrange(100):
 		ci,q = bct.modularity_louvain_und(x)
@@ -31,26 +28,41 @@ def test_modularity_louvain_und():
 			if fails>=5: raise
 			else: fails+=1
 
+	seed = 94885236
+	_,q = bct.modularity_finetune_und(x, seed=seed)
+	assert np.allclose(q, .25879794)
+
 def test_modularity_finetune_und():
 	x = _load_sample()
+
+	seed = 94885236
+	_,q = bct.modularity_finetune_und(x, seed=seed)
+	assert np.allclose(q, .25879794)
+
 	fails = 0
 	for i in xrange(100):
-		ci,q = bct.modularity_finetune_und(x)
+		_,q = bct.modularity_finetune_und(x)
 		try:
 			assert np.allclose(q, .25, atol=0.03)
 		except AssertionError:
 			if fails>=5: raise
 			else: fails+=1
 
-def test_modularity_finetune_und_actually_finetune():
-	x = _load_sample()
-	oci,oq = bct.modularity_und(x)
+	seed = 71040925
+	ci,oq = bct.modularity_louvain_und(x,seed=seed)
+	_,q = bct.modularity_finetune_und(x,ci=ci,seed=seed)
+	assert np.allclose(q, .25892588)
+	assert q >= oq
+
+	ci,oq = bct.modularity_und(x)
 	for i in xrange(100):
-		ci,q = bct.modularity_finetune_und(x,ci=oci)
+		_,q = bct.modularity_finetune_und(x,ci=ci)
 		assert np.allclose(q, .25, atol=0.002)
+		assert q >= oq
 
 	#modularity_finetune_und appears to be very stable when given a stable ci
-	#in thousands of test runs on the sample data, only two states appeared; 
+	#in thousands of test runs on the sample data (using the deterministic
+	#modularity maximization algorithm), only two states appeared; 
 	#both improved the optimal modularity. a basic increase -- modules that
 	#always benefited from switching -- always occurred. on top of that, a
 	#slightly larger increase dependent on order occurred in both matlab and
@@ -64,10 +76,52 @@ def test_modularity_finetune_und_actually_finetune():
 	#(i.e. it is unstable both when the modular structure is identical and not)
 
 def _load_signed_sample():
-	return np.load('sample_signed.npy')
+	return np.around(np.load('mats/sample_signed.npy'), 8)
 
-def test_modularity_louvain_und_sign():
+def test_modularity_louvain_und_sign_seed():
 	#performance is same as matlab if randomness is quashed
 	x = _load_signed_sample()
+	seed = 90772777
+	_,q = bct.modularity_louvain_und_sign(x, seed=seed)
+	assert np.allclose(q, .48336787)
 
+def test_modularity_finetune_und_sign_actually_finetune():
+	x = _load_signed_sample()
+	seed = 34908314
+	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
+	_,q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
+	assert np.allclose(q, .48034182)
+	assert q >= oq
+
+	seed = 88215881
+	np.random.seed(seed)
+	randomized_sample = np.random.random(size=(len(x),len(x)))
+	randomized_sample = randomized_sample + randomized_sample.T
+	x[np.where(bct.threshold_proportional(randomized_sample, .2))] = 0
+
+	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
+	#assert np.allclose(oq, .50225885)
+	assert np.allclose(oq, .48013250)
+	for i in xrange(100):
+		_,q = bct.modularity_finetune_und_sign(x, ci=ci)
+		assert q >= oq
+
+def test_modularity_probtune_und_sign():
+	x = _load_signed_sample()
+	seed = 59468096
+	ci,q = bct.modularity_probtune_und_sign(x, seed=seed)
+	assert np.allclose(q, .13322379)
+
+	seed = 1742447
+	ci,_ = bct.modularity_louvain_und_sign(x, seed=seed)
+	_,oq = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
 	
+	for i in np.arange(.05, .5, .02):
+		fails=0
+		for j in xrange(100):
+			_,q = bct.modularity_probtune_und_sign(x, ci=ci, p=i)
+			try:
+				assert q < oq
+			except AssertionError:
+				if fails > 5: raise
+				else: fails+=1

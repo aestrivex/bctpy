@@ -2817,7 +2817,7 @@ Output:     Ci,     refined community affiliation vector
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
 	'''
-	np.random.seed(None)
+	np.random.seed(seed)
 
 	n=len(W)
 	if ci is None:

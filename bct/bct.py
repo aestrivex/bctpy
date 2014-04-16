@@ -2703,8 +2703,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 			it+=1
 			if it>1000: 
 				raise BCTParamError('Infinite Loop was detected and stopped. '
-				'This was probably caused by passing in a directed matrix. '
-				'The Louvain method only works on undirected matrices')
+				'This was probably caused by passing in a directed matrix.')
 			flag=False
 			for u in np.random.permutation(nh):	#loop over nodes in random order
 				ma=m[u]-1
@@ -2736,6 +2735,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		ci.append(np.zeros((n,)))
 		_,m=np.unique(m,return_inverse=True)
 		m+=1
+
+		print m
 		
 		for u in xrange(nh):		#loop through initial module assignments
 			ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
@@ -2745,11 +2746,11 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		wn1=np.zeros((nh,nh))
 		
 		for u in xrange(nh):
-			for v in xrange(nh):
+			for v in xrange(u,nh):
 				wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
 				wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
 				wn0[v,u]=wn0[u,v]
-				wn1[v,u]=wn1[v,u]
+				wn1[v,u]=wn1[u,v]
 
 		W0=wn0
 		W1=wn1
@@ -2757,7 +2758,7 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		q.append(0)
 		#compute modularity
 		q0=np.trace(W0)-np.sum(np.dot(W0,W0))/s0
-		q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s0
+		q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s1
 		q[h]=d0*q0-d1*q1
 
 	_,ci_ret=np.unique(ci[-1],return_inverse=True)

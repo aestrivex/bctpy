@@ -10,12 +10,14 @@ def test_modularity_und():
 	ci,q = bct.modularity_und(x)
 	print q
 	assert np.allclose(q, 0.24253272, atol=0.0025)
-	#matlab and bctpy appear to return slightly different results due to slight
-	#numerical instability of linear algebra operations on floats
+	#matlab and bctpy appear to return different results due to the cross-
+	#package numerical instability of eigendecompositions
 
 def test_modularity_louvain_und():
 	#this algorithm depends on a random seed so we will run 100 times and make
 	#sure the modularities are relatively close each time
+	#
+	#performance is very similar to matlab
 	x = _load_sample()
 	fails = 0
 	for i in xrange(100):
@@ -58,3 +60,9 @@ def test_modularity_finetune_und_actually_finetune():
 	#different modular structure, but the instability is present despite this
 	#(i.e. it is unstable both when the modular structure is identical and not)
 
+def _load_signed_sample():
+	return np.load('sample_signed.npy')
+
+def test_modularity_louvain_und_sign():
+	# performance is not that close to matlab
+	x = _load_signed_sample()

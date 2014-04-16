@@ -2746,8 +2746,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 		
 		for u in xrange(nh):
 			for v in xrange(nh):
-				wn0[u,v]=np.sum(W0[np.ix_(m==u,m==v)])
-				wn1[u,v]=np.sum(W1[np.ix_(m==u,m==v)])
+				wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
+				wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
 				wn0[v,u]=wn0[u,v]
 				wn1[v,u]=wn1[v,u]
 
@@ -2756,8 +2756,8 @@ algorithm. Consequently, it may be worth to compare multiple runs.
 
 		q.append(0)
 		#compute modularity
-		q0=np.sum(np.diag(W0))-np.sum(np.dot(W0,W0))/s0
-		q1=np.sum(np.diag(W1))-np.sum(np.dot(W1,W1))/s0
+		q0=np.trace(W0)-np.sum(np.dot(W0,W0))/s0
+		q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s0
 		q[h]=d0*q0-d1*q1
 
 		print q0,d0,s0,q1,d1,s1
@@ -3007,7 +3007,6 @@ Outputs:	ci, the same partition that was input (for api consistency)
 	if not s1:							#adjust for absent negative weights
 		s1=1; d1=0
 
-	ci+=1
 	m=np.tile(ci,(n,1))
 
 	print np.sum(Kn0)

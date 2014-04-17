@@ -1,4 +1,4 @@
-Brain Connectivity Toolbox for Python version 0.3.1
+Brain Connectivity Toolbox for Python version 0.3.2
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 
 ==COPYRIGHT INFORMATION==
@@ -24,6 +24,8 @@ A small number of functions (notably including network-based statistics, a
 nonparametric test for differences in undirected weighted graphs from different
 populations) currently require networkx, though this should be changed at some
 point in the future.
+
+Nosetests is used for the test suite. The test suite is not complete.
 
 ==ABOUT BCTPY AND OTHER AUTHORS==
 BCT is a matlab toolbox with many graph theoretical measures off of which bctpy

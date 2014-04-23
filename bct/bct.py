@@ -3776,9 +3776,27 @@ Inputs: W,      weighted or binary connectivity matrix
 		copy,	copy W to avoid side effects, defaults to True
 
 Output: W,		thresholded connectivity matrix
+
+Note: The proportion of elements set to 0 is a fraction of all elements in the 
+matrix, whether or not they are already 0. That is, this function has the
+following behavior:
+
+	>> x = np.random.random((10,10))
+	>> x_25 = threshold_proportional(x, .25)
+    >> np.size(np.where(x_25)) #note this double counts each nonzero element
+	46
+	>> x_125 = threshold_proportional(x, .125)
+    >> np.size(np.where(x_125))
+	22
+	>> x_test = threshold_proportional(x_25, .5)
+    >> np.size(np.where(x_test))
+    46
+
+That is, the 50% thresholding of x_25 does nothing because >=50% of the elements
+in x_25 are aleady <=0. This behavior is the same as in BCT. Be careful with matrices that are both signed and sparse.
 	'''
 	if p>1 or p<0:
-		raise BCTParamError('Threshold must be in [0,1]')
+		raise BCTParamError('Threshold must be in range [0,1]')
 	if copy: W=W.copy()
 	n=len(W)						# number of nodes
 	np.fill_diagonal(W, 0)			# clear diagonal
@@ -5734,11 +5752,16 @@ def adjacency_plot_und(A,coor):
 	same way.
 
 	Instead of doing this, I have included code that will plot the adjacency
-	matrix onto nodes at the given spatial coordinates in mayavi.  This is a
-	less featureful version of cvu, the connectome visualization utility 
-	which I also maintain.  cvu uses freesurfer surfaces and
-	annotations to get the node coordinates (rather than leaving them up to
-	the user) and has many other interactive visualization tools.
+	matrix onto nodes at the given spatial coordinates in mayavi
+
+	This routine is basically a less featureful version of the 3D brain in
+	cvu, the connectome visualization utility which I also maintain. cvu uses 
+	freesurfer surfaces and annotations to get the node coordinates (rather 	
+	than leaving them up to the user) and has many other interactive 
+	visualization features not included here for the sake of brevity.
+
+	There are other similar visualizations in the ConnectomeViewer and the UCLA
+	multimodal connectivity database.
 
 	Note that unlike other bctpy functions, this function depends on mayavi.
 

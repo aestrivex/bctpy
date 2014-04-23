@@ -4300,7 +4300,7 @@ Output:     Rlatt,  latticized network in original node ordering
 					#connectedness condition
 					if not (R[a,c] or R[b,d]):
 						P=R[(a,d),:].copy()
-						P[0,b]=0; P[2,c]=0
+						P[0,b]=0; P[1,c]=0
 						PN=P.copy()
 						PN[:,d]=1; PN[:,a]=1
 						while True:

@@ -1,6 +1,7 @@
 BCT 0.3.3
 
 - Fix small bug in latmio_und_connected causing failure for sparse matrices
+- Add non-networkx dependent algorithm to get_components (but less efficient)
 
 BCT 0.3.2
 

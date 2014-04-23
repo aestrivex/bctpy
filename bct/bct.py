@@ -783,7 +783,14 @@ Outputs:      comps,    vector of component assignments for each node
 Note: disconnected nodes will appear as components with a component
 size of 1
 
-Warning: This function requires networkx
+Note: The identity of each component (i.e. its numerical value in the result) 
+is not guaranteed to be identical the value in BCT, although its topology is.
+
+Note: networkx is used to do the computation efficiently. If networkx is not
+available a breadth-first search that does not depend on networkx is used
+instead, but this is less efficient. The corresponding BCT function does the computation by computing the Dulmage-Mendelsohn decomposition. I don't know
+what a Dulmage-Mendelsohn decomposition is and there doesn't appear to be a 
+python equivalent. If you think of a way to implement this better, let me know.
 	'''
 	#nonsquare matrices cannot be symmetric; no need to check
 
@@ -795,18 +802,37 @@ Warning: This function requires networkx
 	n=len(A)
 	np.fill_diagonal(A, 1)
 
-	import networkx as nx
-	net=nx.from_numpy_matrix(A)
-	cpts=nx.connected_components(net)
+	try:
+		import networkx as nx
+		net=nx.from_numpy_matrix(A)
+		cpts=nx.connected_components(net)
+		
+		cptvec=np.zeros((n,))
+		cptsizes=np.zeros(len(cpts))
+		for i,cpt in enumerate(cpts):
+			cptsizes[i]=len(cpt)
+			for node in cpt:
+				cptvec[node]=i+1
 	
-	cptvec=np.zeros((n,))
-	cptsizes=np.zeros(len(cpts))
-	for i,cpt in enumerate(cpts):
-		cptsizes[i]=len(cpt)
-		for node in cpt:
-			cptvec[node]=i+1
+	except ImportError:
+		#if networkx is not available use less efficient breadth first search
+		cptvec=np.zeros((n,))
+		r,_ = breadthdist(A)
+		for node,reach in enumerate(r):
+			if cptvec[node] > 0:
+				continue
+			else:
+				cptvec[np.where(reach)] = np.max(cptvec)+1
+
+		cptsizes=np.zeros(np.max(cptvec))
+		for i in np.arange(np.max(cptvec)):
+			cptsizes[i]=np.size(np.where(cptvec==i+1))
 
 	return cptvec,cptsizes
+
+def number_of_components(A):
+	_,csizes = get_components(A)
+	return len(csizes)
 	
 def transitivity_bd(A):
 	'''
@@ -4247,6 +4273,12 @@ Output:     Rlatt,  latticized network in original node ordering
 		    ind_rp, node ordering used for latticization
 		    eff,    number of actual rewirings carried out
 	'''
+	if not np.all(R==R.T):
+		raise BCTParamError("Input must be undirected")
+
+	if number_of_components(R) > 1:
+		raise BCTParamError("Input is not connected")
+
 	n=len(R)
 
 	ind_rp=np.random.permutation(n)		#randomly reorder matrix
@@ -5048,6 +5080,10 @@ Output:     R,      randomized network
 	'''
 	if not np.all(R==R.T):
 		raise BCTParamError("Input must be undirected")
+
+	if number_of_components(R) > 1:
+		raise BCTParamError("Input is not connected")
+
 	R=R.copy()
 	n=len(R)
 	i,j=np.where(np.tril(R))

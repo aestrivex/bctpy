@@ -639,7 +639,7 @@ def agreement(ci,buffsz=None):
 			ind=dummyvar(y)
 			D+=np.dot(ind,ind.T)
 
-	D[xrange(n),xrange(n)]=0
+	np.fill_diagonal(D,0)
 	return D
 
 def agreement_weighted(ci,wts):
@@ -765,8 +765,94 @@ Output:     C,      clustering coefficient vector
 	C=cyc3/(K*(K-1))
 	return C
 
-def consensus_und():
-	raise NotImplementedError() #FIXME
+def consensus_und(D,tau,reps=1000):
+	'''
+This algorithm seeks a consensus partition of the 
+agreement matrix D. The algorithm used here is almost identical to the
+one introduced in Lancichinetti & Fortunato (2012): The agreement
+matrix D is thresholded at a level TAU to remove an weak elements. The
+resulting matrix is then partitions REPS number of times using the
+Louvain algorithm (in principle, any clustering algorithm that can
+handle weighted matrixes is a suitable alternative to the Louvain
+algorithm and can be substituted in its place). This clustering
+produces a set of partitions from which a new agreement is built. If
+the partitions have not converged to a single representative partition,
+the above process repeats itself, starting with the newly built
+agreement matrix.
+
+NOTE: In this implementation, the elements of the agreement matrix must
+be converted into probabilities.
+
+NOTE: This implementation is slightly different from the original
+algorithm proposed by Lanchichinetti & Fortunato. In its original
+version, if the thresholding produces singleton communities, those
+nodes are reconnected to the network. Here, we leave any singleton
+communities disconnected.
+
+Inputs:     D,      agreement matrix with entries between 0 and 1
+					denoting the probability of finding node i in the
+					same cluster as node j
+			TAU,    threshold which controls the resolution of the
+					reclustering
+			REPS,   number of times that the clustering algorithm is
+					reapplied
+
+Outputs:    CIU,    consensus partition
+	'''
+	def unique_partitions(cis):
+		#relabels the partitions to recognize different numbers on same topology
+
+		n,r = np.shape(cis)			#ci represents one vector for each rep
+		ci_tmp = np.zeros(n)
+
+		for i in xrange(r):
+			for j,u in enumerate(sorted(
+					np.unique(cis[:,i],return_index=True)[1])):
+				ci_tmp[np.where(cis[:,i]==cis[u,i])]=j
+			cis[:,i]=ci_tmp
+			#so far no partitions have been deleted from ci
+
+		#now squash any of the partitions that are completely identical
+		#do not delete them from ci which needs to stay same size, so make copy
+		ciu = []
+		cis = cis.copy()
+		c = np.arange(r)
+		count=0
+		while (c!=0).sum() > 0:
+			ciu.append(cis[:,0])
+			dup = np.where(np.sum(np.abs(cis.T-cis[:,0]),axis=1)==0)
+			cis = np.delete(cis,dup,axis=1)
+			c = np.delete(c,dup)
+			count+=1
+			print count,c,dup
+			if count>10:
+				class QualitativeError(): pass
+				raise QualitativeError()
+		return np.transpose(ciu)
+
+	n=len(D)
+	flag=True
+	while flag:
+		flag=False
+		dt = D*(D >= tau)
+		print dt.shape, 'gazlewig'
+		print np.sum(dt)
+		np.fill_diagonal(dt,0)
+
+		if np.size(np.where(dt==0)) == 0:
+			ciu = np.arange(1,n+1)
+		else:
+			cis = np.zeros((n,reps))
+			for i in np.arange(reps):
+				cis[:,i],_ = modularity_louvain_und_sign(dt)		
+			ciu = unique_partitions(cis)
+			print ciu.shape
+			nu = np.size(ciu, axis=1)
+			if nu > 1:
+				flag = True
+				D = agreement(cis)/reps
+
+	return np.squeeze(ciu)
 
 def get_components(A):
 	'''	
@@ -3906,68 +3992,6 @@ def invert(W,copy=True):
 	return W
 
 ###############################################################################
-# SMALL WORLD
-###############################################################################
-
-def small_world_bd(W):
-
-	'''
-	An implementation of small worldness. Returned is the coefficient cc/lambda,
-	the ratio of the clustering coefficient to the characteristic path length.
-	This ratio is >>1 for small world networks.
-
-	inputs: W		weighted undirected connectivity matrix
-	
-	output: s		small world coefficient
-	'''
-	cc = bct.clustering_coef_bd(W)
-	_lambda,_,_,_,_ = bct.charpath(W)
-	return np.mean(cc)/_lambda
-
-def small_world_bu(W):
-	'''
-	An implementation of small worldness. Returned is the coefficient cc/lambda,
-	the ratio of the clustering coefficient to the characteristic path length.
-	This ratio is >>1 for small world networks.
-
-	inputs: W		weighted undirected connectivity matrix
-	
-	output: s		small world coefficient
-	'''
-	cc = bct.clustering_coef_bu(W)
-	_lambda,_,_,_,_ = bct.charpath(W)
-	return np.mean(cc)/_lambda
-
-def small_world_wd(W):
-	'''
-	An implementation of small worldness. Returned is the coefficient cc/lambda,
-	the ratio of the clustering coefficient to the characteristic path length.
-	This ratio is >>1 for small world networks.
-
-	inputs: W		weighted undirected connectivity matrix
-	
-	output: s		small world coefficient
-	'''
-	cc = bct.clustering_coef_wd(W)
-	_lambda,_,_,_,_ = bct.charpath(W)
-	return np.mean(cc)/_lambda
-
-def small_world_wu(W):
-	'''
-	An implementation of small worldness. Returned is the coefficient cc/lambda,
-	the ratio of the clustering coefficient to the characteristic path length.
-	This ratio is >>1 for small world networks.
-
-	inputs: W		weighted undirected connectivity matrix
-	
-	output: s		small world coefficient
-	'''
-	cc = bct.clustering_coef_wu(W)
-	_lambda,_,_,_,_ = bct.charpath(W)
-	return np.mean(cc)/_lambda
-
-
-###############################################################################
 # PHYSICAL CONNECTIVITY
 ###############################################################################
 
@@ -6383,12 +6407,12 @@ Inputs:     CIJ,        adjacency matrix
 ##############################################################################
 # MISCELLANEOUS
 ##############################################################################
-def dummyvar(cis):
+def dummyvar(cis, return_sparse=False):
 	'''
 	This is an efficient implementation of matlab's "dummyvar" command
 	using sparse matrices.
 
-	input: partitions, MxN array-like containing M partitions of N nodes
+	input: partitions, NxM array-like containing M partitions of N nodes
 		into <=N distinct communities
 
 	output: dummyvar, an NxR matrix containing R column variables (indicator
@@ -6399,18 +6423,20 @@ def dummyvar(cis):
 		r = sum((max(len(unique(partitions[i]))) for i in range(m)))
 	'''
 	#num_rows is not affected by partition indexes
-	n=np.size(cis,axis=1)
-	m=np.size(cis,axis=0)
-	r=np.sum((np.max(len(np.unique(cis[i])))) for i in range(m))
+	n=np.size(cis,axis=0)
+	m=np.size(cis,axis=1)
+	r=np.sum((np.max(len(np.unique(cis[:,i])))) for i in range(m))
 	nnz=np.prod(cis.shape)
 
-	ix=np.argsort(cis,axis=1)
-	s_cis=np.sort(cis,axis=1)
+	ix=np.argsort(cis,axis=0)
+	#s_cis=np.sort(cis,axis=0)
+	#FIXME use the sorted indices to sort by row efficiently
+	s_cis=cis[ix][:,xrange(m),xrange(m)]
 
-	mask=np.hstack((((True,),)*m,s_cis[:,:-1]!=s_cis[:,1:]))
+	mask=np.hstack((((True,),)*m,(s_cis[:-1,:]!=s_cis[1:,:]).T))
 	indptr,=np.where(mask.flat)
 	indptr=np.append(indptr,nnz)
-	
+
 	import scipy.sparse as sp
-	dv=sp.csc_matrix((np.repeat((1,),nnz),ix.flat,indptr),shape=(n,r))
+	dv=sp.csc_matrix((np.repeat((1,),nnz),ix.T.flat,indptr),shape=(n,r))
 	return dv.toarray()

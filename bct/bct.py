@@ -812,17 +812,17 @@ Outputs:    CIU,    consensus partition
 		ciu = []
 		cis = cis.copy()
 		c = np.arange(r)
-		count=0
+		#count=0
 		while (c!=0).sum() > 0:
 			ciu.append(cis[:,0])
 			dup = np.where(np.sum(np.abs(cis.T-cis[:,0]),axis=1)==0)
 			cis = np.delete(cis,dup,axis=1)
 			c = np.delete(c,dup)
-			count+=1
-			print count,c,dup
-			if count>10:
-				class QualitativeError(): pass
-				raise QualitativeError()
+			#count+=1
+			#print count,c,dup
+			#if count>10:
+			#	class QualitativeError(): pass
+			#	raise QualitativeError()
 		return np.transpose(ciu)
 
 	n=len(D)
@@ -830,8 +830,6 @@ Outputs:    CIU,    consensus partition
 	while flag:
 		flag=False
 		dt = D*(D >= tau)
-		print dt.shape, 'gazlewig'
-		print np.sum(dt)
 		np.fill_diagonal(dt,0)
 
 		if np.size(np.where(dt==0)) == 0:
@@ -841,13 +839,12 @@ Outputs:    CIU,    consensus partition
 			for i in np.arange(reps):
 				cis[:,i],_ = modularity_louvain_und_sign(dt)		
 			ciu = unique_partitions(cis)
-			print ciu.shape
 			nu = np.size(ciu, axis=1)
 			if nu > 1:
 				flag = True
 				D = agreement(cis)/reps
 
-	return np.squeeze(ciu)
+	return np.squeeze(ciu+1)
 
 def get_components(A, no_depend=False):
 	'''	

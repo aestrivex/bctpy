@@ -78,6 +78,7 @@ def test_modularity_louvain_und_sign_seed():
 	x = load_signed_sample()
 	seed = 90772777
 	_,q = bct.modularity_louvain_und_sign(x, seed=seed)
+	print q
 	assert np.allclose(q, .48336787)
 
 def test_modularity_finetune_und_sign_actually_finetune():
@@ -85,6 +86,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 	seed = 34908314
 	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
 	_,q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
+	print q
 	assert np.allclose(q, .48034182)
 	assert q >= oq
 
@@ -95,7 +97,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 	x[np.where(bct.threshold_proportional(randomized_sample, .2))] = 0
 
 	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
-	#assert np.allclose(oq, .50225885)
+	print oq
 	assert np.allclose(oq, .48013250)
 	for i in xrange(100):
 		_,q = bct.modularity_finetune_und_sign(x, ci=ci)
@@ -105,6 +107,7 @@ def test_modularity_probtune_und_sign():
 	x = load_signed_sample()
 	seed = 59468096
 	ci,q = bct.modularity_probtune_und_sign(x, seed=seed)
+	print q
 	assert np.allclose(q, .13322379)
 
 	seed = 1742447
@@ -122,10 +125,18 @@ def test_modularity_probtune_und_sign():
 				else: fails+=1
 
 def test_modularity_dir():
-	pass
+	x = load_directed_sample(thres=.67)
+	_,q = bct.modularity_dir(x)
+	assert np.allclose(q, .06, atol=.02 )
 
 def test_modularity_louvain_dir():
-	pass
+	x = load_directed_sample(thres=.67)
+	_,q = bct.modularity_louvain_dir(x)
+	assert np.allclose(q, .05, atol=.02 )
 
 def test_modularity_finetune_dir():
-	pass
+	x = load_directed_sample(thres=.67)
+	ci,oq = bct.modularity_louvain_dir(x)
+	_,q = bct.modularity_finetune_dir(x, ci=ci)
+	assert q >= oq
+

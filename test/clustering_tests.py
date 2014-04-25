@@ -46,7 +46,11 @@ def test_component():
 	assert bct.number_of_components(x) == 19
 
 def test_consensus():
-	pass
+	x = load_sample(thres=.38)
+	ci = bct.consensus_und(x, .1, reps=50)
+	assert np.max(ci)==4
+	_,q = bct.modularity_und(x, kci=ci)	
+	assert np.allclose(q, 0.27, atol=.01)
 
 def test_cluscoef_wd():
 	x = load_directed_sample(thres=.45)

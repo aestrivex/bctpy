@@ -735,9 +735,9 @@ The weighted modification is as follows:
 The above reduces to symmetric and/or binary versions of the clustering 
 coefficient for respective graphs.
 	'''
-	A=np.logical_not(W==0)					#adjacency matrix
-	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrize weights matrix ^1/3
-	K=np.sum(A+A.T,axis=1,dtype=float)		#total degree (in+out)
+	A=np.logical_not(W==0).astype(float)	#adjacency matrix
+	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
+	K=np.sum(A+A.T,axis=1)					#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
 	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3 cycles
@@ -975,9 +975,9 @@ The weighted modification is as follows:
 The above reduces to symmetric and/or binary versions of the clustering
 coefficient for respective graphs.
 	'''
-	A=np.logical_not(W==0)					#adjacency matrix
+	A=np.logical_not(W==0).astype(float)	#adjacency matrix
 	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
-	K=np.sum(A+A.T,axis=1,dtype=float) 		#total degree (in+out)
+	K=np.sum(A+A.T,axis=1)			 		#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
 	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles

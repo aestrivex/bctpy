@@ -51,22 +51,17 @@ def test_consensus():
 def test_cluscoef_wd():
 	x = load_directed_sample(thres=.45)
 	cc = bct.clustering_coef_wd(x)
-	#FIXME
-	print np.sum(cc), cc[-1]
-	assert np.allclose(np.sum(cc), 298.30817908)
+	print np.sum(cc)
+	assert np.allclose(np.sum(cc), 289.30817909)
 
 def test_transitivity_wd():
 	x = load_directed_sample(thres=.45)
 	t = bct.transitivity_wd(x)
-	print t
-	#FIXME
 	assert np.allclose(t, 1.30727748)
 
 def test_cluscoef_bu():
 	x = bct.binarize(load_sample(thres=.17), copy=False)
 	cc = bct.clustering_coef_bu(x)
-	#FIXME
-	print np.sum(cc)
 	assert np.allclose(np.sum(cc), 60.10160458)
 
 def test_transitivity_bu():

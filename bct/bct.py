@@ -710,7 +710,7 @@ Output:     C,      clustering coefficient vector
 	C=np.zeros((n,))
 
 	for u in xrange(n):
-		V=np.where(G[u,:])
+		V,=np.where(G[u,:])
 		k=len(V)
 		if k>=2:						#degree must be at least 2
 			S=G[np.ix_(V,V)]
@@ -735,11 +735,8 @@ The weighted modification is as follows:
 The above reduces to symmetric and/or binary versions of the clustering 
 coefficient for respective graphs.
 	'''
-	#correctly handle cube root of negative weights
-	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
-
 	A=np.logical_not(W==0)					#adjacency matrix
-	S=cuberoot(W)+cuberoot(W.T)				#symmetrize weights matrix ^1/3
+	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrize weights matrix ^1/3
 	K=np.sum(A+A.T,axis=1,dtype=float)		#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
@@ -756,10 +753,8 @@ Input:      W,      weighted undirected connection matrix
 
 Output:     C,      clustering coefficient vector
 	'''
-	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
-
 	K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
-	ws=cuberoot(W)
+	ws=_cuberoot(W)
 	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
 	K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
 	C=cyc3/(K*(K-1))
@@ -854,7 +849,7 @@ Outputs:    CIU,    consensus partition
 
 	return np.squeeze(ciu)
 
-def get_components(A):
+def get_components(A, no_depend=False):
 	'''	
 Returns the components of an undirected graph specified by the binary and 
 undirected adjacency matrix adj. Components and their constitutent nodes are 
@@ -862,6 +857,7 @@ assigned the same index and stored in the vector, comps. The vector, comp_sizes,
 contains the number of nodes beloning to each component.
 
 Inputs:         adj,    binary and undirected adjacency matrix
+		  no_depend,	if true, dont import networkx (see below), default false
 
 Outputs:      comps,    vector of component assignments for each node
 		comp_sizes,    vector of component sizes
@@ -889,7 +885,10 @@ python equivalent. If you think of a way to implement this better, let me know.
 	np.fill_diagonal(A, 1)
 
 	try:
-		import networkx as nx
+		if no_depend:
+			raise ImportError()
+		else:
+			import networkx as nx
 		net=nx.from_numpy_matrix(A)
 		cpts=nx.connected_components(net)
 		
@@ -977,7 +976,7 @@ The above reduces to symmetric and/or binary versions of the clustering
 coefficient for respective graphs.
 	'''
 	A=np.logical_not(W==0)					#adjacency matrix
-	S=W**(1/3)+W.T**(1/3)					#symmetrized weights matrix ^/13
+	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
 	K=np.sum(A+A.T,axis=1,dtype=float) 		#total degree (in+out)
 	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
 	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
@@ -994,7 +993,7 @@ Input:      W       weighted undirected connection matrix
 Output:     T       transitivity scalar
 	'''
 	K=np.sum(np.logical_not(W==0),axis=1)
-	ws=W**(1/3)
+	ws=_cuberoot(W)
 	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
 	return np.sum(cyc3,axis=0)/np.sum(K*(K-1),axis=0)	
 
@@ -1836,8 +1835,6 @@ efficiency is hence not a strict generalization of the binary variant.
 
 Algorithm:  Dijkstra's algorithm
 	'''
-	def cuberoot(x): return np.sign(x)*np.abs(x)**(1/3)
-
 	def distance_inv_wei(G):
 		n=len(G)
 		D=np.zeros((n,n))				#distance matrix
@@ -1882,18 +1879,18 @@ Algorithm:  Dijkstra's algorithm
 			#find pairs of neighbors
 			V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
 			#symmetrized vector of weights
-			sw=cuberoot(Gw[u,V])+cuberoot(Gw[V,u].T)
+			sw=_cuberoot(Gw[u,V])+_cuberoot(Gw[V,u].T)
 			#inverse distance matrix
 			e=distance_inv_wei(Gl[np.ix_(V,V)])
 			#symmetrized inverse distance matrix
-			se=cuberoot(e)+cuberoot(e.T)
+			se=_cuberoot(e)+_cuberoot(e.T)
 
 			numer=np.sum(np.outer(sw.T,sw)*se)/2
 			if numer!=0:
 				#symmetrized adjacency vector
 				sa=A[u,V]+A[V,u].T
 				denom=np.sum(sa)**2 - np.sum(sa*sa)
-				print numer,denom
+				#print numer,denom
 				E[u] = numer/denom		#local efficiency
 				
 	else:
@@ -6407,6 +6404,13 @@ Inputs:     CIJ,        adjacency matrix
 ##############################################################################
 # MISCELLANEOUS
 ##############################################################################
+def _cuberoot(x):
+	'''
+Correctly handle the cube root for negative weights, instead of uselessly
+crashing as in python or returning the wrong root as in matlab
+	'''
+	return np.sign(x)*np.abs(x)**(1/3)
+
 def dummyvar(cis, return_sparse=False):
 	'''
 	This is an efficient implementation of matlab's "dummyvar" command

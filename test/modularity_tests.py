@@ -1,19 +1,17 @@
+from load_samples import *
 import numpy as np
 import bct
 from scipy import io
 
-def _load_sample():
-	return bct.threshold_proportional(np.load('mats/sample_data.npy'), .4)
-
 def test_modularity_und():
-	x = _load_sample()
+	x = load_sample(thres=.4)
 	_,q = bct.modularity_und(x)
 	assert np.allclose(q, 0.24253272, atol=0.0025)
 	#matlab and bctpy appear to return different results due to the cross-
 	#package numerical instability of eigendecompositions
 
 def test_modularity_louvain_und():
-	x = _load_sample()
+	x = load_sample(thres=.4)
 
 	seed = 38429004
 	_,q = bct.modularity_louvain_und(x, seed=seed)
@@ -33,7 +31,7 @@ def test_modularity_louvain_und():
 	assert np.allclose(q, .25879794)
 
 def test_modularity_finetune_und():
-	x = _load_sample()
+	x = load_sample(thres=.4)
 
 	seed = 94885236
 	_,q = bct.modularity_finetune_und(x, seed=seed)
@@ -75,18 +73,15 @@ def test_modularity_finetune_und():
 	#different modular structure, but the instability is present despite this
 	#(i.e. it is unstable both when the modular structure is identical and not)
 
-def _load_signed_sample():
-	return np.around(np.load('mats/sample_signed.npy'), 8)
-
 def test_modularity_louvain_und_sign_seed():
 	#performance is same as matlab if randomness is quashed
-	x = _load_signed_sample()
+	x = load_signed_sample()
 	seed = 90772777
 	_,q = bct.modularity_louvain_und_sign(x, seed=seed)
 	assert np.allclose(q, .48336787)
 
 def test_modularity_finetune_und_sign_actually_finetune():
-	x = _load_signed_sample()
+	x = load_signed_sample()
 	seed = 34908314
 	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
 	_,q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
@@ -107,7 +102,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 		assert q >= oq
 
 def test_modularity_probtune_und_sign():
-	x = _load_signed_sample()
+	x = load_signed_sample()
 	seed = 59468096
 	ci,q = bct.modularity_probtune_und_sign(x, seed=seed)
 	assert np.allclose(q, .13322379)
@@ -125,3 +120,12 @@ def test_modularity_probtune_und_sign():
 			except AssertionError:
 				if fails > 5: raise
 				else: fails+=1
+
+def test_modularity_dir():
+	pass
+
+def test_modularity_louvain_dir():
+	pass
+
+def test_modularity_finetune_dir():
+	pass

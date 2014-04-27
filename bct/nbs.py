@@ -126,7 +126,7 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 
 	#suprathreshold adjacency matrix
 	adj=np.zeros((n,n))
-	adj[np.ix_(ixes[0][ind_t],ixes[1][ind_t])]=1
+	adj[(ixes[0][ind_t],ixes[1][ind_t])]=1
 	#adj[ixes][ind_t]=1
 	adj=adj+adj.T
 
@@ -170,7 +170,7 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 		ind_t,=np.where(t_stat_perm>thresh)
 	
 		adj_perm=np.zeros((n,n))
-		adj_perm[np.ix_(ixes[0][ind_t],ixes[1][ind_t])]=1
+		adj_perm[(ixes[0][ind_t],ixes[1][ind_t])]=1
 		adj_perm=adj_perm+adj_perm.T
 
 		a,sz=get_components(adj_perm)

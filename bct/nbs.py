@@ -5,7 +5,7 @@ from bct import BCTParamError,get_components
 
 #FIXME considerable gains could be realized using vectorization, although
 #generating the null distribution will take a while
-def nbs_bct(x,y,thresh,k=1000,tail='both'):
+def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 	'''
       PVAL = NBS(X,Y,THRESH) 
 	  Performs the NBS for populations X and Y for a t-statistic threshold of
@@ -89,6 +89,23 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 		if tail=='both': return np.abs(t/denom)
 		if tail=='left': return -t/denom
 		else: return t/denom
+	
+	def unbiased_var(X):
+            n = len(X)
+            sample_SS = sum(X**2) - sum(X)**2 / n
+            return sample_SS/ (n-1)
+    
+        def std(X):
+            return np.sqrt(unbiased_var(X))
+
+        def ttest_rel_stat_only(A,B,tail):
+            n = len(A-B)
+            df = n-1
+            z = np.mean(A-B) / std(A-B)
+            t = z * np.sqrt(n)
+            if tail=='both': return np.abs(t)
+            if tail=='left': return -t
+	    else: return t
 
 	if tail not in ('both','left','right'):
 		raise BCTParamError('Tail must be both, left, right')	
@@ -100,6 +117,9 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 		raise BCTParamError('Population matrices are of inconsistent size')
 	else:
 		n=ix
+	
+	if paired == 'True' and nx!=ny:
+		raise BCTParamError('Population matrices must be an equal size')
 
 	#only consider upper triangular edges
 	ixes=np.where(np.triu(np.ones((n,n)),1))
@@ -119,14 +139,17 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 	#perform t-test at each edge	
 	t_stat=np.zeros((m,))
 	for i in xrange(m):
-		t_stat[i]=ttest2_stat_only(xmat[i,:],ymat[i,:],tail)
+                if paired == 'True':
+                        t_stat[i]=ttest_rel_stat_only(xmat[i,:],ymat[i,:],tail)
+                else:
+                        t_stat[i]=ttest2_stat_only(xmat[i,:],ymat[i,:],tail)
 
 	#threshold
 	ind_t,=np.where(t_stat>thresh)
 
 	#suprathreshold adjacency matrix
 	adj=np.zeros((n,n))
-	adj[np.ix_(ixes[0][ind_t],ixes[1][ind_t])]=1
+	adj[(ixes[0][ind_t],ixes[1][ind_t])]=1
 	#adj[ixes][ind_t]=1
 	adj=adj+adj.T
 
@@ -153,51 +176,62 @@ def nbs_bct(x,y,thresh,k=1000,tail='both'):
 		max_sz=0
 	print 'max component size is %i'%max_sz
 
-	#estimate empirical null distribution of maximum component size by
-	#generating k independent permutations
-	print 'estimating null distribution with %i permutations'%k
+	if max_sz==0:
+                pvals, null = [],[]
+        else:
+                #estimate empirical null distribution of maximum component size by
+                #generating k independent permutations
+                print 'estimating null distribution with %i permutations'%k
 
-	null=np.zeros((k,))
-	hit=0
-	for u in xrange(k):
-		#randomize
-		d=np.hstack((xmat,ymat))[:,np.random.permutation(nx+ny)]
+                null=np.zeros((k,))
+                hit=0
+                for u in xrange(k):
+                        #randomize
+                        if paired == 'True':
+                                indperm = np.sign(0.5 - np.random.rand(1, nx))
+                                d=np.hstack((xmat,ymat))*np.hstack((indperm,indperm))
+                        else:
+                                d=np.hstack((xmat,ymat))[:,np.random.permutation(nx+ny)]
 
-		t_stat_perm=np.zeros((m,))
-		for i in xrange(m):
-			t_stat_perm[i]=ttest2_stat_only(d[i,:nx],d[i,-ny:],tail)
+                        t_stat_perm=np.zeros((m,))
+                        for i in xrange(m):
+                                if paired == 'True':
+                                        t_stat_perm[i]=ttest_rel_stat_only(d[i,:nx],d[i,-nx:],tail)
+                                else:
+                                        t_stat_perm[i]=ttest2_stat_only(d[i,:nx],d[i,-ny:],tail)
 
-		ind_t,=np.where(t_stat_perm>thresh)
-	
-		adj_perm=np.zeros((n,n))
-		adj_perm[np.ix_(ixes[0][ind_t],ixes[1][ind_t])]=1
-		adj_perm=adj_perm+adj_perm.T
+                        ind_t,=np.where(t_stat_perm>thresh)
+                
+                        adj_perm=np.zeros((n,n))
+                        adj_perm[(ixes[0][ind_t],ixes[1][ind_t])]=1
+                        adj_perm=adj_perm+adj_perm.T
 
-		a,sz=get_components(adj_perm)
+                        a,sz=get_components(adj_perm)
 
-		ind_sz,=np.where(sz>1)
-		ind_sz+=1
-		nr_components_perm=np.size(ind_sz)
-		sz_links_perm=np.zeros((nr_components_perm))
-		for i in xrange(nr_components_perm):
-			nodes,=np.where(ind_sz[i]==a)
-			sz_links_perm[i]=np.sum(adj_perm[np.ix_(nodes,nodes)])/2
-	
-		if np.size(sz_links_perm):
-			null[u]=np.max(sz_links_perm)
-		else:
-			null[u]=0
+                        ind_sz,=np.where(sz>1)
+                        ind_sz+=1
+                        nr_components_perm=np.size(ind_sz)
+                        sz_links_perm=np.zeros((nr_components_perm))
+                        for i in xrange(nr_components_perm):
+                                nodes,=np.where(ind_sz[i]==a)
+                                sz_links_perm[i]=np.sum(adj_perm[np.ix_(nodes,nodes)])/2
+                
+                        if np.size(sz_links_perm):
+                                null[u]=np.max(sz_links_perm)
+                        else:
+                                null[u]=0
 
-		#compare to the true dataset
-		if null[u] >= max_sz: hit+=1
+                        #compare to the true dataset
+                        if null[u] >= max_sz: hit+=1
 
-	#	print ('permutation %i of %i.  Permutation max is %s.  Observed max is '
-	#		'%s.  P-val estimate is %.3f')%(u,k,null[u],max_sz,hit/(u+1))
-		print 'permutation %i of %i.  p-value so far is %.3f'%(u,k,hit/(u+1))
+                #	print ('permutation %i of %i.  Permutation max is %s.  Observed max is '
+                #		'%s.  P-val estimate is %.3f')%(u,k,null[u],max_sz,hit/(u+1))
+                        if u%(k/10) == 0 or u==k-1:
+                                print 'permutation %i of %i.  p-value so far is %.3f'%(u,k,hit/(u+1))
 
-	pvals=np.zeros((nr_components,))
-	#calculate p-vals
-	for i in xrange(nr_components):
-		pvals[i]=np.size(np.where(null>=sz_links[i]))/k
+                pvals=np.zeros((nr_components,))
+                #calculate p-vals
+                for i in xrange(nr_components):
+                        pvals[i]=np.size(np.where(null>=sz_links[i]))/k
 
-	return pvals,adj,null
+        return pvals,adj,null

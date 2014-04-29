@@ -5,13 +5,13 @@ from bct import BCTParamError,get_components
 
 #FIXME considerable gains could be realized using vectorization, although
 #generating the null distribution will take a while
-def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
+def nbs_bct(x,y,thresh,k=1000,tail='both',paired=False,verbose=False):
 	'''
-      PVAL = NBS(X,Y,THRESH) 
+	  PVAL = NBS(X,Y,THRESH) 
 	  Performs the NBS for populations X and Y for a t-statistic threshold of
 	  alpha.
 
-      inputs: x,y,	matrices representing the two populations being compared.
+	  inputs: x,y,	matrices representing the two populations being compared.
 					x and y are of size NxNxP, where N is the number of nodes 
 					in the network and P is the number of subjects within the 
 					population.  P need not be equal for both X and Y.  
@@ -19,13 +19,16 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 					the edge between i and j for the kth member of the
 					population. x and y must be symmetric.
 		   thresh,	the minimum t-value used as threshold 
-			    k,	the number of permutations to be generated to estimate the
+				k,	the number of permutations to be generated to estimate the
 					empirical null distribution (default 1000)
 			 tail,	enables specification of the type of alternative hypothesis
 					to test.
 						'left': mean of population X < mean of population Y
 						'right': mean of population Y < mean of population X
 						'both': means are unequal (default)
+			paired,	use paired sample t-test instead of population t-test.
+					defaults to False.
+		   verbose, print extra information. default False
 	  outputs:
 			  pval,	a vector of corrected p-values for each component of the
 					network that is identified.  If at least one p-value is
@@ -38,74 +41,65 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 			  null,	A vector of k samples from the null distribution of maximal
 					component size
 
-      ALGORITHM DESCRIPTION 
-      The NBS is a nonparametric statistical test used to isolate the 
-      components of an N x N undirected connectivity matrix that differ 
-      significantly between two distinct populations. Each element of the 
-      connectivity matrix stores a connectivity value and each member of 
-      the two populations possesses a distinct connectivity matrix. A 
-      component of a connectivity matrix is defined as a set of 
-      interconnected edges. 
+	  ALGORITHM DESCRIPTION 
+	  The NBS is a nonparametric statistical test used to isolate the 
+	  components of an N x N undirected connectivity matrix that differ 
+	  significantly between two distinct populations. Each element of the 
+	  connectivity matrix stores a connectivity value and each member of 
+	  the two populations possesses a distinct connectivity matrix. A 
+	  component of a connectivity matrix is defined as a set of 
+	  interconnected edges. 
  
-      The NBS is essentially a procedure to control the family-wise error 
-      rate, in the weak sense, when the null hypothesis is tested 
-      independently at each of the N(N-1)/2 edges comprising the undirected
-      connectivity matrix. The NBS can provide greater statistical power 
-      than conventional procedures for controlling the family-wise error 
-      rate, such as the false discovery rate, if the set of edges at which
-      the null hypothesis is rejected constitues a large component or
-      components.
-      The NBS comprises fours steps:
-      1. Perform a two-sample T-test at each edge indepedently to test the
-         hypothesis that the value of connectivity between the two
-         populations come from distributions with equal means. 
-      2. Threshold the T-statistic available at each edge to form a set of
-         suprathreshold edges. 
-      3. Identify any components in the adjacency matrix defined by the set
-         of suprathreshold edges. These are referred to as observed 
-         components. Compute the size of each observed component 
-         identified; that is, the number of edges it comprises. 
-      4. Repeat K times steps 1-3, each time randomly permuting members of
-         the two populations and storing the size of the largest component 
-         identified for each permuation. This yields an empirical estimate
-         of the null distribution of maximal component size. A corrected 
-         p-value for each observed component is then calculated using this
-         null distribution.
+	  The NBS is essentially a procedure to control the family-wise error 
+	  rate, in the weak sense, when the null hypothesis is tested 
+	  independently at each of the N(N-1)/2 edges comprising the undirected
+	  connectivity matrix. The NBS can provide greater statistical power 
+	  than conventional procedures for controlling the family-wise error 
+	  rate, such as the false discovery rate, if the set of edges at which
+	  the null hypothesis is rejected constitues a large component or
+	  components.
+	  The NBS comprises fours steps:
+	  1. Perform a two-sample T-test at each edge indepedently to test the
+		 hypothesis that the value of connectivity between the two
+		 populations come from distributions with equal means. 
+	  2. Threshold the T-statistic available at each edge to form a set of
+		 suprathreshold edges. 
+	  3. Identify any components in the adjacency matrix defined by the set
+		 of suprathreshold edges. These are referred to as observed 
+		 components. Compute the size of each observed component 
+		 identified; that is, the number of edges it comprises. 
+	  4. Repeat K times steps 1-3, each time randomly permuting members of
+		 the two populations and storing the size of the largest component 
+		 identified for each permuation. This yields an empirical estimate
+		 of the null distribution of maximal component size. A corrected 
+		 p-value for each observed component is then calculated using this
+		 null distribution.
  
-      [1] Zalesky A, Fornito A, Bullmore ET (2010) Network-based statistic:
-          Identifying differences in brain networks. NeuroImage.
-          10.1016/j.neuroimage.2010.06.041
-
-	  DEPENDENCIES
-	  Please note that nbs_bct depends on networkx
+	  [1] Zalesky A, Fornito A, Bullmore ET (2010) Network-based statistic:
+		  Identifying differences in brain networks. NeuroImage.
+		  10.1016/j.neuroimage.2010.06.041
 	'''
 
 	def ttest2_stat_only(x,y,tail):
 		t=np.mean(x)-np.mean(y)
 		n1,n2=len(x),len(y)
-		s=np.sqrt(((n1-1)*np.var(x)+(n2-1)*np.var(y))/(n1+n2-2))
+		s=np.sqrt(((n1-1)*np.var(x,ddof=1)+(n2-1)*np.var(y,ddof=1))/(n1+n2-2))
 		denom=s*np.sqrt(1/n1+1/n2)
 		if denom==0: return 0
 		if tail=='both': return np.abs(t/denom)
 		if tail=='left': return -t/denom
 		else: return t/denom
 	
-	def unbiased_var(X):
-            n = len(X)
-            sample_SS = sum(X**2) - sum(X)**2 / n
-            return sample_SS/ (n-1)
-    
-        def std(X):
-            return np.sqrt(unbiased_var(X))
-
-        def ttest_rel_stat_only(A,B,tail):
-            n = len(A-B)
-            df = n-1
-            z = np.mean(A-B) / std(A-B)
-            t = z * np.sqrt(n)
-            if tail=='both': return np.abs(t)
-            if tail=='left': return -t
-	    else: return t
+	def ttest_paired_stat_only(A,B,tail):
+		n = len(A-B)
+		df = n-1
+		sample_ss = np.sum((A-B)**2) - np.sum(A-B)**2/n
+		unbiased_std = np.sqrt(sample_ss/(n-1))
+		z = np.mean(A-B) / unbiased_std
+		t = z * np.sqrt(n)
+		if tail=='both': return np.abs(t)
+		if tail=='left': return -t
+		else: return t
 
 	if tail not in ('both','left','right'):
 		raise BCTParamError('Tail must be both, left, right')	
@@ -118,7 +112,7 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 	else:
 		n=ix
 	
-	if paired == 'True' and nx!=ny:
+	if paired and nx!=ny:
 		raise BCTParamError('Population matrices must be an equal size')
 
 	#only consider upper triangular edges
@@ -139,10 +133,10 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 	#perform t-test at each edge	
 	t_stat=np.zeros((m,))
 	for i in xrange(m):
-                if paired == 'True':
-                        t_stat[i]=ttest_rel_stat_only(xmat[i,:],ymat[i,:],tail)
-                else:
-                        t_stat[i]=ttest2_stat_only(xmat[i,:],ymat[i,:],tail)
+		if paired:
+			t_stat[i]=ttest_paired_stat_only(xmat[i,:],ymat[i,:],tail)
+		else:
+			t_stat[i]=ttest2_stat_only(xmat[i,:],ymat[i,:],tail)
 
 	#threshold
 	ind_t,=np.where(t_stat>thresh)
@@ -164,7 +158,6 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 	for i in xrange(nr_components):
 		nodes,=np.where(ind_sz[i]==a)
 		sz_links[i]=np.sum(adj[np.ix_(nodes,nodes)])/2
-	for i in xrange(nr_components):
 		adj[np.ix_(nodes,nodes)]*=(i+2)
 
 	#subtract 1 to delete any edges not comprising a component
@@ -173,65 +166,66 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired='True'):
 	if np.size(sz_links):
 		max_sz=np.max(sz_links)
 	else:
-		max_sz=0
+		#max_sz=0
+		raise BCTParamError('True matrix is degenerate')
 	print 'max component size is %i'%max_sz
 
-	if max_sz==0:
-                pvals, null = [],[]
-        else:
-                #estimate empirical null distribution of maximum component size by
-                #generating k independent permutations
-                print 'estimating null distribution with %i permutations'%k
+	#estimate empirical null distribution of maximum component size by
+	#generating k independent permutations
+	print 'estimating null distribution with %i permutations'%k
 
-                null=np.zeros((k,))
-                hit=0
-                for u in xrange(k):
-                        #randomize
-                        if paired == 'True':
-                                indperm = np.sign(0.5 - np.random.rand(1, nx))
-                                d=np.hstack((xmat,ymat))*np.hstack((indperm,indperm))
-                        else:
-                                d=np.hstack((xmat,ymat))[:,np.random.permutation(nx+ny)]
+	null=np.zeros((k,))
+	hit=0
+	for u in xrange(k):
+		#randomize
+		if paired:
+			indperm = np.sign(0.5 - np.random.rand(1, nx))
+			d=np.hstack((xmat,ymat))*np.hstack((indperm,indperm))
+		else:
+			d=np.hstack((xmat,ymat))[:,np.random.permutation(nx+ny)]
 
-                        t_stat_perm=np.zeros((m,))
-                        for i in xrange(m):
-                                if paired == 'True':
-                                        t_stat_perm[i]=ttest_rel_stat_only(d[i,:nx],d[i,-nx:],tail)
-                                else:
-                                        t_stat_perm[i]=ttest2_stat_only(d[i,:nx],d[i,-ny:],tail)
+		t_stat_perm=np.zeros((m,))
+		for i in xrange(m):
+			if paired:
+				t_stat_perm[i]=ttest_paired_stat_only(d[i,:nx],d[i,-nx:],tail)
+			else:
+				t_stat_perm[i]=ttest2_stat_only(d[i,:nx],d[i,-ny:],tail)
 
-                        ind_t,=np.where(t_stat_perm>thresh)
-                
-                        adj_perm=np.zeros((n,n))
-                        adj_perm[(ixes[0][ind_t],ixes[1][ind_t])]=1
-                        adj_perm=adj_perm+adj_perm.T
+		ind_t,=np.where(t_stat_perm>thresh)
 
-                        a,sz=get_components(adj_perm)
+		adj_perm=np.zeros((n,n))
+		adj_perm[(ixes[0][ind_t],ixes[1][ind_t])]=1
+		adj_perm=adj_perm+adj_perm.T
 
-                        ind_sz,=np.where(sz>1)
-                        ind_sz+=1
-                        nr_components_perm=np.size(ind_sz)
-                        sz_links_perm=np.zeros((nr_components_perm))
-                        for i in xrange(nr_components_perm):
-                                nodes,=np.where(ind_sz[i]==a)
-                                sz_links_perm[i]=np.sum(adj_perm[np.ix_(nodes,nodes)])/2
-                
-                        if np.size(sz_links_perm):
-                                null[u]=np.max(sz_links_perm)
-                        else:
-                                null[u]=0
+		a,sz=get_components(adj_perm)
 
-                        #compare to the true dataset
-                        if null[u] >= max_sz: hit+=1
+		ind_sz,=np.where(sz>1)
+		ind_sz+=1
+		nr_components_perm=np.size(ind_sz)
+		sz_links_perm=np.zeros((nr_components_perm))
+		for i in xrange(nr_components_perm):
+			nodes,=np.where(ind_sz[i]==a)
+			sz_links_perm[i]=np.sum(adj_perm[np.ix_(nodes,nodes)])/2
 
-                #	print ('permutation %i of %i.  Permutation max is %s.  Observed max is '
-                #		'%s.  P-val estimate is %.3f')%(u,k,null[u],max_sz,hit/(u+1))
-                        if u%(k/10) == 0 or u==k-1:
-                                print 'permutation %i of %i.  p-value so far is %.3f'%(u,k,hit/(u+1))
+		if np.size(sz_links_perm):
+			null[u]=np.max(sz_links_perm)
+		else:
+			null[u]=0
 
-                pvals=np.zeros((nr_components,))
-                #calculate p-vals
-                for i in xrange(nr_components):
-                        pvals[i]=np.size(np.where(null>=sz_links[i]))/k
+		#compare to the true dataset
+		if null[u] >= max_sz: hit+=1
 
-        return pvals,adj,null
+		if verbose:
+			print ('permutation %i of %i.  Permutation max is %s.  Observed max'
+				' is %s.  P-val estimate is %.3f')%(
+				u,k,null[u],max_sz,hit/(u+1))
+		elif (u%(k/10) == 0 or u==k-1):
+			print 'permutation %i of %i.  p-value so far is %.3f'%(u,k,
+				hit/(u+1))
+
+	pvals=np.zeros((nr_components,))
+	#calculate p-vals
+	for i in xrange(nr_components):
+		pvals[i]=np.size(np.where(null>=sz_links[i]))/k
+
+	return pvals,adj,null

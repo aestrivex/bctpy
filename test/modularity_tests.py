@@ -6,7 +6,8 @@ from scipy import io
 def test_modularity_und():
 	x = load_sample(thres=.4)
 	_,q = bct.modularity_und(x)
-	assert np.allclose(q, 0.24253272, atol=0.0025)
+	print q
+	assert np.allclose(q, 0.24097717)
 	#matlab and bctpy appear to return different results due to the cross-
 	#package numerical instability of eigendecompositions
 
@@ -47,8 +48,8 @@ def test_modularity_finetune_und():
 			else: fails+=1
 
 	seed = 71040925
-	ci,oq = bct.modularity_louvain_und(x,seed=seed)
-	_,q = bct.modularity_finetune_und(x,ci=ci,seed=seed)
+	ci,oq = bct.modularity_louvain_und(x, seed=seed)
+	_,q = bct.modularity_finetune_und(x, ci=ci, seed=seed)
 	assert np.allclose(q, .25892588)
 	assert q >= oq
 
@@ -79,7 +80,7 @@ def test_modularity_louvain_und_sign_seed():
 	seed = 90772777
 	_,q = bct.modularity_louvain_und_sign(x, seed=seed)
 	print q
-	assert np.allclose(q, .48336787)
+	assert np.allclose(q, .46605515)
 
 def test_modularity_finetune_und_sign_actually_finetune():
 	x = load_signed_sample()
@@ -87,7 +88,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
 	_,q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
 	print q
-	assert np.allclose(q, .48034182)
+	assert np.allclose(q, .47282924)
 	assert q >= oq
 
 	seed = 88215881
@@ -98,7 +99,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 
 	ci,oq = bct.modularity_louvain_und_sign(x, seed=seed)
 	print oq
-	assert np.allclose(oq, .48013250)
+	assert np.allclose(oq, .45254522)
 	for i in xrange(100):
 		_,q = bct.modularity_finetune_und_sign(x, ci=ci)
 		assert q >= oq
@@ -108,7 +109,7 @@ def test_modularity_probtune_und_sign():
 	seed = 59468096
 	ci,q = bct.modularity_probtune_und_sign(x, seed=seed)
 	print q
-	assert np.allclose(q, .13322379)
+	assert np.allclose(q, .07885327)
 
 	seed = 1742447
 	ci,_ = bct.modularity_louvain_und_sign(x, seed=seed)
@@ -124,19 +125,41 @@ def test_modularity_probtune_und_sign():
 				if fails > 5: raise
 				else: fails+=1
 
-def test_modularity_dir():
-	x = load_directed_sample(thres=.67)
+def test_modularity_dir_low_modularity():
+	x = load_directed_low_modularity_sample(thres=.67)
 	_,q = bct.modularity_dir(x)
-	assert np.allclose(q, .06, atol=.02 )
+	assert np.allclose(q, .06450290 )
 
-def test_modularity_louvain_dir():
-	x = load_directed_sample(thres=.67)
-	_,q = bct.modularity_louvain_dir(x)
-	assert np.allclose(q, .05, atol=.02 )
+def test_modularity_louvain_dir_low_modularity():
+	x = load_directed_low_modularity_sample(thres=.67)
+	seed = 28917147
+	_,q = bct.modularity_louvain_dir(x, seed=seed)
+	assert np.allclose(q, .06934894)
 
-def test_modularity_finetune_dir():
-	x = load_directed_sample(thres=.67)
-	ci,oq = bct.modularity_louvain_dir(x)
-	_,q = bct.modularity_finetune_dir(x, ci=ci)
+def test_modularity_finetune_dir_low_modularity():
+	x = load_directed_low_modularity_sample(thres=.67)
+	seed = 39602351
+	ci,oq = bct.modularity_louvain_dir(x, seed=seed)
+	_,q = bct.modularity_finetune_dir(x, ci=ci, seed=seed)
+	print q,oq
 	assert q >= oq
 
+def test_modularity_dir():
+	x = load_directed_sample()
+	_,q = bct.modularity_dir(x)
+	assert np.allclose(q, .31446049)
+
+def test_modularity_louvain_dir():
+	x = load_directed_sample()
+	seed = 43938304
+	_,q = bct.modularity_louvain_dir(x, seed=seed)
+	assert np.allclose(q, .32697921)
+
+def test_modularity_finetune_dir():
+	x = load_directed_sample()
+	seed = 26080
+	ci,oq = bct.modularity_louvain_dir(x, seed=seed)
+	for i in xrange(100):
+		_,q = bct.modularity_finetune_dir(x, ci=ci)
+		print q,oq
+		assert q >= oq

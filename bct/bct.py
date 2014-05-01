@@ -2282,7 +2282,7 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
 	k_o=np.sum(knm_o,axis=1)			#node out-degree
 	k_i=np.sum(knm_i,axis=1)			#node in-degree
 	km_o=np.sum(knm_o,axis=0)			#module out-degree
-	km_i=np.sum(knm_i,axis=1)			#module out-degree
+	km_i=np.sum(knm_i,axis=0)			#module out-degree
 
 	flag=True
 	while flag:
@@ -2596,8 +2596,8 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
 
 					knm_o[:,mb]+=W[u,:].T	#change node-to-module degrees
 					knm_o[:,ma]-=W[u,:].T
-					knm_i[:,mb]+=W[u,:]
-					knm_i[:,ma]-=W[u,:]
+					knm_i[:,mb]+=W[:,u]
+					knm_i[:,ma]-=W[:,u]
 					km_o[mb]+=k_o[u]		#change module out-degrees
 					km_o[ma]-=k_o[u]
 					km_i[mb]+=k_i[u]

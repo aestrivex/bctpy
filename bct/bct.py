@@ -2254,7 +2254,8 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
                             gamma>1     detects smaller modules
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
- 
+
+				seed,	random seed. Default None, seed from /dev/urandom
  
     Output:     Ci,     refined community affiliation vector
                 Q,      modularity
@@ -2276,8 +2277,8 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
 	knm_i=np.zeros((n,n))				#node-to-module in degree
 
 	for m in xrange(np.max(ci)):
-		knm_o[:,m]=np.sum(W[:,ci==m],axis=1)	
-		knm_i[:,m]=np.sum(W[ci==m,:],axis=0)
+		knm_o[:,m]=np.sum(W[:,ci==(m+1)],axis=1)	
+		knm_i[:,m]=np.sum(W[ci==(m+1),:],axis=0)
 
 	k_o=np.sum(knm_o,axis=1)			#node out-degree
 	k_i=np.sum(knm_i,axis=1)			#node in-degree
@@ -2304,8 +2305,8 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
 
 				knm_o[:,mb]+=W[u,:].T	#change node-to-module out-degrees
 				knm_o[:,ma]-=W[u,:].T
-				knm_i[:,mb]+=W[u,:]		#change node-to-module in-degrees
-				knm_i[:,ma]-=W[u,:]
+				knm_i[:,mb]+=W[:,u]		#change node-to-module in-degrees
+				knm_i[:,ma]-=W[:,u]
 				km_o[mb]+=k_o[u]		#change module out-degrees
 				km_o[ma]-=k_o[u]
 				km_i[mb]+=k_i[u]		#change module in-degrees
@@ -2365,7 +2366,7 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
 
 	s=np.sum(W)							#total weight of edges
 	knm=np.zeros((n,n))					#node-to-module degree
-	for m in xrange(int(np.max(ci))):
+	for m in xrange(np.max(ci)):
 		knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
 	k=np.sum(knm,axis=1)				#node degree
 	km=np.sum(knm,axis=0)				#module degree
@@ -2575,7 +2576,7 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
 		while flag:
 			it+=1
 			if it>1000:
-				raise BCTParamError('Modularity Infintie Loop Style F.  Please '
+				raise BCTParamError('Modularity Infinite Loop Style F.  Please '
 					'contact the developer with this error.')
 			flag=False
 			

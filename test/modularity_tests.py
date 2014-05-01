@@ -143,6 +143,8 @@ def test_modularity_finetune_dir_low_modularity():
 	_,q = bct.modularity_finetune_dir(x, ci=ci, seed=seed)
 	print q,oq
 	assert q >= oq
+	#this does not pass. the matlab code appears to have no idea what to do with
+	#the low modularity directed modules. this may be someone else's fault.
 
 def test_modularity_dir():
 	x = load_directed_sample()
@@ -163,3 +165,8 @@ def test_modularity_finetune_dir():
 		_,q = bct.modularity_finetune_dir(x, ci=ci)
 		print q,oq
 		assert q >= oq
+	#this does not pass with similar behavior to low modularity.
+	#the code occasionally returns lower modularity (but very very similar,
+	#order .001) partitions despite returning 
+	#higher modularity partitions a slight majority of the time. i dont know
+	#what is wrong

@@ -1,7 +1,6 @@
 from load_samples import *
 import numpy as np
 import bct
-from scipy import io
 
 def test_cluscoef_wu():
 	x = load_sample(thres=.23)
@@ -53,13 +52,13 @@ def test_consensus():
 	assert np.allclose(q, 0.27, atol=.01)
 
 def test_cluscoef_wd():
-	x = load_directed_sample(thres=.45)
+	x = load_directed_low_modularity_sample(thres=.45)
 	cc = bct.clustering_coef_wd(x)
 	print np.sum(cc)
 	assert np.allclose(np.sum(cc), 289.30817909)
 
 def test_transitivity_wd():
-	x = load_directed_sample(thres=.45)
+	x = load_directed_low_modularity_sample(thres=.45)
 	t = bct.transitivity_wd(x)
 	assert np.allclose(t, 1.30727748)
 
@@ -74,14 +73,15 @@ def test_transitivity_bu():
 	assert np.allclose(t, 0.42763107)
 
 def test_cluscoef_bd():
-	x = bct.binarize(load_directed_sample(thres=.41), copy=False)
+	x = load_binary_directed_low_modularity_sample(thres=.41)
 	cc = bct.clustering_coef_bd(x)
 	assert np.allclose(np.sum(cc), 113.31145155)
 
 def test_transitivity_bd():
-	x = bct.binarize(load_directed_sample(thres=.41), copy=False)
+	x = load_binary_directed_low_modularity_sample(thres=.41)
 	t = bct.transitivity_bd(x)
 	assert np.allclose(t, 0.50919493)
 
 def test_agreement_weighted():
+	#this function is very hard to use or interpret results from
 	pass

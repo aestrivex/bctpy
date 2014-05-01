@@ -1,7 +1,6 @@
 from load_samples import *
 import numpy as np
 import bct
-from scipy import io
 
 def test_modularity_und():
 	x = load_sample(thres=.4)

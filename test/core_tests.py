@@ -1,7 +1,6 @@
 from load_samples import *
 import bct
 import numpy as np
-from scipy import io
 
 def test_threshold_proportional():
 	x = load_sample()

@@ -4,6 +4,9 @@ BCT 0.3.3
 - Add non-networkx dependent algorithm to get_components (but less efficient)
 - Add an implementation of consensus clustering and fix bug in agreement
 - Fix bug causing clustering_coef_bu to always return 0
+- Remembered to update changelog
+- Fix some bugs in modularity_louvain_dir and related
+- Fix bug in NBS and add optional paired-sample test statistic (sviter)
 
 BCT 0.3.2
 

@@ -29,7 +29,7 @@ class BCTParamError(RuntimeError): pass
 ###############################################################################
 
 def betweenness_bin(G):
-	'''
+    '''
 Node betweenness centrality is the fraction of all shortest paths in 
 the network that contain a given node. Nodes with high values of 
 betweenness centrality participate in a large number of shortest paths.
@@ -40,41 +40,41 @@ Output:     BC,     node betweenness centrality vector.
 
 Note: Betweenness centrality may be normalised to the range [0,1] as
 BC/[(N-1)(N-2)], where N is the number of nodes in the network.
-	'''
-	n=len(G)						#number of nodes
-	I=np.eye(n)						#identity matrix
-	d=1								#path length
-	NPd=G.copy()					#number of paths of length |d|
-	NSPd=G.copy()					#number of shortest paths of length |d|
-	NSP=G.copy();					#number of shortest paths of any length
-	L=G.copy();						#length of shortest paths
-	
-	NSP[np.where(I)]=1; L[np.where(I)]=1
+    '''
+    n=len(G)						#number of nodes
+    I=np.eye(n)						#identity matrix
+    d=1								#path length
+    NPd=G.copy()					#number of paths of length |d|
+    NSPd=G.copy()					#number of shortest paths of length |d|
+    NSP=G.copy();					#number of shortest paths of any length
+    L=G.copy();						#length of shortest paths
+    
+    NSP[np.where(I)]=1; L[np.where(I)]=1
 
-	#calculate NSP and L
-	while np.any(NSPd):
-		d+=1
-		NPd=np.dot(NPd,G)
-		NSPd=NPd*(L==0)
-		NSP+=NSPd
-		L=L+d*(NSPd!=0)
+    #calculate NSP and L
+    while np.any(NSPd):
+        d+=1
+        NPd=np.dot(NPd,G)
+        NSPd=NPd*(L==0)
+        NSP+=NSPd
+        L=L+d*(NSPd!=0)
 
-	L[L==0]=np.inf					#L for disconnected vertices is inf
-	L[np.where(I)]=0
-	NSP[NSP==0]=1					#NSP for disconnected vertices is 1
+    L[L==0]=np.inf					#L for disconnected vertices is inf
+    L[np.where(I)]=0
+    NSP[NSP==0]=1					#NSP for disconnected vertices is 1
 
-	DP=np.zeros((n,n))				#vertex on vertex dependency
-	diam=d-1
+    DP=np.zeros((n,n))				#vertex on vertex dependency
+    diam=d-1
 
-	#calculate DP
-	for d in xrange(diam,1,-1):
-		DPd1=np.dot(((L==d)*(1+DP)/NSP),G.T)*((L==(d-1))*NSP)	
-		DP+=DPd1
-		
-	return np.sum(DP,axis=0)
+    #calculate DP
+    for d in xrange(diam,1,-1):
+        DPd1=np.dot(((L==d)*(1+DP)/NSP),G.T)*((L==(d-1))*NSP)	
+        DP+=DPd1
+        
+    return np.sum(DP,axis=0)
 
 def betweenness_wei(G):
-	'''
+    '''
 Node betweenness centrality is the fraction of all shortest paths in 
 the network that contain a given node. Nodes with high values of 
 betweenness centrality participate in a large number of shortest paths.
@@ -91,84 +91,84 @@ interpreted as shorter distances and the input matrix should
 consequently be some inverse of the connectivity matrix. 
    Betweenness centrality may be normalised to the range [0,1] as
 BC/[(N-1)(N-2)], where N is the number of nodes in the network.
-	'''
-	n=len(G)
-	BC=np.zeros((n,))					#vertex betweenness
+    '''
+    n=len(G)
+    BC=np.zeros((n,))					#vertex betweenness
 
-	for u in xrange(n):
-		D=np.tile(np.inf,(n,)); D[u]=0	#distance from u
-		NP=np.zeros((n,)); NP[u]=1		#number of paths from u
-		S=np.ones((n,),dtype=bool)		#distance permanence
-		P=np.zeros((n,n))				#predecessors
-		Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
+    for u in xrange(n):
+        D=np.tile(np.inf,(n,)); D[u]=0	#distance from u
+        NP=np.zeros((n,)); NP[u]=1		#number of paths from u
+        S=np.ones((n,),dtype=bool)		#distance permanence
+        P=np.zeros((n,n))				#predecessors
+        Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
 
-		G1=G.copy()
-		V=[u]
-		while True:
-			S[V]=0						#distance u->V is now permanent	
-			G1[:,V]=0					#no in-edges as already shortest
-			for v in V:
-				Q[q]=v
-				q-=1
-				W,=np.where(G1[v,:])		#neighbors of v
-				for w in W:
-					Duw=D[v]+G1[v,w]	#path length to be tested
-					if Duw<D[w]:		#if new u->w shorter than old
-						D[w]=Duw
-						NP[w]=NP[v]		#NP(u->w) = NP of new path
-						P[w,:]=0
-						P[w,v]=1		#v is the only predecessor
-					elif Duw==D[w]:		#if new u->w equal to old
-						NP[w]+=NP[v]	#NP(u->w) sum of old and new
-						P[w,v]=1		#v is also predecessor
+        G1=G.copy()
+        V=[u]
+        while True:
+            S[V]=0						#distance u->V is now permanent	
+            G1[:,V]=0					#no in-edges as already shortest
+            for v in V:
+                Q[q]=v
+                q-=1
+                W,=np.where(G1[v,:])		#neighbors of v
+                for w in W:
+                    Duw=D[v]+G1[v,w]	#path length to be tested
+                    if Duw<D[w]:		#if new u->w shorter than old
+                        D[w]=Duw
+                        NP[w]=NP[v]		#NP(u->w) = NP of new path
+                        P[w,:]=0
+                        P[w,v]=1		#v is the only predecessor
+                    elif Duw==D[w]:		#if new u->w equal to old
+                        NP[w]+=NP[v]	#NP(u->w) sum of old and new
+                        P[w,v]=1		#v is also predecessor
 
-			if D[S].size==0:
-				break					#all nodes were reached
-			if np.isinf(np.min(D[S])):	#some nodes cannot be reached
-				Q[:q+1],=np.where(np.isinf(D)) #these are first in line
-				break
-			V,=np.where(D==np.min(D[S]))
+            if D[S].size==0:
+                break					#all nodes were reached
+            if np.isinf(np.min(D[S])):	#some nodes cannot be reached
+                Q[:q+1],=np.where(np.isinf(D)) #these are first in line
+                break
+            V,=np.where(D==np.min(D[S]))
 
-		DP=np.zeros((n,))
-		for w in Q[:n-1]:
-			BC[w]+=DP[w]
-			for v in np.where(P[w,:])[0]:
-				DP[v]+=(1+DP[w])*NP[v]/NP[w]
+        DP=np.zeros((n,))
+        for w in Q[:n-1]:
+            BC[w]+=DP[w]
+            for v in np.where(P[w,:])[0]:
+                DP[v]+=(1+DP[w])*NP[v]/NP[w]
 
-	return BC
+    return BC
 
 def diversity_coef_sign(W,Ci):
-	'''
+    '''
 The Shannon-entropy based diversity coefficient measures the diversity
 of intermodular connections of individual nodes and ranges from 0 to 1.
 
 Inputs:     W,      undirected connection matrix with positive and
-				    negative weights
-		    Ci,     community affiliation vector
+                    negative weights
+            Ci,     community affiliation vector
 
 Output:     Hpos,   diversity coefficient based on positive connections
-		    Hneg,   diversity coefficient based on negative connections
-	'''
-	n=len(W)							#number of nodes
-	m=np.max(Ci)						#number of modules		
+            Hneg,   diversity coefficient based on negative connections
+    '''
+    n=len(W)							#number of nodes
+    m=np.max(Ci)						#number of modules		
 
-	def entropy(w_):
-		S=np.sum(w_,axis=1)				#strength
-		Snm=np.zeros((n,m))				#node-to-module degree
-		for i in xrange(m):
-			Snm[:,i]=np.sum(w_[:,Ci==i+1],axis=1)
-		pnm=Snm/(np.tile(S,(m,1)).T)
-		pnm[np.isnan(pnm)]=0
-		pnm[np.logical_not(pnm)]=1
-		return -np.sum(pnm*np.log(pnm),axis=1)/np.log(m)
+    def entropy(w_):
+        S=np.sum(w_,axis=1)				#strength
+        Snm=np.zeros((n,m))				#node-to-module degree
+        for i in xrange(m):
+            Snm[:,i]=np.sum(w_[:,Ci==i+1],axis=1)
+        pnm=Snm/(np.tile(S,(m,1)).T)
+        pnm[np.isnan(pnm)]=0
+        pnm[np.logical_not(pnm)]=1
+        return -np.sum(pnm*np.log(pnm),axis=1)/np.log(m)
 
-	Hpos=entropy(W*(W>0))
-	Hneg=entropy(-W*(W<0))
+    Hpos=entropy(W*(W>0))
+    Hneg=entropy(-W*(W<0))
 
-	return Hpos,Hneg
+    return Hpos,Hneg
 
 def edge_betweenness_bin(G):
-	'''
+    '''
 Edge betweenness centrality is the fraction of all shortest paths in 
 the network that contain a given edge. Edges with high values of 
 betweenness centrality participate in a large number of shortest paths.
@@ -176,54 +176,54 @@ betweenness centrality participate in a large number of shortest paths.
 Input:      A,      binary (directed/undirected) connection matrix.
 
 Output:     EBC,    edge betweenness centrality matrix.
- 		    BC,     node betweenness centrality vector.
+            BC,     node betweenness centrality vector.
 
 Note: Betweenness centrality may be normalised to the range [0,1] as
 BC/[(N-1)(N-2)], where N is the number of nodes in the network.
-	'''
-	n=len(G)
-	BC=np.zeros((n,))					#vertex betweenness
-	EBC=np.zeros((n,n))					#edge betweenness
+    '''
+    n=len(G)
+    BC=np.zeros((n,))					#vertex betweenness
+    EBC=np.zeros((n,n))					#edge betweenness
 
-	for u in xrange(n):
-		D=np.zeros((n,)); D[u]=1		#distance from u
-		NP=np.zeros((n,)); NP[u]=1		#number of paths from u
-		P=np.zeros((n,n))				#predecessors
-		Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
+    for u in xrange(n):
+        D=np.zeros((n,)); D[u]=1		#distance from u
+        NP=np.zeros((n,)); NP[u]=1		#number of paths from u
+        P=np.zeros((n,n))				#predecessors
+        Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
 
-		Gu=G.copy()	
-		V=np.array([u])
-		while V.size:
-			Gu[:,V]=0					#remove remaining in-edges
-			for v in V:
-				Q[q]=v;
-				q-=1
-				W,=np.where(Gu[v,:])		#neighbors of V
-				for w in W:
-					if D[w]:
-						NP[w]+=NP[v]	#NP(u->w) sum of old and new
-						P[w,v]=1		#v is a predecessor
-					else:
-						D[w]=1
-						NP[w]=NP[v]		#NP(u->v) = NP of new path
-						P[w,v]=1		#v is a predecessor
-			V,=np.where(np.any(Gu[V,:],axis=0))
+        Gu=G.copy()	
+        V=np.array([u])
+        while V.size:
+            Gu[:,V]=0					#remove remaining in-edges
+            for v in V:
+                Q[q]=v;
+                q-=1
+                W,=np.where(Gu[v,:])		#neighbors of V
+                for w in W:
+                    if D[w]:
+                        NP[w]+=NP[v]	#NP(u->w) sum of old and new
+                        P[w,v]=1		#v is a predecessor
+                    else:
+                        D[w]=1
+                        NP[w]=NP[v]		#NP(u->v) = NP of new path
+                        P[w,v]=1		#v is a predecessor
+            V,=np.where(np.any(Gu[V,:],axis=0))
 
-		if np.any(np.logical_not(D)):	# if some vertices unreachable
-			Q[:q],=np.where(np.logical_not(D))	#...these are first in line
+        if np.any(np.logical_not(D)):	# if some vertices unreachable
+            Q[:q],=np.where(np.logical_not(D))	#...these are first in line
 
-		DP=np.zeros((n,))				# dependency
-		for w in Q[:n-1]:
-			BC[w]+=DP[w]
-			for v in np.where(P[w,:])[0]:
-				DPvw=(1+DP[w])*NP[v]/NP[w]	
-				DP[v]+=DPvw
-				EBC[v,w]+=DPvw
+        DP=np.zeros((n,))				# dependency
+        for w in Q[:n-1]:
+            BC[w]+=DP[w]
+            for v in np.where(P[w,:])[0]:
+                DPvw=(1+DP[w])*NP[v]/NP[w]	
+                DP[v]+=DPvw
+                EBC[v,w]+=DPvw
 
-	return EBC,BC
+    return EBC,BC
 
 def edge_betweenness_wei(G):
-	'''
+    '''
 Edge betweenness centrality is the fraction of all shortest paths in 
 the network that contain a given edge. Edges with high values of 
 betweenness centrality participate in a large number of shortest paths.
@@ -231,7 +231,7 @@ betweenness centrality participate in a large number of shortest paths.
 Input:      L,      Directed/undirected connection-length matrix.
 
 Output:     EBC,    edge betweenness centrality matrix.
- 		    BC,     nodal betweenness centrality vector.
+            BC,     nodal betweenness centrality vector.
 
 Notes:
    The input matrix must be a connection-length matrix, typically
@@ -241,57 +241,57 @@ interpreted as shorter distances and the input matrix should
 consequently be some inverse of the connectivity matrix. 
    Betweenness centrality may be normalised to the range [0,1] as
 BC/[(N-1)(N-2)], where N is the number of nodes in the network.
-	'''
-	n=len(G)	
-	BC=np.zeros((n,))					#vertex betweenness
-	EBC=np.zeros((n,n))					#edge betweenness
+    '''
+    n=len(G)	
+    BC=np.zeros((n,))					#vertex betweenness
+    EBC=np.zeros((n,n))					#edge betweenness
 
-	for u in xrange(n):
-		D=np.tile(np.inf,n); D[u]=0		#distance from u
-		NP=np.zeros((n,)); NP[u]=1		#number of paths from u
-		S=np.ones((n,),dtype=bool)		#distance permanence
-		P=np.zeros((n,n))				#predecessors
-		Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
+    for u in xrange(n):
+        D=np.tile(np.inf,n); D[u]=0		#distance from u
+        NP=np.zeros((n,)); NP[u]=1		#number of paths from u
+        S=np.ones((n,),dtype=bool)		#distance permanence
+        P=np.zeros((n,n))				#predecessors
+        Q=np.zeros((n,)); q=n-1			#order of non-increasing distance
 
-		G1=G.copy()
-		V=[u]
-		while True:
-			S[V]=0						#distance u->V is now permanent
-			G1[:,V]=0					#no in-edges as already shortest
-			for v in V:
-				Q[q]=v
-				q-=1
-				W,=np.where(G1[v,:])	#neighbors of v
-				for w in W:
-					Duw=D[v]+G1[v,w]	#path length to be tested
-					if Duw<D[w]:		#if new u->w shorter than old
-						D[w]=Duw
-						NP[w]=NP[v]		#NP(u->w) = NP of new path
-						P[w,:]=0
-						P[w,v]=1		#v is the only predecessor
-					elif Duw==D[w]:		#if new u->w equal to old
-						NP[w]+=NP[v]	#NP(u->w) sum of old and new
-						P[w,v]=1		#v is also a predecessor
+        G1=G.copy()
+        V=[u]
+        while True:
+            S[V]=0						#distance u->V is now permanent
+            G1[:,V]=0					#no in-edges as already shortest
+            for v in V:
+                Q[q]=v
+                q-=1
+                W,=np.where(G1[v,:])	#neighbors of v
+                for w in W:
+                    Duw=D[v]+G1[v,w]	#path length to be tested
+                    if Duw<D[w]:		#if new u->w shorter than old
+                        D[w]=Duw
+                        NP[w]=NP[v]		#NP(u->w) = NP of new path
+                        P[w,:]=0
+                        P[w,v]=1		#v is the only predecessor
+                    elif Duw==D[w]:		#if new u->w equal to old
+                        NP[w]+=NP[v]	#NP(u->w) sum of old and new
+                        P[w,v]=1		#v is also a predecessor
 
-			if D[S].size==0:
-				break					#all nodes reached, or
-			if np.isinf(np.min(D[S])):	#some cannot be reached
-				Q[:q],=np.where(np.isinf(D)) #these are first in line
-				break
-			V,=np.where(D==np.min(D[S]))
+            if D[S].size==0:
+                break					#all nodes reached, or
+            if np.isinf(np.min(D[S])):	#some cannot be reached
+                Q[:q],=np.where(np.isinf(D)) #these are first in line
+                break
+            V,=np.where(D==np.min(D[S]))
 
-		DP=np.zeros((n,))				#dependency
-		for w in Q[:n-1]:
-			BC[w]+=DP[w]
-			for v in np.where(P[w,:])[0]:
-				DPvw=(1+DP[w])*NP[v]/NP[w]
-				DP[v]+=DPvw
-				EBC[v,w]+=DPvw
+        DP=np.zeros((n,))				#dependency
+        for w in Q[:n-1]:
+            BC[w]+=DP[w]
+            for v in np.where(P[w,:])[0]:
+                DPvw=(1+DP[w])*NP[v]/NP[w]
+                DP[v]+=DPvw
+                EBC[v,w]+=DPvw
 
-	return EBC,BC
+    return EBC,BC
 
 def eigenvector_centrality_und(CIJ):
-	'''
+    '''
 Eigenector centrality is a self-referential measure of centrality:
 nodes have high eigenvector centrality if they connect to other nodes
 that have high eigenvector centrality. The eigenvector centrality of
@@ -301,58 +301,58 @@ corresponding to the largest eigenvalue of the adjacency matrix.
 Inputs:     CIJ,        binary/weighted undirected adjacency matrix.
 
 Outputs:      v,        eigenvector associated with the largest
-				   	    eigenvalue of the adjacency matrix CIJ.
-	'''
-	from scipy import linalg
+                        eigenvalue of the adjacency matrix CIJ.
+    '''
+    from scipy import linalg
 
-	n=len(CIJ)	
-	vals,vecs=linalg.eig(CIJ)
-	i=np.argmax(vals)
-	return np.abs(vecs[:,i])
+    n=len(CIJ)	
+    vals,vecs=linalg.eig(CIJ)
+    i=np.argmax(vals)
+    return np.abs(vecs[:,i])
 
 def erange(CIJ):
-	'''
+    '''
 Shorcuts are central edges which significantly reduce the
 characteristic path length in the network.
 
 Input:      CIJ,        binary directed connection matrix
 
 Outputs:    Erange,     range for each edge, i.e. the length of the 
- 					    shortest path from i to j for edge c(i,j) AFTER
-					    the edge has been removed from the graph.
-		    eta         average range for entire graph.
-		    Eshort      entries are ones for shortcut edges.
-		    fs          fraction of shortcuts in the graph.
+                        shortest path from i to j for edge c(i,j) AFTER
+                        the edge has been removed from the graph.
+            eta         average range for entire graph.
+            Eshort      entries are ones for shortcut edges.
+            fs          fraction of shortcuts in the graph.
 
 Follows the treatment of 'shortcuts' by Duncan Watts
-	'''
-	N=len(CIJ)	
-	K=np.size(np.where(CIJ)[1])
-	Erange=np.zeros((N,N))
-	i,j=np.where(CIJ)
+    '''
+    N=len(CIJ)	
+    K=np.size(np.where(CIJ)[1])
+    Erange=np.zeros((N,N))
+    i,j=np.where(CIJ)
 
-	for c in xrange(len(i)):
-		CIJcut=CIJ.copy()
-		CIJcut[i[c],j[c]]=0
-		R,D=reachdist(CIJcut)
-		Erange[i[c],j[c]] = D[i[c],j[c]]
+    for c in xrange(len(i)):
+        CIJcut=CIJ.copy()
+        CIJcut[i[c],j[c]]=0
+        R,D=reachdist(CIJcut)
+        Erange[i[c],j[c]] = D[i[c],j[c]]
 
-	#average range (ignore Inf)
-	eta=(np.sum(Erange[np.logical_and(Erange>0,Erange<np.inf)])/
-		len(Erange[np.logical_and(Erange>0,Erange<np.inf)]))
+    #average range (ignore Inf)
+    eta=(np.sum(Erange[np.logical_and(Erange>0,Erange<np.inf)])/
+        len(Erange[np.logical_and(Erange>0,Erange<np.inf)]))
 
-	# Original entries of D are ones, thus entries of Erange 
-	# must be two or greater.
-	# If Erange(i,j) > 2, then the edge is a shortcut.
-	# 'fshort' is the fraction of shortcuts over the entire graph.
+    # Original entries of D are ones, thus entries of Erange 
+    # must be two or greater.
+    # If Erange(i,j) > 2, then the edge is a shortcut.
+    # 'fshort' is the fraction of shortcuts over the entire graph.
 
-	Eshort=Erange>2
-	fs=len(np.where(Eshort))/K
+    Eshort=Erange>2
+    fs=len(np.where(Eshort))/K
 
-	return Erange,eta,Eshort,fs
+    return Erange,eta,Eshort,fs
 
 def flow_coef_bd(CIJ):
-	'''
+    '''
 Computes the flow coefficient for each node and averaged over the
 network, as described in Honey et al. (2007) PNAS. The flow coefficient
 is similar to betweenness centrality, but works on a local
@@ -362,37 +362,37 @@ coefficient  (cc) at each node as, fc+cc <= 1.
 input:      CIJ,	connection/adjacency matrix (binary, directed)
 
 output:     fc,     flow coefficient for each node
-  		    FC,     average flow coefficient over the network
-	 total_flo,     number of paths that "flow" across the central node
-	'''
-	N=len(CIJ)
-	
-	fc=np.zeros((N,))
-	total_flo=np.zeros((N,))
-	max_flo=np.zeros((N,))
+            FC,     average flow coefficient over the network
+     total_flo,     number of paths that "flow" across the central node
+    '''
+    N=len(CIJ)
+    
+    fc=np.zeros((N,))
+    total_flo=np.zeros((N,))
+    max_flo=np.zeros((N,))
 
-	#loop over nodes
-	for v in xrange(N):
-		#find neighbors - note: both incoming and outgoing connections
-		nb,=np.where(CIJ[v,:]+CIJ[:,v].T)
-		fc[v]=0
-		if np.where(nb)[0].size:
-			CIJflo=-CIJ[np.ix_(nb,nb)]
-			for i in xrange(len(nb)):
-				for j in xrange(len(nb)):
-					if CIJ[nb[i],v] and CIJ[v,nb[j]]:
-						CIJflo[i,j]+=1
-			total_flo[v]=np.sum((CIJflo==1)*np.logical_not(np.eye(len(nb))))
-			max_flo[v]=len(nb)*len(nb)-len(nb)
-			fc[v]=total_flo[v]/max_flo[v]
-	
-	fc[np.isnan(fc)]=0
-	FC=np.mean(fc)
+    #loop over nodes
+    for v in xrange(N):
+        #find neighbors - note: both incoming and outgoing connections
+        nb,=np.where(CIJ[v,:]+CIJ[:,v].T)
+        fc[v]=0
+        if np.where(nb)[0].size:
+            CIJflo=-CIJ[np.ix_(nb,nb)]
+            for i in xrange(len(nb)):
+                for j in xrange(len(nb)):
+                    if CIJ[nb[i],v] and CIJ[v,nb[j]]:
+                        CIJflo[i,j]+=1
+            total_flo[v]=np.sum((CIJflo==1)*np.logical_not(np.eye(len(nb))))
+            max_flo[v]=len(nb)*len(nb)-len(nb)
+            fc[v]=total_flo[v]/max_flo[v]
+    
+    fc[np.isnan(fc)]=0
+    FC=np.mean(fc)
 
-	return fc,FC,total_flo
+    return fc,FC,total_flo
 
 def kcoreness_centrality_bd(CIJ):
-	'''
+    '''
 The k-core is the largest subgraph comprising nodes of degree at least
 k. The coreness of a node is k if the node belongs to the k-core but
 not to the (k+1)-core. This function computes k-coreness of all nodes
@@ -401,22 +401,22 @@ for a given binary directed connection matrix.
 input:          CIJ,        connection/adjacency matrix (binary, directed)
 
 output:    coreness,        node coreness.
-				 kn,        size of k-core
-	'''
-	N=len(CIJ)
-	
-	coreness=np.zeros((N,))
-	kn=np.zeros((N,))
-	
-	for k in xrange(N):
-		CIJkcore,kn[k]=kcore_bd(CIJ,k)
-		ss=np.sum(CIJkcore,axis=0)>0
-		coreness[ss]=k
+                 kn,        size of k-core
+    '''
+    N=len(CIJ)
+    
+    coreness=np.zeros((N,))
+    kn=np.zeros((N,))
+    
+    for k in xrange(N):
+        CIJkcore,kn[k]=kcore_bd(CIJ,k)
+        ss=np.sum(CIJkcore,axis=0)>0
+        coreness[ss]=k
 
-	return coreness,kn
+    return coreness,kn
 
 def	kcoreness_centrality_bu(CIJ):
-	'''
+    '''
 The k-core is the largest subgraph comprising nodes of degree at least
 k. The coreness of a node is k if the node belongs to the k-core but
 not to the (k+1)-core. This function computes the coreness of all nodes
@@ -425,58 +425,58 @@ for a given binary undirected connection matrix.
 input:          CIJ,        connection/adjacency matrix (binary, undirected)
 
 output:    coreness,        node coreness.
-				 kn,        size of k-core
-	'''
-	N=len(CIJ)
+                 kn,        size of k-core
+    '''
+    N=len(CIJ)
 
-	#determine if the network is undirected -- if not, compute coreness
-	#on the corresponding undirected network
-	CIJund=CIJ+CIJ.T
-	if np.any(CIJund>1):
-		CIJ=np.array(CIJund>0,dtype=float)
-	
-	coreness=np.zeros((N,))
-	kn=np.zeros((N,))
-	for k in xrange(N):
-		CIJkcore,kn[k]=kcore_bu(CIJ,k)
-		ss=np.sum(CIJkcore,axis=0)>0
-		coreness[ss]=k
+    #determine if the network is undirected -- if not, compute coreness
+    #on the corresponding undirected network
+    CIJund=CIJ+CIJ.T
+    if np.any(CIJund>1):
+        CIJ=np.array(CIJund>0,dtype=float)
+    
+    coreness=np.zeros((N,))
+    kn=np.zeros((N,))
+    for k in xrange(N):
+        CIJkcore,kn[k]=kcore_bu(CIJ,k)
+        ss=np.sum(CIJkcore,axis=0)>0
+        coreness[ss]=k
 
-	return coreness,kn
+    return coreness,kn
 
 def module_degree_zscore(W,Ci,flag=0):
-	'''
+    '''
 The within-module degree z-score is a within-module version of degree
 centrality.
 
 Inputs:     W,      binary/weighted, directed/undirected connection matrix
-		   Ci,      community affiliation vector
-		 flag,		0: undirected graph = default
-					1: directed graph in degree
-					2: directed graph out degree
-					3: directed graph in and out degree
+           Ci,      community affiliation vector
+         flag,		0: undirected graph = default
+                    1: directed graph in degree
+                    2: directed graph out degree
+                    3: directed graph in and out degree
 
 Output:     Z,      within-module degree z-score.
 
 Note: The output for directed graphs is the "out-neighbor" z-score.
-	'''
+    '''
 
-	if flag==2:
-		W=W.copy(); W=W.T
-	elif flag==3:
-		W=W.copy(); W=W+W.T
+    if flag==2:
+        W=W.copy(); W=W.T
+    elif flag==3:
+        W=W.copy(); W=W+W.T
 
-	n=len(W)
-	Z=np.zeros((n,))					#number of vertices
-	for i in xrange(int(np.max(Ci))):
-		Koi=np.sum(W[np.ix_(Ci==i,Ci==i)],axis=1)
-		Z[np.where(Ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
+    n=len(W)
+    Z=np.zeros((n,))					#number of vertices
+    for i in xrange(int(np.max(Ci))):
+        Koi=np.sum(W[np.ix_(Ci==i,Ci==i)],axis=1)
+        Z[np.where(Ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
 
-	Z[np.where(np.isnan(Z))]=0
-	return Z
+    Z[np.where(np.isnan(Z))]=0
+    return Z
 
 def pagerank_centrality(A,d,falff=None):
-	'''
+    '''
 The PageRank centrality is a variant of eigenvector centrality. This
 function computes the PageRank centrality of each vertex in a graph.
 
@@ -493,94 +493,94 @@ walker is restarted at a random vertex. A common value for the damping
 factor is d = 0.85.
 
 Inputs:     A,      adjacency matrix
-		    d,      damping factor
-	    falff,      initial page rank probability (non-negative)
+            d,      damping factor
+        falff,      initial page rank probability (non-negative)
 
 Outputs:    r,      vectors of page rankings
 
 Note: The algorithm will work well for smaller matrices (number of
 nodes around 1000 or less) 
-	'''
-	from scipy import linalg
+    '''
+    from scipy import linalg
 
-	N=len(A)
-	if falff is None:
-		norm_falff=np.ones((N,))/N
-	else:
-		norm_falff=falff/np.sum(falff)
+    N=len(A)
+    if falff is None:
+        norm_falff=np.ones((N,))/N
+    else:
+        norm_falff=falff/np.sum(falff)
 
-	deg=np.sum(A,axis=0)
-	deg[deg==0]=1
-	D1=np.diag(1/deg)
-	B=np.eye(N)-d*np.dot(A,D1)
-	b=(1-d)*norm_falff
-	r=linalg.solve(B,b)
-	r/=np.sum(r)
-	return r
+    deg=np.sum(A,axis=0)
+    deg[deg==0]=1
+    D1=np.diag(1/deg)
+    B=np.eye(N)-d*np.dot(A,D1)
+    b=(1-d)*norm_falff
+    r=linalg.solve(B,b)
+    r/=np.sum(r)
+    return r
 
 def participation_coef(W,ci):
-	'''
+    '''
 Participation coefficient is a measure of diversity of intermodular
 connections of individual nodes.
 
 Inputs:     W,      binary/weighted, directed/undirected connection matrix
-		   Ci,     	community affiliation vector
+           Ci,     	community affiliation vector
 
 Output:     P,      participation coefficient
 
 Note: The output for directed graphs is the "out-neighbor"
-	 participation coefficient.
-	'''
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
+     participation coefficient.
+    '''
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
 
-	n=len(W)						#number of vertices
-	Ko=np.sum(W,axis=1)				#(out) degree
-	Gc=np.dot((W!=0),np.diag(ci))	#neighbor community affiliation
-	Kc2=np.zeros((n,))				#community-specific neighbors
+    n=len(W)						#number of vertices
+    Ko=np.sum(W,axis=1)				#(out) degree
+    Gc=np.dot((W!=0),np.diag(ci))	#neighbor community affiliation
+    Kc2=np.zeros((n,))				#community-specific neighbors
 
-	for i in xrange(int(np.max(ci))):
-		Kc2+=np.square(np.sum(W*(Gc==i),axis=1))
+    for i in xrange(int(np.max(ci))):
+        Kc2+=np.square(np.sum(W*(Gc==i),axis=1))
 
-	P=np.ones((n,))-Kc2/np.square(Ko)
-	P[np.where(np.logical_not(Ko))]=0 #P=0 if for nodes with no (out) neighbors
+    P=np.ones((n,))-Kc2/np.square(Ko)
+    P[np.where(np.logical_not(Ko))]=0 #P=0 if for nodes with no (out) neighbors
 
-	return P
+    return P
 
 def participation_coef_sign(W,ci):
-	'''
+    '''
 Participation coefficient is a measure of diversity of intermodular
 connections of individual nodes.
 
 Inputs:     W,      undirected connection matrix with positive and
-	 			    negative weights
-		   Ci,      community affiliation vector
+                    negative weights
+           Ci,      community affiliation vector
 
 Output:     Ppos,   participation coefficient from positive weights
-		    Pneg,   participation coefficient from negative weights
-	'''	
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
+            Pneg,   participation coefficient from negative weights
+    '''	
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
 
-	n=len(W)						#number of vertices
+    n=len(W)						#number of vertices
 
-	def pcoef(W_):
-		S=np.sum(W_,axis=1)			#strength
-		Gc=np.dot(np.logical_not(W_),np.diag(ci)) #neighbor community affil.
-		Sc2=np.zeros((n,))
-		
-		for i in xrange(int(np.max(ci))):
-			Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
+    def pcoef(W_):
+        S=np.sum(W_,axis=1)			#strength
+        Gc=np.dot(np.logical_not(W_),np.diag(ci)) #neighbor community affil.
+        Sc2=np.zeros((n,))
+        
+        for i in xrange(int(np.max(ci))):
+            Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
 
-		P=np.ones((n,))-Sc2/np.square(S)
-		P[np.where(np.isnan(P))]=0
-		P[np.where(np.logical_not(P))]=0	#p_ind=0 if no (out)neighbors
-		
-	Ppos=pcoef(r*(r>0))
-	Pneg=pcoef(-r*(r<0))
+        P=np.ones((n,))-Sc2/np.square(S)
+        P[np.where(np.isnan(P))]=0
+        P[np.where(np.logical_not(P))]=0	#p_ind=0 if no (out)neighbors
+        
+    Ppos=pcoef(r*(r>0))
+    Pneg=pcoef(-r*(r<0))
 
 def subgraph_centrality(CIJ):
-	'''
+    '''
 The subgraph centrality of a node is a weighted sum of closed walks of
 different lengths in the network starting and ending at the node. This
 function returns a vector of subgraph centralities for each node of the
@@ -589,20 +589,20 @@ network.
 Inputs:     CIJ,        adjacency matrix (binary)
 
 Outputs:     Cs,        subgraph centrality
-	'''
-	from scipy import linalg
-	
-	vals,vecs=linalg.eig(CIJ)				#compute eigendecomposition
-	lambdas=np.diag(vals)
-	Cs=np.real(np.dot(vecs*vecs),np.exp(lambdas)) #compute eigenvectorcentrality
-	return Cs							#imaginary part from precision error
+    '''
+    from scipy import linalg
+    
+    vals,vecs=linalg.eig(CIJ)				#compute eigendecomposition
+    lambdas=np.diag(vals)
+    Cs=np.real(np.dot(vecs*vecs),np.exp(lambdas)) #compute eigenvectorcentrality
+    return Cs							#imaginary part from precision error
 
 ###############################################################################
 # CLUSTERING
 ###############################################################################
 
 def agreement(ci,buffsz=None):
-	'''
+    '''
     Takes as input a set of vertex partitions CI of
     dimensions [vertex x partition]. Each column in CI contains the
     assignments of each vertex to a class/community/module. This function
@@ -620,30 +620,30 @@ def agreement(ci,buffsz=None):
                 BUFFSZ, optional second argument to set buffer size
  
     Outputs:    D,      agreement matrix
-	'''
-	m,n=ci.shape
+    '''
+    m,n=ci.shape
 
-	if buffsz is None: buffsz=1000	
+    if buffsz is None: buffsz=1000	
 
-	if m<=buffsz:
-		ind=dummyvar(ci)
-		D=np.dot(ind,ind.T)
-	else:
-		a=np.arange(0,m,buffsz)
-		b=np.arange(buffsz,m,buffsz)
-		if len(a)!=len(b):
-			b=np.append(b,m)
-		D=np.zeros((n,))
-		for i,j in zip(a,b):
-			y=ci[:,i:j+1]
-			ind=dummyvar(y)
-			D+=np.dot(ind,ind.T)
+    if m<=buffsz:
+        ind=dummyvar(ci)
+        D=np.dot(ind,ind.T)
+    else:
+        a=np.arange(0,m,buffsz)
+        b=np.arange(buffsz,m,buffsz)
+        if len(a)!=len(b):
+            b=np.append(b,m)
+        D=np.zeros((n,))
+        for i,j in zip(a,b):
+            y=ci[:,i:j+1]
+            ind=dummyvar(y)
+            D+=np.dot(ind,ind.T)
 
-	np.fill_diagonal(D,0)
-	return D
+    np.fill_diagonal(D,0)
+    return D
 
 def agreement_weighted(ci,wts):
-	'''
+    '''
     D = AGREEMENT_WEIGHTED(CI,WTS) is identical to AGREEMENT, with the 
     exception that each partitions contribution is weighted according to 
     the corresponding scalar value stored in the vector WTS. As an example,
@@ -659,18 +659,18 @@ def agreement_weighted(ci,wts):
                 WTS,    relative weight of each partition (size Mx1)
  
     Outputs:    D,      weighted agreement matrix
-	'''
-	m,n=ci.shape
-	wts=np.array(wts)/np.sum(wts)
+    '''
+    m,n=ci.shape
+    wts=np.array(wts)/np.sum(wts)
 
-	D=np.zeros((n,n))
-	for i in xrange(m):
-		d=dummyvar(ci[i,:].reshape(1,n))
-		D+=np.dot(d,d.T)*wts[i]
-	return D
+    D=np.zeros((n,n))
+    for i in xrange(m):
+        d=dummyvar(ci[i,:].reshape(1,n))
+        D+=np.dot(d,d.T)*wts[i]
+    return D
 
 def clustering_coef_bd(A):
-	'''
+    '''
 The clustering coefficient is the fraction of triangles around a node
 (equiv. the fraction of nodes neighbors that are neighbors of each other).
 
@@ -688,38 +688,38 @@ Thus the maximum possible number of triangles =
        = (2 edges)*([ALL PAIRS] - [FALSE PAIRS])
        = 2 * (K(K-1)/2 - diag(A^2))
        = K(K-1) - 2(diag(A^2))
-	'''
-	S=A+A.T								#symmetrized input graph
-	K=np.sum(S,axis=1)					#total degree (in+out)
-	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2 #number of 3-cycles
-	K[np.where(cyc3==0)]=np.inf			#if no 3-cycles exist, make C=0
-	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))	#number of all possible 3 cycles
-	C=cyc3/CYC3
-	return C
+    '''
+    S=A+A.T								#symmetrized input graph
+    K=np.sum(S,axis=1)					#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2 #number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf			#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))	#number of all possible 3 cycles
+    C=cyc3/CYC3
+    return C
 
 def clustering_coef_bu(G):
-	'''
+    '''
 The clustering coefficient is the fraction of triangles around a node
 (equiv. the fraction of nodes neighbors that are neighbors of each other).
 
 Input:      A,      binary undirected connection matrix
 
 Output:     C,      clustering coefficient vector
-	'''
-	n=len(G)
-	C=np.zeros((n,))
+    '''
+    n=len(G)
+    C=np.zeros((n,))
 
-	for u in xrange(n):
-		V,=np.where(G[u,:])
-		k=len(V)
-		if k>=2:						#degree must be at least 2
-			S=G[np.ix_(V,V)]
-			C[u]=np.sum(S)/(k*k-k)
+    for u in xrange(n):
+        V,=np.where(G[u,:])
+        k=len(V)
+        if k>=2:						#degree must be at least 2
+            S=G[np.ix_(V,V)]
+            C[u]=np.sum(S)/(k*k-k)
 
-	return C
+    return C
 
 def clustering_coef_wd(W):
-	'''
+    '''
 The weighted clustering coefficient is the average "intensity" of 
 triangles around a node.
 
@@ -734,34 +734,34 @@ The weighted modification is as follows:
 
 The above reduces to symmetric and/or binary versions of the clustering 
 coefficient for respective graphs.
-	'''
-	A=np.logical_not(W==0).astype(float)	#adjacency matrix
-	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
-	K=np.sum(A+A.T,axis=1)					#total degree (in+out)
-	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
-	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
-	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3 cycles
-	C=cyc3/CYC3								#clustering coefficient
-	return C	
+    '''
+    A=np.logical_not(W==0).astype(float)	#adjacency matrix
+    S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    K=np.sum(A+A.T,axis=1)					#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3 cycles
+    C=cyc3/CYC3								#clustering coefficient
+    return C	
 
 def clustering_coef_wu(W):
-	'''
+    '''
 The weighted clustering coefficient is the average "intensity" of 
 triangles around a node.
 
 Input:      W,      weighted undirected connection matrix
 
 Output:     C,      clustering coefficient vector
-	'''
-	K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
-	ws=_cuberoot(W)
-	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
-	K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
-	C=cyc3/(K*(K-1))
-	return C
+    '''
+    K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
+    ws=_cuberoot(W)
+    cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
+    K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
+    C=cyc3/(K*(K-1))
+    return C
 
 def consensus_und(D,tau,reps=1000):
-	'''
+    '''
 This algorithm seeks a consensus partition of the 
 agreement matrix D. The algorithm used here is almost identical to the
 one introduced in Lancichinetti & Fortunato (2012): The agreement
@@ -785,79 +785,79 @@ nodes are reconnected to the network. Here, we leave any singleton
 communities disconnected.
 
 Inputs:     D,      agreement matrix with entries between 0 and 1
-					denoting the probability of finding node i in the
-					same cluster as node j
-			TAU,    threshold which controls the resolution of the
-					reclustering
-			REPS,   number of times that the clustering algorithm is
-					reapplied
+                    denoting the probability of finding node i in the
+                    same cluster as node j
+            TAU,    threshold which controls the resolution of the
+                    reclustering
+            REPS,   number of times that the clustering algorithm is
+                    reapplied
 
 Outputs:    CIU,    consensus partition
-	'''
-	def unique_partitions(cis):
-		#relabels the partitions to recognize different numbers on same topology
+    '''
+    def unique_partitions(cis):
+        #relabels the partitions to recognize different numbers on same topology
 
-		n,r = np.shape(cis)			#ci represents one vector for each rep
-		ci_tmp = np.zeros(n)
+        n,r = np.shape(cis)			#ci represents one vector for each rep
+        ci_tmp = np.zeros(n)
 
-		for i in xrange(r):
-			for j,u in enumerate(sorted(
-					np.unique(cis[:,i],return_index=True)[1])):
-				ci_tmp[np.where(cis[:,i]==cis[u,i])]=j
-			cis[:,i]=ci_tmp
-			#so far no partitions have been deleted from ci
+        for i in xrange(r):
+            for j,u in enumerate(sorted(
+                    np.unique(cis[:,i],return_index=True)[1])):
+                ci_tmp[np.where(cis[:,i]==cis[u,i])]=j
+            cis[:,i]=ci_tmp
+            #so far no partitions have been deleted from ci
 
-		#now squash any of the partitions that are completely identical
-		#do not delete them from ci which needs to stay same size, so make copy
-		ciu = []
-		cis = cis.copy()
-		c = np.arange(r)
-		#count=0
-		while (c!=0).sum() > 0:
-			ciu.append(cis[:,0])
-			dup = np.where(np.sum(np.abs(cis.T-cis[:,0]),axis=1)==0)
-			cis = np.delete(cis,dup,axis=1)
-			c = np.delete(c,dup)
-			#count+=1
-			#print count,c,dup
-			#if count>10:
-			#	class QualitativeError(): pass
-			#	raise QualitativeError()
-		return np.transpose(ciu)
+        #now squash any of the partitions that are completely identical
+        #do not delete them from ci which needs to stay same size, so make copy
+        ciu = []
+        cis = cis.copy()
+        c = np.arange(r)
+        #count=0
+        while (c!=0).sum() > 0:
+            ciu.append(cis[:,0])
+            dup = np.where(np.sum(np.abs(cis.T-cis[:,0]),axis=1)==0)
+            cis = np.delete(cis,dup,axis=1)
+            c = np.delete(c,dup)
+            #count+=1
+            #print count,c,dup
+            #if count>10:
+            #	class QualitativeError(): pass
+            #	raise QualitativeError()
+        return np.transpose(ciu)
 
-	n=len(D)
-	flag=True
-	while flag:
-		flag=False
-		dt = D*(D >= tau)
-		np.fill_diagonal(dt,0)
+    n=len(D)
+    flag=True
+    while flag:
+        flag=False
+        dt = D*(D >= tau)
+        np.fill_diagonal(dt,0)
 
-		if np.size(np.where(dt==0)) == 0:
-			ciu = np.arange(1,n+1)
-		else:
-			cis = np.zeros((n,reps))
-			for i in np.arange(reps):
-				cis[:,i],_ = modularity_louvain_und_sign(dt)		
-			ciu = unique_partitions(cis)
-			nu = np.size(ciu, axis=1)
-			if nu > 1:
-				flag = True
-				D = agreement(cis)/reps
+        if np.size(np.where(dt==0)) == 0:
+            ciu = np.arange(1,n+1)
+        else:
+            cis = np.zeros((n,reps))
+            for i in np.arange(reps):
+                cis[:,i],_ = modularity_louvain_und_sign(dt)		
+            ciu = unique_partitions(cis)
+            nu = np.size(ciu, axis=1)
+            if nu > 1:
+                flag = True
+                D = agreement(cis)/reps
 
-	return np.squeeze(ciu+1)
+    return np.squeeze(ciu+1)
 
 def get_components(A, no_depend=False):
-	'''	
+    '''	
 Returns the components of an undirected graph specified by the binary and 
 undirected adjacency matrix adj. Components and their constitutent nodes are 
 assigned the same index and stored in the vector, comps. The vector, comp_sizes,
 contains the number of nodes beloning to each component.
 
 Inputs:         adj,    binary and undirected adjacency matrix
-		  no_depend,	if true, dont import networkx (see below), default false
+          no_depend,	if true, dont import networkx (see below), default false
 
 Outputs:      comps,    vector of component assignments for each node
-		comp_sizes,    vector of component sizes
+        comp_sizes,    vector of component sizes
 
 Note: disconnected nodes will appear as components with a component
 size of 1
@@ -870,54 +870,54 @@ available a breadth-first search that does not depend on networkx is used
 instead, but this is less efficient. The corresponding BCT function does the computation by computing the Dulmage-Mendelsohn decomposition. I don't know
 what a Dulmage-Mendelsohn decomposition is and there doesn't appear to be a 
 python equivalent. If you think of a way to implement this better, let me know.
-	'''
-	#nonsquare matrices cannot be symmetric; no need to check
+    '''
+    #nonsquare matrices cannot be symmetric; no need to check
 
-	if not np.all(A==A.T):			#ensure matrix is undirected
-		raise BCTParamError('get_components can only be computed for undirected'
-			' matrices.  If your matrix is noisy, correct it with np.around')
+    if not np.all(A==A.T):			#ensure matrix is undirected
+        raise BCTParamError('get_components can only be computed for undirected'
+            ' matrices.  If your matrix is noisy, correct it with np.around')
 
-	A=binarize(A,copy=True)
-	n=len(A)
-	np.fill_diagonal(A, 1)
+    A=binarize(A,copy=True)
+    n=len(A)
+    np.fill_diagonal(A, 1)
 
-	try:
-		if no_depend:
-			raise ImportError()
-		else:
-			import networkx as nx
-		net=nx.from_numpy_matrix(A)
-		cpts=nx.connected_components(net)
-		
-		cptvec=np.zeros((n,))
-		cptsizes=np.zeros(len(cpts))
-		for i,cpt in enumerate(cpts):
-			cptsizes[i]=len(cpt)
-			for node in cpt:
-				cptvec[node]=i+1
-	
-	except ImportError:
-		#if networkx is not available use less efficient breadth first search
-		cptvec=np.zeros((n,))
-		r,_ = breadthdist(A)
-		for node,reach in enumerate(r):
-			if cptvec[node] > 0:
-				continue
-			else:
-				cptvec[np.where(reach)] = np.max(cptvec)+1
+    try:
+        if no_depend:
+            raise ImportError()
+        else:
+            import networkx as nx
+        net=nx.from_numpy_matrix(A)
+        cpts=nx.connected_components(net)
+        
+        cptvec=np.zeros((n,))
+        cptsizes=np.zeros(len(cpts))
+        for i,cpt in enumerate(cpts):
+            cptsizes[i]=len(cpt)
+            for node in cpt:
+                cptvec[node]=i+1
+    
+    except ImportError:
+        #if networkx is not available use less efficient breadth first search
+        cptvec=np.zeros((n,))
+        r,_ = breadthdist(A)
+        for node,reach in enumerate(r):
+            if cptvec[node] > 0:
+                continue
+            else:
+                cptvec[np.where(reach)] = np.max(cptvec)+1
 
-		cptsizes=np.zeros(np.max(cptvec))
-		for i in np.arange(np.max(cptvec)):
-			cptsizes[i]=np.size(np.where(cptvec==i+1))
+        cptsizes=np.zeros(np.max(cptvec))
+        for i in np.arange(np.max(cptvec)):
+            cptsizes[i]=np.size(np.where(cptvec==i+1))
 
-	return cptvec,cptsizes
+    return cptvec,cptsizes
 
 def number_of_components(A):
-	_,csizes = get_components(A)
-	return len(csizes)
-	
+    _,csizes = get_components(A)
+    return len(csizes)
+    
 def transitivity_bd(A):
-	'''
+    '''
 Transitivity is the ratio of 'triangles to triplets' in the network.
 (A classical version of the clustering coefficient).
 
@@ -932,31 +932,31 @@ K(K-1)/2. Each neighbour pair may generate two triangles. "False pairs"
 are i<->j edge pairs (these do not generate triangles). The number of 
 false pairs is the main diagonal of A^2. Thus the maximum possible 
 number of triangles = (2 edges)*([ALL PAIRS] - [FALSE PAIRS])
-				   = 2 * (K(K-1)/2 - diag(A^2))
-				   = K(K-1) - 2(diag(A^2))
-	'''
-	S=A+A.T									#symmetrized input graph
-	K=np.sum(S,axis=1)						#total degree (in+out)
-	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
-	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
-	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
-	return np.sum(cyc3)/np.sum(CYC3)
+                   = 2 * (K(K-1)/2 - diag(A^2))
+                   = K(K-1) - 2(diag(A^2))
+    '''
+    S=A+A.T									#symmetrized input graph
+    K=np.sum(S,axis=1)						#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
+    return np.sum(cyc3)/np.sum(CYC3)
 
 def transitivity_bu(A):
-	'''
+    '''
 Transitivity is the ratio of 'triangles to triplets' in the network.
 (A classical version of the clustering coefficient).
 
 Input:      A       binary undirected connection matrix
 
 Output:     T       transitivity scalar
-	'''
-	tri3=np.trace(np.dot(A,np.dot(A,A)))
-	tri2=np.sum(np.dot(A,A))-np.trace(np.dot(A,A))
-	return tri3/tri2
+    '''
+    tri3=np.trace(np.dot(A,np.dot(A,A)))
+    tri2=np.sum(np.dot(A,A))-np.trace(np.dot(A,A))
+    return tri3/tri2
 
 def transitivity_wd(W):
-	'''
+    '''
 Transitivity is the ratio of 'triangles to triplets' in the network.
 (A classical version of the clustering coefficient).
 
@@ -971,46 +971,46 @@ The weighted modification is as follows:
 
 The above reduces to symmetric and/or binary versions of the clustering
 coefficient for respective graphs.
-	'''
-	A=np.logical_not(W==0).astype(float)	#adjacency matrix
-	S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
-	K=np.sum(A+A.T,axis=1)			 		#total degree (in+out)
-	cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
-	K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
-	CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
-	return np.sum(cyc3)/np.sum(CYC3)		#transitivity
+    '''
+    A=np.logical_not(W==0).astype(float)	#adjacency matrix
+    S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    K=np.sum(A+A.T,axis=1)			 		#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
+    return np.sum(cyc3)/np.sum(CYC3)		#transitivity
 
 def transitivity_wu(W):
-	'''	
+    '''	
 Transitivity is the ratio of 'triangles to triplets' in the network.
 (A classical version of the clustering coefficient).
 
 Input:      W       weighted undirected connection matrix
 
 Output:     T       transitivity scalar
-	'''
-	K=np.sum(np.logical_not(W==0),axis=1)
-	ws=_cuberoot(W)
-	cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
-	return np.sum(cyc3,axis=0)/np.sum(K*(K-1),axis=0)	
+    '''
+    K=np.sum(np.logical_not(W==0),axis=1)
+    ws=_cuberoot(W)
+    cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
+    return np.sum(cyc3,axis=0)/np.sum(K*(K-1),axis=0)	
 
 ###############################################################################
 # CORE
 ###############################################################################
 
 def assortativity_bin(CIJ,flag):
-	'''
+    '''
 The assortativity coefficient is a correlation coefficient between the
 degrees of all nodes on two opposite ends of a link. A positive
 assortativity coefficient indicates that nodes tend to link to other
 nodes with the same or similar degree.
 
 Inputs:     CIJ,    binary directed/undirected connection matrix
-		   flag,   0, undirected graph: degree/degree correlation
-				   1, directed graph: out-degree/in-degree correlation
-				   2, directed graph: in-degree/out-degree correlation
-				   3, directed graph: out-degree/out-degree correlation
-				   4, directed graph: in-degree/in-degree correlation
+           flag,   0, undirected graph: degree/degree correlation
+                   1, directed graph: out-degree/in-degree correlation
+                   2, directed graph: in-degree/out-degree correlation
+                   3, directed graph: out-degree/out-degree correlation
+                   4, directed graph: in-degree/in-degree correlation
 
 Outputs:    r,      assortativity coefficient
 
@@ -1018,41 +1018,41 @@ Notes: The function accepts weighted networks, but all connection
 weights are ignored. The main diagonal should be empty. For flag 1
 the function computes the directed assortativity described in Rubinov
 and Sporns (2010) NeuroImage.
-	'''
-	if flag==0:								#undirected version
-		deg=degrees_und(CIJ)
-		i,j=np.where(np.triu(CIJ,1)>0)
-		K=len(i)
-		degi=deg[i]; degj=deg[j]	
-	else:									#directed version
-		id,od,deg=degrees_dir(CIJ)
-		i,j=np.where(CIJ>0)
-		K=len(i)
+    '''
+    if flag==0:								#undirected version
+        deg=degrees_und(CIJ)
+        i,j=np.where(np.triu(CIJ,1)>0)
+        K=len(i)
+        degi=deg[i]; degj=deg[j]	
+    else:									#directed version
+        id,od,deg=degrees_dir(CIJ)
+        i,j=np.where(CIJ>0)
+        K=len(i)
 
-		if flag==1: degi=od[i]; degj=id[j]
-		elif flag==2: degi=id[i]; degj=od[j]
-		elif flag==3: degi=od[i]; degj=od[j]
-		elif flag==4: degi=id[i]; degj=id[j]
-		else: raise ValueError('Flag must be 0-4')
+        if flag==1: degi=od[i]; degj=id[j]
+        elif flag==2: degi=id[i]; degj=od[j]
+        elif flag==3: degi=od[i]; degj=od[j]
+        elif flag==4: degi=id[i]; degj=id[j]
+        else: raise ValueError('Flag must be 0-4')
 
-	#compute assortativity
-	r=(( np.sum(degi*degj)/K - np.square(np.sum(.5*(degi+degj))/K)) /
-		np.sum(.5*(degi*degi+degj*degj))/K - np.square(sum(.5*(degi+degj))/K))
-	return r
+    #compute assortativity
+    r=(( np.sum(degi*degj)/K - np.square(np.sum(.5*(degi+degj))/K)) /
+        np.sum(.5*(degi*degi+degj*degj))/K - np.square(sum(.5*(degi+degj))/K))
+    return r
 
 def assortativity_wei(CIJ,flag):
-	'''
+    '''
 The assortativity coefficient is a correlation coefficient between the
 strengths (weighted degrees) of all nodes on two opposite ends of a link.
 A positive assortativity coefficient indicates that nodes tend to link to
 other nodes with the same or similar strength.
 
 Inputs:     CIJ,    weighted directed/undirected connection matrix
-		   flag,   0, undirected graph: strength/strength correlation
-				   1, directed graph: out-strength/in-strength correlation
-				   2, directed graph: in-strength/out-strength correlation
-				   3, directed graph: out-strength/out-strength correlation
-				   4, directed graph: in-strength/in-strength correlation
+           flag,   0, undirected graph: strength/strength correlation
+                   1, directed graph: out-strength/in-strength correlation
+                   2, directed graph: in-strength/out-strength correlation
+                   3, directed graph: out-strength/out-strength correlation
+                   4, directed graph: in-strength/in-strength correlation
 
 Outputs:    r,      assortativity coefficient
 
@@ -1060,277 +1060,277 @@ Notes: The function accepts weighted networks, but all connection
 weights are ignored. The main diagonal should be empty. For flag 1
    the function computes the directed assortativity described in Rubinov
    and Sporns (2010) NeuroImage.
-	'''
-	if flag==0:							#undirected version
-		str=strengths_und(CIJ)
-		i,j=np.where(np.triu(CIJ,1)>0)
-		K=len(i)
-		stri=str[i]
-		strj=str[j]
-	else:
-		ist,ost=strengths_dir(CIJ)		#directed version
-		i,j=np.where(CIJ>0)
-		K=len(i)
-		
-		if flag==1: stri=ost[i]; strj=ist[j]
-		elif flag==2: stri=ist[i]; strj=ost[j]
-		elif flag==3: stri=ost[i]; strj=ost[j]
-		elif flag==4: stri=ist[i]; strj=ost[j]
-		else: raise ValueError('Flag must be 0-4')
+    '''
+    if flag==0:							#undirected version
+        str=strengths_und(CIJ)
+        i,j=np.where(np.triu(CIJ,1)>0)
+        K=len(i)
+        stri=str[i]
+        strj=str[j]
+    else:
+        ist,ost=strengths_dir(CIJ)		#directed version
+        i,j=np.where(CIJ>0)
+        K=len(i)
+        
+        if flag==1: stri=ost[i]; strj=ist[j]
+        elif flag==2: stri=ist[i]; strj=ost[j]
+        elif flag==3: stri=ost[i]; strj=ost[j]
+        elif flag==4: stri=ist[i]; strj=ost[j]
+        else: raise ValueError('Flag must be 0-4')
 
-	#compute assortativity
-	r=(( np.sum(stri*strj)/K - np.square(np.sum(.5*(stri+strj))/K)) /
-		np.sum(.5*(stri*stri+strj*strj))/K - np.square(sum(.5*(stri+strj))/K))
+    #compute assortativity
+    r=(( np.sum(stri*strj)/K - np.square(np.sum(.5*(stri+strj))/K)) /
+        np.sum(.5*(stri*stri+strj*strj))/K - np.square(sum(.5*(stri+strj))/K))
 
 def kcore_bd(CIJ,k,peel=False):
-	'''
+    '''
 The k-core is the largest subnetwork comprising nodes of degree at
 least k. This function computes the k-core for a given binary directed
 connection matrix by recursively peeling off nodes with degree lower
 than k, until no such nodes remain.
 
 input:          CIJ,        connection/adjacency matrix (binary, directed)
-				  k,        level of k-core
-			   peel,		whether to calculate peelorder and peellevel,
-								default false
+                  k,        level of k-core
+               peel,		whether to calculate peelorder and peellevel,
+                                default false
 
 output:    CIJkcore,        connection matrix of the k-core.  This matrix
-						   only contains nodes of degree at least k.
-				kn,        size of k-core
-				peelorder, indices in the order in which they were
-						   peeled away during k-core decomposition.
-						   only returned if peel is specified.
-				peellevel, corresponding level - nodes at the same
-						   level have been peeled away at the same time.
-						   only returned if peel is specified
+                           only contains nodes of degree at least k.
+                kn,        size of k-core
+                peelorder, indices in the order in which they were
+                           peeled away during k-core decomposition.
+                           only returned if peel is specified.
+                peellevel, corresponding level - nodes at the same
+                           level have been peeled away at the same time.
+                           only returned if peel is specified
 
 'peelorder' and 'peellevel' are similar the the k-core sub-shells
 described in Modha and Singh (2010).
-	'''
-	if peel: peelorder,peellevel=([],[])
-	iter=0
-	CIJkcore=CIJ.copy()
+    '''
+    if peel: peelorder,peellevel=([],[])
+    iter=0
+    CIJkcore=CIJ.copy()
 
-	while True:
-		id,od,deg=degrees_dir(CIJkcore)		#get degrees of matrix
-	
-		#find nodes with degree <k	
-		ff,=np.where(np.logical_and(deg<k,deg>0))
+    while True:
+        id,od,deg=degrees_dir(CIJkcore)		#get degrees of matrix
+    
+        #find nodes with degree <k	
+        ff,=np.where(np.logical_and(deg<k,deg>0))
 
-		if ff.size==0: break				#if none found -> stop
+        if ff.size==0: break				#if none found -> stop
 
-		#else peel away found nodes
-		iter+=1
-		CIJkcore[ff,:]=0
-		CIJkcore[:,ff]=0
+        #else peel away found nodes
+        iter+=1
+        CIJkcore[ff,:]=0
+        CIJkcore[:,ff]=0
 
-		if peel: peelorder.append(ff)
-		if peel: peellevel.append(iter*np.ones((len(ff),)))
-	
-	kn=np.sum(deg>0)
+        if peel: peelorder.append(ff)
+        if peel: peellevel.append(iter*np.ones((len(ff),)))
+    
+    kn=np.sum(deg>0)
 
-	if peel: return CIJkcore,kn,peelorder,peellevel
-	else: return CIJkcore,kn
+    if peel: return CIJkcore,kn,peelorder,peellevel
+    else: return CIJkcore,kn
 
 def kcore_bu(CIJ,k,peel=False):
-	'''
+    '''
 The k-core is the largest subnetwork comprising nodes of degree at
 least k. This function computes the k-core for a given binary
 undirected connection matrix by recursively peeling off nodes with
 degree lower than k, until no such nodes remain.
 
 input:          CIJ,        connection/adjacency matrix (binary, undirected)
-				  k,        level of k-core
-			   peel,		whether to return peelorder, peellevel, 
-							default False
+                  k,        level of k-core
+               peel,		whether to return peelorder, peellevel, 
+                            default False
 
 output:    CIJkcore,        connection matrix of the k-core.  This matrix
- 						    only contains nodes of degree at least k.
-				 kn,        size of k-core
-				 peelorder, indices in the order in which they were
-					 	    peeled away during k-core decomposition
-				 peellevel, corresponding level - nodes at the same
-						    level were peeled away at the same time
+                            only contains nodes of degree at least k.
+                 kn,        size of k-core
+                 peelorder, indices in the order in which they were
+                            peeled away during k-core decomposition
+                 peellevel, corresponding level - nodes at the same
+                            level were peeled away at the same time
 
 'peelorder' and 'peellevel' are similar the the k-core sub-shells
 described in Modha and Singh (2010).
-	'''
-	if peel: peelorder,peellevel=([],[])
-	iter=0
-	CIJkcore=CIJ.copy()
+    '''
+    if peel: peelorder,peellevel=([],[])
+    iter=0
+    CIJkcore=CIJ.copy()
 
-	while True:
-		deg=degrees_und(CIJkcore)		#get degrees of matrix
-		
-		#find nodes with degree <k
-		ff,=np.where(np.logical_and(deg<k,deg>0))
+    while True:
+        deg=degrees_und(CIJkcore)		#get degrees of matrix
+        
+        #find nodes with degree <k
+        ff,=np.where(np.logical_and(deg<k,deg>0))
 
-		if ff.size==0: break			#if none found -> stop
-			
-		#else peel away found nodes
-		iter+=1
-		CIJkcore[ff,:]=0
-		CIJkcore[:,ff]=0
+        if ff.size==0: break			#if none found -> stop
+            
+        #else peel away found nodes
+        iter+=1
+        CIJkcore[ff,:]=0
+        CIJkcore[:,ff]=0
 
-		if peel: peelorder.append(ff)
-		if peel: peellevel.append(iter*np.ones((len(ff),)))
+        if peel: peelorder.append(ff)
+        if peel: peellevel.append(iter*np.ones((len(ff),)))
 
-	kn=np.sum(deg>0)
+    kn=np.sum(deg>0)
 
-	if peel: return CIJkcore,kn,peelorder,peellevel
-	else: return CIJkcore,kn
+    if peel: return CIJkcore,kn,peelorder,peellevel
+    else: return CIJkcore,kn
 
 def rich_club_bd(CIJ,klevel=None):
-	'''
+    '''
 The rich club coefficient, R, at level k is the fraction of edges that
 connect nodes of degree k or higher out of the maximum number of edges
 that such nodes might share.
 
 Input:      CIJ,        connection matrix, binary and directed
-		 klevel,        optional input argument. klevel sets the
-						  maximum level at which the rich club
-						  coefficient will be calculated. If klevel is
-						  not included the the maximum level will be
-						  set to the maximum degree of CIJ.
+         klevel,        optional input argument. klevel sets the
+                          maximum level at which the rich club
+                          coefficient will be calculated. If klevel is
+                          not included the the maximum level will be
+                          set to the maximum degree of CIJ.
 
 Output:       R,        vector of rich-club coefficients for levels
-						  1 to klevel.
-			 Nk,        number of nodes with degree>k
-			 Ek,        number of edges remaining in subgraph with
-						  degree>k
-	'''
-	#definition of degree as used for RC coefficients
-	#degree is taken to be the sum of incoming and outgoing connections
-	id,od,deg=degrees_dir(CIJ)
+                          1 to klevel.
+             Nk,        number of nodes with degree>k
+             Ek,        number of edges remaining in subgraph with
+                          degree>k
+    '''
+    #definition of degree as used for RC coefficients
+    #degree is taken to be the sum of incoming and outgoing connections
+    id,od,deg=degrees_dir(CIJ)
 
-	if klevel is None:
-		klevel=int(np.max(deg))
-	
-	R=np.zeros((klevel,))
-	Nk=np.zeros((klevel,))
-	Ek=np.zeros((klevel,))
-	for k in xrange(klevel):
-		SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
-		subCIJ=np.delete(CIJ,SmallNodes,axis=0)
-		subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
-		Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
-		Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
-		R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
+    if klevel is None:
+        klevel=int(np.max(deg))
+    
+    R=np.zeros((klevel,))
+    Nk=np.zeros((klevel,))
+    Ek=np.zeros((klevel,))
+    for k in xrange(klevel):
+        SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
+        subCIJ=np.delete(CIJ,SmallNodes,axis=0)
+        subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
+        Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
+        Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
+        R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
 
-	return R,Nk,Ek
+    return R,Nk,Ek
 
 def rich_club_bu(CIJ,klevel=None):
-	'''
+    '''
 The rich club coefficient, R, at level k is the fraction of edges that
 connect nodes of degree k or higher out of the maximum number of edges
 that such nodes might share.
 
 Input:      CIJ,        connection matrix, binary and undirected
-	 	 klevel,        optional input argument. klevel sets the
-						  maximum level at which the rich club
-						  coefficient will be calculated. If klevel is
-						  not included the the maximum level will be
-						  set to the maximum degree of CIJ.
+         klevel,        optional input argument. klevel sets the
+                          maximum level at which the rich club
+                          coefficient will be calculated. If klevel is
+                          not included the the maximum level will be
+                          set to the maximum degree of CIJ.
 
 Output:       R,        vector of rich-club coefficients for levels
-						  1 to klevel.
-			 Nk,        number of nodes with degree>k
-			 Ek,        number of edges remaining in subgraph with
-						  degree>k
-	'''
-	deg=degrees_und(CIJ)					#compute degree of each node
+                          1 to klevel.
+             Nk,        number of nodes with degree>k
+             Ek,        number of edges remaining in subgraph with
+                          degree>k
+    '''
+    deg=degrees_und(CIJ)					#compute degree of each node
 
-	if klevel==None:
-		klevel=int(np.max(deg))
-	
-	R=np.zeros((klevel,))
-	Nk=np.zeros((klevel,))
-	Ek=np.zeros((klevel,))
-	for k in xrange(klevel):
-		SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
-		subCIJ=np.delete(CIJ,SmallNodes,axis=0)
-		subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
-		Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
-		Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
-		R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
+    if klevel==None:
+        klevel=int(np.max(deg))
+    
+    R=np.zeros((klevel,))
+    Nk=np.zeros((klevel,))
+    Ek=np.zeros((klevel,))
+    for k in xrange(klevel):
+        SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
+        subCIJ=np.delete(CIJ,SmallNodes,axis=0)
+        subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
+        Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
+        Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
+        R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
 
-	return R,Nk,Ek
-	
+    return R,Nk,Ek
+    
 def rich_club_wd(CIJ,klevel=None):
-	'''
+    '''
   inputs:
        CIJ:       weighted directed connection matrix
        k-level:   max level of RC(k). defaults to max degree.
                  
   output:
        Rw:        rich-club curve
-	'''
-	nr_nodes = len(CIJ)
-	#degree of each node is defined here as in+out
-	deg = np.sum((CIJ != 0),axis=0)+np.sum((CIJ.T != 0),axis=0)
+    '''
+    nr_nodes = len(CIJ)
+    #degree of each node is defined here as in+out
+    deg = np.sum((CIJ != 0),axis=0)+np.sum((CIJ.T != 0),axis=0)
 
-	if klevel is None: klevel = np.max(deg)
-	Rw=np.zeros((klevel,))
+    if klevel is None: klevel = np.max(deg)
+    Rw=np.zeros((klevel,))
 
-	#sort the weights of the network, with the strongest connection first
-	wrank = np.sort(CIJ.flat)[::-1]
+    #sort the weights of the network, with the strongest connection first
+    wrank = np.sort(CIJ.flat)[::-1]
 
-	for k in xrange(klevel):
-		SmallNodes,=np.where(deg<k+1)
-		if np.size(SmallNodes) == 0:
-			Rw[k]=np.nan
-			continue
+    for k in xrange(klevel):
+        SmallNodes,=np.where(deg<k+1)
+        if np.size(SmallNodes) == 0:
+            Rw[k]=np.nan
+            continue
 
-		#remove small nodes with node degree < k
-		cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
-		#total weight of connections in subset E>r
-		Wr = np.sum(cutCIJ)
-		#total number of connections in subset E>r
-		Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
-		#E>r number of connections with max weight in network
-		wrank_r = wrank[:Er]
-		#weighted rich-club coefficient
-		Rw[k] = Wr/np.sum(wrank_r)
-	return Rw
+        #remove small nodes with node degree < k
+        cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+        #total weight of connections in subset E>r
+        Wr = np.sum(cutCIJ)
+        #total number of connections in subset E>r
+        Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+        #E>r number of connections with max weight in network
+        wrank_r = wrank[:Er]
+        #weighted rich-club coefficient
+        Rw[k] = Wr/np.sum(wrank_r)
+    return Rw
 
 def rich_club_wu(CIJ,klevel=None):
-	'''
+    '''
   inputs:
        CIJ:       weighted directed connection matrix
        k-level:   max level of RC(k). defaults to max degree.
                  
   output:
        Rw:        rich-club curve
-	'''
-	nr_nodes = len(CIJ)
-	deg = np.sum((CIJ != 0),axis=0)
+    '''
+    nr_nodes = len(CIJ)
+    deg = np.sum((CIJ != 0),axis=0)
 
-	if klevel is None: klevel = np.max(deg)
-	Rw=np.zeros((klevel,))
+    if klevel is None: klevel = np.max(deg)
+    Rw=np.zeros((klevel,))
 
-	#sort the weights of the network, with the strongest connection first
-	wrank = np.sort(CIJ.flat)[::-1]
+    #sort the weights of the network, with the strongest connection first
+    wrank = np.sort(CIJ.flat)[::-1]
 
-	for k in xrange(klevel):
-		SmallNodes,=np.where(deg<k+1)
-		if np.size(SmallNodes) == 0:
-			Rw[k]=np.nan
-			continue
+    for k in xrange(klevel):
+        SmallNodes,=np.where(deg<k+1)
+        if np.size(SmallNodes) == 0:
+            Rw[k]=np.nan
+            continue
 
-		#remove small nodes with node degree < k
-		cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
-		#total weight of connections in subset E>r
-		Wr = np.sum(cutCIJ)
-		#total number of connections in subset E>r
-		Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
-		#E>r number of connections with max weight in network
-		wrank_r = wrank[:Er]
-		#weighted rich-club coefficient
-		Rw[k] = Wr/np.sum(wrank_r)
-	return Rw
-	
+        #remove small nodes with node degree < k
+        cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+        #total weight of connections in subset E>r
+        Wr = np.sum(cutCIJ)
+        #total number of connections in subset E>r
+        Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+        #E>r number of connections with max weight in network
+        wrank_r = wrank[:Er]
+        #weighted rich-club coefficient
+        Rw[k] = Wr/np.sum(wrank_r)
+    return Rw
+    
 def score_wu(CIJ,s):
-	'''
+    '''
 The s-core is the largest subnetwork comprising nodes of strength at
 least s. This function computes the s-core for a given weighted
 undirected connection matrix. Computation is analogous to the more
@@ -1338,34 +1338,34 @@ widely used k-core, but is based on node strengths instead of node
 degrees. 
 
 input:          CIJ,	connection/adjacency matrix (weighted, undirected)
-				 s,    level of s-core. Note: s can take on any fractional value
+                 s,    level of s-core. Note: s can take on any fractional value
 
 output:    CIJscore,    connection matrix of the s-core.  This matrix 
-					   contains only nodes with a strength of at least s.
-				sn,    size of s-score
-	'''
-	CIJscore=CIJ.copy()
-	while True:
-		str=strengths_und(CIJscore)			#get strengths of matrix
+                       contains only nodes with a strength of at least s.
+                sn,    size of s-score
+    '''
+    CIJscore=CIJ.copy()
+    while True:
+        str=strengths_und(CIJscore)			#get strengths of matrix
 
-		#find nodes with strength <s
-		ff,=np.where(np.logical_and(str<s,str>0))
+        #find nodes with strength <s
+        ff,=np.where(np.logical_and(str<s,str>0))
 
-		if ff.size==0: break			#if none found -> stop
+        if ff.size==0: break			#if none found -> stop
 
-		#else peel away found nodes
-		CIJscore[ff,:]=0
-		CIJscore[:,ff]=0
+        #else peel away found nodes
+        CIJscore[ff,:]=0
+        CIJscore[:,ff]=0
 
-	sn=np.sum(str>0)
-	return CIJscore,sn
+    sn=np.sum(str>0)
+    return CIJscore,sn
 
 ###############################################################################
 # DEGREE
 ###############################################################################
 
 def degrees_dir(CIJ):
-	'''
+    '''
 Node degree is the number of links connected to the node. The indegree 
 is the number of inward links and the outdegree is the number of 
 outward links.
@@ -1373,20 +1373,20 @@ outward links.
 Input:      CIJ,    directed (binary/weighted) connection matrix
 
 Output:     id,     node indegree
-		    od,     node outdegree
-		    deg,    node degree (indegree + outdegree)
+            od,     node outdegree
+            deg,    node degree (indegree + outdegree)
 
 Notes:  Inputs are assumed to be on the columns of the CIJ matrix.
-	   Weight information is discarded.
-	'''
-	CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
-	id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
-	od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
-	deg=id+od						#degree = indegree+outdegree
-	return id,od,deg
+       Weight information is discarded.
+    '''
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
+    od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
+    deg=id+od						#degree = indegree+outdegree
+    return id,od,deg
 
 def degrees_und(CIJ):
-	'''
+    '''
 Node degree is the number of links connected to the node.
 
 Input:      CIJ,    undirected (binary/weighted) connection matrix
@@ -1394,12 +1394,12 @@ Input:      CIJ,    undirected (binary/weighted) connection matrix
 Output:     deg,    node degree
 
 Note: Weight information is discarded.
-	'''
-	CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
-	return np.sum(CIJ,axis=0)
+    '''
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    return np.sum(CIJ,axis=0)
 
 def jdegree(CIJ):
-	'''
+    '''
 %   This function returns a matrix in which the value of each element (u,v)
 %   corresponds to the number of nodes that have u outgoing connections 
 %   and v incoming connections.
@@ -1412,33 +1412,33 @@ def jdegree(CIJ):
 %               J_bl,   number of vertices with id=od.
 %
 %   Note: Weights are discarded.
-	'''
-	CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
-	n=len(CIJ)
-	id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
-	od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
+    '''
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    n=len(CIJ)
+    id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
+    od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
 
-	#create the joint degree distribution matrix
-	#note: the matrix is shifted by one, to accomodate zero id and od in the 
-	#first row/column
-	#upper triangular part of the matrix has vertices with od>id
-	#lower triangular part has vertices with id>od
-	#main diagonal has units with id=od
+    #create the joint degree distribution matrix
+    #note: the matrix is shifted by one, to accomodate zero id and od in the 
+    #first row/column
+    #upper triangular part of the matrix has vertices with od>id
+    #lower triangular part has vertices with id>od
+    #main diagonal has units with id=od
 
-	szJ=np.max((id,od))+1
-	J=np.zeros((szJ,szJ))
-	
-	for i in xrange(n):
-		J[id[i],od[i]]+=1
+    szJ=np.max((id,od))+1
+    J=np.zeros((szJ,szJ))
+    
+    for i in xrange(n):
+        J[id[i],od[i]]+=1
 
-	J_od=np.sum(np.triu(J,1))
-	J_id=np.sum(np.tril(J,-1))
-	J_bl=np.sum(np.diag(J))
-	return J,J_od,J_id,J_bl
-	
+    J_od=np.sum(np.triu(J,1))
+    J_id=np.sum(np.tril(J,-1))
+    J_bl=np.sum(np.diag(J))
+    return J,J_od,J_id,J_bl
+    
 
 def strengths_dir(CIJ):
-	'''	
+    '''	
 Node strength is the sum of weights of links connected to the node. The
 instrength is the sum of inward link weights and the outstrength is the
 sum of outward link weights.
@@ -1446,51 +1446,51 @@ sum of outward link weights.
 Input:      CIJ,    directed weighted connection matrix
 
 Output:     is,     node instrength
-		    os,     node outstrength
-		    str,    node strength (instrength + outstrength)
+            os,     node outstrength
+            str,    node strength (instrength + outstrength)
 
 Notes:  Inputs are assumed to be on the columns of the CIJ matrix.
-	'''
-	istr=np.sum(CIJ,axis=0)
-	ostr=np.sum(CIJ,axis=1)
-	return istr+ostr
+    '''
+    istr=np.sum(CIJ,axis=0)
+    ostr=np.sum(CIJ,axis=1)
+    return istr+ostr
 
 def strengths_und(CIJ):
-	'''
+    '''
 Node strength is the sum of weights of links connected to the node.
 
 Input:      CIJ,    undirected weighted connection matrix
 
 Output:     str,    node strength
-	'''
-	return np.sum(CIJ,axis=0)	
+    '''
+    return np.sum(CIJ,axis=0)	
 
 def strengths_und_sign(W):
-	'''
+    '''
 Node strength is the sum of weights of links connected to the node.
 
 Inputs:     W,              undirected connection matrix with positive
-						    and negative weights
+                            and negative weights
 
 Output:     Spos/Sneg,      nodal strength of positive/negative weights
-		    vpos/vneg,      total positive/negative weight
-	'''
-	W=W.copy()
-	n=len(W)
-	np.fill_diagonal(W, 0)				#clear diagonal
-	Spos=W*(W>0)						#positive strengths
-	Sneg=W*(W<0)						#negative strengths
+            vpos/vneg,      total positive/negative weight
+    '''
+    W=W.copy()
+    n=len(W)
+    np.fill_diagonal(W, 0)				#clear diagonal
+    Spos=W*(W>0)						#positive strengths
+    Sneg=W*(W<0)						#negative strengths
 
-	vpos=np.sum(W[W>0])					#positive weight
-	vneg=np.sum(W[W<0])					#negative weight
-	return W
+    vpos=np.sum(W[W>0])					#positive weight
+    vneg=np.sum(W[W<0])					#negative weight
+    return W
 
 ###############################################################################
 # DISTANCE
 ###############################################################################
 
 def breadthdist(CIJ):
-	'''
+    '''
 The binary reachability matrix describes reachability between all pairs
 of nodes. An entry (u,v)=1 means that there exists a path from node u
 to node v; alternatively (u,v)=0.
@@ -1503,72 +1503,72 @@ characteristic path length of the network.
 Input:      CIJ,     binary (directed/undirected) connection matrix
 
 Outputs:    R,       reachability matrix
-		    D,       distance matrix
+            D,       distance matrix
 
 Note: slower but less memory intensive than "reachdist.m".
-	'''
-	n=len(CIJ)
+    '''
+    n=len(CIJ)
 
-	D=np.zeros((n,n))
-	for i in xrange(n):
-		D[i,:],_=breadth(CIJ,i)
+    D=np.zeros((n,n))
+    for i in xrange(n):
+        D[i,:],_=breadth(CIJ,i)
 
-	D[D==0]=np.inf;
-	R=(D!=np.inf);
-	return R,D
+    D[D==0]=np.inf;
+    R=(D!=np.inf);
+    return R,D
 
 def breadth(CIJ,source):
-	'''
+    '''
 Implementation of breadth-first search.
 
 Input:      CIJ,        binary (directed/undirected) connection matrix
-		    source,     source vertex
+            source,     source vertex
 
 Outputs:    distance,   distance between 'source' and i'th vertex
-					    (0 for source vertex)
-		    branch,     vertex that precedes i in the breadth-first search tree
-					    (-1 for source vertex)
-	
+                        (0 for source vertex)
+            branch,     vertex that precedes i in the breadth-first search tree
+                        (-1 for source vertex)
+    
 Notes: Breadth-first search tree does not contain all paths (or all 
 shortest paths), but allows the determination of at least one path with
 minimum distance. The entire graph is explored, starting from source 
 vertex 'source'.
-	'''
-	n=len(CIJ)
+    '''
+    n=len(CIJ)
 
-	#colors: white,gray,black
-	white=0; gray=1; black=2
+    #colors: white,gray,black
+    white=0; gray=1; black=2
 
-	color=np.zeros((n,))
-	distance=np.inf*np.ones((n,))
-	branch=np.zeros((n,))
+    color=np.zeros((n,))
+    distance=np.inf*np.ones((n,))
+    branch=np.zeros((n,))
 
-	#start on vertex source
-	color[source]=gray
-	distance[source]=0
-	branch[source]=-1
-	Q=[source]
+    #start on vertex source
+    color[source]=gray
+    distance[source]=0
+    branch[source]=-1
+    Q=[source]
 
-	#keep going until the entire graph is explored
-	while Q:
-		u=Q[0]
-		ns,=np.where(CIJ[u,:])
-		for v in ns:
-			#this allows the source distance itself to be recorded
-			if distance[v]==0:
-				distance[v]=distance[u]+1
-			if color[v]==white:
-				color[v]=gray
-				distance[v]=distance[u]+1
-				branch[v]=u
-				Q.append(v)
-		Q=Q[1:]
-		color[u]=black
+    #keep going until the entire graph is explored
+    while Q:
+        u=Q[0]
+        ns,=np.where(CIJ[u,:])
+        for v in ns:
+            #this allows the source distance itself to be recorded
+            if distance[v]==0:
+                distance[v]=distance[u]+1
+            if color[v]==white:
+                color[v]=gray
+                distance[v]=distance[u]+1
+                branch[v]=u
+                Q.append(v)
+        Q=Q[1:]
+        color[u]=black
 
-	return distance,branch
+    return distance,branch
 
 def charpath(D):
-	'''
+    '''
 The characteristic path length is the average shortest path length in 
 the network. The global efficiency is the average inverse shortest path
 length in the network.
@@ -1576,10 +1576,10 @@ length in the network.
 Input:      D,              distance matrix
 
 Outputs:    lambda,         characteristic path length
-			efficiency,     global efficiency
-			ecc,            eccentricity (for each vertex)
-			radius,         radius of graph
-			diameter,       diameter of graph
+            efficiency,     global efficiency
+            ecc,            eccentricity (for each vertex)
+            radius,         radius of graph
+            diameter,       diameter of graph
 
 Notes:
 The input distance matrix may be obtained with any of the distance
@@ -1587,66 +1587,66 @@ functions, e.g. distance_bin, distance_wei.
 Characteristic path length is calculated as the global mean of 
 the distance matrix D, excludings any 'Infs' but including distances on
 the main diagonal.
-	'''
-	#mean of finite entries of D[G]
-	lambda_=np.sum(D[D!=np.inf])/len(np.where(D!=np.inf)[0])	
+    '''
+    #mean of finite entries of D[G]
+    lambda_=np.sum(D[D!=np.inf])/len(np.where(D!=np.inf)[0])	
 
-	#eccentricity for each vertex (ignore inf)
-	ecc=np.max(D*(D!=np.inf),axis=1)
+    #eccentricity for each vertex (ignore inf)
+    ecc=np.max(D*(D!=np.inf),axis=1)
 
-	#radius of graph
-	radius=np.min(ecc)	#but what about zeros?
+    #radius of graph
+    radius=np.min(ecc)	#but what about zeros?
 
-	#diameter of graph
-	diameter=np.max(ecc)
+    #diameter of graph
+    diameter=np.max(ecc)
 
-	#efficiency: mean of inverse entries of D[G]
-	n=len(D)
-	D=1/D								#invert distance
-	np.fill_diagonal(D, 0)				#set diagonal to 0
-	efficiency=np.sum(D)/(n*(n-1))		#compute global efficiency
+    #efficiency: mean of inverse entries of D[G]
+    n=len(D)
+    D=1/D								#invert distance
+    np.fill_diagonal(D, 0)				#set diagonal to 0
+    efficiency=np.sum(D)/(n*(n-1))		#compute global efficiency
 
-	return lambda_,efficiency,ecc,radius,diameter
+    return lambda_,efficiency,ecc,radius,diameter
 
 def cycprob(Pq):
-	'''
+    '''
 Cycles are paths which begin and end at the same node. Cycle 
 probability for path length d, is the fraction of all paths of length 
 d-1 that may be extended to form cycles of length d.
 
 Input:      Pq,     3D matrix, with Pq(i,j,q) = number of paths from 
-				   'i' to 'j' of length 'q' (produced by 'findpaths')
+                   'i' to 'j' of length 'q' (produced by 'findpaths')
 
 Outputs:    fcyc,   fraction of all paths that are cycles for each path
-				   length 'q'. 
-		   pcyc,   probability that a non-cyclic path of length 'q-1' 
-				   can be extended to form a cycle of length 'q', for 
-				   each path length 'q', 
-	'''
+                   length 'q'. 
+           pcyc,   probability that a non-cyclic path of length 'q-1' 
+                   can be extended to form a cycle of length 'q', for 
+                   each path length 'q', 
+    '''
 
-	#note: fcyc[1] must be zero, as there cannot be cycles of length 1
-	fcyc=np.zeros(np.size(Pq,axis=2))
-	for q in xrange(np.size(Pq,axis=2)):
-		if np.sum(Pq[:,:,q])>0:
-			fcyc[q]=np.sum(np.diag(Pq[:,:,q]))/np.sum(Pq[:,:,q])
-		else:
-			fcyc[q]=0
+    #note: fcyc[1] must be zero, as there cannot be cycles of length 1
+    fcyc=np.zeros(np.size(Pq,axis=2))
+    for q in xrange(np.size(Pq,axis=2)):
+        if np.sum(Pq[:,:,q])>0:
+            fcyc[q]=np.sum(np.diag(Pq[:,:,q]))/np.sum(Pq[:,:,q])
+        else:
+            fcyc[q]=0
 
-	#note: pcyc[1] is not defined (set to zero)
-	#note: pcyc[2] is equal to the fraction of reciprocal connections
-	#note: there are no non-cyclic paths of length N and no cycles of len N+1
-	pcyc=np.zeros(np.size(Pq,axis=2))
-	for q in xrange(np.size(Pq,axis=2)):
-		if np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1]))>0:
-			pcyc[q]=(np.sum(np.diag(Pq[:,:,q-1]))/
-				np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1])))
-		else:
-			pcyc[q]=0
-	
-	return fcyc,pcyc
+    #note: pcyc[1] is not defined (set to zero)
+    #note: pcyc[2] is equal to the fraction of reciprocal connections
+    #note: there are no non-cyclic paths of length N and no cycles of len N+1
+    pcyc=np.zeros(np.size(Pq,axis=2))
+    for q in xrange(np.size(Pq,axis=2)):
+        if np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1]))>0:
+            pcyc[q]=(np.sum(np.diag(Pq[:,:,q-1]))/
+                np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1])))
+        else:
+            pcyc[q]=0
+    
+    return fcyc,pcyc
 
 def distance_bin(G):
-	'''	
+    '''	
 The distance matrix contains lengths of shortest paths between all
 pairs of nodes. An entry (u,v) represents the length of shortest path 
 from node u to node v. The average shortest path length is the 
@@ -1661,25 +1661,25 @@ Notes:
    Lengths on the main diagonal are set to 0.
 
 Algorithm: Algebraic shortest paths.
-	'''
-	G=binarize(G,copy=True)
-	D=np.eye(len(G))
-	n=1
-	nPATH=G.copy()						#n path matrix
-	L=(nPATH!=0)						#shortest n-path matrix
-	
-	while np.any(L):
-		D+=n*L
-		n+=1
-		nPATH=np.dot(nPATH,G)
-		L=(nPATH!=0)*(D==0)
+    '''
+    G=binarize(G,copy=True)
+    D=np.eye(len(G))
+    n=1
+    nPATH=G.copy()						#n path matrix
+    L=(nPATH!=0)						#shortest n-path matrix
+    
+    while np.any(L):
+        D+=n*L
+        n+=1
+        nPATH=np.dot(nPATH,G)
+        L=(nPATH!=0)*(D==0)
 
-	D[D==0]=np.inf						#disconnected nodes are assigned d=inf
-	np.fill_diagonal(D, 0)
-	return D
+    D[D==0]=np.inf						#disconnected nodes are assigned d=inf
+    np.fill_diagonal(D, 0)
+    return D
 
 def distance_wei(G):
-	'''
+    '''
 The distance matrix contains lengths of shortest paths between all
 pairs of nodes. An entry (u,v) represents the length of shortest path 
 from node u to node v. The average shortest path length is the 
@@ -1688,7 +1688,7 @@ characteristic path length of the network.
 Input:      L,      Directed/undirected connection-length matrix.
 
 Output:     D,      distance (shortest weighted path) matrix
-		    B,      number of edges in shortest weighted path matrix
+            B,      number of edges in shortest weighted path matrix
 
 Notes:
    The input matrix must be a connection-length matrix, typically
@@ -1705,42 +1705,42 @@ the minimal number of edges.
    Lengths on the main diagonal are set to 0.
 
 Algorithm: Dijkstra's algorithm.
-	'''
-	n=len(G)						
-	D=np.zeros((n,n))					#distance matrix
-	D[np.logical_not(np.eye(n))]=np.inf	
-	B=np.zeros((n,n))					#number of edges matrix
+    '''
+    n=len(G)						
+    D=np.zeros((n,n))					#distance matrix
+    D[np.logical_not(np.eye(n))]=np.inf	
+    B=np.zeros((n,n))					#number of edges matrix
 
-	for u in xrange(n):
-		S=np.ones((n,),dtype=bool)		#distance permanence (true is temporary)
-		G1=G.copy()
-		V=[u]
-		while True:
-			S[V]=0						#distance u->V is now permanent
-			G1[:,V]=0					#no in-edges as already shortest
-			for v in V:
-				W,=np.where(G1[v,:])	#neighbors of shortest nodes
+    for u in xrange(n):
+        S=np.ones((n,),dtype=bool)		#distance permanence (true is temporary)
+        G1=G.copy()
+        V=[u]
+        while True:
+            S[V]=0						#distance u->V is now permanent
+            G1[:,V]=0					#no in-edges as already shortest
+            for v in V:
+                W,=np.where(G1[v,:])	#neighbors of shortest nodes
 
-				td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
-				d=np.min(td,axis=0)
-				wi=np.argmin(td,axis=0)
+                td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
+                d=np.min(td,axis=0)
+                wi=np.argmin(td,axis=0)
 
-				D[u,W]=d				#smallest of old/new path lengths
-				ind=W[np.where(wi==1)]	#indices of lengthened paths
-				B[u,ind]=B[u,v]+1		#increment nr_edges for lengthened paths
+                D[u,W]=d				#smallest of old/new path lengths
+                ind=W[np.where(wi==1)]	#indices of lengthened paths
+                B[u,ind]=B[u,v]+1		#increment nr_edges for lengthened paths
 
-			if D[u,S].size==0:			#all nodes reached
-				break 
-			minD=np.min(D[u,S])
-			if np.isinf(minD):			#some nodes cannot be reached
-				break
+            if D[u,S].size==0:			#all nodes reached
+                break 
+            minD=np.min(D[u,S])
+            if np.isinf(minD):			#some nodes cannot be reached
+                break
 
-			V,=np.where(D[u,:]==minD)
+            V,=np.where(D[u,:]==minD)
 
-	return D,B
+    return D,B
 
 def efficiency_bin(G,local=False):
-	'''
+    '''
 The global efficiency is the average of inverse shortest path length, 
 and is inversely related to the characteristic path length.
 
@@ -1748,60 +1748,60 @@ The local efficiency is the global efficiency computed on the
 neighborhood of the node, and is related to the clustering coefficient.
 
 Inputs:     A,              binary undirected connection matrix
-		    local,          compute local instead of global efficiency,
-							defaults to False
+            local,          compute local instead of global efficiency,
+                            defaults to False
 
 Output:     Eglob,          global efficiency (scalar) OR
-		    Eloc,           local efficiency (vector)
-	'''
-	def distance_inv(g):
-		D=np.eye(len(g))
-		n=1
-		nPATH=g.copy()
-		L=(nPATH!=0)
-		
-		while np.any(L):
-			D+=n*L
-			n+=1
-			nPATH=np.dot(nPATH,g)
-			L=(nPATH!=0)*(D==0)
-		D[np.logical_not(D)]=np.inf
-		D=1/D
-		np.fill_diagonal(D, 0)
-		return D
+            Eloc,           local efficiency (vector)
+    '''
+    def distance_inv(g):
+        D=np.eye(len(g))
+        n=1
+        nPATH=g.copy()
+        L=(nPATH!=0)
+        
+        while np.any(L):
+            D+=n*L
+            n+=1
+            nPATH=np.dot(nPATH,g)
+            L=(nPATH!=0)*(D==0)
+        D[np.logical_not(D)]=np.inf
+        D=1/D
+        np.fill_diagonal(D, 0)
+        return D
 
-	n=len(G)							#number of nodes
-	if local:							
-		E=np.zeros((n,))				#local efficiency	
+    n=len(G)							#number of nodes
+    if local:							
+        E=np.zeros((n,))				#local efficiency	
 
-		for u in xrange(n):
-			#V,=np.where(G[u,:])			#neighbors
-			#k=len(V)					#degree
-			#if k>=2:					#degree must be at least 2
-			#	e=distance_inv(G[V].T[V])
-			#	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
+        for u in xrange(n):
+            #V,=np.where(G[u,:])			#neighbors
+            #k=len(V)					#degree
+            #if k>=2:					#degree must be at least 2
+            #	e=distance_inv(G[V].T[V])
+            #	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
 
-			#find pairs of neighbors 
-			V,=np.where(np.logical_or(G[u,:], G[u,:].T))
-			#inverse distance matrix
-			e=distance_inv(G[np.ix_(V,V)])
-			#symmetrized inverse distance matrix
-			se=e+e.T
+            #find pairs of neighbors 
+            V,=np.where(np.logical_or(G[u,:], G[u,:].T))
+            #inverse distance matrix
+            e=distance_inv(G[np.ix_(V,V)])
+            #symmetrized inverse distance matrix
+            se=e+e.T
 
-			#symmetrized adjacency vector
-			sa=G[u,V]+G[V,u].T
-			numer = np.sum(np.dot(sa.T,sa)*se)/2
-			if numer!=0:
-				denom = np.sum(sa)**2 - np.sum(sa*sa)
-				E[u] = numer/denom		#local efficiency
+            #symmetrized adjacency vector
+            sa=G[u,V]+G[V,u].T
+            numer = np.sum(np.dot(sa.T,sa)*se)/2
+            if numer!=0:
+                denom = np.sum(sa)**2 - np.sum(sa*sa)
+                E[u] = numer/denom		#local efficiency
 
-	else:
-		e=distance_inv(G)
-		E=np.sum(e)/(n*n-n)				#global efficiency
-	return E
+    else:
+        e=distance_inv(G)
+        E=np.sum(e)/(n*n-n)				#global efficiency
+    return E
 
 def efficiency_wei(Gw,local=False):
-	'''
+    '''
 The global efficiency is the average of inverse shortest path length, 
 and is inversely related to the characteristic path length.
 
@@ -1809,12 +1809,12 @@ The local efficiency is the global efficiency computed on the
 neighborhood of the node, and is related to the clustering coefficient.
 
 Inputs:     W,              undirected weighted connection matrix
-						    (all weights in W must be between 0 and 1)
-		    local,          compute local instead of global efficiency,
-							defaults to False
+                            (all weights in W must be between 0 and 1)
+            local,          compute local instead of global efficiency,
+                            defaults to False
 
 Output:     Eglob,          global efficiency (scalar) OR
-		    Eloc,           local efficiency (vector)
+            Eloc,           local efficiency (vector)
 
 Notes:
    The  efficiency is computed using an auxiliary connection-length
@@ -1831,72 +1831,72 @@ connected neighbors. Note that this weighted variant of the local
 efficiency is hence not a strict generalization of the binary variant.
 
 Algorithm:  Dijkstra's algorithm
-	'''
-	def distance_inv_wei(G):
-		n=len(G)
-		D=np.zeros((n,n))				#distance matrix
-		D[np.logical_not(np.eye(n))]=np.inf
+    '''
+    def distance_inv_wei(G):
+        n=len(G)
+        D=np.zeros((n,n))				#distance matrix
+        D[np.logical_not(np.eye(n))]=np.inf
 
-		for u in xrange(n):
-			S=np.ones((n,),dtype=bool)	#distance permanence (true is temporary)
-			G1=G.copy()
-			V=[u]
-			while True:
-				S[V]=0					#distance u->V is now permanent
-				G1[:,V]=0				#no in-edges as already shortest
-				for v in V:
-					W,=np.where(G1[v,:])	#neighbors of smallest nodes
-					td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
-					D[u,W]=np.min(td,axis=0)
+        for u in xrange(n):
+            S=np.ones((n,),dtype=bool)	#distance permanence (true is temporary)
+            G1=G.copy()
+            V=[u]
+            while True:
+                S[V]=0					#distance u->V is now permanent
+                G1[:,V]=0				#no in-edges as already shortest
+                for v in V:
+                    W,=np.where(G1[v,:])	#neighbors of smallest nodes
+                    td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
+                    D[u,W]=np.min(td,axis=0)
 
-				if D[u,S].size==0:		#all nodes reached
-					break				
-				minD=np.min(D[u,S])
-				if np.isinf(minD):		#some nodes cannot be reached
-					break
-				V,=np.where(D[u,:]==minD)
-		
-		np.fill_diagonal(D, 1)
-		D=1/D
-		np.fill_diagonal(D, 0)
-		return D
+                if D[u,S].size==0:		#all nodes reached
+                    break				
+                minD=np.min(D[u,S])
+                if np.isinf(minD):		#some nodes cannot be reached
+                    break
+                V,=np.where(D[u,:]==minD)
+        
+        np.fill_diagonal(D, 1)
+        D=1/D
+        np.fill_diagonal(D, 0)
+        return D
 
-	n=len(Gw)
-	Gl=invert(Gw,copy=True)				#connection length matrix
-	A=np.array((Gw!=0),dtype=int)
-	if local:
-		E=np.zeros((n,))				#local efficiency
-		for u in xrange(n):
-			#V,=np.where(Gw[u,:])		#neighbors
-			#k=len(V)					#degree
-			#if k>=2:					#degree must be at least 2
-			#	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
-			#	E[u]=np.sum(e)/(k*k-k)
-			
-			#find pairs of neighbors
-			V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
-			#symmetrized vector of weights
-			sw=_cuberoot(Gw[u,V])+_cuberoot(Gw[V,u].T)
-			#inverse distance matrix
-			e=distance_inv_wei(Gl[np.ix_(V,V)])
-			#symmetrized inverse distance matrix
-			se=_cuberoot(e)+_cuberoot(e.T)
+    n=len(Gw)
+    Gl=invert(Gw,copy=True)				#connection length matrix
+    A=np.array((Gw!=0),dtype=int)
+    if local:
+        E=np.zeros((n,))				#local efficiency
+        for u in xrange(n):
+            #V,=np.where(Gw[u,:])		#neighbors
+            #k=len(V)					#degree
+            #if k>=2:					#degree must be at least 2
+            #	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
+            #	E[u]=np.sum(e)/(k*k-k)
+            
+            #find pairs of neighbors
+            V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
+            #symmetrized vector of weights
+            sw=_cuberoot(Gw[u,V])+_cuberoot(Gw[V,u].T)
+            #inverse distance matrix
+            e=distance_inv_wei(Gl[np.ix_(V,V)])
+            #symmetrized inverse distance matrix
+            se=_cuberoot(e)+_cuberoot(e.T)
 
-			numer=np.sum(np.outer(sw.T,sw)*se)/2
-			if numer!=0:
-				#symmetrized adjacency vector
-				sa=A[u,V]+A[V,u].T
-				denom=np.sum(sa)**2 - np.sum(sa*sa)
-				#print numer,denom
-				E[u] = numer/denom		#local efficiency
-				
-	else:
-		e=distance_inv_wei(Gl)
-		E=np.sum(e)/(n*n-n)
-	return E
+            numer=np.sum(np.outer(sw.T,sw)*se)/2
+            if numer!=0:
+                #symmetrized adjacency vector
+                sa=A[u,V]+A[V,u].T
+                denom=np.sum(sa)**2 - np.sum(sa*sa)
+                #print numer,denom
+                E[u] = numer/denom		#local efficiency
+                
+    else:
+        e=distance_inv_wei(Gl)
+        E=np.sum(e)/(n*n-n)
+    return E
 
 def findpaths(CIJ,qmax,sources,savepths=False):
-	'''	
+    '''	
    Paths are sequences of linked nodes, that never visit a single node
    more than once. This function finds all paths that start at a set of 
    source nodes, up to a specified length. Warning: very memory-intensive.
@@ -1924,110 +1924,110 @@ def findpaths(CIJ,qmax,sources,savepths=False):
    Note: I am certain that this algorithm is rather inefficient -
    suggestions for improvements are welcome.
 
-	#FIXME allpths
-	'''
-	CIJ=binarize(CIJ,copy=True)				#ensure CIJ is binary
-	n=len(CIJ)
-	k=np.sum(CIJ)
-	pths=[]
-	Pq=np.zeros((n,n,qmax))
-	util=np.zeros((n,qmax))
+    #FIXME allpths
+    '''
+    CIJ=binarize(CIJ,copy=True)				#ensure CIJ is binary
+    n=len(CIJ)
+    k=np.sum(CIJ)
+    pths=[]
+    Pq=np.zeros((n,n,qmax))
+    util=np.zeros((n,qmax))
 
-	#this code is for pathlength=1
-	#paths are seeded from sources
-	q=1
-	for j in xrange(n):
-		for i in xrange(len(sources)):
-			i_s=sources[i]
-			if CIJ[i_s,j]==1:
-				pths.append([i_s,j])
-	pths=np.array(pths)
+    #this code is for pathlength=1
+    #paths are seeded from sources
+    q=1
+    for j in xrange(n):
+        for i in xrange(len(sources)):
+            i_s=sources[i]
+            if CIJ[i_s,j]==1:
+                pths.append([i_s,j])
+    pths=np.array(pths)
 
-	#calculate the use index per vertex (for paths of length 1)
-	util[:,q],_=np.histogram(pths,bins=n)
-	#now enter the found paths of length 1 into the pathmatrix Pq
-	for nrp in xrange(np.size(pths,axis=0)):
-		Pq[pths[nrp,0],pths[nrp,q],q-1]+=1
+    #calculate the use index per vertex (for paths of length 1)
+    util[:,q],_=np.histogram(pths,bins=n)
+    #now enter the found paths of length 1 into the pathmatrix Pq
+    for nrp in xrange(np.size(pths,axis=0)):
+        Pq[pths[nrp,0],pths[nrp,q],q-1]+=1
 
-	#begin saving allpths
-	if savepths:
-		allpths=pths.copy()
-	else:
-		allpths=[]
+    #begin saving allpths
+    if savepths:
+        allpths=pths.copy()
+    else:
+        allpths=[]
 
-	npthscnt=k
+    npthscnt=k
 
-	#big loop for all other pathlengths q
-	for q in xrange(2,qmax+1):
-		#to keep track of time...
-		print ('current pathlength (q=i, number of paths so far (up to q-1)=i'			%(q,np.sum(Pq)))
+    #big loop for all other pathlengths q
+    for q in xrange(2,qmax+1):
+        #to keep track of time...
+        print ('current pathlength (q=i, number of paths so far (up to q-1)=i'			%(q,np.sum(Pq)))
 
-		#old paths are now in 'pths'
-		#new paths are about to be collected in 'npths'
-		#estimate needed allocation for new paths
-		len_npths=np.min((np.ceil(1.1*npthscnt*k/n),100000000))
-		npths=np.zeros((q+1,len_npths))
+        #old paths are now in 'pths'
+        #new paths are about to be collected in 'npths'
+        #estimate needed allocation for new paths
+        len_npths=np.min((np.ceil(1.1*npthscnt*k/n),100000000))
+        npths=np.zeros((q+1,len_npths))
 
-		#find the unique set of endpoints of 'pths'
-		endp=np.unique(pths[:,q-1])
-		npthscnt=0
+        #find the unique set of endpoints of 'pths'
+        endp=np.unique(pths[:,q-1])
+        npthscnt=0
 
-		for i in endp:	#set of endpoints of previous paths
-			#in 'pb' collect all previous paths with 'i' as their endpoint
-			pb,=np.where(pths[:,q-1]==i)
-			#find the outgoing connections from i (breadth-first)
-			nendp,=np.where(CIJ[i,:]==1)
-			#if i is not a dead end
-			if nendp.size:
-				for j in nendp:			#endpoints of next edge
-					#find new paths -- only legal ones, no vertex twice visited
-					pb_temp=pb[np.sum(j==pths[pb,1:q],axis=1)==0]
+        for i in endp:	#set of endpoints of previous paths
+            #in 'pb' collect all previous paths with 'i' as their endpoint
+            pb,=np.where(pths[:,q-1]==i)
+            #find the outgoing connections from i (breadth-first)
+            nendp,=np.where(CIJ[i,:]==1)
+            #if i is not a dead end
+            if nendp.size:
+                for j in nendp:			#endpoints of next edge
+                    #find new paths -- only legal ones, no vertex twice visited
+                    pb_temp=pb[np.sum(j==pths[pb,1:q],axis=1)==0]
 
-					#add new paths to 'npths'
-					pbx=pths[pb_temp-1,:]
-					npx=np.ones((len(pb_temp),1))*j
-					npths[:,npthscnt:npthscnt+len(pb_temp)]=np.append(
-						pbx,npx,axis=1).T
-					npthscnt+=len(pb_temp)
-					#count new paths and add the number to P
-					Pq[:n,j,q-1]+=np.histogram(pths[pb_temp-1,0],bins=n)[0]
+                    #add new paths to 'npths'
+                    pbx=pths[pb_temp-1,:]
+                    npx=np.ones((len(pb_temp),1))*j
+                    npths[:,npthscnt:npthscnt+len(pb_temp)]=np.append(
+                        pbx,npx,axis=1).T
+                    npthscnt+=len(pb_temp)
+                    #count new paths and add the number to P
+                    Pq[:n,j,q-1]+=np.histogram(pths[pb_temp-1,0],bins=n)[0]
 
-		#note: 'npths' now contains a list of all the paths of length q
-		if len_npths>npthscnt:
-			npths=npths[:,:npthscnt]
+        #note: 'npths' now contains a list of all the paths of length q
+        if len_npths>npthscnt:
+            npths=npths[:,:npthscnt]
 
-		#append the matrix of all paths
-		#FIXME
-		if savepths:
-			raise NotImplementedError("Sorry allpaths is not yet implemented")
-		
-		#calculate the use index per vertex (correct for cycles, count
-		#source/target only once)
-		util[:,q-1]+=(np.histogram(npths[:,:npthscnt],bins=n)[0]-
-			np.diag(Pq[:,:,q-1]))
+        #append the matrix of all paths
+        #FIXME
+        if savepths:
+            raise NotImplementedError("Sorry allpaths is not yet implemented")
+        
+        #calculate the use index per vertex (correct for cycles, count
+        #source/target only once)
+        util[:,q-1]+=(np.histogram(npths[:,:npthscnt],bins=n)[0]-
+            np.diag(Pq[:,:,q-1]))
 
-		#elininate cycles from "making it" to the next level, so that "pths"
-		#contains all the paths that have a chance of being continued
-		if npths.size:
-			pths=np.squeeze(npths[:,np.where(npths[0,:]!=npths[q,:])]).T
-		else:
-			pths=[]
+        #elininate cycles from "making it" to the next level, so that "pths"
+        #contains all the paths that have a chance of being continued
+        if npths.size:
+            pths=np.squeeze(npths[:,np.where(npths[0,:]!=npths[q,:])]).T
+        else:
+            pths=[]
 
-		#if there are no 'pths' paths left, end the search
-		if not pths.size:
-			qstop=q
-			tpath=np.sum(Pq)
-			plq=np.sum(np.sum(Pq,axis=0),axis=0)
-			return
-	
-	qstop=q
-	tpath=np.sum(Pq)						#total number of paths
-	plq=np.sum(np.sum(Pq,axis=0),axis=0)	#path length distribution
+        #if there are no 'pths' paths left, end the search
+        if not pths.size:
+            qstop=q
+            tpath=np.sum(Pq)
+            plq=np.sum(np.sum(Pq,axis=0),axis=0)
+            return
+    
+    qstop=q
+    tpath=np.sum(Pq)						#total number of paths
+    plq=np.sum(np.sum(Pq,axis=0),axis=0)	#path length distribution
 
-	return Pq,tpath,plq,qstop,allpths,util
+    return Pq,tpath,plq,qstop,allpths,util
 
 def findwalks(CIJ):
-	'''
+    '''
 Walks are sequences of linked nodes, that may visit a single node more
 than once. This function finds the number of walks of a given length, 
 between any two nodes.
@@ -2035,27 +2035,27 @@ between any two nodes.
 Input:      CIJ         binary (directed/undirected) connection matrix
 
 Outputs:    Wq          3D matrix, Wq(i,j,q) is the number of walks
-					   from 'i' to 'j' of length 'q'.
-		   twalk       total number of walks found
-		   wlq         walk length distribution as function of 'q'
+                       from 'i' to 'j' of length 'q'.
+           twalk       total number of walks found
+           wlq         walk length distribution as function of 'q'
 
 Notes: Wq grows very quickly for larger N,K,q. Weights are discarded.
-	'''
-	CIJ=binarize(CIJ,copy=True)
-	n=len(CIJ)
-	Wq=np.zeros((n,n,n))
-	CIJpwr=CIJ.copy()
-	Wq[:,:,1]=CIJ
-	for q in xrange(n):
-		CIJpwr=np.dot(CIJpwr,CIJ)
-		Wq[:,:,q]=CIJpwr
+    '''
+    CIJ=binarize(CIJ,copy=True)
+    n=len(CIJ)
+    Wq=np.zeros((n,n,n))
+    CIJpwr=CIJ.copy()
+    Wq[:,:,1]=CIJ
+    for q in xrange(n):
+        CIJpwr=np.dot(CIJpwr,CIJ)
+        Wq[:,:,q]=CIJpwr
 
-	twalk=np.sum(Wq)						#total number of walks
-	wlq=np.sum(np.sum(Wq,axis=0),axis=0)
-	return Wq,twalk,wlq
+    twalk=np.sum(Wq)						#total number of walks
+    wlq=np.sum(np.sum(Wq,axis=0),axis=0)
+    return Wq,twalk,wlq
 
 def reachdist(CIJ):
-	'''
+    '''
 The binary reachability matrix describes reachability between all pairs
 
 of nodes. An entry (u,v)=1 means that there exists a path from node u
@@ -2069,91 +2069,91 @@ characteristic path length of the network.
 Input:      CIJ,     binary (directed/undirected) connection matrix
 
 Outputs:    R,       reachability matrix
-		    D,       distance matrix
+            D,       distance matrix
 
 Note: faster but more memory intensive than "breadthdist.m".
-	'''
-	def reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row):
-		CIJpwr=np.dot(CIJpwr,CIJ)
-		R=np.logical_or(R,CIJpwr!=0)
-		D+=R
-		if powr<=n and np.any(R[row,col]==0):
-			powr+=1
-			R,D,powr=reachdist2(CIJ,CIJpwr,R,D,N,powr,col,row)
-		return R,D,powr
+    '''
+    def reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row):
+        CIJpwr=np.dot(CIJpwr,CIJ)
+        R=np.logical_or(R,CIJpwr!=0)
+        D+=R
+        if powr<=n and np.any(R[row,col]==0):
+            powr+=1
+            R,D,powr=reachdist2(CIJ,CIJpwr,R,D,N,powr,col,row)
+        return R,D,powr
 
-	R=CIJ.copy()
-	D=CIJ.copy()
-	powr=2
-	n=len(CIJ)
-	CIJpwr=CIJ.copy()
+    R=CIJ.copy()
+    D=CIJ.copy()
+    powr=2
+    n=len(CIJ)
+    CIJpwr=CIJ.copy()
 
-	#check for vertices that have no incoming or outgoing connections
-	#these are ignored by reachdist
-	id=np.sum(CIJ,axis=0)
-	od=np.sum(CIJ,axis=1)
-	id0,=np.where(id==0)	#nothing goes in, so column(R) will be 0
-	od0,=np.where(od==0)	#nothing comes out, so row(R) will be 0
-	#use these colums and rows to check for reachability
-	col=range(10); col=np.delete(col,id0)
-	row=range(10); row=np.delete(row,od0)
-	
-	R,D,powr=reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row)
+    #check for vertices that have no incoming or outgoing connections
+    #these are ignored by reachdist
+    id=np.sum(CIJ,axis=0)
+    od=np.sum(CIJ,axis=1)
+    id0,=np.where(id==0)	#nothing goes in, so column(R) will be 0
+    od0,=np.where(od==0)	#nothing comes out, so row(R) will be 0
+    #use these colums and rows to check for reachability
+    col=range(10); col=np.delete(col,id0)
+    row=range(10); row=np.delete(row,od0)
+    
+    R,D,powr=reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row)
 
-	#'invert' CIJdist to get distances
-	D=powr-D+1
-	
-	#put inf if no path found
-	D[D==n+2]=np.inf
-	D[:,id0]=np.inf
-	D[od0,:]=np.inf
+    #'invert' CIJdist to get distances
+    D=powr-D+1
+    
+    #put inf if no path found
+    D[D==n+2]=np.inf
+    D[:,id0]=np.inf
+    D[od0,:]=np.inf
 
-	return R,D
+    return R,D
 
 ###############################################################################
 # MODULARITY
 ###############################################################################
 
 def ci2ls(ci):
-	'''
-	Convert from a community index vector to a 2D python list of modules
-	The list is a pure python list, not requiring numpy.
+    '''
+    Convert from a community index vector to a 2D python list of modules
+    The list is a pure python list, not requiring numpy.
 
-	Input: ci,			the 1D community index vector
-		   zeroindexed, lowest value in ci vector is 0.  default False
-	Output: ls,			2D pure python list with lowest value 0
-	'''
-	if not np.size(ci): return ci #list is empty
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
-	nr_indices=int(max(ci))
-	ls=[]
-	for c in range(nr_indices):
-		ls.append([])
-	for i,x in enumerate(ci):
-		ls[ci[i]-1].append(i)
-	return ls
+    Input: ci,			the 1D community index vector
+           zeroindexed, lowest value in ci vector is 0.  default False
+    Output: ls,			2D pure python list with lowest value 0
+    '''
+    if not np.size(ci): return ci #list is empty
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
+    nr_indices=int(max(ci))
+    ls=[]
+    for c in range(nr_indices):
+        ls.append([])
+    for i,x in enumerate(ci):
+        ls[ci[i]-1].append(i)
+    return ls
 
 def ls2ci(ls,zeroindexed=False):
-	'''
-	Convert from a 2D python list of modules to a community index vector.
-	The list is a pure python list, not requiring numpy.
+    '''
+    Convert from a 2D python list of modules to a community index vector.
+    The list is a pure python list, not requiring numpy.
 
-	Input: ls,			2D pure python list with lowest value 0
-		   zeroindexed, lowest value in ci vector is 0.  default False
-	Output: ci,			the 1D community index vector
-	'''
-	if ls is None or np.size(ls)==0: return ()	#list is empty
-	nr_indices=sum(map(len,ls))
-	ci=np.zeros((nr_indices,),dtype=int)
-	z=int(not zeroindexed)
-	for i,x in enumerate(ls):
-		for j,y in enumerate(ls[i]):
-			ci[ls[i][j]]=i+z
-	return ci
+    Input: ls,			2D pure python list with lowest value 0
+           zeroindexed, lowest value in ci vector is 0.  default False
+    Output: ci,			the 1D community index vector
+    '''
+    if ls is None or np.size(ls)==0: return ()	#list is empty
+    nr_indices=sum(map(len,ls))
+    ci=np.zeros((nr_indices,),dtype=int)
+    z=int(not zeroindexed)
+    for i,x in enumerate(ls):
+        for j,y in enumerate(ls[i]):
+            ci[ls[i][j]]=i+z
+    return ci
 
 def modularity_dir(A,gamma=1,kci=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges. 
@@ -2161,82 +2161,82 @@ The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups. 
 
 Input:      W,      directed (weighted or binary) connection matrix.
-			gamma,	modularity resolution parameter
-					gamma>1:	detects smaller modules
-					0<=gamma<1:	detects larger modules
-					gamma=1:	no scaling of module size (default)
-			kci		existing ci.  If specified, only calculates the
-					modularity on the given community structure.  If None
-					(default), generates optimal ci by modularity maximization
+            gamma,	modularity resolution parameter
+                    gamma>1:	detects smaller modules
+                    0<=gamma<1:	detects larger modules
+                    gamma=1:	no scaling of module size (default)
+            kci		existing ci.  If specified, only calculates the
+                    modularity on the given community structure.  If None
+                    (default), generates optimal ci by modularity maximization
 
 Outputs:    Ci,     optimal community structure
-		   Q,      maximized modularity
+           Q,      maximized modularity
 
 Note: This algorithm is deterministic. The matlab function bearing this name 
 incorrectly disclaims that the outcome depends on heuristics involving a random
 seed. The louvain method does depend on a random seed, but this function uses
 a modularity maximization algorithm which does not.
-	'''
-	from scipy import linalg
-	n=len(A)							#number of vertices
-	ki=np.sum(A,axis=0)					#in degree
-	ko=np.sum(A,axis=1)					#out degree
-	m=np.sum(ki)						#number of edges
-	b=A-gamma*np.outer(ko,ki)/m
-	B=b+b.T								#directed modularity matrix
+    '''
+    from scipy import linalg
+    n=len(A)							#number of vertices
+    ki=np.sum(A,axis=0)					#in degree
+    ko=np.sum(A,axis=1)					#out degree
+    m=np.sum(ki)						#number of edges
+    b=A-gamma*np.outer(ko,ki)/m
+    B=b+b.T								#directed modularity matrix
 
-	init_mod=np.arange(n)				#initial one big module
-	modules=[]							#output modules list
+    init_mod=np.arange(n)				#initial one big module
+    modules=[]							#output modules list
  
-	def recur(module):
-		n=len(module)
-		modmat=B[module][:,module]
+    def recur(module):
+        n=len(module)
+        modmat=B[module][:,module]
 
-		vals,vecs=linalg.eig(modmat)	#biggest eigendecomposition
-		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
-		if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
-			max_eigvec=max_eigvec[:,0]
-		mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
-		q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
-	
-		if q>0:							#change in modularity was positive
-			qmax=q
-			np.fill_diagonal(modmat, 0)
-			it=np.ma.masked_array(np.ones((n,)),False)
-			mod_asgn_iter=mod_asgn.copy()
-			while np.any(it):			#do some iterative fine tuning
-				#this line is linear algebra voodoo
-				q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
-				qmax=np.max(q_iter*it)
-				imax,=np.where(q_iter==qmax)
-				mod_asgn_iter[imax]*=-1	#does switching increase modularity?
-				it[imax]=np.ma.masked
-				if qmax>q:
-					q=qmax
-					mod_asgn=mod_asgn_iter
-			if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
-				modules.append(np.array(module).tolist())
-			else:
-				mod1=module[np.where(mod_asgn==1)]
-				mod2=module[np.where(mod_asgn==-1)]
+        vals,vecs=linalg.eig(modmat)	#biggest eigendecomposition
+        max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
+        if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
+            max_eigvec=max_eigvec[:,0]
+        mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
+        q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
+    
+        if q>0:							#change in modularity was positive
+            qmax=q
+            np.fill_diagonal(modmat, 0)
+            it=np.ma.masked_array(np.ones((n,)),False)
+            mod_asgn_iter=mod_asgn.copy()
+            while np.any(it):			#do some iterative fine tuning
+                #this line is linear algebra voodoo
+                q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
+                qmax=np.max(q_iter*it)
+                imax,=np.where(q_iter==qmax)
+                mod_asgn_iter[imax]*=-1	#does switching increase modularity?
+                it[imax]=np.ma.masked
+                if qmax>q:
+                    q=qmax
+                    mod_asgn=mod_asgn_iter
+            if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
+                modules.append(np.array(module).tolist())
+            else:
+                mod1=module[np.where(mod_asgn==1)]
+                mod2=module[np.where(mod_asgn==-1)]
 
-				recur(mod1)
-				recur(mod2)
-		else:							#change in modularity was negative or 0
-			modules.append(np.array(module).tolist())
+                recur(mod1)
+                recur(mod2)
+        else:							#change in modularity was negative or 0
+            modules.append(np.array(module).tolist())
 
-	#adjustment to one-based indexing occurs in ls2ci
-	if kci is None:
-		recur(init_mod)
-		ci=ls2ci(modules)
-	else:
-		ci=kci
-	s=np.tile(ci,(n,1))
-	q=np.sum(np.logical_not(s-s.T)*B/(2*m))
-	return ci,q
+    #adjustment to one-based indexing occurs in ls2ci
+    if kci is None:
+        recur(init_mod)
+        ci=ls2ci(modules)
+    else:
+        ci=kci
+    s=np.tile(ci,(n,1))
+    q=np.sum(np.logical_not(s-s.T)*B/(2*m))
+    return ci,q
 
 def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
-	'''
+    '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
     within-group edges, and minimizes the number of between-group edges.
@@ -2255,81 +2255,81 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
 
-				seed,	random seed. Default None, seed from /dev/urandom
+                seed,	random seed. Default None, seed from /dev/urandom
  
     Output:     Ci,     refined community affiliation vector
                 Q,      modularity
  
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)							#number of nodes
-	if ci is None:
-		ci=np.arange(n)+1
-	else:
-		_,ci=np.unique(ci,return_inverse=True)
-		ci+=1
+    n=len(W)							#number of nodes
+    if ci is None:
+        ci=np.arange(n)+1
+    else:
+        _,ci=np.unique(ci,return_inverse=True)
+        ci+=1
 
-	s=np.sum(W)							#weight of edges
-	knm_o=np.zeros((n,n))				#node-to-module out degree
-	knm_i=np.zeros((n,n))				#node-to-module in degree
+    s=np.sum(W)							#weight of edges
+    knm_o=np.zeros((n,n))				#node-to-module out degree
+    knm_i=np.zeros((n,n))				#node-to-module in degree
 
-	for m in xrange(np.max(ci)):
-		knm_o[:,m]=np.sum(W[:,ci==(m+1)],axis=1)	
-		knm_i[:,m]=np.sum(W[ci==(m+1),:],axis=0)
+    for m in xrange(np.max(ci)):
+        knm_o[:,m]=np.sum(W[:,ci==(m+1)],axis=1)	
+        knm_i[:,m]=np.sum(W[ci==(m+1),:],axis=0)
 
-	k_o=np.sum(knm_o,axis=1)			#node out-degree
-	k_i=np.sum(knm_i,axis=1)			#node in-degree
-	km_o=np.sum(knm_o,axis=0)			#module out-degree
-	km_i=np.sum(knm_i,axis=0)			#module out-degree
+    k_o=np.sum(knm_o,axis=1)			#node out-degree
+    k_i=np.sum(knm_i,axis=1)			#node in-degree
+    km_o=np.sum(knm_o,axis=0)			#module out-degree
+    km_i=np.sum(knm_i,axis=0)			#module out-degree
 
-	flag=True
-	while flag:
-		flag=False
-		for u in np.random.permutation(n):	#loop over nodes in random order
-			ma=ci[u]-1					#current module of u
-			#algorithm condition
-			dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
-				gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
-			dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-
-				gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
-			dq = (dq_o+dq_i)/2
-			dq[ma]=0
+    flag=True
+    while flag:
+        flag=False
+        for u in np.random.permutation(n):	#loop over nodes in random order
+            ma=ci[u]-1					#current module of u
+            #algorithm condition
+            dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
+                gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
+            dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-
+                gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
+            dq = (dq_o+dq_i)/2
+            dq[ma]=0
 
-			max_dq=np.max(dq)			#find maximal modularity increase
-			if max_dq>1e-10:			#if maximal increase positive
-				mb=np.argmax(dq)		#take only one value
-				#print max_dq,mb
+            max_dq=np.max(dq)			#find maximal modularity increase
+            if max_dq>1e-10:			#if maximal increase positive
+                mb=np.argmax(dq)		#take only one value
+                #print max_dq,mb
 
-				knm_o[:,mb]+=W[u,:].T	#change node-to-module out-degrees
-				knm_o[:,ma]-=W[u,:].T
-				knm_i[:,mb]+=W[:,u]		#change node-to-module in-degrees
-				knm_i[:,ma]-=W[:,u]
-				km_o[mb]+=k_o[u]		#change module out-degrees
-				km_o[ma]-=k_o[u]
-				km_i[mb]+=k_i[u]		#change module in-degrees
-				km_i[ma]-=k_i[u]
+                knm_o[:,mb]+=W[u,:].T	#change node-to-module out-degrees
+                knm_o[:,ma]-=W[u,:].T
+                knm_i[:,mb]+=W[:,u]		#change node-to-module in-degrees
+                knm_i[:,ma]-=W[:,u]
+                km_o[mb]+=k_o[u]		#change module out-degrees
+                km_o[ma]-=k_o[u]
+                km_i[mb]+=k_i[u]		#change module in-degrees
+                km_i[ma]-=k_i[u]
 
-				ci[u]=mb+1				#reassign module
-				flag=True
+                ci[u]=mb+1				#reassign module
+                flag=True
 
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
-	m=np.max(ci)						#new number of modules
-	w=np.zeros((m,m))					#new weighted matrix
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
+    m=np.max(ci)						#new number of modules
+    w=np.zeros((m,m))					#new weighted matrix
 
-	for u in xrange(m):
-		for v in xrange(m):
-			#pool weights of nodes in same module
-			w[u,v]=np.sum(W[np.ix_(ci==u+1,ci==v+1)]) 
+    for u in xrange(m):
+        for v in xrange(m):
+            #pool weights of nodes in same module
+            w[u,v]=np.sum(W[np.ix_(ci==u+1,ci==v+1)]) 
 
-	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
-	return ci,q
+    q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
+    return ci,q
 
 def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
-	'''
+    '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
     within-group edges, and minimizes the number of between-group edges. 
@@ -2345,7 +2345,7 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
                             gamma>1     detects smaller modules
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
-				seed,	random seed. Default None, seed from /dev/urandom
+                seed,	random seed. Default None, seed from /dev/urandom
  
  
     Output:     Ci,     refined community affiliation vector
@@ -2353,68 +2353,68 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
  
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	#import time
-	n=len(W)							#number of nodes
-	if ci is None:
-		ci=np.arange(n)+1
-	else:
-		_,ci=np.unique(ci,return_inverse=True)
-		ci+=1
+    #import time
+    n=len(W)							#number of nodes
+    if ci is None:
+        ci=np.arange(n)+1
+    else:
+        _,ci=np.unique(ci,return_inverse=True)
+        ci+=1
 
-	s=np.sum(W)							#total weight of edges
-	knm=np.zeros((n,n))					#node-to-module degree
-	for m in xrange(np.max(ci)):
-		knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
-	k=np.sum(knm,axis=1)				#node degree
-	km=np.sum(knm,axis=0)				#module degree
+    s=np.sum(W)							#total weight of edges
+    knm=np.zeros((n,n))					#node-to-module degree
+    for m in xrange(np.max(ci)):
+        knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
+    k=np.sum(knm,axis=1)				#node degree
+    km=np.sum(knm,axis=0)				#module degree
 
-	flag=True							
-	while flag:
-		flag=False
+    flag=True							
+    while flag:
+        flag=False
 
-		for u in np.random.permutation(n):
-		#for u in np.arange(n):
-			ma=ci[u]-1
-			#time.sleep(1)
-			#algorithm condition
-			dq=(knm[u,:]-knm[u,ma]+W[u,u])-gamma*k[u]*(km-km[ma]+k[u])/s
-			#print np.sum(knm[u,:],knm[u,ma],W[u,u],gamma,k[u],np.sum(km),km[ma],k[u],s
-			dq[ma]=0
+        for u in np.random.permutation(n):
+        #for u in np.arange(n):
+            ma=ci[u]-1
+            #time.sleep(1)
+            #algorithm condition
+            dq=(knm[u,:]-knm[u,ma]+W[u,u])-gamma*k[u]*(km-km[ma]+k[u])/s
+            #print np.sum(knm[u,:],knm[u,ma],W[u,u],gamma,k[u],np.sum(km),km[ma],k[u],s
+            dq[ma]=0
 
-			max_dq=np.max(dq)			#find maximal modularity increase
-			if max_dq>1e-10:			#if maximal increase positive
-				mb=np.argmax(dq)		#take only one value
+            max_dq=np.max(dq)			#find maximal modularity increase
+            if max_dq>1e-10:			#if maximal increase positive
+                mb=np.argmax(dq)		#take only one value
 
-				#print max_dq, mb
+                #print max_dq, mb
 
-				knm[:,mb]+=W[:,u]		#change node-to-module degrees	
-				knm[:,ma]-=W[:,u]
-				km[mb]+=k[u]			#change module degrees
-				km[ma]-=k[u]
+                knm[:,mb]+=W[:,u]		#change node-to-module degrees	
+                knm[:,ma]-=W[:,u]
+                km[mb]+=k[u]			#change module degrees
+                km[ma]-=k[u]
 
-				ci[u]=mb+1
-				flag=True
+                ci[u]=mb+1
+                flag=True
 
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
 
-	m=np.max(ci)
-	w=np.zeros((m,m))
-	for u in xrange(m):
-		for v in xrange(m):
-			#pool weights of nodes in same module
-			wm=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
-			w[u,v]=wm
-			w[v,u]=wm
+    m=np.max(ci)
+    w=np.zeros((m,m))
+    for u in xrange(m):
+        for v in xrange(m):
+            #pool weights of nodes in same module
+            wm=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
+            w[u,v]=wm
+            w[v,u]=wm
 
-	q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
-	return ci,q
+    q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
+    return ci,q
 
 def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges. 
@@ -2425,104 +2425,104 @@ This algorithm is inspired by the Kernighan-Lin fine-tuning algorithm
 and is designed to refine a previously detected community structure.
 
 Input:      W,      undirected (weighted or binary) connection matrix
-				    with positive and negative weights
+                    with positive and negative weights
 
-		    qtype,  modularity type (see Rubinov and Sporns, 2011)
-					   'sta',  Q_* (default if qtype is not specified)
-					   'pos',  Q_+
-					   'smp',  Q_simple
-					   'gja',  Q_GJA
-					   'neg',  Q_-
+            qtype,  modularity type (see Rubinov and Sporns, 2011)
+                       'sta',  Q_* (default if qtype is not specified)
+                       'pos',  Q_+
+                       'smp',  Q_simple
+                       'gja',  Q_GJA
+                       'neg',  Q_-
 
-		    ci,     initial community affiliation vector (optional)
-			seed,	random seed. Default None, seed from /dev/urandom
+            ci,     initial community affiliation vector (optional)
+            seed,	random seed. Default None, seed from /dev/urandom
 
 
 Output:     Ci,     refined community affiliation vector
-		    Q,      modularity (qtype dependent)
+            Q,      modularity (qtype dependent)
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)							#number of nodes/modules
-	if ci is None:
-		ci=np.arange(n)+1
-	else:
-		_,ci=np.unique(ci,return_inverse=True);
-		ci+=1
+    n=len(W)							#number of nodes/modules
+    if ci is None:
+        ci=np.arange(n)+1
+    else:
+        _,ci=np.unique(ci,return_inverse=True);
+        ci+=1
 
-	W0=W*(W>0)							#positive weights matrix
-	W1=-W*(W<0)							#negative weights matrix
-	s0=np.sum(W0)						#positive sum of weights
-	s1=np.sum(W1)						#negative sum of weights
-	Knm0=np.zeros((n,n))				#positive node-to-module-degree
-	Knm1=np.zeros((n,n))				#negative node-to-module degree
+    W0=W*(W>0)							#positive weights matrix
+    W1=-W*(W<0)							#negative weights matrix
+    s0=np.sum(W0)						#positive sum of weights
+    s1=np.sum(W1)						#negative sum of weights
+    Knm0=np.zeros((n,n))				#positive node-to-module-degree
+    Knm1=np.zeros((n,n))				#negative node-to-module degree
 
-	for m in xrange(int(np.max(ci))):	#loop over modules
-		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):	#loop over modules
+        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
-	Kn0=np.sum(Knm0,axis=1)				#positive node degree
-	Kn1=np.sum(Knm1,axis=1)				#negative node degree
-	Km0=np.sum(Knm0,axis=0)				#positive module degree
-	Km1=np.sum(Knm1,axis=0)				#negative module degree
+    Kn0=np.sum(Knm0,axis=1)				#positive node degree
+    Kn1=np.sum(Knm1,axis=1)				#negative node degree
+    Km0=np.sum(Knm0,axis=0)				#positive module degree
+    Km1=np.sum(Knm1,axis=0)				#negative module degree
 
-	if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-	elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-	elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-	elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-	elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-	else: raise KeyError('modularity type unknown')
-	
-	if not s0:							#adjust for absent positive weights
-		s0=1; d0=0
-	if not s1:							#adjust for absent negative weights
-		s1=1; d1=0
+    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
+    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
+    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
+    else: raise KeyError('modularity type unknown')
+    
+    if not s0:							#adjust for absent positive weights
+        s0=1; d0=0
+    if not s1:							#adjust for absent negative weights
+        s1=1; d1=0
 
-	flag=True							#flag for within hierarchy search
-	h=0
-	while flag:
-		h+=1
-		if h>1000:
-			raise BCTParamError('Modularity infinite loop style D')
-		flag=False
-		for u in np.random.permutation(n):	#loop over nodes in random order
-			ma=ci[u]-1						#current module of u
-			dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
-			dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
-			dq=d0*dq0-d1*dq1			#rescaled changes in modularity
-			dq[ma]=0					#no changes for same module
+    flag=True							#flag for within hierarchy search
+    h=0
+    while flag:
+        h+=1
+        if h>1000:
+            raise BCTParamError('Modularity infinite loop style D')
+        flag=False
+        for u in np.random.permutation(n):	#loop over nodes in random order
+            ma=ci[u]-1						#current module of u
+            dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
+            dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
+            dq=d0*dq0-d1*dq1			#rescaled changes in modularity
+            dq[ma]=0					#no changes for same module
 
-			#print dq,ma,u
+            #print dq,ma,u
 
-			max_dq=np.max(dq)			#maximal increase in modularity
-			mb=np.argmax(dq)			#corresponding module
-			if max_dq>1e-10:			#if maximal increase is positive
-				#print h,max_dq,mb,u
-				flag=True
-				ci[u]=mb+1				#reassign module
+            max_dq=np.max(dq)			#maximal increase in modularity
+            mb=np.argmax(dq)			#corresponding module
+            if max_dq>1e-10:			#if maximal increase is positive
+                #print h,max_dq,mb,u
+                flag=True
+                ci[u]=mb+1				#reassign module
 
-				Knm0[:,mb]+=W0[:,u]
-				Knm0[:,ma]-=W0[:,u]
-				Knm1[:,mb]+=W1[:,u]
-				Knm1[:,ma]-=W1[:,u]
-				Km0[mb]+=Kn0[u]
-				Km0[ma]-=Kn0[u]
-				Km1[mb]+=Kn1[u]
-				Km1[ma]-=Kn1[u]
+                Knm0[:,mb]+=W0[:,u]
+                Knm0[:,ma]-=W0[:,u]
+                Knm1[:,mb]+=W1[:,u]
+                Knm1[:,ma]-=W1[:,u]
+                Km0[mb]+=Kn0[u]
+                Km0[ma]-=Kn0[u]
+                Km1[mb]+=Kn1[u]
+                Km1[ma]-=Kn1[u]
 
-	_,ci=np.unique(ci,return_inverse=True); ci+=1
-	m=np.tile(ci,(n,1))
-	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-	q=d0*np.sum(q0)-d1*np.sum(q1)
+    _,ci=np.unique(ci,return_inverse=True); ci+=1
+    m=np.tile(ci,(n,1))
+    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
+    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
+    q=d0*np.sum(q0)-d1*np.sum(q1)
 
-	return ci,q
+    return ci,q
 
 def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
-	'''
+    '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
     within-group edges, and minimizes the number of between-group edges.
@@ -2538,104 +2538,104 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
                             gamma>1     detects smaller modules
                             0<=gamma<1  detects larger modules
                             gamma=1     no scaling of module size (default)
-			 hierarchy, enables hierarchical output (default false)
-				seed,	random seed. Default None, seed from /dev/urandom
+             hierarchy, enables hierarchical output (default false)
+                seed,	random seed. Default None, seed from /dev/urandom
  
     Outputs:    Ci,     community structure
                 Q,      modularity
  
     Note: Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)							#number of nodes
-	s=np.sum(W)							#total weight of edges
-	h=0									#hierarchy index
-	ci=[]
-	ci.append(np.arange(n)+1)			#hierarchical module assignments
-	q=[]
-	q.append(-1)						#hierarchical modularity index
-	n0=n
+    n=len(W)							#number of nodes
+    s=np.sum(W)							#total weight of edges
+    h=0									#hierarchy index
+    ci=[]
+    ci.append(np.arange(n)+1)			#hierarchical module assignments
+    q=[]
+    q.append(-1)						#hierarchical modularity index
+    n0=n
 
-	while True:	
-		if h>300:
-			raise BCTParamError('Modularity Infinite Loop Style E.  Please '
-				'contact the developer with this error.')
-		k_o=np.sum(W,axis=1)			#node in/out degrees
-		k_i=np.sum(W,axis=0)
-		km_o=k_o.copy()					#module in/out degrees
-		km_i=k_i.copy()
-		knm_o=W.copy()					#node-to-module in/out degrees
-		knm_i=W.copy()
+    while True:	
+        if h>300:
+            raise BCTParamError('Modularity Infinite Loop Style E.  Please '
+                'contact the developer with this error.')
+        k_o=np.sum(W,axis=1)			#node in/out degrees
+        k_i=np.sum(W,axis=0)
+        km_o=k_o.copy()					#module in/out degrees
+        km_i=k_i.copy()
+        knm_o=W.copy()					#node-to-module in/out degrees
+        knm_i=W.copy()
 
-		m=np.arange(n)+1				#initial module assignments
+        m=np.arange(n)+1				#initial module assignments
 
-		flag=True						#flag for within hierarchy search
-		it=0
-		while flag:
-			it+=1
-			if it>1000:
-				raise BCTParamError('Modularity Infinite Loop Style F.  Please '
-					'contact the developer with this error.')
-			flag=False
-			
-			#loop over nodes in random order
-			for u in np.random.permutation(n):
-				ma=m[u]-1
-				#algorithm condition
-				dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
-					gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
-				dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-	
-					gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
-				dq = (dq_o+dq_i)/2
-				dq[ma]=0
+        flag=True						#flag for within hierarchy search
+        it=0
+        while flag:
+            it+=1
+            if it>1000:
+                raise BCTParamError('Modularity Infinite Loop Style F.  Please '
+                    'contact the developer with this error.')
+            flag=False
+            
+            #loop over nodes in random order
+            for u in np.random.permutation(n):
+                ma=m[u]-1
+                #algorithm condition
+                dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
+                    gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
+                dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-	
+                    gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
+                dq = (dq_o+dq_i)/2
+                dq[ma]=0
 
-				max_dq=np.max(dq)		#find maximal modularity increase
-				if max_dq>1e-10:		#if maximal increase positive
-					mb=np.argmax(dq)	#take only one value
+                max_dq=np.max(dq)		#find maximal modularity increase
+                if max_dq>1e-10:		#if maximal increase positive
+                    mb=np.argmax(dq)	#take only one value
 
-					knm_o[:,mb]+=W[u,:].T	#change node-to-module degrees
-					knm_o[:,ma]-=W[u,:].T
-					knm_i[:,mb]+=W[:,u]
-					knm_i[:,ma]-=W[:,u]
-					km_o[mb]+=k_o[u]		#change module out-degrees
-					km_o[ma]-=k_o[u]
-					km_i[mb]+=k_i[u]
-					km_i[ma]-=k_i[u]
-					
-					m[u]=mb+1			#reassign module
-					flag=True
+                    knm_o[:,mb]+=W[u,:].T	#change node-to-module degrees
+                    knm_o[:,ma]-=W[u,:].T
+                    knm_i[:,mb]+=W[:,u]
+                    knm_i[:,ma]-=W[:,u]
+                    km_o[mb]+=k_o[u]		#change module out-degrees
+                    km_o[ma]-=k_o[u]
+                    km_i[mb]+=k_i[u]
+                    km_i[ma]-=k_i[u]
+                    
+                    m[u]=mb+1			#reassign module
+                    flag=True
 
-		_,m=np.unique(m,return_inverse=True)
-		m+=1
-		h+=1
-		ci.append(np.zeros((n0,)))
-		for i,mi in enumerate(m):		#loop through module assignments
-			ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+        _,m=np.unique(m,return_inverse=True)
+        m+=1
+        h+=1
+        ci.append(np.zeros((n0,)))
+        for i,mi in enumerate(m):		#loop through module assignments
+            ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
 
-		n=np.max(m)						#new number of modules
-		W1=np.zeros((n,n))				#new weighted matrix
-		for i in xrange(n):
-			for j in xrange(n):
-				#pool weights of nodes in same module
-				W1[i,j]=np.sum(W[np.ix_(m==i+1,m==j+1)])
+        n=np.max(m)						#new number of modules
+        W1=np.zeros((n,n))				#new weighted matrix
+        for i in xrange(n):
+            for j in xrange(n):
+                #pool weights of nodes in same module
+                W1[i,j]=np.sum(W[np.ix_(m==i+1,m==j+1)])
 
-		q.append(0)
-		#compute modularity
-		q[h]=np.trace(W1)/s-gamma*np.sum(np.dot(W1/s,W1/s))
-		if q[h]-q[h-1]<1e-10:			#if modularity does not increase
-			break
+        q.append(0)
+        #compute modularity
+        q[h]=np.trace(W1)/s-gamma*np.sum(np.dot(W1/s,W1/s))
+        if q[h]-q[h-1]<1e-10:			#if modularity does not increase
+            break
 
-	ci=np.array(ci)+1
-	if hierarchy:
-		ci=ci[1:-1]; q=q[1:-1]
-		return ci,q
-	else:
-		return ci[h-1],q[h-1]
+    ci=np.array(ci)+1
+    if hierarchy:
+        ci=ci[1:-1]; q=q[1:-1]
+        return ci,q
+    else:
+        return ci[h-1],q[h-1]
 
 def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges. 
@@ -2647,112 +2647,112 @@ algorithm (as of writing). The algorithm may also be used to detect
 hierarchical community structure.
 
 Input:      W       	undirected (weighted or binary) connection matrix.
-			gamma,		modularity resolution parameter
-						gamma>1:	detects smaller modules
-						0<=gamma<1:	detects larger modules
-						gamma=1:	no scaling of module size (default)
-		    hierarchy	enables hierarchical output, false by default
-			seed,		random seed. Default None, seed from /dev/urandom
+            gamma,		modularity resolution parameter
+                        gamma>1:	detects smaller modules
+                        0<=gamma<1:	detects larger modules
+                        gamma=1:	no scaling of module size (default)
+            hierarchy	enables hierarchical output, false by default
+            seed,		random seed. Default None, seed from /dev/urandom
 
 Outputs:    1. Classic
-				   Ci,     community structure
-				   Q,      modularity
-		    2. Hierarchical (if h=1)
-				   Ci_h,   community structure at each hierarchy
-						   (access as Ci_h{1}, Ci_h{2}, ...)
-				   Q_h,    modularity at each hierarhcy
-						   (access as Q_h{1}, Q_h{2}, ...)
+                   Ci,     community structure
+                   Q,      modularity
+            2. Hierarchical (if h=1)
+                   Ci_h,   community structure at each hierarchy
+                           (access as Ci_h{1}, Ci_h{2}, ...)
+                   Q_h,    modularity at each hierarhcy
+                           (access as Q_h{1}, Q_h{2}, ...)
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)							#number of nodes
-	s=np.sum(W)							#weight of edges
-	h=0									#hierarchy index
-	ci=[]
-	ci.append(np.arange(n)+1)			#hierarchical module assignments
-	q=[]
-	q.append(-1)						#hierarchical modularity values
-	n0=n
+    n=len(W)							#number of nodes
+    s=np.sum(W)							#weight of edges
+    h=0									#hierarchy index
+    ci=[]
+    ci.append(np.arange(n)+1)			#hierarchical module assignments
+    q=[]
+    q.append(-1)						#hierarchical modularity values
+    n0=n
 
-	while True:
-		if h>300:
-			raise BCTParamError('Modularity Infinite Loop Style B.  Please '
-			'contact the developer with this error.')
-		k=np.sum(W,axis=0)				#node degree
-		Km=k.copy()						#module degree
-		Knm=W.copy()					#node-to-module degree
+    while True:
+        if h>300:
+            raise BCTParamError('Modularity Infinite Loop Style B.  Please '
+            'contact the developer with this error.')
+        k=np.sum(W,axis=0)				#node degree
+        Km=k.copy()						#module degree
+        Knm=W.copy()					#node-to-module degree
 
-		m=np.arange(n)+1				#initial module assignments
+        m=np.arange(n)+1				#initial module assignments
 
-		flag=True						#flag for within-hierarchy search
-		it=0
-		while flag:
-			it+=1
-			if it>1000:
-				raise BCTParamError('Modularity Infinite Loop Style C.  Please '
-				'contact the developer with this error.')
-			flag=False
+        flag=True						#flag for within-hierarchy search
+        it=0
+        while flag:
+            it+=1
+            if it>1000:
+                raise BCTParamError('Modularity Infinite Loop Style C.  Please '
+                'contact the developer with this error.')
+            flag=False
 
-			#loop over nodes in random order
-			for i in np.random.permutation(n):	
-				ma=m[i]-1
-				#algorithm condition
-				dQ=((Knm[i,:]-Knm[i,ma]+W[i,i])-
-					gamma*k[i]*(Km-Km[ma]+k[i])/s)
-				dQ[ma]=0
+            #loop over nodes in random order
+            for i in np.random.permutation(n):	
+                ma=m[i]-1
+                #algorithm condition
+                dQ=((Knm[i,:]-Knm[i,ma]+W[i,i])-
+                    gamma*k[i]*(Km-Km[ma]+k[i])/s)
+                dQ[ma]=0
 
-				max_dq=np.max(dQ)		#find maximal modularity increase
-				if max_dq>1e-10:		#if maximal increase positive
-					j=np.argmax(dQ)		#take only one value			
-					#print max_dq,j,dQ[j]
+                max_dq=np.max(dQ)		#find maximal modularity increase
+                if max_dq>1e-10:		#if maximal increase positive
+                    j=np.argmax(dQ)		#take only one value			
+                    #print max_dq,j,dQ[j]
 
-					Knm[:,j]+=W[:,i]	#change node-to-module degrees
-					Knm[:,ma]-=W[:,i]
+                    Knm[:,j]+=W[:,i]	#change node-to-module degrees
+                    Knm[:,ma]-=W[:,i]
 
-					Km[j]+=k[i]			#change module degrees
-					Km[ma]-=k[i]
+                    Km[j]+=k[i]			#change module degrees
+                    Km[ma]-=k[i]
 
-					m[i]=j+1			#reassign module
-					flag=True
+                    m[i]=j+1			#reassign module
+                    flag=True
 
-		_,m=np.unique(m,return_inverse=True)	#new module assignments
-		#print m,h
-		m+=1
-		h+=1
-		ci.append(np.zeros((n0,)))
-		for i,mi in enumerate(m):	#loop through initial module assignments
-			#print i,mi,m[i],h
-			#print np.where(ci[h-1]==i+1)
-			ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+        _,m=np.unique(m,return_inverse=True)	#new module assignments
+        #print m,h
+        m+=1
+        h+=1
+        ci.append(np.zeros((n0,)))
+        for i,mi in enumerate(m):	#loop through initial module assignments
+            #print i,mi,m[i],h
+            #print np.where(ci[h-1]==i+1)
+            ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
 
-		n=np.max(m)						#new number of modules
-		W1=np.zeros((n,n))				#new weighted matrix
-		for i in xrange(n):
-			for j in xrange(n):
-				#pool weights of nodes in same module
-				wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
-				W1[i,j]=wp
-				W1[j,i]=wp
-		W=W1
+        n=np.max(m)						#new number of modules
+        W1=np.zeros((n,n))				#new weighted matrix
+        for i in xrange(n):
+            for j in xrange(n):
+                #pool weights of nodes in same module
+                wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
+                W1[i,j]=wp
+                W1[j,i]=wp
+        W=W1
 
-		q.append(0)
-		#compute modularity
-		q[h]=np.trace(W)/s-gamma*np.sum(np.dot(W/s,W/s))
-		if q[h]-q[h-1]<1e-10:			#if modularity does not increase
-			break
+        q.append(0)
+        #compute modularity
+        q[h]=np.trace(W)/s-gamma*np.sum(np.dot(W/s,W/s))
+        if q[h]-q[h-1]<1e-10:			#if modularity does not increase
+            break
 
-	ci=np.array(ci)+1
-	if hierarchy:
-		ci=ci[1:-1]; q=q[1:-1]
-		return ci,q
-	else:
-		return ci[h-1],q[h-1]
+    ci=np.array(ci)+1
+    if hierarchy:
+        ci=ci[1:-1]; q=q[1:-1]
+        return ci,q
+    else:
+        return ci[h-1],q[h-1]
 
 def modularity_louvain_und_sign(W,qtype='sta',seed=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges. 
@@ -2768,129 +2768,129 @@ contains all positive weights, the output will be equivalent to that of
 modularity_louvain_und().
 
 Input:      W       undirected (weighted or binary) connection matrix
-				    with positive and negative weights
+                    with positive and negative weights
 
-		    qtype,  modularity type (see Rubinov and Sporns, 2011)
-					   'sta',  Q_* (default if qtype is not specified)
-					   'pos',  Q_+
-					   'smp',  Q_simple
-					   'gja',  Q_GJA
-					   'neg',  Q_-
+            qtype,  modularity type (see Rubinov and Sporns, 2011)
+                       'sta',  Q_* (default if qtype is not specified)
+                       'pos',  Q_+
+                       'smp',  Q_simple
+                       'gja',  Q_GJA
+                       'neg',  Q_-
 
-			seed,	random seed. Default None, seed from /dev/urandom
+            seed,	random seed. Default None, seed from /dev/urandom
 
 Output:     Ci,     community affiliation vector
-		    Q,      modularity (qtype dependent)
+            Q,      modularity (qtype dependent)
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)							#number of nodes
+    n=len(W)							#number of nodes
 
-	W0=W*(W>0)							#positive weights matrix
-	W1=-W*(W<0)							#negative weights matrix
-	s0=np.sum(W0)						#weight of positive links
-	s1=np.sum(W1)						#weight of negative links
+    W0=W*(W>0)							#positive weights matrix
+    W1=-W*(W<0)							#negative weights matrix
+    s0=np.sum(W0)						#weight of positive links
+    s1=np.sum(W1)						#weight of negative links
 
-	if qtype=='smp': d0=1/s0; d1=1/s1			#dQ=dQ0/s0-sQ1/s1
-	elif qtype=='gja': d0=1/(s0+s1); d1=d0		#dQ=(dQ0-dQ1)/(s0+s1)
-	elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)	#dQ=dQ0/s0-dQ1/(s0+s1)
-	elif qtype=='pos': d0=1/s0; d1=0			#dQ=dQ0/s0
-	elif qtype=='neg': d0=0; d1=1/s1			#dQ=-dQ1/s1
-	else: raise KeyError('modularity type unknown')
+    if qtype=='smp': d0=1/s0; d1=1/s1			#dQ=dQ0/s0-sQ1/s1
+    elif qtype=='gja': d0=1/(s0+s1); d1=d0		#dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)	#dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype=='pos': d0=1/s0; d1=0			#dQ=dQ0/s0
+    elif qtype=='neg': d0=0; d1=1/s1			#dQ=-dQ1/s1
+    else: raise KeyError('modularity type unknown')
 
-	if not s0:							#adjust for absent positive weights
-		s0=1; d1=0
-	if not s1:							#adjust for absent negative weights
-		s1=1; d1=0
+    if not s0:							#adjust for absent positive weights
+        s0=1; d1=0
+    if not s1:							#adjust for absent negative weights
+        s1=1; d1=0
 
-	h=1									#hierarchy index
-	nh=n								#number of nodes in hierarchy
-	ci=[None,np.arange(n)+1]			#hierarchical module assignments
-	q=[-1,0]							#hierarchical modularity values
-	while q[h]-q[h-1]>1e-10:
-		if h>300: 
-			raise BCTParamError('Modularity Infinite Loop Style A.  Please '
-			'contact the developer with this error.')
-		kn0=np.sum(W0,axis=0)			#positive node degree
-		kn1=np.sum(W1,axis=0)			#negative node degree
-		km0=kn0.copy()					#positive module degree
-		km1=kn1.copy()					#negative module degree
-		knm0=W0.copy()					#positive node-to-module degree
-		knm1=W1.copy()					#negative node-to-module degree
+    h=1									#hierarchy index
+    nh=n								#number of nodes in hierarchy
+    ci=[None,np.arange(n)+1]			#hierarchical module assignments
+    q=[-1,0]							#hierarchical modularity values
+    while q[h]-q[h-1]>1e-10:
+        if h>300: 
+            raise BCTParamError('Modularity Infinite Loop Style A.  Please '
+            'contact the developer with this error.')
+        kn0=np.sum(W0,axis=0)			#positive node degree
+        kn1=np.sum(W1,axis=0)			#negative node degree
+        km0=kn0.copy()					#positive module degree
+        km1=kn1.copy()					#negative module degree
+        knm0=W0.copy()					#positive node-to-module degree
+        knm1=W1.copy()					#negative node-to-module degree
 
-		m=np.arange(nh)+1				#initial module assignments
-		flag=True						#flag for within hierarchy search
-		it=0
-		while flag:
-			it+=1
-			if it>1000: 
-				raise BCTParamError('Infinite Loop was detected and stopped. '
-				'This was probably caused by passing in a directed matrix.')
-			flag=False
-			for u in np.random.permutation(nh):	#loop over nodes in random order
-				ma=m[u]-1
-				dQ0=(knm0[u,:]+W0[u,u]-knm0[u,ma])-kn0[u]*(
-					km0+kn0[u]-km0[ma])/s0	#positive dQ
-				dQ1=(knm1[u,:]+W1[u,u]-knm1[u,ma])-kn1[u]*(
-					km1+kn1[u]-km1[ma])/s1	#negative dQ
+        m=np.arange(nh)+1				#initial module assignments
+        flag=True						#flag for within hierarchy search
+        it=0
+        while flag:
+            it+=1
+            if it>1000: 
+                raise BCTParamError('Infinite Loop was detected and stopped. '
+                'This was probably caused by passing in a directed matrix.')
+            flag=False
+            for u in np.random.permutation(nh):	#loop over nodes in random order
+                ma=m[u]-1
+                dQ0=(knm0[u,:]+W0[u,u]-knm0[u,ma])-kn0[u]*(
+                    km0+kn0[u]-km0[ma])/s0	#positive dQ
+                dQ1=(knm1[u,:]+W1[u,u]-knm1[u,ma])-kn1[u]*(
+                    km1+kn1[u]-km1[ma])/s1	#negative dQ
 
-				dQ=d0*dQ0-d1*dQ1		#rescaled changes in modularity
-				dQ[ma]=0				#no changes for same module
+                dQ=d0*dQ0-d1*dQ1		#rescaled changes in modularity
+                dQ[ma]=0				#no changes for same module
 
-				max_dQ=np.max(dQ)		#maximal increase in modularity
-				if max_dQ>1e-10:		#if maximal increase is positive
-					flag=True
-					mb=np.argmax(dQ)
+                max_dQ=np.max(dQ)		#maximal increase in modularity
+                if max_dQ>1e-10:		#if maximal increase is positive
+                    flag=True
+                    mb=np.argmax(dQ)
 
-					knm0[:,mb]+=W0[:,u]	#change positive node-to-module degrees
-					knm0[:,ma]-=W0[:,u]
-					knm1[:,mb]+=W1[:,u]	#change negative node-to-module degrees
-					knm1[:,ma]-=W1[:,u]
-					km0[mb]+=kn0[u]		#change positive module degrees
-					km0[ma]-=kn0[u]
-					km1[mb]+=kn1[u]		#change negative module degrees
-					km1[ma]-=kn1[u]
+                    knm0[:,mb]+=W0[:,u]	#change positive node-to-module degrees
+                    knm0[:,ma]-=W0[:,u]
+                    knm1[:,mb]+=W1[:,u]	#change negative node-to-module degrees
+                    knm1[:,ma]-=W1[:,u]
+                    km0[mb]+=kn0[u]		#change positive module degrees
+                    km0[ma]-=kn0[u]
+                    km1[mb]+=kn1[u]		#change negative module degrees
+                    km1[ma]-=kn1[u]
 
-					m[u]=mb+1			#reassign module
+                    m[u]=mb+1			#reassign module
 
-		h+=1
-		ci.append(np.zeros((n,)))
-		_,m=np.unique(m,return_inverse=True)
-		m+=1
+        h+=1
+        ci.append(np.zeros((n,)))
+        _,m=np.unique(m,return_inverse=True)
+        m+=1
 
-		for u in xrange(nh):		#loop through initial module assignments
-			ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
+        for u in xrange(nh):		#loop through initial module assignments
+            ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
 
-		nh=np.max(m)					#number of new nodes
-		wn0=np.zeros((nh,nh))			#new positive weights matrix
-		wn1=np.zeros((nh,nh))
-		
-		for u in xrange(nh):
-			for v in xrange(u,nh):
-				wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
-				wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
-				wn0[v,u]=wn0[u,v]
-				wn1[v,u]=wn1[u,v]
+        nh=np.max(m)					#number of new nodes
+        wn0=np.zeros((nh,nh))			#new positive weights matrix
+        wn1=np.zeros((nh,nh))
+        
+        for u in xrange(nh):
+            for v in xrange(u,nh):
+                wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
+                wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
+                wn0[v,u]=wn0[u,v]
+                wn1[v,u]=wn1[u,v]
 
-		W0=wn0
-		W1=wn1
+        W0=wn0
+        W1=wn1
 
-		q.append(0)
-		#compute modularity
-		q0=np.trace(W0)-np.sum(np.dot(W0,W0))/s0
-		q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s1
-		q[h]=d0*q0-d1*q1
+        q.append(0)
+        #compute modularity
+        q0=np.trace(W0)-np.sum(np.dot(W0,W0))/s0
+        q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s1
+        q[h]=d0*q0-d1*q1
 
-	_,ci_ret=np.unique(ci[-1],return_inverse=True)
-	ci_ret+=1
+    _,ci_ret=np.unique(ci[-1],return_inverse=True)
+    ci_ret+=1
 
-	return ci_ret,q[-1]
-				
+    return ci_ret,q[-1]
+                
 def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges. 
@@ -2905,99 +2905,99 @@ community by incorporating random node moves into a finetuning
 algorithm.
 
 Input:      W,      undirected (weighted or binary) connection matrix
-				    with positive and negative weights
+                    with positive and negative weights
 
-		    qtype,  modularity type (see Rubinov and Sporns, 2011)
-					   'sta',  Q_* (default)
-					   'pos',  Q_+
-					   'smp',  Q_simple
-					   'gja',  Q_GJA
-					   'neg',  Q_-
+            qtype,  modularity type (see Rubinov and Sporns, 2011)
+                       'sta',  Q_* (default)
+                       'pos',  Q_+
+                       'smp',  Q_simple
+                       'gja',  Q_GJA
+                       'neg',  Q_-
 
-		    ci,     initial community affiliation vector (optional)
-		    p,      probability of random node moves (default .45)
-			seed,	random seed. Default None, seed from /dev/urandom
+            ci,     initial community affiliation vector (optional)
+            p,      probability of random node moves (default .45)
+            seed,	random seed. Default None, seed from /dev/urandom
 
 Output:     Ci,     refined community affiliation vector
-		    Q,      modularity (qtype dependent)
+            Q,      modularity (qtype dependent)
 
 Note: Ci and Q may vary from run to run, due to heuristics in the
 algorithm. Consequently, it may be worth to compare multiple runs.
-	'''
-	np.random.seed(seed)
+    '''
+    np.random.seed(seed)
 
-	n=len(W)
-	if ci is None:
-		ci=np.arange(n)+1
-	else:
-		_,ci=np.unique(ci,return_inverse=True)
-		ci+=1
+    n=len(W)
+    if ci is None:
+        ci=np.arange(n)+1
+    else:
+        _,ci=np.unique(ci,return_inverse=True)
+        ci+=1
 
-	W0=W*(W>0)								#positive weights matrix
-	W1=-W*(W<0)								#negative weights matrix
-	s0=np.sum(W0)							#positive sum of weights
-	s1=np.sum(W1)							#negative sum of weights
-	Knm0=np.zeros((n,n))					#positive node-to-module degree
-	Knm1=np.zeros((n,n))					#negative node-to-module degree
+    W0=W*(W>0)								#positive weights matrix
+    W1=-W*(W<0)								#negative weights matrix
+    s0=np.sum(W0)							#positive sum of weights
+    s1=np.sum(W1)							#negative sum of weights
+    Knm0=np.zeros((n,n))					#positive node-to-module degree
+    Knm1=np.zeros((n,n))					#negative node-to-module degree
 
-	for m in xrange(int(np.max(ci))):		#loop over initial modules
-		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):		#loop over initial modules
+        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
-	Kn0=np.sum(Knm0,axis=1)					#positive node degree
-	Kn1=np.sum(Knm1,axis=1)					#negative node degree
-	Km0=np.sum(Knm0,axis=0)					#positive module degree
-	Km1=np.sum(Knm1,axis=0)					#negaitve module degree
+    Kn0=np.sum(Knm0,axis=1)					#positive node degree
+    Kn1=np.sum(Knm1,axis=1)					#negative node degree
+    Km0=np.sum(Knm0,axis=0)					#positive module degree
+    Km1=np.sum(Knm1,axis=0)					#negaitve module degree
 
-	if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-	elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-	elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-	elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-	elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-	else: raise KeyError('modularity type unknown')
-	
-	if not s0:							#adjust for absent positive weights
-		s0=1; d0=0
-	if not s1:							#adjust for absent negative weights
-		s1=1; d1=0
+    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
+    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
+    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
+    else: raise KeyError('modularity type unknown')
+    
+    if not s0:							#adjust for absent positive weights
+        s0=1; d0=0
+    if not s1:							#adjust for absent negative weights
+        s1=1; d1=0
 
-	for u in np.random.permutation(n):		#loop over nodes in random order
-		ma=ci[u]-1							#current module
-		r=np.random.random()<p
-		if r:
-			mb=np.random.randint(n)		 #select new module randomly
-		else:
-			dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
-			dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
-			dq=d0*dq0-d1*dq1
-			dq[ma]=0
+    for u in np.random.permutation(n):		#loop over nodes in random order
+        ma=ci[u]-1							#current module
+        r=np.random.random()<p
+        if r:
+            mb=np.random.randint(n)		 #select new module randomly
+        else:
+            dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
+            dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
+            dq=d0*dq0-d1*dq1
+            dq[ma]=0
 
-			max_dq=np.max(dq)
-			mb=np.argmax(dq)
+            max_dq=np.max(dq)
+            mb=np.argmax(dq)
 
-		if r or max_dq>1e-10:
-			ci[u]=mb+1
+        if r or max_dq>1e-10:
+            ci[u]=mb+1
 
-			Knm0[:,mb]+=W0[:,u]
-			Knm0[:,ma]-=W0[:,u]
-			Knm1[:,mb]+=W1[:,u]
-			Knm1[:,ma]-=W1[:,u]
-			Km0[mb]+=Kn0[u]
-			Km0[ma]-=Kn0[u]
-			Km1[mb]+=Kn1[u]
-			Km1[ma]-=Kn1[u]
+            Knm0[:,mb]+=W0[:,u]
+            Knm0[:,ma]-=W0[:,u]
+            Knm1[:,mb]+=W1[:,u]
+            Knm1[:,ma]-=W1[:,u]
+            Km0[mb]+=Kn0[u]
+            Km0[ma]-=Kn0[u]
+            Km1[mb]+=Kn1[u]
+            Km1[ma]-=Kn1[u]
 
-	_,ci=np.unique(ci,return_inverse=True)
-	ci+=1
-	m=np.tile(ci,(n,1))
-	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-	q=d0*np.sum(q0)-d1*np.sum(q1)
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
+    m=np.tile(ci,(n,1))
+    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
+    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
+    q=d0*np.sum(q0)-d1*np.sum(q1)
 
-	return ci,q
+    return ci,q
 
 def modularity_und(A,gamma=1,kci=None):
-	'''
+    '''
 The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
 within-group edges, and minimizes the number of between-group edges.
@@ -3005,169 +3005,169 @@ The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.
 
 Input:      W,      undirected (weighted or binary) connection matrix.
-			gamma,	modularity resolution parameter
-					gamma>1:	detects smaller modules
-					0<=gamma<1:	detects larger modules
-					gamma=1:	no scaling of module size (default)
-			kci		existing ci.  If specified, only calculates the
-					modularity on the given community structure.  If None
-					(default), generates optimal ci by modularity maximization
+            gamma,	modularity resolution parameter
+                    gamma>1:	detects smaller modules
+                    0<=gamma<1:	detects larger modules
+                    gamma=1:	no scaling of module size (default)
+            kci		existing ci.  If specified, only calculates the
+                    modularity on the given community structure.  If None
+                    (default), generates optimal ci by modularity maximization
 
 Outputs:    Ci,     optimal community structure
-		    Q,      maximized modularity
+            Q,      maximized modularity
 
 Note: This algorithm is deterministic. The matlab function bearing this name 
 incorrectly disclaims that the outcome depends on heuristics involving a random
 seed.  The louvain method does depend on a random seed, but this function uses
 a modularity maximization algorithm which does not.
 '''
-	from scipy import linalg
-	n=len(A)							#number of vertices
-	k=np.sum(A,axis=0)					#degree
-	m=np.sum(k)							#number of edges (each undirected edge
-											#is counted twice)
-	B=A-gamma*np.outer(k,k)/m			#initial modularity matrix
+    from scipy import linalg
+    n=len(A)							#number of vertices
+    k=np.sum(A,axis=0)					#degree
+    m=np.sum(k)							#number of edges (each undirected edge
+                                            #is counted twice)
+    B=A-gamma*np.outer(k,k)/m			#initial modularity matrix
 
-	init_mod=np.arange(n)				#initial one big module
-	modules=[]							#output modules list
+    init_mod=np.arange(n)				#initial one big module
+    modules=[]							#output modules list
 
-	def recur(module):
-		n=len(module)
-		modmat=B[module][:,module]
-		modmat-=np.diag(np.sum(modmat,axis=0))
+    def recur(module):
+        n=len(module)
+        modmat=B[module][:,module]
+        modmat-=np.diag(np.sum(modmat,axis=0))
 
-		vals,vecs=linalg.eigh(modmat)	#biggest eigendecomposition
-		max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
-		if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
-			max_eigvec=max_eigvec[:,0]
-		mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
-		q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
+        vals,vecs=linalg.eigh(modmat)	#biggest eigendecomposition
+        max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
+        if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
+            max_eigvec=max_eigvec[:,0]
+        mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
+        q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
 
-		if q>0:							#change in modularity was positive
-			qmax=q
-			np.fill_diagonal(modmat, 0)
-			it=np.ma.masked_array(np.ones((n,)),False)
-			mod_asgn_iter=mod_asgn.copy()
-			while np.any(it):			#do some iterative fine tuning
-				#this line is linear algebra voodoo
-				q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
-				qmax=np.max(q_iter*it)
-				imax,=np.where(q_iter==qmax)
-				mod_asgn_iter[imax]*=-1	#does switching increase modularity?
-				it[imax]=np.ma.masked
-				if qmax>q:
-					q=qmax
-					mod_asgn=mod_asgn_iter
-			if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
-				modules.append(np.array(module).tolist())
-				return
-			else:
-				mod1=module[np.where(mod_asgn==1)]
-				mod2=module[np.where(mod_asgn==-1)]
+        if q>0:							#change in modularity was positive
+            qmax=q
+            np.fill_diagonal(modmat, 0)
+            it=np.ma.masked_array(np.ones((n,)),False)
+            mod_asgn_iter=mod_asgn.copy()
+            while np.any(it):			#do some iterative fine tuning
+                #this line is linear algebra voodoo
+                q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
+                qmax=np.max(q_iter*it)
+                imax,=np.where(q_iter==qmax)
+                mod_asgn_iter[imax]*=-1	#does switching increase modularity?
+                it[imax]=np.ma.masked
+                if qmax>q:
+                    q=qmax
+                    mod_asgn=mod_asgn_iter
+            if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
+                modules.append(np.array(module).tolist())
+                return
+            else:
+                mod1=module[np.where(mod_asgn==1)]
+                mod2=module[np.where(mod_asgn==-1)]
 
-				recur(mod1)
-				recur(mod2)
-		else:							#change in modularity was negative or 0
-			modules.append(np.array(module).tolist())
-				
-	#adjustment to one-based indexing occurs in ls2ci
-	if kci is None:
-		recur(init_mod)
-		ci=ls2ci(modules)
-	else:
-		ci=kci
-	s=np.tile(ci,(n,1))
-	q=np.sum(np.logical_not(s-s.T)*B/m)
-	return ci,q
+                recur(mod1)
+                recur(mod2)
+        else:							#change in modularity was negative or 0
+            modules.append(np.array(module).tolist())
+                
+    #adjustment to one-based indexing occurs in ls2ci
+    if kci is None:
+        recur(init_mod)
+        ci=ls2ci(modules)
+    else:
+        ci=kci
+    s=np.tile(ci,(n,1))
+    q=np.sum(np.logical_not(s-s.T)*B/m)
+    return ci,q
 
 def modularity_und_sign(W,ci,qtype='sta'):
-	'''
+    '''
 This function simply calculates the signed modularity for a given partition.
 It does not do automatic partition generation right now.
 
 Inputs:		w, weighted and potentially signed adjacency matrix
-			ci, community partition
-		    qtype,  modularity type (see Rubinov and Sporns, 2011)
-					   'sta',  Q_* (default)
-					   'pos',  Q_+
-					   'smp',  Q_simple
-					   'gja',  Q_GJA
-					   'neg',  Q_-
+            ci, community partition
+            qtype,  modularity type (see Rubinov and Sporns, 2011)
+                       'sta',  Q_* (default)
+                       'pos',  Q_+
+                       'smp',  Q_simple
+                       'gja',  Q_GJA
+                       'neg',  Q_-
 Outputs:	ci, the same partition that was input (for api consistency)
-			q, signed modularity
-	'''
-	n=len(W)
-	_,ci=np.unique(ci, return_inverse=True)
-	ci+=1
+            q, signed modularity
+    '''
+    n=len(W)
+    _,ci=np.unique(ci, return_inverse=True)
+    ci+=1
 
-	W0=W*(W>0)								#positive weights matrix
-	W1=-W*(W<0)								#negative weights matrix
-	s0=np.sum(W0)							#positive sum of weights
-	s1=np.sum(W1)							#negative sum of weights
-	Knm0=np.zeros((n,n))					#positive node-to-module degree
-	Knm1=np.zeros((n,n))					#negative node-to-module degree
+    W0=W*(W>0)								#positive weights matrix
+    W1=-W*(W<0)								#negative weights matrix
+    s0=np.sum(W0)							#positive sum of weights
+    s1=np.sum(W1)							#negative sum of weights
+    Knm0=np.zeros((n,n))					#positive node-to-module degree
+    Knm1=np.zeros((n,n))					#negative node-to-module degree
 
-	for m in xrange(int(np.max(ci))):		#loop over initial modules
-		Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-		Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):		#loop over initial modules
+        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
+        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
-	Kn0=np.sum(Knm0,axis=1)					#positive node degree
-	Kn1=np.sum(Knm1,axis=1)					#negative node degree
-	Km0=np.sum(Knm0,axis=0)					#positive module degree
-	Km1=np.sum(Knm1,axis=0)					#negaitve module degree
+    Kn0=np.sum(Knm0,axis=1)					#positive node degree
+    Kn1=np.sum(Knm1,axis=1)					#negative node degree
+    Km0=np.sum(Knm0,axis=0)					#positive module degree
+    Km1=np.sum(Knm1,axis=0)					#negaitve module degree
 
-	if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-	elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-	elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-	elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-	elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-	else: raise KeyError('modularity type unknown')
+    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
+    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
+    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
+    else: raise KeyError('modularity type unknown')
 
-	if not s0:							#adjust for absent positive weights
-		s0=1; d0=0
-	if not s1:							#adjust for absent negative weights
-		s1=1; d1=0
+    if not s0:							#adjust for absent positive weights
+        s0=1; d0=0
+    if not s1:							#adjust for absent negative weights
+        s1=1; d1=0
 
-	m=np.tile(ci,(n,1))
+    m=np.tile(ci,(n,1))
 
-	q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-	q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-	q=d0*np.sum(q0)-d1*np.sum(q1)
+    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
+    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
+    q=d0*np.sum(q0)-d1*np.sum(q1)
 
-	return ci,q
+    return ci,q
 
 def partition_distance(cx,cy):
-	'''
+    '''
 This function quantifies the distance between pairs of community
 partitions with information theoretic measures.
 
 Inputs:         Cx,         Community affiliation vector X
-			    Cy,         Community affiliation vector Y
+                Cy,         Community affiliation vector Y
 
 Outputs:        VIn,        Normalized variation of information
-			    MIn,        Normalized mutual information
+                MIn,        Normalized mutual information
 
 (Definitions:
    VIn = [H(X) + H(Y) - 2MI(X,Y)]/log(n)
    MIn = 2MI(X,Y)/[H(X)+H(Y)]
 where H is entropy, MI is mutual information and n is number of nodes)
-	'''
-	n=np.size(cx)
-	_,cx=np.unique(cx,return_inverse=True)
-	_,cy=np.unique(cy,return_inverse=True)
-	_,cxy=np.unique(cx+cy*1j,return_inverse=True)
-	
-	Px=np.histogram(cx,bins=np.max(cx))[0]/n
-	Py=np.histogram(cy,bins=np.max(cy))[0]/n
-	Pxy=np.histogram(cxy,bins=np.max(cxy)+1)[0]/n
+    '''
+    n=np.size(cx)
+    _,cx=np.unique(cx,return_inverse=True)
+    _,cy=np.unique(cy,return_inverse=True)
+    _,cxy=np.unique(cx+cy*1j,return_inverse=True)
+    
+    Px=np.histogram(cx,bins=np.max(cx))[0]/n
+    Py=np.histogram(cy,bins=np.max(cy))[0]/n
+    Pxy=np.histogram(cxy,bins=np.max(cxy)+1)[0]/n
 
-	Hx=-np.sum(Px*np.log(Px))
-	Hy=-np.sum(Py*np.log(Py))
-	Hxy=-np.sum(Pxy*np.log(Pxy))
+    Hx=-np.sum(Px*np.log(Px))
+    Hy=-np.sum(Py*np.log(Py))
+    Hxy=-np.sum(Pxy*np.log(Pxy))
 
-	Vin=(2*Hxy-Hx-Hy)/np.log(n)
-	Min=2*(Hx+Hy-Hxy)/(Hx+Hy)
-	return Vin,Min
+    Vin=(2*Hxy-Hx-Hy)/np.log(n)
+    Min=2*(Hx+Hy-Hxy)/(Hx+Hy)
+    return Vin,Min
 
 ###############################################################################
 # MOTIFS
@@ -3177,151 +3177,151 @@ motiflib='motif34lib.mat'
 
 #FIXME there may be some subtle bugs here
 def find_motif34(m,n=None):
-	'''
+    '''
 This function returns all motif isomorphs for a given motif id and 
 class (3 or 4). The function also returns the motif id for a given
 motif matrix
 
 1. Input:       Motif_id,           e.g. 1 to 13, if class is 3
-			    Motif_class,        number of nodes, 3 or 4.
+                Motif_class,        number of nodes, 3 or 4.
    Output:      Motif_matrices,     all isomorphs for the given motif
 
 2. Input:       Motif_matrix        e.g. [0 1 0; 0 0 1; 1 0 0]
    Output       Motif_id            e.g. 1 to 13, if class is 3
 
-	The default value of Motif_class is None, so specify it for use case #1
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	z=(0,)
-	if n==3:
-		mot=io.loadmat(fname)
-		m3=mot['m3']; id3=mot['id3'].squeeze()
-		ix,=np.where(id3==m)
-		M=np.zeros((3,3,len(ix)))
-		for i,ind in enumerate(ix):
-			M[:,:,i]=np.reshape(np.concatenate(
-				(z,m3[ind,0:3],z,m3[ind,3:6],z)),(3,3))
-	elif n==4:
-		mot=io.loadmat(fname)
-		m4=mot['m4']; id4=mot['id4'].squeeze()
-		ix,=np.where(id4==m)
-		M=np.zeros((4,4,len(ix)))
-		for i,ind in enumerate(ix):
-			M[:,:,i]=np.reshape(np.concatenate(
-				(z,m4[ind,0:4],z,m4[ind,4:8],z,m4[ind,8:12],z)),(4,4))
-	elif n is None:
-		try:
-			m=np.array(m)
-		except TypeError:
-			raise BCTParamError('motif matrix must be an array-like')
-		if m.shape[0]==3:
-			M,=np.where(motif3struct_bin(m))
-		elif m.shape[0]==4:
-			M,=np.where(motif4struct_bin(m))
-		else:
-			raise BCTParamError('motif matrix must be 3x3 or 4x4')
-	else:
-		raise BCTParamError('Invalid motif class, must be 3, 4, or None')
+    The default value of Motif_class is None, so specify it for use case #1
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    z=(0,)
+    if n==3:
+        mot=io.loadmat(fname)
+        m3=mot['m3']; id3=mot['id3'].squeeze()
+        ix,=np.where(id3==m)
+        M=np.zeros((3,3,len(ix)))
+        for i,ind in enumerate(ix):
+            M[:,:,i]=np.reshape(np.concatenate(
+                (z,m3[ind,0:3],z,m3[ind,3:6],z)),(3,3))
+    elif n==4:
+        mot=io.loadmat(fname)
+        m4=mot['m4']; id4=mot['id4'].squeeze()
+        ix,=np.where(id4==m)
+        M=np.zeros((4,4,len(ix)))
+        for i,ind in enumerate(ix):
+            M[:,:,i]=np.reshape(np.concatenate(
+                (z,m4[ind,0:4],z,m4[ind,4:8],z,m4[ind,8:12],z)),(4,4))
+    elif n is None:
+        try:
+            m=np.array(m)
+        except TypeError:
+            raise BCTParamError('motif matrix must be an array-like')
+        if m.shape[0]==3:
+            M,=np.where(motif3struct_bin(m))
+        elif m.shape[0]==4:
+            M,=np.where(motif4struct_bin(m))
+        else:
+            raise BCTParamError('motif matrix must be 3x3 or 4x4')
+    else:
+        raise BCTParamError('Invalid motif class, must be 3, 4, or None')
 
-	return M
+    return M
 
 def make_motif34lib():
-	'''
+    '''
 This function generates the motif34lib.mat library required for all
 other motif computations.
-	'''
-	from scipy import io; import os
-	
-	def motif3generate():
-		n=0
-		M=np.zeros((54,6),dtype=bool)	#isomorphs
-		CL=np.zeros((54,6),dtype=np.uint8)#canonical labels (predecssors of IDs)
-		cl=np.zeros((6,),dtype=np.uint8)
-		for i in xrange(2**6):			#loop through all subgraphs
-			m='{0:b}'.format(i)
-			m=str().zfill(6-len(m))+m
-			G=np.array(((0,m[2],m[4]),(m[0],0,m[5]),(m[1],m[3],0)),dtype=int)
-			ko=np.sum(G,axis=1)
-			ki=np.sum(G,axis=0)
-			if np.all(ko+ki):			#if subgraph weakly connected
-				u=np.array((ko,ki)).T	
-				cl.flat=u[np.lexsort((ki,ko))]
-				CL[n,:]=cl				#assign motif label to isomorph
-				M[n,:]=np.array((G.T.flat[1:4],G.T.flat[5:8])).flat
-				n+=1
+    '''
+    from scipy import io; import os
+    
+    def motif3generate():
+        n=0
+        M=np.zeros((54,6),dtype=bool)	#isomorphs
+        CL=np.zeros((54,6),dtype=np.uint8)#canonical labels (predecssors of IDs)
+        cl=np.zeros((6,),dtype=np.uint8)
+        for i in xrange(2**6):			#loop through all subgraphs
+            m='{0:b}'.format(i)
+            m=str().zfill(6-len(m))+m
+            G=np.array(((0,m[2],m[4]),(m[0],0,m[5]),(m[1],m[3],0)),dtype=int)
+            ko=np.sum(G,axis=1)
+            ki=np.sum(G,axis=0)
+            if np.all(ko+ki):			#if subgraph weakly connected
+                u=np.array((ko,ki)).T	
+                cl.flat=u[np.lexsort((ki,ko))]
+                CL[n,:]=cl				#assign motif label to isomorph
+                M[n,:]=np.array((G.T.flat[1:4],G.T.flat[5:8])).flat
+                n+=1
 
-		#convert CLs into motif IDs
-		_,ID=np.unique(CL.view(CL.dtype.descr*CL.shape[1]),return_inverse=True)
-		ID+=1
+        #convert CLs into motif IDs
+        _,ID=np.unique(CL.view(CL.dtype.descr*CL.shape[1]),return_inverse=True)
+        ID+=1
 
-		#convert IDs into sporns & kotter classification
-		id_mika=(1,3,4,6,7,8,11); id_olaf=(-3,-6,-1,-11,-4,-7,-8)
-		for mika,olaf in zip(id_mika,id_olaf):
-			ID[ID==mika]=olaf
-		ID=np.abs(ID)
+        #convert IDs into sporns & kotter classification
+        id_mika=(1,3,4,6,7,8,11); id_olaf=(-3,-6,-1,-11,-4,-7,-8)
+        for mika,olaf in zip(id_mika,id_olaf):
+            ID[ID==mika]=olaf
+        ID=np.abs(ID)
 
-		ix=np.argsort(ID)
-		ID=ID[ix]						#sort IDs
-		M=M[ix,:]						#sort isomorphs
-		N=np.squeeze(np.sum(M,axis=1))	#number of edges
-		Mn=np.array(np.sum(np.tile(np.power(10,np.arange(5,-1,-1)),
-			(M.shape[0],1))*M,axis=1),dtype=np.uint32)
-		return M,Mn,ID,N
-	
-	def motif4generate():
-		n=0
-		M=np.zeros((3834,12),dtype=bool)	#isomorphs
-		CL=np.zeros((3834,16),dtype=np.uint8)	#canonical labels
-		cl=np.zeros((16,),dtype=np.uint8)
-		for i in xrange (2**12):			#loop through all subgraphs
-			m='{0:b}'.format(i)
-			m=str().zfill(12-len(m))+m
-			G=np.array(((0,m[3],m[6],m[9]),(m[0],0,m[7],m[10]),
-				(m[1],m[4],0,m[11]),(m[2],m[5],m[8],0)),dtype=int)
-			Gs=G+G.T
-			v=Gs[0,:]
-			for j in xrange(2):
-				v=np.any(Gs[v!=0,:],axis=0)+v
-			if np.all(v):					#if subgraph weakly connected
-				G2=np.dot(G,G)!=0
-				ko=np.sum(G,axis=1)
-				ki=np.sum(G,axis=0)
-				ko2=np.sum(G2,axis=1)
-				ki2=np.sum(G2,axis=0)
+        ix=np.argsort(ID)
+        ID=ID[ix]						#sort IDs
+        M=M[ix,:]						#sort isomorphs
+        N=np.squeeze(np.sum(M,axis=1))	#number of edges
+        Mn=np.array(np.sum(np.tile(np.power(10,np.arange(5,-1,-1)),
+            (M.shape[0],1))*M,axis=1),dtype=np.uint32)
+        return M,Mn,ID,N
+    
+    def motif4generate():
+        n=0
+        M=np.zeros((3834,12),dtype=bool)	#isomorphs
+        CL=np.zeros((3834,16),dtype=np.uint8)	#canonical labels
+        cl=np.zeros((16,),dtype=np.uint8)
+        for i in xrange (2**12):			#loop through all subgraphs
+            m='{0:b}'.format(i)
+            m=str().zfill(12-len(m))+m
+            G=np.array(((0,m[3],m[6],m[9]),(m[0],0,m[7],m[10]),
+                (m[1],m[4],0,m[11]),(m[2],m[5],m[8],0)),dtype=int)
+            Gs=G+G.T
+            v=Gs[0,:]
+            for j in xrange(2):
+                v=np.any(Gs[v!=0,:],axis=0)+v
+            if np.all(v):					#if subgraph weakly connected
+                G2=np.dot(G,G)!=0
+                ko=np.sum(G,axis=1)
+                ki=np.sum(G,axis=0)
+                ko2=np.sum(G2,axis=1)
+                ki2=np.sum(G2,axis=0)
 
-				u=np.array((ki,ko,ki2,ko2)).T	
-				cl.flat=u[np.lexsort((ko2,ki2,ko,ki))]
-				CL[n,:]=cl				#assign motif label to isomorph
-				M[n,:]=np.array((G.T.flat[1:5],G.T.flat[6:10],
-					G.T.flat[11:15])).flat
-				n+=1
+                u=np.array((ki,ko,ki2,ko2)).T	
+                cl.flat=u[np.lexsort((ko2,ki2,ko,ki))]
+                CL[n,:]=cl				#assign motif label to isomorph
+                M[n,:]=np.array((G.T.flat[1:5],G.T.flat[6:10],
+                    G.T.flat[11:15])).flat
+                n+=1
 
-		#convert CLs into motif IDs
-		_,ID=np.unique(CL.view(CL.dtype.descr*CL.shape[1]),return_inverse=True)
-		ID+=1
+        #convert CLs into motif IDs
+        _,ID=np.unique(CL.view(CL.dtype.descr*CL.shape[1]),return_inverse=True)
+        ID+=1
 
-		ix=np.argsort(ID)
-		ID=ID[ix]						#sort IDs
-		M=M[ix,:]						#sort isomorphs
-		N=np.sum(M,axis=1)				#number of edges
-		Mn=np.array(np.sum(np.tile(np.power(10,np.arange(11,-1,-1)),
-			(M.shape[0],1))*M,axis=1),dtype=np.uint64)
-		return M,Mn,ID,N
+        ix=np.argsort(ID)
+        ID=ID[ix]						#sort IDs
+        M=M[ix,:]						#sort isomorphs
+        N=np.sum(M,axis=1)				#number of edges
+        Mn=np.array(np.sum(np.tile(np.power(10,np.arange(11,-1,-1)),
+            (M.shape[0],1))*M,axis=1),dtype=np.uint64)
+        return M,Mn,ID,N
 
-	dir=os.path.dirname(__file__)
-	fname=os.path.join(dir,motiflib)
-	if os.path.exists(fname):
-		print "motif34lib already exists"; return
+    dir=os.path.dirname(__file__)
+    fname=os.path.join(dir,motiflib)
+    if os.path.exists(fname):
+        print "motif34lib already exists"; return
 
-	m3,m3n,id3,n3=motif3generate()
-	m4,m4n,id4,n4=motif4generate()
+    m3,m3n,id3,n3=motif3generate()
+    m4,m4n,id4,n4=motif4generate()
 
-	io.savemat(fname,mdict={'m3':m3,'m3n':m3n,'id3':id3,'n3':n3,
-		'm4':m4,'m4n':m4n,'id4':id4,'n4':n4})
+    io.savemat(fname,mdict={'m3':m3,'m3n':m3n,'id3':id3,'n3':n3,
+        'm4':m4,'m4n':m4n,'id4':id4,'n4':n4})
 
 def motif3funct_bin(A):
-	'''
+    '''
 Functional motifs are subsets of connection patterns embedded within 
 anatomical motifs. Motif frequency is the frequency of occurrence of 
 motifs around a node.
@@ -3329,224 +3329,224 @@ motifs around a node.
 Input:      A,      binary directed connection matrix
 
 Output:     F,      motif frequency matrix
-		    f,      motif frequency vector (averaged over all nodes)
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m3=mot['m3']; id3=mot['id3'].squeeze(); n3=mot['n3'].squeeze()
+            f,      motif frequency vector (averaged over all nodes)
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m3=mot['m3']; id3=mot['id3'].squeeze(); n3=mot['n3'].squeeze()
 
-	n=len(A)							#number of vertices in A
-	f=np.zeros((13,))					#motif count for whole graph
-	F=np.zeros((13,n))					#motif frequency
+    n=len(A)							#number of vertices in A
+    f=np.zeros((13,))					#motif count for whole graph
+    F=np.zeros((13,n))					#motif frequency
 
-	A=binarize(A,copy=True)				#ensure A is binary
-	As=np.logical_or(A,A.T)				#symmetrized adjmat
+    A=binarize(A,copy=True)				#ensure A is binary
+    As=np.logical_or(A,A.T)				#symmetrized adjmat
 
-	for u in xrange(n-2):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			#v2: neighbors of v1 (>u)
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0					#not already in V1
-				#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,2]))
-				#find all contained isomorphs
-				ix=(np.dot(m3,a)==n3)
-				id=id3[ix]-1
-				
-				#unique motif occurrences
-				idu,jx=np.unique(id,return_index=True)
-				jx=np.append((0,),jx+1)
+    for u in xrange(n-2):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            #v2: neighbors of v1 (>u)
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0					#not already in V1
+                #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,2]))
+                #find all contained isomorphs
+                ix=(np.dot(m3,a)==n3)
+                id=id3[ix]-1
+                
+                #unique motif occurrences
+                idu,jx=np.unique(id,return_index=True)
+                jx=np.append((0,),jx+1)
 
-				mu=len(idu)				#number of unique motifs
-				f2=np.zeros((mu,))
-				for h in xrange(mu):	#for each unique motif
-					f2[h]=jx[h+1]-jx[h]	#and frequencies
+                mu=len(idu)				#number of unique motifs
+                f2=np.zeros((mu,))
+                for h in xrange(mu):	#for each unique motif
+                    f2[h]=jx[h+1]-jx[h]	#and frequencies
 
-				#then add to a cumulative count
-				f[idu]+=f2
-				#numpy indexing is teh sucks :(
-				F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2
+                #then add to a cumulative count
+                f[idu]+=f2
+                #numpy indexing is teh sucks :(
+                F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2
 
-	return f,F
+    return f,F
 
 def motif3funct_wei(W):
-	'''
+    '''
 Functional motifs are subsets of connection patterns embedded within 
 anatomical motifs. Motif frequency is the frequency of occurrence of 
 motifs around a node. Motif intensity and coherence are weighted 
 generalizations of motif frequency. 
 
 Input:      W,      weighted directed connection matrix
-				   (all weights must be between 0 and 1)
+                   (all weights must be between 0 and 1)
 
 Output:     I,      motif intensity matrix
-		    Q,      motif coherence matrix
-		    F,      morif frequency matrix
+            Q,      motif coherence matrix
+            F,      morif frequency matrix
 
 Note: Average intensity and coherence are given by I./F and Q./F.
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m3=mot['m3']; id3=mot['id3'].squeeze(); n3=mot['n3'].squeeze()
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m3=mot['m3']; id3=mot['id3'].squeeze(); n3=mot['n3'].squeeze()
 
-	n=len(W)
-	I=np.zeros((13,n))				#intensity
-	Q=np.zeros((13,n))				#coherence
-	F=np.zeros((13,n))				#frequency
+    n=len(W)
+    I=np.zeros((13,n))				#intensity
+    Q=np.zeros((13,n))				#coherence
+    F=np.zeros((13,n))				#frequency
 
-	A=binarize(W,copy=True)			#create binary adjmat
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
+    A=binarize(W,copy=True)			#create binary adjmat
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-	for u in xrange(n-2):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			#v2: neighbors of v1 (>u)
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])	
-			V2[V1]=0					#not already in V1
-				#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,v2]))
-				ix=(np.dot(m3,a)==n3)
-				m=np.sum(ix)
+    for u in xrange(n-2):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            #v2: neighbors of v1 (>u)
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])	
+            V2[V1]=0					#not already in V1
+                #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,v2]))
+                ix=(np.dot(m3,a)==n3)
+                m=np.sum(ix)
 
-				w=np.array((W[v1,u],W[v2,u],W[u,v1],W[v2,v1],W[u,v2],W[v1,v2]))
-				
-				M=m3[ix,:]*np.tile(w,(m,1))
-				id=id3[ix]-1
-				l=n3[ix]
-				x=np.sum(M,axis=1)/l		#arithmetic mean
-				M[M==0]=1					#enable geometric mean
-				i=np.prod(M,axis=1)**(1/l)	#intensity
-				q=i/x						#coherence
+                w=np.array((W[v1,u],W[v2,u],W[u,v1],W[v2,v1],W[u,v2],W[v1,v2]))
+                
+                M=m3[ix,:]*np.tile(w,(m,1))
+                id=id3[ix]-1
+                l=n3[ix]
+                x=np.sum(M,axis=1)/l		#arithmetic mean
+                M[M==0]=1					#enable geometric mean
+                i=np.prod(M,axis=1)**(1/l)	#intensity
+                q=i/x						#coherence
 
-				#unique motif occurrences
-				idu,jx=np.unique(id,return_index=True)
-				jx=np.append((0,),jx+1)
+                #unique motif occurrences
+                idu,jx=np.unique(id,return_index=True)
+                jx=np.append((0,),jx+1)
 
-				mu=len(idu)				#number of unique motifs
-				i2,q2,f2=np.zeros((3,mu))
+                mu=len(idu)				#number of unique motifs
+                i2,q2,f2=np.zeros((3,mu))
 
-				for h in xrange(mu):
-					i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
-					q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
-					f2[h]=jx[h+1]-jx[h]
+                for h in xrange(mu):
+                    i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
+                    q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
+                    f2[h]=jx[h+1]-jx[h]
 
-				#then add to cumulative count
-				I[idu,u]+=i2; I[idu,v1]+=i2; I[idu,v2]+=i2
-				Q[idu,u]+=q2; Q[idu,v1]+=q2; Q[idu,v2]+=q2
-				F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2
+                #then add to cumulative count
+                I[idu,u]+=i2; I[idu,v1]+=i2; I[idu,v2]+=i2
+                Q[idu,u]+=q2; Q[idu,v1]+=q2; Q[idu,v2]+=q2
+                F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2
 
-	return I,Q,F
+    return I,Q,F
 
 def motif3struct_bin(A):
-	'''
+    '''
 Structural motifs are patterns of local connectivity. Motif frequency
 is the frequency of occurrence of motifs around a node.
 
 Input:      A,      binary directed connection matrix
 
 Output:     F,      motif frequency matrix
-		    f,      motif frequency vector (averaged over all nodes)
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m3n=mot['m3n']; id3=mot['id3'].squeeze();
+            f,      motif frequency vector (averaged over all nodes)
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m3n=mot['m3n']; id3=mot['id3'].squeeze();
 
-	n=len(A)							#number of vertices in A
-	f=np.zeros((13,))					#motif count for whole graph
-	F=np.zeros((13,n))					#motif frequency
+    n=len(A)							#number of vertices in A
+    f=np.zeros((13,))					#motif count for whole graph
+    F=np.zeros((13,n))					#motif frequency
 
-	A=binarize(A,copy=True)				#ensure A is binary
-	As=np.logical_or(A,A.T)				#symmetrized adjmat
+    A=binarize(A,copy=True)				#ensure A is binary
+    As=np.logical_or(A,A.T)				#symmetrized adjmat
 
-	for u in xrange(n-2):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			#v2: neighbors of v1 (>u)
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0					#not already in V1
-				#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,v2]))
-				s=np.uint32(np.sum(np.power(10,np.arange(5,-1,-1))*a))
-				ix=id3[np.squeeze(s==m3n)]-1
-				F[ix,u]+=1; F[ix,v1]+=1; F[ix,v2]+=1
-				f[ix]+=1
+    for u in xrange(n-2):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            #v2: neighbors of v1 (>u)
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0					#not already in V1
+                #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,v2]))
+                s=np.uint32(np.sum(np.power(10,np.arange(5,-1,-1))*a))
+                ix=id3[np.squeeze(s==m3n)]-1
+                F[ix,u]+=1; F[ix,v1]+=1; F[ix,v2]+=1
+                f[ix]+=1
 
-	return f,F
+    return f,F
 
 def motif3struct_wei(W):
-	'''
+    '''
 Structural motifs are patterns of local connectivity. Motif frequency
 is the frequency of occurrence of motifs around a node. Motif intensity
 and coherence are weighted generalizations of motif frequency. 
 m
 Input:      W,      weighted directed connection matrix
-				   (all weights must be between 0 and 1)
+                   (all weights must be between 0 and 1)
 
 Output:     I,      motif intensity matrix
-		    Q,      motif coherence matrix
-		    F,      morif frequency matrix
+            Q,      motif coherence matrix
+            F,      morif frequency matrix
 
 Note: Average intensity and coherence are given by I./F and Q./F.
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m3=mot['m3'];m3n=mot['m3n'];id3=mot['id3'].squeeze();n3=mot['n3'].squeeze()
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m3=mot['m3'];m3n=mot['m3n'];id3=mot['id3'].squeeze();n3=mot['n3'].squeeze()
 
-	n=len(W)						#number of vertices in W
-	I=np.zeros((13,n))				#intensity
-	Q=np.zeros((13,n))				#coherence
-	F=np.zeros((13,n))				#frequency
+    n=len(W)						#number of vertices in W
+    I=np.zeros((13,n))				#intensity
+    Q=np.zeros((13,n))				#coherence
+    F=np.zeros((13,n))				#frequency
 
-	A=binarize(W,copy=True)			#create binary adjmat
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
+    A=binarize(W,copy=True)			#create binary adjmat
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-	for u in xrange(n-2):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			#v2: neighbors of v1 (>u)
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0					#not already in V1
-				#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,2]))
-				s=np.uint32(np.sum(np.power(10,np.arange(5,-1,-1))*a))
-				ix=np.squeeze(s==m3n)
+    for u in xrange(n-2):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            #v2: neighbors of v1 (>u)
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0					#not already in V1
+                #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                a=np.array((A[v1,u],A[v2,u],A[u,v1],A[v2,v1],A[u,v2],A[v1,2]))
+                s=np.uint32(np.sum(np.power(10,np.arange(5,-1,-1))*a))
+                ix=np.squeeze(s==m3n)
 
-				w=np.array((W[v1,u],W[v2,u],W[u,v1],W[v2,v1],W[u,v2],W[v1,v2]))
-				
-				M=w*m3[ix,:]
-				id=id3[ix]-1
-				l=n3[ix]
-				x=np.sum(M,axis=1)/l	#arithmetic mean
-				M[M==0]=1				#enable geometric mean
-				i=np.prod(M,axis=1)**(1/l)	#intensity
-				q=i/x					#coherence
+                w=np.array((W[v1,u],W[v2,u],W[u,v1],W[v2,v1],W[u,v2],W[v1,v2]))
+                
+                M=w*m3[ix,:]
+                id=id3[ix]-1
+                l=n3[ix]
+                x=np.sum(M,axis=1)/l	#arithmetic mean
+                M[M==0]=1				#enable geometric mean
+                i=np.prod(M,axis=1)**(1/l)	#intensity
+                q=i/x					#coherence
 
-				#add to cumulative counts
-				I[id,u]+=i; I[id,v1]+=i; I[id,v2]+=i
-				Q[id,u]+=q; Q[id,v1]+=q; Q[id,v2]+=q
-				F[id,u]+=1; F[id,v1]+=1; F[id,v1]+=1
+                #add to cumulative counts
+                I[id,u]+=i; I[id,v1]+=i; I[id,v2]+=i
+                Q[id,u]+=q; Q[id,v1]+=q; Q[id,v2]+=q
+                F[id,u]+=1; F[id,v1]+=1; F[id,v1]+=1
 
-	return I,Q,F
+    return I,Q,F
 
 def motif4funct_bin(A):
-	'''
+    '''
 Functional motifs are subsets of connection patterns embedded within 
 anatomical motifs. Motif frequency is the frequency of occurrence of 
 motifs around a node.
@@ -3554,277 +3554,277 @@ motifs around a node.
 Input:      A,      binary directed connection matrix
 
 Output:     F,      motif frequency matrix
-		    f,      motif frequency vector (averaged over all nodes)
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m4=mot['m4']; id4=mot['id4'].squeeze(); n4=mot['n4'].squeeze()
+            f,      motif frequency vector (averaged over all nodes)
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m4=mot['m4']; id4=mot['id4'].squeeze(); n4=mot['n4'].squeeze()
 
-	n=len(A)
-	f=np.zeros((199,))
-	F=np.zeros((199,n))				#frequency
+    n=len(A)
+    f=np.zeros((199,))
+    F=np.zeros((199,n))				#frequency
 
-	A=binarize(A,copy=True)			#ensure A is binary	
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
-	
-	for u in xrange(n-3):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0				#not already in V1
-			#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				vz=np.max((v1,v2))	#vz: largest rank node
-				#v3: all neighbors of v2 (>u)
-				V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
-				V3[V2]=0			#not already in V1 and V2
-				#and all neighbors of v1 (>v2) 
-				V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
-				V3[V1]=0			#not already in V1
-				#and all neighbors of u (>vz)
-				V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
-				for v3 in np.where(V3)[0]:
-					a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
-						A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
-						A[v2,v3]))
-	
-					ix=(np.dot(m4,a)==n4)	#find all contained isomorphs
-					id=id4[ix]-1
+    A=binarize(A,copy=True)			#ensure A is binary	
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
+    
+    for u in xrange(n-3):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0				#not already in V1
+            #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                vz=np.max((v1,v2))	#vz: largest rank node
+                #v3: all neighbors of v2 (>u)
+                V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
+                V3[V2]=0			#not already in V1 and V2
+                #and all neighbors of v1 (>v2) 
+                V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
+                V3[V1]=0			#not already in V1
+                #and all neighbors of u (>vz)
+                V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
+                for v3 in np.where(V3)[0]:
+                    a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
+                        A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
+                        A[v2,v3]))
+    
+                    ix=(np.dot(m4,a)==n4)	#find all contained isomorphs
+                    id=id4[ix]-1
 
-					#unique motif occurrences
-					idu,jx=np.unique(id,return_index=True)
-					jx=np.append((0,),jx)
-					mu=len(idu)				#number of unique motifs
-					f2=np.zeros((mu,))
-					for h in xrange(mu):
-						f2[h]=jx[h+1]-jx[h]
-					
-					#add to cumulative count
-					f[idu]+=f2
-					F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2; F[idu,v3]+=f2
+                    #unique motif occurrences
+                    idu,jx=np.unique(id,return_index=True)
+                    jx=np.append((0,),jx)
+                    mu=len(idu)				#number of unique motifs
+                    f2=np.zeros((mu,))
+                    for h in xrange(mu):
+                        f2[h]=jx[h+1]-jx[h]
+                    
+                    #add to cumulative count
+                    f[idu]+=f2
+                    F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2; F[idu,v3]+=f2
 
-	return f,F
+    return f,F
 
 def motif4funct_wei(W):
-	'''
+    '''
 Functional motifs are subsets of connection patterns embedded within 
 anatomical motifs. Motif frequency is the frequency of occurrence of 
 motifs around a node. Motif intensity and coherence are weighted 
 generalizations of motif frequency. 
 
 Input:      W,      weighted directed connection matrix
-				   (all weights must be between 0 and 1)
+                   (all weights must be between 0 and 1)
 
 Output:     I,      motif intensity matrix
-		    Q,      motif coherence matrix
-		    F,      morif frequency matrix
+            Q,      motif coherence matrix
+            F,      morif frequency matrix
 
 Note: Average intensity and coherence are given by I./F and Q./F.
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m4=mot['m4']; id4=mot['id4'].squeeze(); n4=mot['n4'].squeeze()
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m4=mot['m4']; id4=mot['id4'].squeeze(); n4=mot['n4'].squeeze()
 
-	n=len(W)
-	I=np.zeros((199,n))				#intensity
-	Q=np.zeros((199,n))				#coherence
-	F=np.zeros((199,n))				#frequency
+    n=len(W)
+    I=np.zeros((199,n))				#intensity
+    Q=np.zeros((199,n))				#coherence
+    F=np.zeros((199,n))				#frequency
 
-	A=binarize(W,copy=True)			#ensure A is binary	
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
+    A=binarize(W,copy=True)			#ensure A is binary	
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-	for u in xrange(n-3):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0				#not already in V1
-			#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				vz=np.max((v1,v2))	#vz: largest rank node
-				#v3: all neighbors of v2 (>u)
-				V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
-				V3[V2]=0			#not already in V1 and V2
-				#and all neighbors of v1 (>v2) 
-				V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
-				V3[V1]=0			#not already in V1
-				#and all neighbors of u (>vz)
-				V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
-				for v3 in np.where(V3)[0]:
-					a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
-						A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
-						A[v2,v3]))
-					ix=(np.dot(m4,a)==n4)		#find all contained isomorphs
-				
-					w=np.array((W[v1,u],W[v2,u],W[v3,u],W[u,v1],W[v2,v1],
-						W[v3,v1],W[u,v2],W[v1,v2],W[v3,v2],W[u,v3],W[v1,v3],
-						W[v2,v3]))
+    for u in xrange(n-3):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0				#not already in V1
+            #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                vz=np.max((v1,v2))	#vz: largest rank node
+                #v3: all neighbors of v2 (>u)
+                V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
+                V3[V2]=0			#not already in V1 and V2
+                #and all neighbors of v1 (>v2) 
+                V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
+                V3[V1]=0			#not already in V1
+                #and all neighbors of u (>vz)
+                V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
+                for v3 in np.where(V3)[0]:
+                    a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
+                        A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
+                        A[v2,v3]))
+                    ix=(np.dot(m4,a)==n4)		#find all contained isomorphs
+                
+                    w=np.array((W[v1,u],W[v2,u],W[v3,u],W[u,v1],W[v2,v1],
+                        W[v3,v1],W[u,v2],W[v1,v2],W[v3,v2],W[u,v3],W[v1,v3],
+                        W[v2,v3]))
 
-					m=np.sum(ix)
-					M=m4[ix,:]*np.tile(w,(m,1))
-					id=id4[ix]-1
-					l=n4[ix]
-					x=np.sum(M,axis=1)/l		#arithmetic mean
-					M[M==0]=1					#enable geometric mean
-					i=np.prod(M,axis=1)**(1/l)	#intensity
-					q=i/x						#coherence
+                    m=np.sum(ix)
+                    M=m4[ix,:]*np.tile(w,(m,1))
+                    id=id4[ix]-1
+                    l=n4[ix]
+                    x=np.sum(M,axis=1)/l		#arithmetic mean
+                    M[M==0]=1					#enable geometric mean
+                    i=np.prod(M,axis=1)**(1/l)	#intensity
+                    q=i/x						#coherence
 
-					#unique motif occurrences
-					idu,jx=np.unique(id,return_index=True)
-					jx=np.append((0,),jx+1)
+                    #unique motif occurrences
+                    idu,jx=np.unique(id,return_index=True)
+                    jx=np.append((0,),jx+1)
 
-					mu=len(idu)				#number of unique motifs
-					i2,q2,f2=np.zeros((3,mu))
+                    mu=len(idu)				#number of unique motifs
+                    i2,q2,f2=np.zeros((3,mu))
 
-					for h in xrange(mu):
-						i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
-						q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
-						f2[h]=jx[h+1]-jx[h]
+                    for h in xrange(mu):
+                        i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
+                        q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
+                        f2[h]=jx[h+1]-jx[h]
 
-					#then add to cumulative count
-					I[idu,u]+=i2; I[idu,v1]+=i2; I[idu,v2]+=i2; I[idu,v3]+=i2
-					Q[idu,u]+=q2; Q[idu,v1]+=q2; Q[idu,v2]+=q2; Q[idu,v3]+=q2
-					F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2; F[idu,v3]+=f2
+                    #then add to cumulative count
+                    I[idu,u]+=i2; I[idu,v1]+=i2; I[idu,v2]+=i2; I[idu,v3]+=i2
+                    Q[idu,u]+=q2; Q[idu,v1]+=q2; Q[idu,v2]+=q2; Q[idu,v3]+=q2
+                    F[idu,u]+=f2; F[idu,v1]+=f2; F[idu,v2]+=f2; F[idu,v3]+=f2
 
-	return I,Q,F
+    return I,Q,F
 
 def motif4struct_bin(A):
-	'''
+    '''
 Structural motifs are patterns of local connectivity. Motif frequency
 is the frequency of occurrence of motifs around a node.
 
 Input:      A,      binary directed connection matrix
 
 Output:     F,      motif frequency matrix
-		    f,      motif frequency vector (averaged over all nodes)
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m4n=mot['m4n']; id4=mot['id4'].squeeze(); 
+            f,      motif frequency vector (averaged over all nodes)
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m4n=mot['m4n']; id4=mot['id4'].squeeze(); 
 
-	n=len(A)
-	f=np.zeros((199,))
-	F=np.zeros((199,n))				#frequency
+    n=len(A)
+    f=np.zeros((199,))
+    F=np.zeros((199,n))				#frequency
 
-	A=binarize(A,copy=True)			#ensure A is binary	
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
-	
-	for u in xrange(n-3):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0				#not already in V1
-			#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				vz=np.max((v1,v2))	#vz: largest rank node
-				#v3: all neighbors of v2 (>u)
-				V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
-				V3[V2]=0			#not already in V1 and V2
-				#and all neighbors of v1 (>v2) 
-				V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
-				V3[V1]=0			#not already in V1
-				#and all neighbors of u (>vz)
-				V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
-				for v3 in np.where(V3)[0]:
-					
-					a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
-						A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
-						A[v2,v3]))
-				
-					s=np.uint64(np.sum(np.power(10,np.arange(11,-1,-1))*a))
-					ix=id4[np.squeeze(s==m4n)]
-					F[ix,u]+=1; F[ix,v1]+=1; F[ix,v2]+=1; F[ix,v3]+=1
-					f[ix]+=1
+    A=binarize(A,copy=True)			#ensure A is binary	
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
+    
+    for u in xrange(n-3):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0				#not already in V1
+            #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                vz=np.max((v1,v2))	#vz: largest rank node
+                #v3: all neighbors of v2 (>u)
+                V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
+                V3[V2]=0			#not already in V1 and V2
+                #and all neighbors of v1 (>v2) 
+                V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
+                V3[V1]=0			#not already in V1
+                #and all neighbors of u (>vz)
+                V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
+                for v3 in np.where(V3)[0]:
+                    
+                    a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
+                        A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
+                        A[v2,v3]))
+                
+                    s=np.uint64(np.sum(np.power(10,np.arange(11,-1,-1))*a))
+                    ix=id4[np.squeeze(s==m4n)]
+                    F[ix,u]+=1; F[ix,v1]+=1; F[ix,v2]+=1; F[ix,v3]+=1
+                    f[ix]+=1
 
-	return f,F
+    return f,F
 
 def motif4struct_wei(W):
-	'''
+    '''
 Structural motifs are patterns of local connectivity. Motif frequency
 is the frequency of occurrence of motifs around a node. Motif intensity
 and coherence are weighted generalizations of motif frequency. 
 
 Input:      W,      weighted directed connection matrix
-				   (all weights must be between 0 and 1)
+                   (all weights must be between 0 and 1)
 
 Output:     I,      motif intensity matrix
-		    Q,      motif coherence matrix
-		    F,      morif frequency matrix
+            Q,      motif coherence matrix
+            F,      morif frequency matrix
 
 Note: Average intensity and coherence are given by I./F and Q./F.
-	'''
-	from scipy import io; import os
-	fname=os.path.join(os.path.dirname(__file__),motiflib)
-	mot=io.loadmat(fname)
-	m4=mot['m4'];m4n=mot['m4n'];id4=mot['id4'].squeeze();n4=mot['n4'].squeeze()
+    '''
+    from scipy import io; import os
+    fname=os.path.join(os.path.dirname(__file__),motiflib)
+    mot=io.loadmat(fname)
+    m4=mot['m4'];m4n=mot['m4n'];id4=mot['id4'].squeeze();n4=mot['n4'].squeeze()
 
-	n=len(W)
-	I=np.zeros((199,n))				#intensity
-	Q=np.zeros((199,n))				#coherence
-	F=np.zeros((199,n))				#frequency
+    n=len(W)
+    I=np.zeros((199,n))				#intensity
+    Q=np.zeros((199,n))				#coherence
+    F=np.zeros((199,n))				#frequency
 
-	A=binarize(W,copy=True)			#ensure A is binary	
-	As=np.logical_or(A,A.T)			#symmetrized adjmat
+    A=binarize(W,copy=True)			#ensure A is binary	
+    As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-	for u in xrange(n-3):
-		#v1: neighbors of u (>u)
-		V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
-		for v1 in np.where(V1)[0]:
-			V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
-			V2[V1]=0				#not already in V1
-			#and all neighbors of u (>v1)
-			V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
-			for v2 in np.where(V2)[0]:
-				vz=np.max((v1,v2))	#vz: largest rank node
-				#v3: all neighbors of v2 (>u)
-				V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
-				V3[V2]=0			#not already in V1 and V2
-				#and all neighbors of v1 (>v2) 
-				V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
-				V3[V1]=0			#not already in V1
-				#and all neighbors of u (>vz)
-				V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
-				for v3 in np.where(V3)[0]:
-					a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
-						A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
-						A[v2,v3]))
-					s=np.uint64(np.sum(np.power(10,np.arange(11,-1,-1))*a))
-					#print np.shape(s),np.shape(m4n)
-					ix=np.squeeze(s==m4n)
-				
-					w=np.array((W[v1,u],W[v2,u],W[v3,u],W[u,v1],W[v2,v1],
-						W[v3,v1],W[u,v2],W[v1,v2],W[v3,v2],W[u,v3],W[v1,v3],
-						W[v2,v3]))
+    for u in xrange(n-3):
+        #v1: neighbors of u (>u)
+        V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
+        for v1 in np.where(V1)[0]:
+            V2=np.append(np.zeros((u,),dtype=int),As[v1,u+1:n+1])
+            V2[V1]=0				#not already in V1
+            #and all neighbors of u (>v1)
+            V2=np.logical_or(np.append(np.zeros((v1,)),As[u,v1+1:n+1]),V2)
+            for v2 in np.where(V2)[0]:
+                vz=np.max((v1,v2))	#vz: largest rank node
+                #v3: all neighbors of v2 (>u)
+                V3=np.append(np.zeros((u,),dtype=int),As[v2,u+1:n+1])
+                V3[V2]=0			#not already in V1 and V2
+                #and all neighbors of v1 (>v2) 
+                V3=np.logical_or(np.append(np.zeros((v2,)),As[v1,v2+1:n+1]),V3)
+                V3[V1]=0			#not already in V1
+                #and all neighbors of u (>vz)
+                V3=np.logical_or(np.append(np.zeros((vz,)),As[u,vz+1:n+1]),V3)
+                for v3 in np.where(V3)[0]:
+                    a=np.array((A[v1,u],A[v2,u],A[v3,u],A[u,v1],A[v2,v1],
+                        A[v3,v1],A[u,v2],A[v1,v2],A[v3,v2],A[u,v3],A[v1,v3],
+                        A[v2,v3]))
+                    s=np.uint64(np.sum(np.power(10,np.arange(11,-1,-1))*a))
+                    #print np.shape(s),np.shape(m4n)
+                    ix=np.squeeze(s==m4n)
+                
+                    w=np.array((W[v1,u],W[v2,u],W[v3,u],W[u,v1],W[v2,v1],
+                        W[v3,v1],W[u,v2],W[v1,v2],W[v3,v2],W[u,v3],W[v1,v3],
+                        W[v2,v3]))
 
-					M=w*m4[ix,:]
-					id=id4[ix]-1
-					l=n4[ix]
-					x=np.sum(M,axis=1)/l		#arithmetic mean
-					M[M==0]=1					#enable geometric mean
-					i=np.prod(M,axis=1)**(1/l)	#intensity
-					q=i/x						#coherence
+                    M=w*m4[ix,:]
+                    id=id4[ix]-1
+                    l=n4[ix]
+                    x=np.sum(M,axis=1)/l		#arithmetic mean
+                    M[M==0]=1					#enable geometric mean
+                    i=np.prod(M,axis=1)**(1/l)	#intensity
+                    q=i/x						#coherence
 
-					#then add to cumulative count
-					I[id,u]+=i; I[id,v1]+=i; I[id,v2]+=i; I[id,v3]+=i
-					Q[id,u]+=q; Q[id,v1]+=q; Q[id,v2]+=q; Q[id,v3]+=q
-					F[id,u]+=1; F[id,v1]+=1; F[id,v2]+=1; F[id,v3]+=1
+                    #then add to cumulative count
+                    I[id,u]+=i; I[id,v1]+=i; I[id,v2]+=i; I[id,v3]+=i
+                    Q[id,u]+=q; Q[id,v1]+=q; Q[id,v2]+=q; Q[id,v3]+=q
+                    F[id,u]+=1; F[id,v1]+=1; F[id,v2]+=1; F[id,v3]+=1
 
-	return I,Q,F
+    return I,Q,F
 
 ###############################################################################
 # OTHER
 ###############################################################################
 
 def threshold_absolute(W,thr,copy=True):
-	'''
+    '''
 This function thresholds the connectivity matrix by absolute weight
 magnitude. All weights below the given threshold, and all weights
 on the main diagonal (self-self connections) are set to 0.
@@ -3832,18 +3832,18 @@ on the main diagonal (self-self connections) are set to 0.
 If copy is not set, this function will *modify W in place.*
 
 Inputs: W           weighted or binary connectivity matrix
-	    thr         weight threshold
-		copy		copy W to avoid side effects, defaults to True
+        thr         weight threshold
+        copy		copy W to avoid side effects, defaults to True
 
 Output: thresholded connectivity matrix
-	'''
-	if copy: W=W.copy()
-	np.fill_diagonal(W, 0)				#clear diagonal
-	W[W<thr]=0							#apply threshold
-	return W
+    '''
+    if copy: W=W.copy()
+    np.fill_diagonal(W, 0)				#clear diagonal
+    W[W<thr]=0							#apply threshold
+    return W
 
 def threshold_proportional(W,p,copy=True):
-	'''
+    '''
 This function "thresholds" the connectivity matrix by preserving a
 proportion p (0<p<1) of the strongest weights. All other weights, and
 all weights on the main diagonal (self-self connections) are set to 0.
@@ -3851,10 +3851,10 @@ all weights on the main diagonal (self-self connections) are set to 0.
 If copy is not set, this function will *modify W in place.*
 
 Inputs: W,      weighted or binary connectivity matrix
-		p,      proportion of weights to preserve
-					range:  p=1 (all weights preserved) to
-							p=0 (no weights preserved)
-		copy,	copy W to avoid side effects, defaults to True
+        p,      proportion of weights to preserve
+                    range:  p=1 (all weights preserved) to
+                            p=0 (no weights preserved)
+        copy,	copy W to avoid side effects, defaults to True
 
 Output: W,		thresholded connectivity matrix
 
@@ -3862,47 +3862,47 @@ Note: The proportion of elements set to 0 is a fraction of all elements in the
 matrix, whether or not they are already 0. That is, this function has the
 following behavior:
 
-	>> x = np.random.random((10,10))
-	>> x_25 = threshold_proportional(x, .25)
+    >> x = np.random.random((10,10))
+    >> x_25 = threshold_proportional(x, .25)
     >> np.size(np.where(x_25)) #note this double counts each nonzero element
-	46
-	>> x_125 = threshold_proportional(x, .125)
+    46
+    >> x_125 = threshold_proportional(x, .125)
     >> np.size(np.where(x_125))
-	22
-	>> x_test = threshold_proportional(x_25, .5)
+    22
+    >> x_test = threshold_proportional(x_25, .5)
     >> np.size(np.where(x_test))
     46
 
 That is, the 50% thresholding of x_25 does nothing because >=50% of the elements
 in x_25 are aleady <=0. This behavior is the same as in BCT. Be careful with matrices that are both signed and sparse.
-	'''
-	if p>1 or p<0:
-		raise BCTParamError('Threshold must be in range [0,1]')
-	if copy: W=W.copy()
-	n=len(W)						# number of nodes
-	np.fill_diagonal(W, 0)			# clear diagonal
+    '''
+    if p>1 or p<0:
+        raise BCTParamError('Threshold must be in range [0,1]')
+    if copy: W=W.copy()
+    n=len(W)						# number of nodes
+    np.fill_diagonal(W, 0)			# clear diagonal
 
-	if np.all(W==W.T):				# if symmetric matrix
-		W[np.tril_indices(n)]=0		# ensure symmetry is preserved
-		ud=2						# halve number of removed links
-	else:
-		ud=1
+    if np.all(W==W.T):				# if symmetric matrix
+        W[np.tril_indices(n)]=0		# ensure symmetry is preserved
+        ud=2						# halve number of removed links
+    else:
+        ud=1
 
-	ind=np.where(W)					# find all links
+    ind=np.where(W)					# find all links
 
-	I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
+    I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-	en=round((n*n-n)*p/ud)			# number of links to be preserved
+    en=round((n*n-n)*p/ud)			# number of links to be preserved
 
-	W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
+    W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
 
-	if ud==2:						# if symmetric matrix
-		W[:,:]=W+W.T						# reconstruct symmetry
+    if ud==2:						# if symmetric matrix
+        W[:,:]=W+W.T						# reconstruct symmetry
 
-	return W
+    return W
 
 def weight_conversion(W,wcm,copy=True):
-	'''
+    '''
 W_bin = weight_conversion(W, 'binarize');
 W_nrm = weight_conversion(W, 'normalize');
 L = weight_conversion(W, 'lengths');
@@ -3927,107 +3927,107 @@ connection-weights matrix.
 If copy is not set, this function will *modify W in place.*
 
 Inputs: W           weighted connectivity matrix
-	    wcm         weight-conversion command - possible values:
-					   'binarize'      binarize weights
-					   'normalize'     normalize weights
-					   'lengths'       convert weights to lengths
-		copy		copy W to avoid side effects, defaults to True
+        wcm         weight-conversion command - possible values:
+                       'binarize'      binarize weights
+                       'normalize'     normalize weights
+                       'lengths'       convert weights to lengths
+        copy		copy W to avoid side effects, defaults to True
 
 Output: W           connectivity matrix with converted weights
-	'''
-	if wcm=='binarize': return binarize(W,copy)
-	elif wcm=='normalize': return normalize(W,copy)
-	elif wcm=='lengths': return invert(W,copy)
-	else: raise NotImplementedError('Unknown weight conversion command.')
+    '''
+    if wcm=='binarize': return binarize(W,copy)
+    elif wcm=='normalize': return normalize(W,copy)
+    elif wcm=='lengths': return invert(W,copy)
+    else: raise NotImplementedError('Unknown weight conversion command.')
 
 def binarize(W,copy=True):
-	'''
-	Binarizes an input weighted connection matrix.  If copy is not set, this
-	function will *modify W in place.*
+    '''
+    Binarizes an input weighted connection matrix.  If copy is not set, this
+    function will *modify W in place.*
 
-	Inputs:	W		weighted connectivity matrix
-			copy	copy W to avoid side effects, defaults to True
-		
-	Output: W		binary connectivity matrix
-	'''
-	if copy: W=W.copy()
-	W[W!=0]=1
-	return W
+    Inputs:	W		weighted connectivity matrix
+            copy	copy W to avoid side effects, defaults to True
+        
+    Output: W		binary connectivity matrix
+    '''
+    if copy: W=W.copy()
+    W[W!=0]=1
+    return W
 
 def normalize(W,copy=True):
-	'''
-	Normalizes an input weighted connection matrix.  If copy is not set, this
-	function will *modify W in place.*
+    '''
+    Normalizes an input weighted connection matrix.  If copy is not set, this
+    function will *modify W in place.*
 
-	Inputs: W		weighted connectivity matrix
-		 	copy	copy W to avoid side effects, defaults to True
+    Inputs: W		weighted connectivity matrix
+            copy	copy W to avoid side effects, defaults to True
 
-	Output: W		normalized connectivity matrix
-	'''
-	if copy: W=W.copy()
-	W/=np.max(np.abs(W))
-	return W
+    Output: W		normalized connectivity matrix
+    '''
+    if copy: W=W.copy()
+    W/=np.max(np.abs(W))
+    return W
 
 def invert(W,copy=True):
-	'''
-	Inverts elementwise the weights in an input connection matrix. 
-	In other words, change the from the matrix of internode strengths to the 
-	matrix of internode distances.
+    '''
+    Inverts elementwise the weights in an input connection matrix. 
+    In other words, change the from the matrix of internode strengths to the 
+    matrix of internode distances.
 
-	If copy is not set, this function will *modify W in place.*
+    If copy is not set, this function will *modify W in place.*
 
-	Inputs: W		weighted connectivity matrix
-			copy	copy W to avoid side effects, defaults to True
+    Inputs: W		weighted connectivity matrix
+            copy	copy W to avoid side effects, defaults to True
 
-	Output: W		inverted connectivity matrix
-	'''
-	if copy: W=W.copy()
-	E=np.where(W)
-	W[E]=1./W[E]
-	return W
+    Output: W		inverted connectivity matrix
+    '''
+    if copy: W=W.copy()
+    E=np.where(W)
+    W[E]=1./W[E]
+    return W
 
 ###############################################################################
 # PHYSICAL CONNECTIVITY
 ###############################################################################
 
 def density_dir(CIJ):
-	'''
+    '''
 Density is the fraction of present connections to possible connections.
 
 Input:      CIJ,    directed (weighted/binary) connection matrix
 
 Output:     kden,   density
-		    N,      number of vertices
-		    K,      number of edges
+            N,      number of vertices
+            K,      number of edges
 
 Notes:  Assumes CIJ is directed and has no self-connections.
-	    Weight information is discarded.
-	'''
-	n=len(CIJ)
-	k=np.size(np.where(CIJ.flatten()))
-	kden=k/(n*n-n)
-	return kden,n,k
+        Weight information is discarded.
+    '''
+    n=len(CIJ)
+    k=np.size(np.where(CIJ.flatten()))
+    kden=k/(n*n-n)
+    return kden,n,k
 
 def density_und(CIJ):
-	'''
+    '''
 Density is the fraction of present connections to possible connections.
 
 Input:      CIJ,    undirected (weighted/binary) connection matrix
 
 Output:     kden,   density
-		    N,      number of vertices
-		    K,      number of edges
+            N,      number of vertices
+            K,      number of edges
 
 Notes:  Assumes CIJ is undirected and has no self-connections.
-	    Weight information is discarded.
-	'''
-	n=len(CIJ)
-	k=np.size(np.where(np.triu(CIJ).flatten()))
-	kden=k/((n*n-n)/2)
-	return kden,n,k
+        Weight information is discarded.
+    '''
+    n=len(CIJ)
+    k=np.size(np.where(np.triu(CIJ).flatten()))
+    kden=k/((n*n-n)/2)
+    return kden,n,k
 
 def rentian_scaling(A,xyz,n):
-	'''
+    '''
 Physical Rentian scaling (or more simply Rentian scaling) is a property 
 of systems that are cost-efficiently embedded into physical space. It is 
 what is called a "topo-physical" property because it combines information 
@@ -4051,9 +4051,9 @@ system.
 Inputs:
 A is the MxM adjacency matrix which must be unweighted, binary, and symmetric.
 XYZ is the vector of node placement coordinates - must be Mx3 matrix.
-	where M is the number of nodes.
+    where M is the number of nodes.
 n is a scalar - the number of partitions to compute
-	Each partition is a data point.
+    Each partition is a data point.
    You want a large enough number to adequately estimate the Rent's exponent.
 
 Outputs:
@@ -4063,60 +4063,60 @@ E is an nx1 vector of the number of edges crossing the boundary of each partitio
 Subsequent Analysis:
 Rentian scaling plots are then created by: figure; loglog(E,N,'*');
 To determine the Rent's exponent, p, it is important not to use partitions which	may 
-	be affected by boundary conditions. In Bassett et al. 2010 PLoS CB, only 
-	partitions with N<M/2 were used in the estimation of the Rent's exponent. 
-	Thus, we can define N_prime = N(find(N<M/2)) and E_prime = E(find(N<M/2)). 
-	Next we 
-	need to determine the slope of Eprime vs. Nprime in loglog space, which is 
-	the Rent's 
-	exponent. There are many ways of doing this with more or less statistical 
-	rigor. Robustfit in MATLAB is one such option:
+    be affected by boundary conditions. In Bassett et al. 2010 PLoS CB, only 
+    partitions with N<M/2 were used in the estimation of the Rent's exponent. 
+    Thus, we can define N_prime = N(find(N<M/2)) and E_prime = E(find(N<M/2)). 
+    Next we 
+    need to determine the slope of Eprime vs. Nprime in loglog space, which is 
+    the Rent's 
+    exponent. There are many ways of doing this with more or less statistical 
+    rigor. Robustfit in MATLAB is one such option:
    [b,stats] = robustfit(log10(N_prime),log10(E_prime))
    Then the Rent's exponent is b(1,2) and the standard error of the
    estimation is given by stats.se(1,2).
 
 Note: n=5000 was used in Bassett et al. 2010 in PLoS CB.
-	'''
-	m=np.size(xyz,axis=0)			#find number of nodes in system
+    '''
+    m=np.size(xyz,axis=0)			#find number of nodes in system
 
-	#rescale coordinates so they are all greater than unity
-	xyzn=xyz-np.tile(np.min(xyz,axis=0)-1,(m,1))
+    #rescale coordinates so they are all greater than unity
+    xyzn=xyz-np.tile(np.min(xyz,axis=0)-1,(m,1))
 
-	#find the absolute minimum and maximum over all directions
-	nmax=np.max(xyzn)
-	nmin=np.min(xyzn)
+    #find the absolute minimum and maximum over all directions
+    nmax=np.max(xyzn)
+    nmin=np.min(xyzn)
 
-	count=0
-	N=np.zeros((n,))
-	E=np.zeros((n,))
+    count=0
+    N=np.zeros((n,))
+    E=np.zeros((n,))
 
-	#create partitions and count the number of nodes inside the partition (n)
-	#and the number of edges traversing the boundary of the partition (e)
-	while count<n:
-		#define cube endpoints
-		randx=np.sort((1+nmax-nmin)*np.random.random((2,)))
+    #create partitions and count the number of nodes inside the partition (n)
+    #and the number of edges traversing the boundary of the partition (e)
+    while count<n:
+        #define cube endpoints
+        randx=np.sort((1+nmax-nmin)*np.random.random((2,)))
 
-		#find nodes in cube
-		l1=xyzn[:,0]>randx[0]; l2=xyzn[:,0]<randx[1]
-		l3=xyzn[:,1]>randx[0]; l4=xyzn[:,1]<randx[1]
-		l5=xyzn[:,2]>randx[0]; l6=xyzn[:,2]<randx[1]
+        #find nodes in cube
+        l1=xyzn[:,0]>randx[0]; l2=xyzn[:,0]<randx[1]
+        l3=xyzn[:,1]>randx[0]; l4=xyzn[:,1]<randx[1]
+        l5=xyzn[:,2]>randx[0]; l6=xyzn[:,2]<randx[1]
 
-		L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
-		if np.size(L):
-			#count edges crossing at the boundary of the cube
-			E[count]=np.sum(A[np.ix_(L,np.setdiff1d(xrange(m),L))])
-			#count nodes inside of the cube
-			N[count]=np.size(L)
-			count+=1
+        L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
+        if np.size(L):
+            #count edges crossing at the boundary of the cube
+            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(xrange(m),L))])
+            #count nodes inside of the cube
+            N[count]=np.size(L)
+            count+=1
 
-	return N,E 
+    return N,E 
 
 ###############################################################################
 # REFERENCE
 ###############################################################################
 
 def latmio_dir_connected(R,iter,D=None):
-	'''
+    '''
 This function "latticizes" a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions. The 
@@ -4125,173 +4125,173 @@ connectedness, the ability for every node to reach every other node in
 the network. The input network for this function must be connected.
 
 Input:      R,      directed (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
-		    D,      distance-to-diagonal matrix (optional)
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
+            D,      distance-to-diagonal matrix (optional)
 
 Output:     Rlatt,  latticized network in original node ordering
-		    Rrp,    latticized network in node ordering used for
-				    latticization
-		    ind_rp, node ordering used for latticization
-		    eff,    number of actual rewirings carried out
-	'''
-	n=len(R)
-	
-	ind_rp=np.random.permutation(n)		#random permutation of nodes
-	R=R.copy()
-	R=R[np.ix_(ind_rp,ind_rp)]
+            Rrp,    latticized network in node ordering used for
+                    latticization
+            ind_rp, node ordering used for latticization
+            eff,    number of actual rewirings carried out
+    '''
+    n=len(R)
+    
+    ind_rp=np.random.permutation(n)		#random permutation of nodes
+    R=R.copy()
+    R=R[np.ix_(ind_rp,ind_rp)]
 
-	#create distance to diagonal matrix if not specified by user
-	if D is None:
-		D=np.zeros((n,n))
-		un=np.mod(xrange(1,n),n)
-		um=np.mod(xrange(n-1,0,-1),n)
-		u=np.append((0,),np.where(un<um,un,um))
+    #create distance to diagonal matrix if not specified by user
+    if D is None:
+        D=np.zeros((n,n))
+        un=np.mod(xrange(1,n),n)
+        um=np.mod(xrange(n-1,0,-1),n)
+        u=np.append((0,),np.where(un<um,un,um))
 
-		for v in xrange(int(np.ceil(n/2))):
-			D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
-			D[v,:]=D[n-v-1,:][::-1]
+        for v in xrange(int(np.ceil(n/2))):
+            D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
+            D[v,:]=D[n-v-1,:][::-1]
 
-	i,j=np.where(R)
-	k=len(i)
-	iter*=k
+    i,j=np.where(R)
+    k=len(i)
+    iter*=k
 
-	#maximal number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)))
+    #maximal number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)))
 
-	#actual number of successful rewirings
-	eff=0
+    #actual number of successful rewirings
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			rewire=True
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            rewire=True
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break
+                if a!=c and a!=d and b!=c and b!=d:
+                    break
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#lattice condition
-				if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
-					#connectedness condition
-					if not (np.any((R[a,c],R[d,b],R[d,c])) and
-							np.any((R[c,a],R[b,d],R[b,a]))):	
-						P=R[(a,c),:].copy()
-						P[0,b]=0;	P[0,d]=1
-						P[1,d]=0;	P[1,b]=1
-						PN=P.copy()
-						PN[0,a]=1;	PN[1,c]=1
-						while True:
-							P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
-							P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
-							P*=np.logical_not(PN)
-							PN+=P
-							if not np.all(np.any(P,axis=1)):
-								rewire=False
-								break
-							elif np.any(PN[0,(b,c)]) and np.any(PN[1,(d,a)]):
-								break
-					#end connectedness testing
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #lattice condition
+                if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
+                    #connectedness condition
+                    if not (np.any((R[a,c],R[d,b],R[d,c])) and
+                            np.any((R[c,a],R[b,d],R[b,a]))):	
+                        P=R[(a,c),:].copy()
+                        P[0,b]=0;	P[0,d]=1
+                        P[1,d]=0;	P[1,b]=1
+                        PN=P.copy()
+                        PN[0,a]=1;	PN[1,c]=1
+                        while True:
+                            P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
+                            P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
+                            P*=np.logical_not(PN)
+                            PN+=P
+                            if not np.all(np.any(P,axis=1)):
+                                rewire=False
+                                break
+                            elif np.any(PN[0,(b,c)]) and np.any(PN[1,(d,a)]):
+                                break
+                    #end connectedness testing
 
-					if rewire:					#reassign edges
-						R[a,d]=R[a,b]; R[a,b]=0
-						R[c,b]=R[c,d]; R[c,d]=0
+                    if rewire:					#reassign edges
+                        R[a,d]=R[a,b]; R[a,b]=0
+                        R[c,b]=R[c,d]; R[c,d]=0
 
-						j.setflags(write=True)
-						j[e1]=d; j[e2]=b		#reassign edge indices
-						eff+=1
-						break
-			att+=1
+                        j.setflags(write=True)
+                        j[e1]=d; j[e2]=b		#reassign edge indices
+                        eff+=1
+                        break
+            att+=1
 
-	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
+    Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
 
-	return Rlatt,R,ind_rp,eff
+    return Rlatt,R,ind_rp,eff
 
 def latmio_dir(R,iter,D=None):
-	'''
+    '''
 This function "latticizes" a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions.
 
 Input:      R,      directed (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
-		    D,      distance-to-diagonal matrix (optional)
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
+            D,      distance-to-diagonal matrix (optional)
 
 Output:     Rlatt,  latticized network in original node ordering
-		    Rrp,    latticized network in node ordering used for
-				    latticization
-		    ind_rp, node ordering used for latticization
-		    eff,    number of actual rewirings carried out
-	'''
-	n=len(R)
+            Rrp,    latticized network in node ordering used for
+                    latticization
+            ind_rp, node ordering used for latticization
+            eff,    number of actual rewirings carried out
+    '''
+    n=len(R)
 
-	ind_rp=np.random.permutation(n)		#randomly reorder matrix
-	R=R.copy()
-	R=R[np.ix_(ind_rp,ind_rp)]
+    ind_rp=np.random.permutation(n)		#randomly reorder matrix
+    R=R.copy()
+    R=R[np.ix_(ind_rp,ind_rp)]
 
-	#create distance to diagonal matrix if not specified by user
-	if D is None:
-		D=np.zeros((n,n))
-		un=np.mod(xrange(1,n),n)
-		um=np.mod(xrange(n-1,0,-1),n)
-		u=np.append((0,),np.where(un<um,un,um))
+    #create distance to diagonal matrix if not specified by user
+    if D is None:
+        D=np.zeros((n,n))
+        un=np.mod(xrange(1,n),n)
+        um=np.mod(xrange(n-1,0,-1),n)
+        u=np.append((0,),np.where(un<um,un,um))
 
-		for v in xrange(int(np.ceil(n/2))):
-			D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
-			D[v,:]=D[n-v-1,:][::-1]
+        for v in xrange(int(np.ceil(n/2))):
+            D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
+            D[v,:]=D[n-v-1,:][::-1]
 
-	i,j=np.where(R)
-	k=len(i)
-	iter*=k
+    i,j=np.where(R)
+    k=len(i)
+    iter*=k
 
-	#maximal number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)))
+    #maximal number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)))
 
-	#actual number of successful rewirings
-	eff=0
+    #actual number of successful rewirings
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break
+                if a!=c and a!=d and b!=c and b!=d:
+                    break
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#lattice condition
-				if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
-					R[a,d]=R[a,b]; R[a,b]=0
-					R[c,b]=R[c,d]; R[c,d]=0
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #lattice condition
+                if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
+                    R[a,d]=R[a,b]; R[a,b]=0
+                    R[c,b]=R[c,d]; R[c,d]=0
 
-					j.setflags(write=True)
-					j[e1]=d; j[e2]=b		#reassign edge indices
-					eff+=1
-					break
-			att+=1
+                    j.setflags(write=True)
+                    j[e1]=d; j[e2]=b		#reassign edge indices
+                    eff+=1
+                    break
+            att+=1
 
-	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
+    Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]	#reverse random permutation
 
-	return Rlatt,R,ind_rp,eff
+    return Rlatt,R,ind_rp,eff
 
 def latmio_und_connected(R,iter,D=None):
-	'''
+    '''
 This function "latticizes" an undirected network, while preserving the 
 degree distribution. The function does not preserve the strength 
 distribution in weighted networks. The function also ensures that the 
@@ -4300,491 +4300,491 @@ to reach every other node in the network. The input network for this
 function must be connected.
 
 Input:      R,      undirected (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
-		    D,      distance-to-diagonal matrix
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
+            D,      distance-to-diagonal matrix
 
 Output:     Rlatt,  latticized network in original node ordering
-		    Rrp,    latticized network in node ordering used for
-				    latticization
-		    ind_rp, node ordering used for latticization
-		    eff,    number of actual rewirings carried out
-	'''
-	if not np.all(R==R.T):
-		raise BCTParamError("Input must be undirected")
+            Rrp,    latticized network in node ordering used for
+                    latticization
+            ind_rp, node ordering used for latticization
+            eff,    number of actual rewirings carried out
+    '''
+    if not np.all(R==R.T):
+        raise BCTParamError("Input must be undirected")
 
-	if number_of_components(R) > 1:
-		raise BCTParamError("Input is not connected")
+    if number_of_components(R) > 1:
+        raise BCTParamError("Input is not connected")
 
-	n=len(R)
+    n=len(R)
 
-	ind_rp=np.random.permutation(n)		#randomly reorder matrix
-	R=R.copy()
-	R=R[np.ix_(ind_rp,ind_rp)]
+    ind_rp=np.random.permutation(n)		#randomly reorder matrix
+    R=R.copy()
+    R=R[np.ix_(ind_rp,ind_rp)]
 
-	if D is None:
-		D=np.zeros((n,n))
-		un=np.mod(xrange(1,n),n)
-		um=np.mod(xrange(n-1,0,-1),n)
-		u=np.append((0,),np.where(un<um,un,um))
+    if D is None:
+        D=np.zeros((n,n))
+        un=np.mod(xrange(1,n),n)
+        um=np.mod(xrange(n-1,0,-1),n)
+        u=np.append((0,),np.where(un<um,un,um))
 
-		for v in xrange(int(np.ceil(n/2))):
-			D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
-			D[v,:]=D[n-v-1,:][::-1]
+        for v in xrange(int(np.ceil(n/2))):
+            D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
+            D[v,:]=D[n-v-1,:][::-1]
 
-	i,j=np.where(np.tril(R))
-	k=len(i)
-	iter*=k
+    i,j=np.where(np.tril(R))
+    k=len(i)
+    iter*=k
 
-	#maximal number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)/2))
+    #maximal number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)/2))
 
-	#actual number of successful rewirings
-	eff=0
+    #actual number of successful rewirings
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:
-			rewire=True
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:
+            rewire=True
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break
+                if a!=c and a!=d and b!=c and b!=d:
+                    break
 
-			if np.random.random()>.5:
-				i.setflags(write=True); j.setflags(write=True)
-				i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
-				c=i[e2]; d=j[e2]		#to explore all potential rewirings
+            if np.random.random()>.5:
+                i.setflags(write=True); j.setflags(write=True)
+                i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
+                c=i[e2]; d=j[e2]		#to explore all potential rewirings
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#lattice condition
-				if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
-					#connectedness condition
-					if not (R[a,c] or R[b,d]):
-						P=R[(a,d),:].copy()
-						P[0,b]=0; P[1,c]=0
-						PN=P.copy()
-						PN[:,d]=1; PN[:,a]=1
-						while True:
-							P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
-							P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
-							P*=np.logical_not(PN)
-							if not np.all(np.any(P,axis=1)):
-								rewire=False
-								break
-							elif np.any(P[:,(b,c)]):
-								break
-							PN+=P
-					#end connectedness testing
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #lattice condition
+                if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
+                    #connectedness condition
+                    if not (R[a,c] or R[b,d]):
+                        P=R[(a,d),:].copy()
+                        P[0,b]=0; P[1,c]=0
+                        PN=P.copy()
+                        PN[:,d]=1; PN[:,a]=1
+                        while True:
+                            P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
+                            P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
+                            P*=np.logical_not(PN)
+                            if not np.all(np.any(P,axis=1)):
+                                rewire=False
+                                break
+                            elif np.any(P[:,(b,c)]):
+                                break
+                            PN+=P
+                    #end connectedness testing
 
-					if rewire:			#reassign edges
-						R[a,d]=R[a,b]; R[a,b]=0
-						R[d,a]=R[b,a]; R[b,a]=0
-						R[c,b]=R[c,d]; R[c,d]=0
-						R[b,c]=R[d,c]; R[d,c]=0
+                    if rewire:			#reassign edges
+                        R[a,d]=R[a,b]; R[a,b]=0
+                        R[d,a]=R[b,a]; R[b,a]=0
+                        R[c,b]=R[c,d]; R[c,d]=0
+                        R[b,c]=R[d,c]; R[d,c]=0
 
-						j.setflags(write=True)
-						j[e1]=d; j[e2]=b
-						eff+=1
-						break
-			att+=1
+                        j.setflags(write=True)
+                        j[e1]=d; j[e2]=b
+                        eff+=1
+                        break
+            att+=1
 
-	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
-	return Rlatt,R,ind_rp,eff
+    Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
+    return Rlatt,R,ind_rp,eff
 
 def latmio_und(R,iter,D=None):
-	'''
+    '''
 This function "latticizes" an undirected network, while preserving the 
 degree distribution. The function does not preserve the strength 
 distribution in weighted networks.
 
 Input:      R,      undirected (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
-		    D,      distance-to-diagonal matrix
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
+            D,      distance-to-diagonal matrix
 
 Output:     Rlatt,  latticized network in original node ordering
-		    Rrp,    latticized network in node ordering used for
-				    latticization
-		    ind_rp, node ordering used for latticization
-		    eff,    number of actual rewirings carried out
-	'''
-	n=len(R)
+            Rrp,    latticized network in node ordering used for
+                    latticization
+            ind_rp, node ordering used for latticization
+            eff,    number of actual rewirings carried out
+    '''
+    n=len(R)
 
-	ind_rp=np.random.permutation(n)		#randomly reorder matrix
-	R=R.copy()
-	R=R[np.ix_(ind_rp,ind_rp)]
+    ind_rp=np.random.permutation(n)		#randomly reorder matrix
+    R=R.copy()
+    R=R[np.ix_(ind_rp,ind_rp)]
 
-	if D is None:
-		D=np.zeros((n,n))
-		un=np.mod(xrange(1,n),n)
-		um=np.mod(xrange(n-1,0,-1),n)
-		u=np.append((0,),np.where(un<um,un,um))
+    if D is None:
+        D=np.zeros((n,n))
+        un=np.mod(xrange(1,n),n)
+        um=np.mod(xrange(n-1,0,-1),n)
+        u=np.append((0,),np.where(un<um,un,um))
 
-		for v in xrange(int(np.ceil(n/2))):
-			D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
-			D[v,:]=D[n-v-1,:][::-1]
+        for v in xrange(int(np.ceil(n/2))):
+            D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
+            D[v,:]=D[n-v-1,:][::-1]
 
-	i,j=np.where(np.tril(R))
-	k=len(i)
-	iter*=k
+    i,j=np.where(np.tril(R))
+    k=len(i)
+    iter*=k
 
-	#maximal number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)/2))
+    #maximal number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)/2))
 
-	#actual number of successful rewirings
-	eff=0
+    #actual number of successful rewirings
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break
+                if a!=c and a!=d and b!=c and b!=d:
+                    break
 
-			if np.random.random()>.5:
-				i.setflags(write=True); j.setflags(write=True)
-				i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
-				c=i[e2]; d=j[e2]		#to explore all potential rewirings
+            if np.random.random()>.5:
+                i.setflags(write=True); j.setflags(write=True)
+                i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
+                c=i[e2]; d=j[e2]		#to explore all potential rewirings
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#lattice condition
-				if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
-					R[a,d]=R[a,b]; R[a,b]=0
-					R[d,a]=R[b,a]; R[b,a]=0
-					R[c,b]=R[c,d]; R[c,d]=0
-					R[b,c]=R[d,c]; R[d,c]=0
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #lattice condition
+                if (D[a,b]*R[a,b]+D[c,d]*R[c,d]>=D[a,d]*R[a,b]+D[c,b]*R[c,d]):
+                    R[a,d]=R[a,b]; R[a,b]=0
+                    R[d,a]=R[b,a]; R[b,a]=0
+                    R[c,b]=R[c,d]; R[c,d]=0
+                    R[b,c]=R[d,c]; R[d,c]=0
 
-					j.setflags(write=True)
-					j[e1]=d; j[e2]=b	
-					eff+=1
-					break
-			att+=1
+                    j.setflags(write=True)
+                    j[e1]=d; j[e2]=b	
+                    eff+=1
+                    break
+            att+=1
 
-	Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
-	return Rlatt,R,ind_rp,eff
+    Rlatt=R[np.ix_(ind_rp[::-1],ind_rp[::-1])]
+    return Rlatt,R,ind_rp,eff
 
 def makeevenCIJ(n,k,sz_cl):
-	'''
+    '''
 This function generates a random, directed network with a specified 
 number of fully connected modules linked together by evenly distributed
 remaining random connections.
 
 Inputs:     N,      number of vertices (must be power of 2)
-		    K,      number of edges
-		    sz_cl,  size of clusters (power of 2)
+            K,      number of edges
+            sz_cl,  size of clusters (power of 2)
 
 Outputs:    CIJ,    connection matrix
 
 Notes:  N must be a power of 2.
-	    A warning is generated if all modules contain more edges than K.
-	    Cluster size is 2^sz_cl;
-	'''
-	#compute number of hierarchical levels and adjust cluster size
-	mx_lvl=int(np.floor(np.log2(n)))
-	sz_cl-=1
+        A warning is generated if all modules contain more edges than K.
+        Cluster size is 2^sz_cl;
+    '''
+    #compute number of hierarchical levels and adjust cluster size
+    mx_lvl=int(np.floor(np.log2(n)))
+    sz_cl-=1
 
-	#make a stupid little template
-	t=np.ones((2,2))*2
+    #make a stupid little template
+    t=np.ones((2,2))*2
 
-	#check n against the number of levels
-	Nlvl=2**mx_lvl
-	if Nlvl!=n:
-		print "Warning: n must be a power of 2"
-	n=Nlvl
+    #check n against the number of levels
+    Nlvl=2**mx_lvl
+    if Nlvl!=n:
+        print "Warning: n must be a power of 2"
+    n=Nlvl
 
-	#create hierarchical template
-	for lvl in xrange(1,mx_lvl):
-		s=2**(lvl+1)
-		CIJ=np.ones((s,s))
-		grp1=xrange(int(s/2))
-		grp2=xrange(int(s/2),s)
-		ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
-		ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
-		CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
-		CIJ.flat[ix2]=t
-		CIJ+=1
-		t=CIJ.copy()
+    #create hierarchical template
+    for lvl in xrange(1,mx_lvl):
+        s=2**(lvl+1)
+        CIJ=np.ones((s,s))
+        grp1=xrange(int(s/2))
+        grp2=xrange(int(s/2),s)
+        ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
+        ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
+        CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
+        CIJ.flat[ix2]=t
+        CIJ+=1
+        t=CIJ.copy()
 
-	CIJ-=(np.ones((s,s))+mx_lvl*np.eye(s))
+    CIJ-=(np.ones((s,s))+mx_lvl*np.eye(s))
 
-	#assign connection probabilities
-	CIJp=(CIJ>=(mx_lvl-sz_cl))
+    #assign connection probabilities
+    CIJp=(CIJ>=(mx_lvl-sz_cl))
 
-	#determine nr of non-cluster connections left and their possible positions
-	rem_k=k-np.size(np.where(CIJp.flatten()))
-	if rem_k<0:
-		print "Warning: K is too small, output matrix contains clusters only"
-		return CIJp
-	a,b=np.where(np.logical_not(CIJp+np.eye(n)))
+    #determine nr of non-cluster connections left and their possible positions
+    rem_k=k-np.size(np.where(CIJp.flatten()))
+    if rem_k<0:
+        print "Warning: K is too small, output matrix contains clusters only"
+        return CIJp
+    a,b=np.where(np.logical_not(CIJp+np.eye(n)))
 
-	#assign remK randomly dstributed connections
-	rp=np.random.permutation(len(a))
-	a=a[rp[:rem_k]]
-	b=b[rp[:rem_k]]
-	for ai,bi in zip(a,b):
-		CIJp[ai,bi]=1
+    #assign remK randomly dstributed connections
+    rp=np.random.permutation(len(a))
+    a=a[rp[:rem_k]]
+    b=b[rp[:rem_k]]
+    for ai,bi in zip(a,b):
+        CIJp[ai,bi]=1
 
-	return np.array(CIJp,dtype=int)
+    return np.array(CIJp,dtype=int)
 
 def makefractalCIJ(mx_lvl,E,sz_cl):
-	'''
+    '''
 This function generates a directed network with a hierarchical modular
 organization. All modules are fully connected and connection density 
 decays as 1/(E^n), with n = index of hierarchical level.
 
 Inputs:     mx_lvl,     number of hierarchical levels, N = 2^mx_lvl
-		    E,          connection density fall-off per level
-		    sz_cl,      size of clusters (power of 2)
+            E,          connection density fall-off per level
+            sz_cl,      size of clusters (power of 2)
 
 Outputs:    CIJ,        connection matrix
-		    K,          number of connections present in the output CIJ
-	'''
-	#make a stupid little template
-	t=np.ones((2,2))*2
+            K,          number of connections present in the output CIJ
+    '''
+    #make a stupid little template
+    t=np.ones((2,2))*2
 
-	#compute N and cluster size
-	n=2**mx_lvl
-	sz_cl-=1
+    #compute N and cluster size
+    n=2**mx_lvl
+    sz_cl-=1
 
-	for lvl in xrange(1,mx_lvl):
-		s=2**(lvl+1)
-		CIJ=np.ones((s,s))
-		grp1=xrange(int(s/2))
-		grp2=xrange(int(s/2),s)
-		ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
-		ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
-		CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
-		CIJ.flat[ix2]=t
-		CIJ+=1
-		t=CIJ.copy()
+    for lvl in xrange(1,mx_lvl):
+        s=2**(lvl+1)
+        CIJ=np.ones((s,s))
+        grp1=xrange(int(s/2))
+        grp2=xrange(int(s/2),s)
+        ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
+        ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
+        CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
+        CIJ.flat[ix2]=t
+        CIJ+=1
+        t=CIJ.copy()
 
-	CIJ-=(np.ones((s,s))+mx_lvl*np.eye(s))
+    CIJ-=(np.ones((s,s))+mx_lvl*np.eye(s))
 
-	#assign connection probabilities
-	ee=mx_lvl-CIJ-sz_cl
-	ee=(ee>0)*ee
-	prob=(1/E**ee)*(np.ones((s,s))-np.eye(s))
-	CIJ=(prob>np.random.random((n,n)))
+    #assign connection probabilities
+    ee=mx_lvl-CIJ-sz_cl
+    ee=(ee>0)*ee
+    prob=(1/E**ee)*(np.ones((s,s))-np.eye(s))
+    CIJ=(prob>np.random.random((n,n)))
 
-	#count connections
-	k=np.sum(CIJ)
+    #count connections
+    k=np.sum(CIJ)
 
-	return np.array(CIJ,dtype=int),k
+    return np.array(CIJ,dtype=int),k
 
 def makerandCIJdegreesfixed(inv,outv):
-	'''
+    '''
 This function generates a directed random network with a specified 
 in-degree and out-degree sequence.
 
 Inputs:     inv,    indegree vector
-		    outv,   outdegree vector
+            outv,   outdegree vector
 
 Output:     CIJ,    binary directed connectivity matrix
 
 Notes:  Necessary conditions include:
-		    length(in) = length(out) = n
-		    sum(in) = sum(out) = k
-		    in(i), out(i) < n-1
-		    in(i) + out(j) < n+2
-		    in(i) + out(i) < n
+            length(in) = length(out) = n
+            sum(in) = sum(out) = k
+            in(i), out(i) < n-1
+            in(i) + out(j) < n+2
+            in(i) + out(i) < n
 
-	    No connections are placed on the main diagonal
+        No connections are placed on the main diagonal
 
-		The algorithm used in this function is not, technically, guaranteed to
-		terminate. If a valid distribution of in and out degrees is provided, 
-		this function will find it in bounded time with probability 
-		1-(1/(2*(k^2))).  This turns out to be a serious problem when computing 
-		infinite degree matrices, but offers good performance otherwise.
-	'''
-	n=len(inv)
-	k=np.sum(inv)
-	in_inv=np.zeros((k,))
-	out_inv=np.zeros((k,))
-	i_in=0; i_out=0	
+        The algorithm used in this function is not, technically, guaranteed to
+        terminate. If a valid distribution of in and out degrees is provided, 
+        this function will find it in bounded time with probability 
+        1-(1/(2*(k^2))).  This turns out to be a serious problem when computing 
+        infinite degree matrices, but offers good performance otherwise.
+    '''
+    n=len(inv)
+    k=np.sum(inv)
+    in_inv=np.zeros((k,))
+    out_inv=np.zeros((k,))
+    i_in=0; i_out=0	
 
-	for i in xrange(n):
-		in_inv[i_in:i_in+inv[i]]=i
-		out_inv[i_out:i_out+outv[i]]=i
-		i_in+=inv[i]
-		i_out+=outv[i]
+    for i in xrange(n):
+        in_inv[i_in:i_in+inv[i]]=i
+        out_inv[i_out:i_out+outv[i]]=i
+        i_in+=inv[i]
+        i_out+=outv[i]
 
-	CIJ=np.eye(n)
-	edges=np.array((out_inv,in_inv[np.random.permutation(k)]))
+    CIJ=np.eye(n)
+    edges=np.array((out_inv,in_inv[np.random.permutation(k)]))
 
-	#create CIJ and check for double edges and self connections
-	for i in xrange(k):
-		if CIJ[edges[0,i],edges[1,i]]:
-			tried=set()
-			while True:
-				if len(tried)==k:
-					raise BCTParamError('Could not resolve the given '
-						'in and out vectors')	
-				switch=np.random.randint(k)
-				while switch in tried:
-					switch=np.random.randint(k)
-				if not (CIJ[edges[0,i],edges[1,switch]] or
-						CIJ[edges[0,switch],edges[1,i]]):
-					CIJ[edges[0,switch],edges[1,switch]]=0
-					CIJ[edges[0,switch],edges[1,i]]=1
-					if switch<i:
-						CIJ[edges[0,switch],edges[1,switch]]=0
-						CIJ[edges[0,switch],edges[1,i]]=1
-					t=edges[1,i]
-					edges[1,i]=edges[1,switch]
-					edges[1,switch]=t
-					break
-				tried.add(switch)
-		else:
-			CIJ[edges[0,i],edges[1,i]]=1
+    #create CIJ and check for double edges and self connections
+    for i in xrange(k):
+        if CIJ[edges[0,i],edges[1,i]]:
+            tried=set()
+            while True:
+                if len(tried)==k:
+                    raise BCTParamError('Could not resolve the given '
+                        'in and out vectors')	
+                switch=np.random.randint(k)
+                while switch in tried:
+                    switch=np.random.randint(k)
+                if not (CIJ[edges[0,i],edges[1,switch]] or
+                        CIJ[edges[0,switch],edges[1,i]]):
+                    CIJ[edges[0,switch],edges[1,switch]]=0
+                    CIJ[edges[0,switch],edges[1,i]]=1
+                    if switch<i:
+                        CIJ[edges[0,switch],edges[1,switch]]=0
+                        CIJ[edges[0,switch],edges[1,i]]=1
+                    t=edges[1,i]
+                    edges[1,i]=edges[1,switch]
+                    edges[1,switch]=t
+                    break
+                tried.add(switch)
+        else:
+            CIJ[edges[0,i],edges[1,i]]=1
 
-	CIJ-=np.eye(n)
-	return CIJ
+    CIJ-=np.eye(n)
+    return CIJ
 
 def makerandCIJ_dir(n,k):
-	'''
+    '''
 This function generates a directed random network
 
 Inputs:     N,      number of vertices
-		    K,      number of edges
+            K,      number of edges
 
 Output:     CIJ,    directed random connection matrix
 
 Note: no connections are placed on the main diagonal.
-	'''
-	ix,=np.where(np.logical_not(np.eye(n)).flat)
-	rp=np.random.permutation(np.size(ix))
+    '''
+    ix,=np.where(np.logical_not(np.eye(n)).flat)
+    rp=np.random.permutation(np.size(ix))
 
-	CIJ=np.zeros((n,n))
-	CIJ.flat[ix[rp][:k]]=1
-	return CIJ
+    CIJ=np.zeros((n,n))
+    CIJ.flat[ix[rp][:k]]=1
+    return CIJ
 
 def makerandCIJ_und(n,k):
-	'''
+    '''
 This function generates an undirected random network
 
 Inputs:     N,      number of vertices
-		    K,      number of edges
+            K,      number of edges
 
 Output:     CIJ,    undirected random connection matrix
 
 Note: no connections are placed on the main diagonal.
-	'''
-	ix,=np.where(np.triu(np.logical_not(np.eye(n))).flat)
-	rp=np.random.permutation(np.size(ix))
-	
-	CIJ=np.zeros((n,n))
-	CIJ.flat[ix[rp][:k]]=1
-	return CIJ
+    '''
+    ix,=np.where(np.triu(np.logical_not(np.eye(n))).flat)
+    rp=np.random.permutation(np.size(ix))
+    
+    CIJ=np.zeros((n,n))
+    CIJ.flat[ix[rp][:k]]=1
+    return CIJ
 
 def makeringlatticeCIJ(n,k):
-	'''
+    '''
 This function generates a directed lattice network with toroidal 
 boundary counditions (i.e. with ring-like "wrapping around").
 
 Inputs:     N,      number of vertices
-		    K,      number of edges
+            K,      number of edges
 
 Outputs:    CIJ,    connection matrix
 
 Note: The lattice is made by placing connections as close as possible 
 to the main diagonal, with wrapping around. No connections are made 
 on the main diagonal. In/Outdegree is kept approx. constant at K/N.
-	'''
-	#initialize
-	CIJ=np.zeros((n,n))
-	CIJ1=np.ones((n,n))
-	kk=0
-	count=0
-	seq=xrange(1,n)
-	seq2=xrange(n-1,0,-1)
+    '''
+    #initialize
+    CIJ=np.zeros((n,n))
+    CIJ1=np.ones((n,n))
+    kk=0
+    count=0
+    seq=xrange(1,n)
+    seq2=xrange(n-1,0,-1)
 
-	#fill in
-	while kk<k:
-		count+=1
-		dCIJ=np.triu(CIJ1,seq[count])-np.triu(CIJ1,seq[count]+1)
-		dCIJ2=np.triu(CIJ1,seq2[count])-np.triu(CIJ1,seq2[count]+1)
-		dCIJ=dCIJ+dCIJ.T+dCIJ2+dCIJ2.T
-		CIJ+=dCIJ
-		kk=int(np.sum(CIJ))
-	
-	#remove excess connections
-	overby=kk-k
-	if overby:
-		i,j=np.where(dCIJ)
-		rp=np.random.permutation(np.size(i))
-		for ii in xrange(overby):
-			CIJ[i[rp[ii]],j[rp[ii]]]=0
+    #fill in
+    while kk<k:
+        count+=1
+        dCIJ=np.triu(CIJ1,seq[count])-np.triu(CIJ1,seq[count]+1)
+        dCIJ2=np.triu(CIJ1,seq2[count])-np.triu(CIJ1,seq2[count]+1)
+        dCIJ=dCIJ+dCIJ.T+dCIJ2+dCIJ2.T
+        CIJ+=dCIJ
+        kk=int(np.sum(CIJ))
+    
+    #remove excess connections
+    overby=kk-k
+    if overby:
+        i,j=np.where(dCIJ)
+        rp=np.random.permutation(np.size(i))
+        for ii in xrange(overby):
+            CIJ[i[rp[ii]],j[rp[ii]]]=0
 
-	return CIJ
+    return CIJ
 
 def maketoeplitzCIJ(n,k,s):
-	'''
+    '''
 This function generates a directed network with a Gaussian drop-off in
 edge density with increasing distance from the main diagonal. There are
 toroidal boundary counditions (i.e. no ring-like "wrapping around").
 
 Inputs:     N,      number of vertices
-		    K,      number of edges
-		    s,      standard deviation of toeplitz
+            K,      number of edges
+            s,      standard deviation of toeplitz
 
 Output:     CIJ,    connection matrix
 
 Note: no connections are placed on the main diagonal.
-	'''
-	from scipy import linalg,stats
-	pf=stats.norm.pdf(xrange(1,n),.5,s)
-	template=linalg.toeplitz(np.append((0,),pf),r=np.append((0,),pf))
-	template*=(k/np.sum(template))
+    '''
+    from scipy import linalg,stats
+    pf=stats.norm.pdf(xrange(1,n),.5,s)
+    template=linalg.toeplitz(np.append((0,),pf),r=np.append((0,),pf))
+    template*=(k/np.sum(template))
 
-	CIJ=np.zeros((n,n))
-	itr=0
-	while np.sum(CIJ)!=k:
-		CIJ=(np.random.random((n,n))<template)
-		itr+=1
-		if itr>10000:
-			raise BCTParamError('Infinite loop was caught generating toeplitz ' 
-				'matrix.  This means the matrix could not be resolved with the '
-				'specified parameters.')
+    CIJ=np.zeros((n,n))
+    itr=0
+    while np.sum(CIJ)!=k:
+        CIJ=(np.random.random((n,n))<template)
+        itr+=1
+        if itr>10000:
+            raise BCTParamError('Infinite loop was caught generating toeplitz ' 
+                'matrix.  This means the matrix could not be resolved with the '
+                'specified parameters.')
 
-	return CIJ
+    return CIJ
 
 def null_model_dir_sign(W,bin_swaps=5,wei_freq=.1):
-	'''
+    '''
 This function randomizes an directed network with positive and
 negative weights, while preserving the degree and strength
 distributions. This function calls randmio_dir.m
 
 Inputs: W,          Directed weighted connection matrix
-	   bin_swaps,  Average number of swaps of each edge in binary randomization.
-					   bin_swap=5 is the default (each edge rewired 5 times)
-					   bin_swap=0 implies no binary randomization 
-	   wei_freq,   Frequency of weight sorting in weighted randomization
-					   0 <= wei_freq < 1
-					   wei_freq=1 implies that weights are sorted at each step
-					   wei_freq=0.1 implies that weights are sorted at each 
-							10th step (faster, default value)
-					   wei_freq=0 implies no sorting of weights
-						   (not recommended)
+       bin_swaps,  Average number of swaps of each edge in binary randomization.
+                       bin_swap=5 is the default (each edge rewired 5 times)
+                       bin_swap=0 implies no binary randomization 
+       wei_freq,   Frequency of weight sorting in weighted randomization
+                       0 <= wei_freq < 1
+                       wei_freq=1 implies that weights are sorted at each step
+                       wei_freq=0.1 implies that weights are sorted at each 
+                            10th step (faster, default value)
+                       wei_freq=0 implies no sorting of weights
+                           (not recommended)
 
 Output:     W0,     Randomized weighted connection matrix
-		    R,      Correlation coefficients between strength sequences
-					   of input and output connection matrices
+            R,      Correlation coefficients between strength sequences
+                       of input and output connection matrices
 
 Notes:
    The value of bin_swaps is ignored when binary topology is fully
@@ -4799,184 +4799,184 @@ matrices and are used to evaluate the accuracy with which strengths
 were preserved. Note that correlation coefficients may be a rough
 measure of strength-sequence accuracy and one could implement more
 formal tests (such as the Kolmogorov-Smirnov test) if desired.
-	'''
-	W=W.copy()
-	n=len(W)
-	np.fill_diagonal(W, 0)						#clear diagonal
-	Ap=(W>0)									#positive adjmat
-	if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
-		Ap_r,_=randmio_dir(Ap,bin_swaps)			#randomized Ap
-	else:
-		Ap_r=Ap.copy()
+    '''
+    W=W.copy()
+    n=len(W)
+    np.fill_diagonal(W, 0)						#clear diagonal
+    Ap=(W>0)									#positive adjmat
+    if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
+        Ap_r,_=randmio_dir(Ap,bin_swaps)			#randomized Ap
+    else:
+        Ap_r=Ap.copy()
 
-	An=np.logical_not(Ap) 						#negative adjmat
-	np.fill_diagonal(An, 0)
-	An_r=np.logical_not(Ap_r) 					#randomized An
-	np.fill_diagonal(An_r, 0)
+    An=np.logical_not(Ap) 						#negative adjmat
+    np.fill_diagonal(An, 0)
+    An_r=np.logical_not(Ap_r) 					#randomized An
+    np.fill_diagonal(An_r, 0)
 
-	W0=np.zeros((n,n))
-	for s in (1,-1):
-		if s==1:
-			Acur=Ap; A_rcur=Ap_r
-		else:
-			Acur=An; A_rcur=An_r
+    W0=np.zeros((n,n))
+    for s in (1,-1):
+        if s==1:
+            Acur=Ap; A_rcur=Ap_r
+        else:
+            Acur=An; A_rcur=An_r
 
-		Si=np.sum(W*Acur,axis=0)				#positive in-strength
-		So=np.sum(W*Acur,axis=1)				#positive out-strength
-		Wv=np.sort(W[Acur].flat)				#sorted weights vector
-		i,j=np.where(A_rcur)
-		Lij,=np.where(A_rcur.flat)				#weights indices
+        Si=np.sum(W*Acur,axis=0)				#positive in-strength
+        So=np.sum(W*Acur,axis=1)				#positive out-strength
+        Wv=np.sort(W[Acur].flat)				#sorted weights vector
+        i,j=np.where(A_rcur)
+        Lij,=np.where(A_rcur.flat)				#weights indices
 
-		P=np.outer(So,Si)
-		
-		if wei_freq==0:							#get indices of Lij that sort P
-			Oind=np.argsort(P.flat[Lij])		#assign corresponding sorted
-			W0.flat[Lij[Oind]]=s*Wv				#weight at this index
-		else:
-			wsize=np.size(Wv)
-			wei_period=np.round(1/wei_freq)		#convert frequency to period
-			lq=np.arange(wsize,0,-wei_period,dtype=int)	
-			for m in lq:				#iteratively explore at this period
-				Oind=np.argsort(P.flat[Lij])	#get indices of Lij that sort P
-				R=np.random.permutation(m)[:np.min((m,wei_period))]
-				for q,r in enumerate(R):
-					o=Oind[r]	#choose random index of sorted expected weight
-					W0.flat[Lij[o]]=s*Wv[r]		#assign corresponding weight
+        P=np.outer(So,Si)
+        
+        if wei_freq==0:							#get indices of Lij that sort P
+            Oind=np.argsort(P.flat[Lij])		#assign corresponding sorted
+            W0.flat[Lij[Oind]]=s*Wv				#weight at this index
+        else:
+            wsize=np.size(Wv)
+            wei_period=np.round(1/wei_freq)		#convert frequency to period
+            lq=np.arange(wsize,0,-wei_period,dtype=int)	
+            for m in lq:				#iteratively explore at this period
+                Oind=np.argsort(P.flat[Lij])	#get indices of Lij that sort P
+                R=np.random.permutation(m)[:np.min((m,wei_period))]
+                for q,r in enumerate(R):
+                    o=Oind[r]	#choose random index of sorted expected weight
+                    W0.flat[Lij[o]]=s*Wv[r]		#assign corresponding weight
 
-					#readjust expected weighted probability for i[o],j[o]
-					f=1-Wv[r]/So[i[o]]	
-					P[i[o],:]*=f
-					f=1-Wv[r]/So[j[o]]
-					P[j[o],:]*=f
+                    #readjust expected weighted probability for i[o],j[o]
+                    f=1-Wv[r]/So[i[o]]	
+                    P[i[o],:]*=f
+                    f=1-Wv[r]/So[j[o]]
+                    P[j[o],:]*=f
 
-					#readjust in-strength of i[o]
-					So[i[o]]-=Wv[r]
-					#readjust out-strength of j[o]
-					Si[j[o]]-=Wv[r]
+                    #readjust in-strength of i[o]
+                    So[i[o]]-=Wv[r]
+                    #readjust out-strength of j[o]
+                    Si[j[o]]-=Wv[r]
 
-				O=Oind[R]
-				#remove current indices from further consideration
-				Lij=np.delete(Lij,O)
-				i=np.delete(i,O)
-				j=np.delete(j,O)
-				Wv=np.delete(Wv,O)
+                O=Oind[R]
+                #remove current indices from further consideration
+                Lij=np.delete(Lij,O)
+                i=np.delete(i,O)
+                j=np.delete(j,O)
+                Wv=np.delete(Wv,O)
 
-	rpos_in=np.corrcoef(np.sum(W*(W>0),axis=0),np.sum(W0*(W0>0),axis=0))
-	rpos_ou=np.corrcoef(np.sum(W*(W>0),axis=1),np.sum(W0*(W0>0),axis=1))
-	rneg_in=np.corrcoef(np.sum(-W*(W<0),axis=0),np.sum(-W0*(W0<0),axis=0))
-	rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
-	return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
+    rpos_in=np.corrcoef(np.sum(W*(W>0),axis=0),np.sum(W0*(W0>0),axis=0))
+    rpos_ou=np.corrcoef(np.sum(W*(W>0),axis=1),np.sum(W0*(W0>0),axis=1))
+    rneg_in=np.corrcoef(np.sum(-W*(W<0),axis=0),np.sum(-W0*(W0<0),axis=0))
+    rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
+    return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
 
 def null_model_und_sign(W,bin_swaps=5,wei_freq=.1):
-	'''
+    '''
 This function randomizes an undirected network with positive and
 negative weights, while preserving the degree and strength
 distributions. This function calls randmio_und.m
 
 Inputs: W,          Undirected weighted connection matrix
-	   bin_swaps,  Average number of swaps of each edge in binary randomization.
-					   bin_swap=5 is the default (each edge rewired 5 times)
-					   bin_swap=0 implies no binary randomization 
-	   wei_freq,   Frequency of weight sorting in weighted randomization
-					   wei_freq should range between 0 and 1
-					   wei_freq=1 implies that weights are resorted at each step
-					   wei_freq=0.1 implies that weights are sorted at each 10th
-								step (default)
-					   wei_freq=0 implies no sorting of weights
-							   (not recommended)
+       bin_swaps,  Average number of swaps of each edge in binary randomization.
+                       bin_swap=5 is the default (each edge rewired 5 times)
+                       bin_swap=0 implies no binary randomization 
+       wei_freq,   Frequency of weight sorting in weighted randomization
+                       wei_freq should range between 0 and 1
+                       wei_freq=1 implies that weights are resorted at each step
+                       wei_freq=0.1 implies that weights are sorted at each 10th
+                                step (default)
+                       wei_freq=0 implies no sorting of weights
+                               (not recommended)
 
 Output:     W0,     Randomized weighted connection matrix
-		    R,      Correlation coefficient between strength sequences
-					   of input and output connection matrices
+            R,      Correlation coefficient between strength sequences
+                       of input and output connection matrices
 
 Notes:
   The value of bin_swaps is ignored when binary topology is fully
-	connected (e.g. when the network has no negative weights).
+    connected (e.g. when the network has no negative weights).
   Randomization may be better (and execution time will be slower) for
-	higher values of bin_swaps and wei_freq. Higher values of bin_swaps may
-	enable a more random binary organization, and higher values of wei_freq
-	may enable a more accurate conservation of strength sequences.
+    higher values of bin_swaps and wei_freq. Higher values of bin_swaps may
+    enable a more random binary organization, and higher values of wei_freq
+    may enable a more accurate conservation of strength sequences.
   R are the correlation coefficients between positive and negative
-	strength sequences of input and output connection matrices and are
-	used to evaluate the accuracy with which strengths were preserved. Note
-	that correlation coefficients may be a rough measure of
-	strength-sequence accuracy and one could implement more formal tests
-	(such as the Kolmogorov-Smirnov test) if desired. 
-	'''
-	if not np.all(W==W.T):
-		raise BCTParamError("Input must be undirected")
-	W=W.copy()
-	n=len(W)
-	np.fill_diagonal(W, 0)						#clear diagonal
-	Ap=(W>0)									#positive adjmat
-	if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
-		Ap_r,_=randmio_und(Ap,bin_swaps)		#randomized Ap
-	else:
-		Ap_r=Ap.copy()
+    strength sequences of input and output connection matrices and are
+    used to evaluate the accuracy with which strengths were preserved. Note
+    that correlation coefficients may be a rough measure of
+    strength-sequence accuracy and one could implement more formal tests
+    (such as the Kolmogorov-Smirnov test) if desired. 
+    '''
+    if not np.all(W==W.T):
+        raise BCTParamError("Input must be undirected")
+    W=W.copy()
+    n=len(W)
+    np.fill_diagonal(W, 0)						#clear diagonal
+    Ap=(W>0)									#positive adjmat
+    if np.size(np.where(Ap.flat))<(n*(n-1)):	#if Ap not fully connected
+        Ap_r,_=randmio_und(Ap,bin_swaps)		#randomized Ap
+    else:
+        Ap_r=Ap.copy()
 
-	An=np.logical_not(Ap) 						#negative adjmat
-	np.fill_diagonal(An, 0)
-	An_r=np.logical_not(Ap_r) 					#randomized An
-	np.fill_diagonal(An_r, 0)
+    An=np.logical_not(Ap) 						#negative adjmat
+    np.fill_diagonal(An, 0)
+    An_r=np.logical_not(Ap_r) 					#randomized An
+    np.fill_diagonal(An_r, 0)
 
-	W0=np.zeros((n,n))
-	for s in (1,-1):
-		if s==1:
-			Acur=Ap; A_rcur=Ap_r
-		else:
-			Acur=An; A_rcur=An_r
+    W0=np.zeros((n,n))
+    for s in (1,-1):
+        if s==1:
+            Acur=Ap; A_rcur=Ap_r
+        else:
+            Acur=An; A_rcur=An_r
 
-		S=np.sum(W*Acur,axis=0)					#strengths
-		Wv=np.sort(W[np.where(np.triu(Acur))])	#sorted weights vector
-		i,j=np.where(np.triu(A_rcur))
-		Lij,=np.where(np.triu(A_rcur).flat)		#weights indices
+        S=np.sum(W*Acur,axis=0)					#strengths
+        Wv=np.sort(W[np.where(np.triu(Acur))])	#sorted weights vector
+        i,j=np.where(np.triu(A_rcur))
+        Lij,=np.where(np.triu(A_rcur).flat)		#weights indices
 
-		P=np.outer(S,S)
+        P=np.outer(S,S)
 
-		if wei_freq==0:							#get indices of Lij that sort P
-			Oind=np.argsort(P.flat[Lij])		#assign corresponding sorted
-			W0.flat[Lij[Oind]]=s*Wv				#weight at this index
-		else:
-			wsize=np.size(Wv)
-			wei_period=np.round(1/wei_freq)		#convert frequency to period
-			lq=np.arange(wsize,0,-wei_period,dtype=int)	
-			for m in lq:				#iteratively explore at this period
-				Oind=np.argsort(P.flat[Lij])	#get indices of Lij that sort P
-				R=np.random.permutation(m)[:np.min((m,wei_period))]
-				for q,r in enumerate(R):
-					o=Oind[r]	#choose random index of sorted expected weight
-					W0.flat[Lij[o]]=s*Wv[r]		#assign corresponding weight
+        if wei_freq==0:							#get indices of Lij that sort P
+            Oind=np.argsort(P.flat[Lij])		#assign corresponding sorted
+            W0.flat[Lij[Oind]]=s*Wv				#weight at this index
+        else:
+            wsize=np.size(Wv)
+            wei_period=np.round(1/wei_freq)		#convert frequency to period
+            lq=np.arange(wsize,0,-wei_period,dtype=int)	
+            for m in lq:				#iteratively explore at this period
+                Oind=np.argsort(P.flat[Lij])	#get indices of Lij that sort P
+                R=np.random.permutation(m)[:np.min((m,wei_period))]
+                for q,r in enumerate(R):
+                    o=Oind[r]	#choose random index of sorted expected weight
+                    W0.flat[Lij[o]]=s*Wv[r]		#assign corresponding weight
 
-					#readjust expected weighted probability for i[o],j[o]
-					f=1-Wv[r]/S[i[o]]	
-					P[i[o],:]*=f
-					P[:,i[o]]*=f
-					f=1-Wv[r]/S[j[o]]
-					P[j[o],:]*=f
-					P[:,j[o]]*=f
+                    #readjust expected weighted probability for i[o],j[o]
+                    f=1-Wv[r]/S[i[o]]	
+                    P[i[o],:]*=f
+                    P[:,i[o]]*=f
+                    f=1-Wv[r]/S[j[o]]
+                    P[j[o],:]*=f
+                    P[:,j[o]]*=f
 
-					#readjust strength of i[o]
-					S[i[o]]-=Wv[r]
-					#readjust strength of j[o]
-					S[j[o]]-=Wv[r]
+                    #readjust strength of i[o]
+                    S[i[o]]-=Wv[r]
+                    #readjust strength of j[o]
+                    S[j[o]]-=Wv[r]
 
-				O=Oind[R]
-				#remove current indices from further consideration
-				Lij=np.delete(Lij,O)
-				i=np.delete(i,O)
-				j=np.delete(j,O)
-				Wv=np.delete(Wv,R)
+                O=Oind[R]
+                #remove current indices from further consideration
+                Lij=np.delete(Lij,O)
+                i=np.delete(i,O)
+                j=np.delete(j,O)
+                Wv=np.delete(Wv,R)
 
-	W0=W0+W0.T
+    W0=W0+W0.T
 
-	rpos_in=np.corrcoef(np.sum(W*(W>0),axis=0),np.sum(W0*(W0>0),axis=0))
-	rpos_ou=np.corrcoef(np.sum(W*(W>0),axis=1),np.sum(W0*(W0>0),axis=1))
-	rneg_in=np.corrcoef(np.sum(-W*(W<0),axis=0),np.sum(-W0*(W0<0),axis=0))
-	rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
-	return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
-			
+    rpos_in=np.corrcoef(np.sum(W*(W>0),axis=0),np.sum(W0*(W0>0),axis=0))
+    rpos_ou=np.corrcoef(np.sum(W*(W>0),axis=1),np.sum(W0*(W0>0),axis=1))
+    rneg_in=np.corrcoef(np.sum(-W*(W<0),axis=0),np.sum(-W0*(W0<0),axis=0))
+    rneg_ou=np.corrcoef(np.sum(-W*(W<0),axis=1),np.sum(-W0*(W0<0),axis=1))
+    return W0,(rpos_in[0,1],rpos_ou[0,1],rneg_in[0,1],rneg_ou[0,1])
+            
 def randmio_dir_connected(R,iter):
-	'''
+    '''
 This function randomizes a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions. The
@@ -4985,122 +4985,122 @@ connectedness, the ability for every node to reach every other node in
 the network. The input network for this function must be connected.
 
 Input:      W,      directed (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				   (each edge is rewired approximately ITER times)
+            ITER,   rewiring parameter
+                   (each edge is rewired approximately ITER times)
 
 Output:     R,      randomized network
-		    eff,    number of actual rewirings carried out
-	'''
-	R=R.copy()
-	n=len(R)
-	i,j=np.where(R)
-	k=len(i)
-	iter*=k
+            eff,    number of actual rewirings carried out
+    '''
+    R=R.copy()
+    n=len(R)
+    i,j=np.where(R)
+    k=len(i)
+    iter*=k
 
-	max_attempts=np.round(n*k/(n*(n-1)))
-	eff=0
+    max_attempts=np.round(n*k/(n*(n-1)))
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			rewire=True
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            rewire=True
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break					#all 4 vertices must be different
+                if a!=c and a!=d and b!=c and b!=d:
+                    break					#all 4 vertices must be different
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#connectedness condition
-				if not (np.any((R[a,c],R[d,b],R[d,c])) and
-						np.any((R[c,a],R[b,d],R[b,a]))):
-					P=R[(a,c),:].copy()
-					P[0,b]=0; P[0,d]=1
-					P[1,d]=0; P[1,b]=1
-					PN=P.copy()
-					PN[0,a]=1; PN[1,c]=1
-					while True:
-						P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
-						P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
-						P*=np.logical_not(PN)
-						PN+=P
-						if not np.all(np.any(P,axis=1)):
-							rewire=False
-							break
-						elif np.any(PN[0,(b,c)]) and np.any(PN[1,(d,a)]):
-							break	
-				#end connectedness testing
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #connectedness condition
+                if not (np.any((R[a,c],R[d,b],R[d,c])) and
+                        np.any((R[c,a],R[b,d],R[b,a]))):
+                    P=R[(a,c),:].copy()
+                    P[0,b]=0; P[0,d]=1
+                    P[1,d]=0; P[1,b]=1
+                    PN=P.copy()
+                    PN[0,a]=1; PN[1,c]=1
+                    while True:
+                        P[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
+                        P[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
+                        P*=np.logical_not(PN)
+                        PN+=P
+                        if not np.all(np.any(P,axis=1)):
+                            rewire=False
+                            break
+                        elif np.any(PN[0,(b,c)]) and np.any(PN[1,(d,a)]):
+                            break	
+                #end connectedness testing
 
-				if rewire:						#reassign edges
-					R[a,d]=R[a,b]; R[a,b]=0
-					R[c,b]=R[c,d]; R[c,d]=0
+                if rewire:						#reassign edges
+                    R[a,d]=R[a,b]; R[a,b]=0
+                    R[c,b]=R[c,d]; R[c,d]=0
 
-					j.setflags(write=True)
-					j[e1]=d						#reassign edge indices
-					j[e2]=b
-					eff+=1
-					break
-			att+=1
-				
-	return R,eff
+                    j.setflags(write=True)
+                    j[e1]=d						#reassign edge indices
+                    j[e2]=b
+                    eff+=1
+                    break
+            att+=1
+                
+    return R,eff
 
 def randmio_dir(R,iter):
-	'''
+    '''
 This function randomizes a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions.
 
 Input:      W,      directed (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
 
 Output:     R,      randomized network
-		    eff,    number of actual rewirings carried out
-	'''
-	R=R.copy()
-	n=len(R)
-	i,j=np.where(R)
-	k=len(i)
-	iter*=k
+            eff,    number of actual rewirings carried out
+    '''
+    R=R.copy()
+    n=len(R)
+    i,j=np.where(R)
+    k=len(i)
+    iter*=k
 
-	max_attempts=np.round(n*k/(n*(n-1)))
-	eff=0
+    max_attempts=np.round(n*k/(n*(n-1)))
+    eff=0
 
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break					#all 4 vertices must be different
+                if a!=c and a!=d and b!=c and b!=d:
+                    break					#all 4 vertices must be different
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				R[a,d]=R[a,b]; R[a,b]=0
-				R[c,b]=R[c,d]; R[c,d]=0
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                R[a,d]=R[a,b]; R[a,b]=0
+                R[c,b]=R[c,d]; R[c,d]=0
 
-				i.setflags(write=True); j.setflags(write=True)
-				i[e1]=d; j[e2]=b			#reassign edge indices
-				eff+=1
-				break
-			att+=1
-				
-	return R,eff
+                i.setflags(write=True); j.setflags(write=True)
+                i[e1]=d; j[e2]=b			#reassign edge indices
+                eff+=1
+                break
+            att+=1
+                
+    return R,eff
 
 def randmio_und_connected(R,iter):
-	'''
+    '''
 This function randomizes an undirected network, while preserving the 
 degree distribution. The function does not preserve the strength 
 distribution in weighted networks. The function also ensures that the 
@@ -5109,214 +5109,214 @@ to reach every other node in the network. The input network for this
 function must be connected.
 
 Input:      W,      undirected (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				   (each edge is rewired approximately ITER times)
+            ITER,   rewiring parameter
+                   (each edge is rewired approximately ITER times)
 
 Output:     R,      randomized network
-		    eff,    number of actual rewirings carried out
-	'''
-	if not np.all(R==R.T):
-		raise BCTParamError("Input must be undirected")
+            eff,    number of actual rewirings carried out
+    '''
+    if not np.all(R==R.T):
+        raise BCTParamError("Input must be undirected")
 
-	if number_of_components(R) > 1:
-		raise BCTParamError("Input is not connected")
+    if number_of_components(R) > 1:
+        raise BCTParamError("Input is not connected")
 
-	R=R.copy()
-	n=len(R)
-	i,j=np.where(np.tril(R))
-	k=len(i)
-	iter*=k
+    R=R.copy()
+    n=len(R)
+    i,j=np.where(np.tril(R))
+    k=len(i)
+    iter*=k
 
-	#maximum number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)))
-	#actual number of successful rewirings
-	eff=0
-	
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			rewire=True
-			while True:
-				e1=np.random.randint(k)
-				e2=np.random.randint(k)
-				while e1==e2:
-					e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    #maximum number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)))
+    #actual number of successful rewirings
+    eff=0
+    
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            rewire=True
+            while True:
+                e1=np.random.randint(k)
+                e2=np.random.randint(k)
+                while e1==e2:
+                    e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break					#all 4 vertices must be different
+                if a!=c and a!=d and b!=c and b!=d:
+                    break					#all 4 vertices must be different
 
-			if np.random.random()>.5:
+            if np.random.random()>.5:
 
-				i.setflags(write=True); j.setflags(write=True)
-				i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
-				c=i[e2]; d=j[e2]			#to explore all potential rewirings
+                i.setflags(write=True); j.setflags(write=True)
+                i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
+                c=i[e2]; d=j[e2]			#to explore all potential rewirings
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				#connectedness condition
-				if not (R[a,c] or R[b,d]):
-					P=R[(a,d),:].copy()
-					P[0,b]=0; P[1,c]=0
-					PN=P.copy()
-					PN[:,d]=1; PN[:,a]=1
-					while True:
-						PN[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
-						PN[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
-						P*=np.logical_not(PN)
-						if not np.all(np.any(P,axis=1)):
-							rewire=0
-							break
-						elif np.any(P[:,(b,c)]):
-							break
-						PN+=P
-				#end connectedness testing
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                #connectedness condition
+                if not (R[a,c] or R[b,d]):
+                    P=R[(a,d),:].copy()
+                    P[0,b]=0; P[1,c]=0
+                    PN=P.copy()
+                    PN[:,d]=1; PN[:,a]=1
+                    while True:
+                        PN[0,:]=np.any(R[P[0,:]!=0,:],axis=0)
+                        PN[1,:]=np.any(R[P[1,:]!=0,:],axis=0)
+                        P*=np.logical_not(PN)
+                        if not np.all(np.any(P,axis=1)):
+                            rewire=0
+                            break
+                        elif np.any(P[:,(b,c)]):
+                            break
+                        PN+=P
+                #end connectedness testing
 
-				if rewire:
-					R[a,d]=R[a,b]; R[a,b]=0
-					R[d,a]=R[b,a]; R[b,a]=0
-					R[c,b]=R[c,d]; R[c,d]=0
-					R[b,c]=R[d,c]; R[d,c]=0
+                if rewire:
+                    R[a,d]=R[a,b]; R[a,b]=0
+                    R[d,a]=R[b,a]; R[b,a]=0
+                    R[c,b]=R[c,d]; R[c,d]=0
+                    R[b,c]=R[d,c]; R[d,c]=0
 
-					j.setflags(write=True)
-					j[e1]=d; j[e2]=b			#reassign edge indices
-					eff+=1
-					break
-			att+=1
+                    j.setflags(write=True)
+                    j[e1]=d; j[e2]=b			#reassign edge indices
+                    eff+=1
+                    break
+            att+=1
 
-	return R,eff
+    return R,eff
 
 def randmio_und(R,iter):
-	'''
+    '''
 This function randomizes an undirected network, while preserving the 
 degree distribution. The function does not preserve the strength 
 distribution in weighted networks.
 
 Input:      W,      undirected (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				   (each edge is rewired approximately ITER times)
+            ITER,   rewiring parameter
+                   (each edge is rewired approximately ITER times)
 
 Output:     R,      randomized network
-		    eff,    number of actual rewirings carried out
-	'''
-	if not np.all(R==R.T):
-		raise BCTParamError("Input must be undirected")
-	R=R.copy()
-	n=len(R)
-	i,j=np.where(np.tril(R))
-	k=len(i)
-	iter*=k
+            eff,    number of actual rewirings carried out
+    '''
+    if not np.all(R==R.T):
+        raise BCTParamError("Input must be undirected")
+    R=R.copy()
+    n=len(R)
+    i,j=np.where(np.tril(R))
+    k=len(i)
+    iter*=k
 
-	#maximum number of rewiring attempts per iteration
-	max_attempts=np.round(n*k/(n*(n-1)))
-	#actual number of successful rewirings
-	eff=0
-	
-	for it in xrange(iter):
-		att=0
-		while att<=max_attempts:			#while not rewired
-			while True:
-				e1,e2=np.random.randint(k,size=(2,))
-				while e1==e2: e2=np.random.randint(k)
-				a=i[e1]; b=j[e1]
-				c=i[e2]; d=j[e2]
+    #maximum number of rewiring attempts per iteration
+    max_attempts=np.round(n*k/(n*(n-1)))
+    #actual number of successful rewirings
+    eff=0
+    
+    for it in xrange(iter):
+        att=0
+        while att<=max_attempts:			#while not rewired
+            while True:
+                e1,e2=np.random.randint(k,size=(2,))
+                while e1==e2: e2=np.random.randint(k)
+                a=i[e1]; b=j[e1]
+                c=i[e2]; d=j[e2]
 
-				if a!=c and a!=d and b!=c and b!=d:
-					break					#all 4 vertices must be different
+                if a!=c and a!=d and b!=c and b!=d:
+                    break					#all 4 vertices must be different
 
-			if np.random.random()>.5:
-				i.setflags(write=True); j.setflags(write=True)
-				i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
-				c=i[e2]; d=j[e2]		#to explore all potential rewirings
+            if np.random.random()>.5:
+                i.setflags(write=True); j.setflags(write=True)
+                i[e2]=d; j[e2]=c		#flip edge c-d with 50% probability
+                c=i[e2]; d=j[e2]		#to explore all potential rewirings
 
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				R[a,d]=R[a,b]; R[a,b]=0
-				R[d,a]=R[b,a]; R[b,a]=0
-				R[c,b]=R[c,d]; R[c,d]=0
-				R[b,c]=R[d,c]; R[d,c]=0
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                R[a,d]=R[a,b]; R[a,b]=0
+                R[d,a]=R[b,a]; R[b,a]=0
+                R[c,b]=R[c,d]; R[c,d]=0
+                R[b,c]=R[d,c]; R[d,c]=0
 
-				j.setflags(write=True)
-				j[e1]=d; j[e2]=b			#reassign edge indices
-				eff+=1
-				break
-			att+=1
+                j.setflags(write=True)
+                j[e1]=d; j[e2]=b			#reassign edge indices
+                eff+=1
+                break
+            att+=1
 
-	return R,eff
+    return R,eff
 
 def randmio_und_signed(R,iter):
-	'''
+    '''
 This function randomizes an undirected weighted network with positive
 and negative weights, while simultaneously preserving the degree 
 distribution of positive and negative weights. The function does not 
 preserve the strength distribution in weighted networks.
 
 Input:      W,      undirected (binary/weighted) connection matrix
-		    ITER,   rewiring parameter
-				    (each edge is rewired approximately ITER times)
+            ITER,   rewiring parameter
+                    (each edge is rewired approximately ITER times)
 
 Output:     R,      randomized network
-	'''
-	if not np.all(R==R.T):
-		raise BCTParamError("Input must be undirected")
-	R=R.copy()
-	i,j=np.where(np.tril(R))
-	i_p,j_p=np.where(np.tril(R)>0)
-	i_m,j_m=np.where(np.tril(R)<0)
-	k=len(i)
-	k_p=len(i_p)
-	k_m=len(i_m)
-	iter*=k
+    '''
+    if not np.all(R==R.T):
+        raise BCTParamError("Input must be undirected")
+    R=R.copy()
+    i,j=np.where(np.tril(R))
+    i_p,j_p=np.where(np.tril(R)>0)
+    i_m,j_m=np.where(np.tril(R)<0)
+    k=len(i)
+    k_p=len(i_p)
+    k_m=len(i_m)
+    iter*=k
 
-	if not (k_p and k_m):
-		return randmio_und(R,iter)[0]
+    if not (k_p and k_m):
+        return randmio_und(R,iter)[0]
 
-	for it in xrange(iter):					#while not rewired
-		while True:
-			while True:
-				#choose two edges to rewire but make sure they are either
-				#both positive or both negative
-				do_pos=np.random.random()>.5	#randomly rewires pos or neg
-				if do_pos: kcur=k_p; icur=i_p; jcur=j_p
-				else: kcur=k_m; icur=i_m; jcur=j_m
+    for it in xrange(iter):					#while not rewired
+        while True:
+            while True:
+                #choose two edges to rewire but make sure they are either
+                #both positive or both negative
+                do_pos=np.random.random()>.5	#randomly rewires pos or neg
+                if do_pos: kcur=k_p; icur=i_p; jcur=j_p
+                else: kcur=k_m; icur=i_m; jcur=j_m
 
-				e1=np.random.randint(kcur)
-				e2=np.random.randint(kcur)
-				while e1==e2:
-					e2=np.random.randint(kcur)
-				a=icur[e1]; b=jcur[e1]
-				c=icur[e2]; d=jcur[e2]
-				if a!=c and a!=d and b!=c and b!=d:
-					break					#all 4 vertices must be different
+                e1=np.random.randint(kcur)
+                e2=np.random.randint(kcur)
+                while e1==e2:
+                    e2=np.random.randint(kcur)
+                a=icur[e1]; b=jcur[e1]
+                c=icur[e2]; d=jcur[e2]
+                if a!=c and a!=d and b!=c and b!=d:
+                    break					#all 4 vertices must be different
 
-			if np.random.random()>.5:
-				icur.setflags(write=True); jcur.setflags(write=True)
-				icur[e2]=d; jcur[e2]=c		#flip edge c-d with 50% probability
-				c=icur[e2]; d=jcur[e2]		#to explore all potential rewirings
-			#rewiring condition
-			if not (R[a,d] or R[c,b]):
-				R[a,d]=R[a,b]; R[a,b]=0
-				R[d,a]=R[b,a]; R[b,a]=0
-				R[c,b]=R[c,d]; R[c,d]=0
-				R[b,c]=R[d,c]; R[d,c]=0
-				jcur.setflags(write=True)
-				jcur[e1]=d					#reassign edge indices
-				jcur[e2]=b
-				break
+            if np.random.random()>.5:
+                icur.setflags(write=True); jcur.setflags(write=True)
+                icur[e2]=d; jcur[e2]=c		#flip edge c-d with 50% probability
+                c=icur[e2]; d=jcur[e2]		#to explore all potential rewirings
+            #rewiring condition
+            if not (R[a,d] or R[c,b]):
+                R[a,d]=R[a,b]; R[a,b]=0
+                R[d,a]=R[b,a]; R[b,a]=0
+                R[c,b]=R[c,d]; R[c,d]=0
+                R[b,c]=R[d,c]; R[d,c]=0
+                jcur.setflags(write=True)
+                jcur[e1]=d					#reassign edge indices
+                jcur[e2]=b
+                break
 
-	return R
+    return R
 
 def randomize_graph_partial_und(A,B,maxswap):
-	'''
+    '''
 A = RANDOMIZE_GRAPH_PARTIAL_UND(A,B,MAXSWAP) takes adjacency matrices A 
 and B and attempts to randomize matrix A by performing MAXSWAP 
 rewirings. The rewirings will avoid any spots where matrix B is 
 nonzero.
 
 Inputs:       A,      adjacency matrix to randomize
-			  B,      edges to avoid
-	    MAXSWAP,      number of rewirings
+              B,      edges to avoid
+        MAXSWAP,      number of rewirings
 
 Outputs:      A,      randomized matrix
 
@@ -5326,148 +5326,148 @@ Notes:
 2. A can be weighted, though the weighted degree sequence will not be
   preserved.
 3. A must be undirected.
-	'''
-	A=A.copy()
-	i,j=np.where(np.triu(A,1))
-	m=len(i)
+    '''
+    A=A.copy()
+    i,j=np.where(np.triu(A,1))
+    m=len(i)
 
-	nswap=0
-	while nswap < maxswap: 
-		while True:
-			e1,e2=np.random.randint(m,size=(2,));
-			while e1==e2: e2=np.random.randint(m)
-			a=i[e1]; b=j[e1]
-			c=i[e2]; d=j[e2]
-		
-			if a!=c and a!=d and b!=c and b!=d:
-				break					#all 4 vertices must be different
+    nswap=0
+    while nswap < maxswap: 
+        while True:
+            e1,e2=np.random.randint(m,size=(2,));
+            while e1==e2: e2=np.random.randint(m)
+            a=i[e1]; b=j[e1]
+            c=i[e2]; d=j[e2]
+        
+            if a!=c and a!=d and b!=c and b!=d:
+                break					#all 4 vertices must be different
 
-		if np.random.random()>.5:
-			i.setflags(write=True); j.setflags(write=True)
-			i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
-			c=i[e2]; d=j[e2]			#to explore all potential rewirings
-			
-		#rewiring condition
-		if not (A[a,d] or A[c,b] or B[a,d] or B[c,b]): #avoid specified ixes
-			A[a,d]=A[a,b]; A[a,b]=0
-			A[d,a]=A[b,a]; A[b,a]=0
-			A[c,b]=A[c,d]; A[c,d]=0
-			A[b,c]=A[d,c]; A[d,c]=0
+        if np.random.random()>.5:
+            i.setflags(write=True); j.setflags(write=True)
+            i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
+            c=i[e2]; d=j[e2]			#to explore all potential rewirings
+            
+        #rewiring condition
+        if not (A[a,d] or A[c,b] or B[a,d] or B[c,b]): #avoid specified ixes
+            A[a,d]=A[a,b]; A[a,b]=0
+            A[d,a]=A[b,a]; A[b,a]=0
+            A[c,b]=A[c,d]; A[c,d]=0
+            A[b,c]=A[d,c]; A[d,c]=0
 
-			j.setflags(write=True)
-			j[e1]=d; j[e2]=b			#reassign edge indices
-			nswap+=1
-			break
+            j.setflags(write=True)
+            j[e1]=d; j[e2]=b			#reassign edge indices
+            nswap+=1
+            break
 
 def randomizer_bin_und(R,alpha):
-	'''
+    '''
 This function randomizes a binary undirected network, while preserving 
 the degree distribution. The function directly searches for rewirable 
 edge pairs (rather than trying to rewire edge pairs at random), and 
 hence avoids long loops and works especially well in dense matrices.
 
 Inputs:     A,          binary undirected connection matrix
-		    alpha,      fraction of edges to rewire
+            alpha,      fraction of edges to rewire
 
 Outputs:    R,          randomized network
-	'''
-	R=binarize(R,copy=True)					#binarize
-	if not np.all(R==R.T):
-		raise BCTParamError('randomizer_bin_und only takes undirected matrices')
+    '''
+    R=binarize(R,copy=True)					#binarize
+    if not np.all(R==R.T):
+        raise BCTParamError('randomizer_bin_und only takes undirected matrices')
 
-	ax=len(R)
-	nr_poss_edges=(np.dot(ax,ax)-ax)/2			#find maximum possible edges
+    ax=len(R)
+    nr_poss_edges=(np.dot(ax,ax)-ax)/2			#find maximum possible edges
 
-	savediag=np.diag(R)
-	np.fill_diagonal(R, np.inf)				#replace diagonal with high value
-	
-	#if there are more edges than non-edges, invert the matrix to reduce
-	#computation time.  "invert" means swap meaning of 0 and 1, not matrix
-	#inversion
+    savediag=np.diag(R)
+    np.fill_diagonal(R, np.inf)				#replace diagonal with high value
+    
+    #if there are more edges than non-edges, invert the matrix to reduce
+    #computation time.  "invert" means swap meaning of 0 and 1, not matrix
+    #inversion
 
-	i,j=np.where(np.triu(R,1))
-	k=len(i)
-	if k>nr_poss_edges/2:
-		swap=True
-		R=np.logical_not(R)
-		np.fill_diagonal(R, np.inf)
-		i,j=np.where(np.triu(R,1))
-		k=len(i)
-	else: swap=False
+    i,j=np.where(np.triu(R,1))
+    k=len(i)
+    if k>nr_poss_edges/2:
+        swap=True
+        R=np.logical_not(R)
+        np.fill_diagonal(R, np.inf)
+        i,j=np.where(np.triu(R,1))
+        k=len(i)
+    else: swap=False
 
-	#exclude fully connected nodes
-	fullnodes=np.where((np.sum(np.triu(R,1),axis=0)+
-		np.sum(np.triu(R,1),axis=1).T)==(ax-1))
-	if np.size(fullnodes):
-		R[fullnode,:]=0; R[:,fullnode]=0
-		np.fill_diagonal(R, np.inf)
-		i,j=np.where(np.triu(R,1))
-		k=len(i)
+    #exclude fully connected nodes
+    fullnodes=np.where((np.sum(np.triu(R,1),axis=0)+
+        np.sum(np.triu(R,1),axis=1).T)==(ax-1))
+    if np.size(fullnodes):
+        R[fullnode,:]=0; R[:,fullnode]=0
+        np.fill_diagonal(R, np.inf)
+        i,j=np.where(np.triu(R,1))
+        k=len(i)
 
-	if k==0 or k>=(nr_poss_edges-1):
-		raise BCTParamError("No possible randomization")
-	
-	for it in xrange(k):
-		if np.random.random()>alpha:
-			continue						#rewire alpha% of edges
+    if k==0 or k>=(nr_poss_edges-1):
+        raise BCTParamError("No possible randomization")
+    
+    for it in xrange(k):
+        if np.random.random()>alpha:
+            continue						#rewire alpha% of edges
 
-		a=i[it]; b=j[it]					#it is the chosen edge from a<->b
-		
-		alliholes,=np.where(R[:,a]==0)		#find where each end can connect
-		alljholes,=np.where(R[:,b]==0)
+        a=i[it]; b=j[it]					#it is the chosen edge from a<->b
+        
+        alliholes,=np.where(R[:,a]==0)		#find where each end can connect
+        alljholes,=np.where(R[:,b]==0)
 
-		#we can only use edges with connection to neither node
-		i_intersect=np.intersect1d(alliholes,alljholes)
-		#find which of these nodes are connected
-		ii,jj=np.where(R[np.ix_(i_intersect,i_intersect)])
+        #we can only use edges with connection to neither node
+        i_intersect=np.intersect1d(alliholes,alljholes)
+        #find which of these nodes are connected
+        ii,jj=np.where(R[np.ix_(i_intersect,i_intersect)])
 
-		#if there is an edge to switch
-		if np.size(ii):
-			#choose one randomly
-			nummates=np.size(ii)
-			mate=np.random.randint(nummates)
+        #if there is an edge to switch
+        if np.size(ii):
+            #choose one randomly
+            nummates=np.size(ii)
+            mate=np.random.randint(nummates)
 
-			#randomly orient the second edge
-			if np.random.random()>.5:
-				c=i_intersect[ii[mate]];	d=i_intersect[jj[mate]]
-			else:
-				d=i_intersect[ii[mate]];	c=i_intersect[jj[mate]]
+            #randomly orient the second edge
+            if np.random.random()>.5:
+                c=i_intersect[ii[mate]];	d=i_intersect[jj[mate]]
+            else:
+                d=i_intersect[ii[mate]];	c=i_intersect[jj[mate]]
 
-			#swap the edges
-			R[a,b]=0; R[c,d]=0
-			R[b,a]=0; R[d,c]=0
-			R[a,c]=1; R[b,d]=1
-			R[c,a]=1; R[d,b]=1
+            #swap the edges
+            R[a,b]=0; R[c,d]=0
+            R[b,a]=0; R[d,c]=0
+            R[a,c]=1; R[b,d]=1
+            R[c,a]=1; R[d,b]=1
 
-			#update the edge index (this is inefficient)
-			for m in xrange(k):
-				if i[m]==d and j[m]==c:
-					i.setflags(write=True); j.setflags(write=True)
-					i[it]=c; j[m]=b
-				elif i[m]==c and j[m]==d:
-					i.setflags(write=True); j.setflags(write=True)
-					j[it]=c; i[m]=b
+            #update the edge index (this is inefficient)
+            for m in xrange(k):
+                if i[m]==d and j[m]==c:
+                    i.setflags(write=True); j.setflags(write=True)
+                    i[it]=c; j[m]=b
+                elif i[m]==c and j[m]==d:
+                    i.setflags(write=True); j.setflags(write=True)
+                    j[it]=c; i[m]=b
 
-	#restore fullnodes
-	if np.size(fullnodes):
-		R[fullnodes,:]=1; R[:,fullnodes]=1
-	
-	#restore inversion
-	if swap:
-		R=np.logical_not(R)
+    #restore fullnodes
+    if np.size(fullnodes):
+        R[fullnodes,:]=1; R[:,fullnodes]=1
+    
+    #restore inversion
+    if swap:
+        R=np.logical_not(R)
 
-	#restore diagonal
-	np.fill_diagonal(R, 0)
-	R+=savediag
+    #restore diagonal
+    np.fill_diagonal(R, 0)
+    R+=savediag
 
-	return np.array(R,dtype=int)
+    return np.array(R,dtype=int)
 
 ###############################################################################
 # SIMILARITY 
 ###############################################################################
 
 def edge_nei_overlap_bd(CIJ):
-	'''	
+    '''	
 This function determines the neighbors of two nodes that are linked by 
 an edge, and then computes their overlap.  Connection matrix must be
 binary and directed.  Entries of 'EC' that are 'inf' indicate that no
@@ -5481,32 +5481,32 @@ linked by incoming, outgoing, or reciprocal connections.
 Inputs:     CIJ,      directed (binary/weighted) connection matrix
 
 Outputs:    EC,     edge neighborhood overlap matrix
-		    ec,     edge neighborhood overlap per edge, in vector format
-		    degij,  degrees of node pairs connected by each edge
-	'''
+            ec,     edge neighborhood overlap per edge, in vector format
+            degij,  degrees of node pairs connected by each edge
+    '''
 
-	ik,jk=np.where(CIJ)
-	lel=len(CIJ[ik,jk])
-	n=len(CIJ)
+    ik,jk=np.where(CIJ)
+    lel=len(CIJ[ik,jk])
+    n=len(CIJ)
 
-	_,_,deg=degrees_dir(CIJ)
+    _,_,deg=degrees_dir(CIJ)
 
-	ec=np.zeros((lel,))
-	degij=np.zeros((2,lel))
-	for e in xrange(lel):
-		neiik=np.setdiff1d(np.union1d(
-			np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
-		neijk=np.setdiff1d(np.union1d(
-			np.where(CIJ[jk[e],:]),np.where(CIJ[:,jk[e]])),(ik[e],jk[e]))
-		ec[e]=len(np.intersect1d(neiik,neijk))/len(np.union1d(neiik,neijk))
-		degij[:,e]=(deg[ik[e]],deg[jk[e]])
+    ec=np.zeros((lel,))
+    degij=np.zeros((2,lel))
+    for e in xrange(lel):
+        neiik=np.setdiff1d(np.union1d(
+            np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
+        neijk=np.setdiff1d(np.union1d(
+            np.where(CIJ[jk[e],:]),np.where(CIJ[:,jk[e]])),(ik[e],jk[e]))
+        ec[e]=len(np.intersect1d(neiik,neijk))/len(np.union1d(neiik,neijk))
+        degij[:,e]=(deg[ik[e]],deg[jk[e]])
 
-	EC=np.tile(np.inf,(n,n))
-	EC[ik,jk]=ec
-	return EC,ec,degij
+    EC=np.tile(np.inf,(n,n))
+    EC[ik,jk]=ec
+    return EC,ec,degij
 
 def edge_nei_overlap_bu(CIJ):
-	'''
+    '''
 This function determines the neighbors of two nodes that are linked by 
 an edge, and then computes their overlap.  Connection matrix must be
 binary and directed.  Entries of 'EC' that are 'inf' indicate that no
@@ -5519,31 +5519,31 @@ If CIJ is weighted, the weights are ignored.
 Inputs:     CIJ,    undirected (binary/weighted) connection matrix
 
 Outputs:    EC,     edge neighborhood overlap matrix
-		    ec,     edge neighborhood overlap per edge, in vector format
-		    degij,  degrees of node pairs connected by each edge
-	'''
-	ik,jk=np.where(CIJ)
-	lel=len(CIJ[ik,jk])
-	n=len(CIJ)
+            ec,     edge neighborhood overlap per edge, in vector format
+            degij,  degrees of node pairs connected by each edge
+    '''
+    ik,jk=np.where(CIJ)
+    lel=len(CIJ[ik,jk])
+    n=len(CIJ)
 
-	deg=degrees_und(CIJ)
+    deg=degrees_und(CIJ)
 
-	ec=np.zeros((lel,))
-	degij=np.zeros((2,lel))
-	for e in xrange(lel):
-		neiik=np.setdiff1d(np.union1d(
-			np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
-		neijk=np.setdiff1d(np.union1d(
-			np.where(CIJ[jk[e],:]),np.where(CIJ[:,jk[e]])),(ik[e],jk[e]))
-		ec[e]=len(np.intersect1d(neiik,neijk))/len(np.union1d(neiik,neijk))
-		degij[:,e]=(deg[ik[e]],deg[jk[e]])
+    ec=np.zeros((lel,))
+    degij=np.zeros((2,lel))
+    for e in xrange(lel):
+        neiik=np.setdiff1d(np.union1d(
+            np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
+        neijk=np.setdiff1d(np.union1d(
+            np.where(CIJ[jk[e],:]),np.where(CIJ[:,jk[e]])),(ik[e],jk[e]))
+        ec[e]=len(np.intersect1d(neiik,neijk))/len(np.union1d(neiik,neijk))
+        degij[:,e]=(deg[ik[e]],deg[jk[e]])
 
-	EC=np.tile(np.inf,(n,n))
-	EC[ik,jk]=ec
-	return EC,ec,degij
+    EC=np.tile(np.inf,(n,n))
+    EC[ik,jk]=ec
+    return EC,ec,degij
 
 def gtom(adj,nr_steps):
-	'''
+    '''
 The m-th step generalized topological overlap measure (GTOM) quantifies
 the extent to which a pair of nodes have similar m-th step neighbors.
 Mth-step neighbors are nodes that are reachable by a path of at most
@@ -5551,7 +5551,7 @@ length m.
 
 This function computes the the M x M generalized topological overlap
 measure (GTOM) matrix for number of steps, numSteps. 
-		 nr_steps,    number of steps
+         nr_steps,    number of steps
 
 Outputs:       gt,    GTOM matrix
 
@@ -5562,40 +5562,40 @@ nodes share in common, where "neighbors" are one step removed. As
 'numSteps' is increased, neighbors that are furter out are considered.
 Elements of 'gt' are bounded between 0 and 1.  The 'gt' matrix can be
 converted from a similarity to a distance matrix by taking 1-gt.
-	'''
-	bm=binarize(bm,copy=True)
-	bm_aux=bm.copy()
-	nr_nodes=len(adj)
+    '''
+    bm=binarize(bm,copy=True)
+    bm_aux=bm.copy()
+    nr_nodes=len(adj)
 
-	if nr_steps>nr_nodes:
-		print "Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes"
-	if nr_steps==0:
-		return bm
-	else:
-		for steps in xrange(2,nr_steps):
-			for i in xrange(nr_nodes):
-				#neighbors of node i
-				ng_col,=np.where(bm_aux[i,:]==1)
-				#neighbors of neighbors of node i
-				nng_row,nng_col=np.where(bm_aux[ng_col,:]==1)
-				new_ng=np.setdiff1d(nng_col,(i,))
+    if nr_steps>nr_nodes:
+        print "Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes"
+    if nr_steps==0:
+        return bm
+    else:
+        for steps in xrange(2,nr_steps):
+            for i in xrange(nr_nodes):
+                #neighbors of node i
+                ng_col,=np.where(bm_aux[i,:]==1)
+                #neighbors of neighbors of node i
+                nng_row,nng_col=np.where(bm_aux[ng_col,:]==1)
+                new_ng=np.setdiff1d(nng_col,(i,))
 
-				#neighbors of neighbors of i become considered neighbors of i
-				bm_aux[i,new_ng]=1
-				bm_aux[new_ng,i]=1
+                #neighbors of neighbors of i become considered neighbors of i
+                bm_aux[i,new_ng]=1
+                bm_aux[new_ng,i]=1
 
-		#numerator of GTOM formula
-		numerator_mat=np.dot(bm_aux,bm_aux)+bm+np.eye(nr_nodes)
+        #numerator of GTOM formula
+        numerator_mat=np.dot(bm_aux,bm_aux)+bm+np.eye(nr_nodes)
 
-		#vector of node degrees
-		bms=np.sum(bm_aux,axis=0)
-		bms_r=np.tile(bms,(nr_nodes,1))
-		
-		denominator_mat=-bm+np.where(bms_r>bms_r.T,bms_r,bms_r.T)+1
-		return numerator_mat/denominator_mat
+        #vector of node degrees
+        bms=np.sum(bm_aux,axis=0)
+        bms_r=np.tile(bms,(nr_nodes,1))
+        
+        denominator_mat=-bm+np.where(bms_r>bms_r.T,bms_r,bms_r.T)+1
+        return numerator_mat/denominator_mat
 
 def matching_ind(CIJ):
-	'''
+    '''
 For any two nodes u and v, the matching index computes the amount of
 overlap in the connection patterns of u and v. Self-connections and
 u-v connections are ignored. The matching index is a symmetric 
@@ -5604,60 +5604,60 @@ quantity, similar to a correlation or a dot product.
 Input:      CIJ,    connection/adjacency matrix
 
 Output:     Min,    matching index for incoming connections
-		    Mout,   matching index for outgoing connections
-		    Mall,   matching index for all connections
+            Mout,   matching index for outgoing connections
+            Mall,   matching index for all connections
 
 Notes:
    Does not use self- or cross connections for comparison.
    Does not use connections that are not present in BOTH u and v.
    All output matrices are calculated for upper triangular only.
-	'''
-	n=len(CIJ)
+    '''
+    n=len(CIJ)
 
-	Min=np.zeros((n,n))
-	Mout=np.zeros((n,n))
-	Mall=np.zeros((n,n))
+    Min=np.zeros((n,n))
+    Mout=np.zeros((n,n))
+    Mall=np.zeros((n,n))
 
-	#compare incoming connections
-	for i in xrange(n-1):
-		for j in xrange(i+1,n):
-			c1i=CIJ[:,i]
-			c2i=CIJ[:,j]
-			usei=np.logical_or(c1i,c2i)
-			usei[i]=0; usei[j]=0
-			nconi=np.sum(c1i[usei])+np.sum(c2i[usei])
-			if not nconi:
-				Min[i,j]=0
-			else:
-				Min[i,j]=2*np.sum(np.logical_and(c1i[usei],c2i[usei]))/nconi
+    #compare incoming connections
+    for i in xrange(n-1):
+        for j in xrange(i+1,n):
+            c1i=CIJ[:,i]
+            c2i=CIJ[:,j]
+            usei=np.logical_or(c1i,c2i)
+            usei[i]=0; usei[j]=0
+            nconi=np.sum(c1i[usei])+np.sum(c2i[usei])
+            if not nconi:
+                Min[i,j]=0
+            else:
+                Min[i,j]=2*np.sum(np.logical_and(c1i[usei],c2i[usei]))/nconi
 
-			c1o=CIJ[i,:]
-			c2o=CIJ[j,:]
-			useo=np.logical_or(c1o,c2o)
-			useo[i]=0; useo[j]=0
-			ncono=np.sum(c1o[useo])+np.sum(c2o[useo])
-			if not ncono:
-				Mout[i,j]=0
-			else:
-				Mout[i,j]=2*np.sum(np.logical_and(c1o[useo],c2o[useo]))/ncono
+            c1o=CIJ[i,:]
+            c2o=CIJ[j,:]
+            useo=np.logical_or(c1o,c2o)
+            useo[i]=0; useo[j]=0
+            ncono=np.sum(c1o[useo])+np.sum(c2o[useo])
+            if not ncono:
+                Mout[i,j]=0
+            else:
+                Mout[i,j]=2*np.sum(np.logical_and(c1o[useo],c2o[useo]))/ncono
 
-			c1a=np.ravel((c1i,c1o))
-			c2a=np.ravel((c2i,c2o))
-			usea=np.logical_or(c1a,c2a)
-			usea[i]=0; usea[i+n]=0
-			usea[j]=0; usea[j+n]=0
-			ncona=np.sum(c1a[usea])+np.sum(c2a[usea])
-			if not ncona:
-				Mall[i,j]=0
-			else:
-				Mall[i,j]=2*np.sum(np.logical_and(c1a[usea],c2a[usea]))/ncona
+            c1a=np.ravel((c1i,c1o))
+            c2a=np.ravel((c2i,c2o))
+            usea=np.logical_or(c1a,c2a)
+            usea[i]=0; usea[i+n]=0
+            usea[j]=0; usea[j+n]=0
+            ncona=np.sum(c1a[usea])+np.sum(c2a[usea])
+            if not ncona:
+                Mall[i,j]=0
+            else:
+                Mall[i,j]=2*np.sum(np.logical_and(c1a[usea],c2a[usea]))/ncona
 
-	Min=Min+Min.T; Mout=Mout+Mout.T; Mall=Mall+Mall.T
+    Min=Min+Min.T; Mout=Mout+Mout.T; Mall=Mall+Mall.T
 
-	return Min,Mout,Mall 
+    return Min,Mout,Mall 
 
 def matching_ind_und(CIJ0):
-	'''
+    '''
     M0 = MATCHING_IND_UND(CIJ) computes matching index for undirected
     graph specified by adjacency matrix CIJ. Matching index is a measure of
     similarity between two nodes' connectivity profiles (excluding their
@@ -5666,216 +5666,216 @@ def matching_ind_und(CIJ0):
     Inputs:     CIJ,    undirected adjacency matrix
  
     Outputs:    M0,     matching index matrix.
-	'''
-	K=np.sum(CIJ0,axis=0) 
-	n=len(CIJ0)
-	R=(K!=0)
-	N=np.sum(R)
-	xR,=np.where(R==0)
-	CIJ=np.delete(np.delete(CIJ0,xR,axis=0),xR,axis=1)
-	I=np.logical_not(np.eye(N))
-	M=np.zeros((N,N))
+    '''
+    K=np.sum(CIJ0,axis=0) 
+    n=len(CIJ0)
+    R=(K!=0)
+    N=np.sum(R)
+    xR,=np.where(R==0)
+    CIJ=np.delete(np.delete(CIJ0,xR,axis=0),xR,axis=1)
+    I=np.logical_not(np.eye(N))
+    M=np.zeros((N,N))
 
-	for i in xrange(N):
-		c1=CIJ[i,:]
-		use=np.logical_or(c1,CIJ)
-		use[:,i]=0
-		use*=I
+    for i in xrange(N):
+        c1=CIJ[i,:]
+        use=np.logical_or(c1,CIJ)
+        use[:,i]=0
+        use*=I
 
-		ncon1=c1*use
-		ncon2=c1*CIJ
-		ncon=np.sum(ncon1+ncon2,axis=1)
-		print ncon
+        ncon1=c1*use
+        ncon2=c1*CIJ
+        ncon=np.sum(ncon1+ncon2,axis=1)
+        print ncon
 
-		M[:,i] = 2*np.sum(np.logical_and(ncon1,ncon2),axis=1)/ncon
+        M[:,i] = 2*np.sum(np.logical_and(ncon1,ncon2),axis=1)/ncon
 
-	M*=I
-	M[np.isnan(M)]=0
-	M0=np.zeros((n,n))
-	yR,=np.where(R)
-	M0[np.ix_(yR,yR)]=M
-	return M0
+    M*=I
+    M[np.isnan(M)]=0
+    M0=np.zeros((n,n))
+    yR,=np.where(R)
+    M0[np.ix_(yR,yR)]=M
+    return M0
 
 def dice_pairwise_und(a1,a2):
-	'''
-	Calculates pairwise dice similarity for each vertex between two matrices.  
-	Treats the matrices as binary and undirected.
+    '''
+    Calculates pairwise dice similarity for each vertex between two matrices.  
+    Treats the matrices as binary and undirected.
 
-	input:	a1, matrix 1 of size nxn
-			a2, matrix 2 of size nxn
+    input:	a1, matrix 1 of size nxn
+            a2, matrix 2 of size nxn
 
-	output: d, dice similarity vector of size n
-	'''
-	a1=binarize(a1,copy=True)
-	a2=binarize(a2,copy=True)			#ensure matrices are binary
+    output: d, dice similarity vector of size n
+    '''
+    a1=binarize(a1,copy=True)
+    a2=binarize(a2,copy=True)			#ensure matrices are binary
 
-	n=len(a1)
-	np.fill_diagonal(a1, 0)
-	np.fill_diagonal(a2, 0)				#set diagonals to 0
+    n=len(a1)
+    np.fill_diagonal(a1, 0)
+    np.fill_diagonal(a2, 0)				#set diagonals to 0
 
-	d=np.zeros((n,))					#dice similarity
+    d=np.zeros((n,))					#dice similarity
 
-	#calculate the common neighbors for each vertex
-	for i in xrange(n):
-		d[i]=2*(np.sum(np.logical_and(a1[:,i],a2[:,i]))/
-			(np.sum(a1[:,i])+np.sum(a2[:,i])))
+    #calculate the common neighbors for each vertex
+    for i in xrange(n):
+        d[i]=2*(np.sum(np.logical_and(a1[:,i],a2[:,i]))/
+            (np.sum(a1[:,i])+np.sum(a2[:,i])))
 
-	return d
+    return d
 
 def corr_flat_und(a1,a2):
-	'''
-	Returns the correlation coefficient between two flattened adjacency
-	matrices.  Only the upper triangular part is used to avoid double counting
-	undirected matrices.  Similarity metric for weighted matrices.
+    '''
+    Returns the correlation coefficient between two flattened adjacency
+    matrices.  Only the upper triangular part is used to avoid double counting
+    undirected matrices.  Similarity metric for weighted matrices.
 
-	input:	a1, matrix 1 of size NxN
-			a2, matrix 2 of size NxN
+    input:	a1, matrix 1 of size NxN
+            a2, matrix 2 of size NxN
 
-	output:	r, correlation coefficient describing the similarity of a1 and a2
-	'''
-	n=len(a1)
-	if len(a2)!=n:
-		raise BCTParamError("Cannot calculate flattened correlation on "
-			"matrices of different size")
-	triu_ix=np.where(np.triu(np.ones((n,n)),1))
-	return np.corrcoef(a1[triu_ix].flat,a2[triu_ix].flat)[0][1]
+    output:	r, correlation coefficient describing the similarity of a1 and a2
+    '''
+    n=len(a1)
+    if len(a2)!=n:
+        raise BCTParamError("Cannot calculate flattened correlation on "
+            "matrices of different size")
+    triu_ix=np.where(np.triu(np.ones((n,n)),1))
+    return np.corrcoef(a1[triu_ix].flat,a2[triu_ix].flat)[0][1]
 
 def corr_flat_dir(a1,a2):
-	'''
-	Returns the correlation coefficient between two flattened adjacency
-	matrices.  Similarity metric for weighted matrices.
+    '''
+    Returns the correlation coefficient between two flattened adjacency
+    matrices.  Similarity metric for weighted matrices.
 
-	input:	a1, matrix 1 of size NxN
-			a2, matrix 2 of size NxN
+    input:	a1, matrix 1 of size NxN
+            a2, matrix 2 of size NxN
 
-	output: r, correlation coefficient describing similarity of a1 and a2
-	'''
-	n=len(a1)
-	if len(a2)!=n:
-		raise BCTParamError("Cannot calculate flattened correlation on "
-			"matrices of different size")
-	ix=np.logical_not(np.eye(n))
-	return np.corrcoef(a1[ix].flat,a2[ix].flat)[0][1]
+    output: r, correlation coefficient describing similarity of a1 and a2
+    '''
+    n=len(a1)
+    if len(a2)!=n:
+        raise BCTParamError("Cannot calculate flattened correlation on "
+            "matrices of different size")
+    ix=np.logical_not(np.eye(n))
+    return np.corrcoef(a1[ix].flat,a2[ix].flat)[0][1]
 
 ###############################################################################
 # VISUALIZATION
 ###############################################################################
 
 def adjacency_plot_und(A,coor):
-	'''
-	This function in matlab is a visualization helper which translates an
-	adjacency matrix and an Nx3 matrix of spatial coordinates, and plots a
-	3D isometric network connecting the undirected unweighted nodes using a
-	specific plotting format. Including the formatted output is not useful at
-	all for bctpy since matplotlib will not be able to plot it in quite the
-	same way.
+    '''
+    This function in matlab is a visualization helper which translates an
+    adjacency matrix and an Nx3 matrix of spatial coordinates, and plots a
+    3D isometric network connecting the undirected unweighted nodes using a
+    specific plotting format. Including the formatted output is not useful at
+    all for bctpy since matplotlib will not be able to plot it in quite the
+    same way.
 
-	Instead of doing this, I have included code that will plot the adjacency
-	matrix onto nodes at the given spatial coordinates in mayavi
+    Instead of doing this, I have included code that will plot the adjacency
+    matrix onto nodes at the given spatial coordinates in mayavi
 
-	This routine is basically a less featureful version of the 3D brain in
-	cvu, the connectome visualization utility which I also maintain. cvu uses 
-	freesurfer surfaces and annotations to get the node coordinates (rather 	
-	than leaving them up to the user) and has many other interactive 
-	visualization features not included here for the sake of brevity.
+    This routine is basically a less featureful version of the 3D brain in
+    cvu, the connectome visualization utility which I also maintain. cvu uses 
+    freesurfer surfaces and annotations to get the node coordinates (rather 	
+    than leaving them up to the user) and has many other interactive 
+    visualization features not included here for the sake of brevity.
 
-	There are other similar visualizations in the ConnectomeViewer and the UCLA
-	multimodal connectivity database.
+    There are other similar visualizations in the ConnectomeViewer and the UCLA
+    multimodal connectivity database.
 
-	Note that unlike other bctpy functions, this function depends on mayavi.
+    Note that unlike other bctpy functions, this function depends on mayavi.
 
-	Inputs:		A = Adjacency matrix
-			 coor = Nx3 matrix of node coordinates in the same order as A
-	Outputs:  fig, A handle to a mayavi figure.
+    Inputs:		A = Adjacency matrix
+             coor = Nx3 matrix of node coordinates in the same order as A
+    Outputs:  fig, A handle to a mayavi figure.
 
-	To display the output interactively, call
+    To display the output interactively, call
 
-	fig=adjacency_plot_und(A,coor)
-	from mayavi import mlab
-	mlab.show(figure=fig)
+    fig=adjacency_plot_und(A,coor)
+    from mayavi import mlab
+    mlab.show(figure=fig)
 
-	Note: Thresholding the matrix is strongly recommended.  It is recommended
-	that the input matrix have fewer than 5000 total connections in order to
-	achieve reasonable performance and noncluttered visualization.
-	'''
-	from mayavi import mlab
+    Note: Thresholding the matrix is strongly recommended.  It is recommended
+    that the input matrix have fewer than 5000 total connections in order to
+    achieve reasonable performance and noncluttered visualization.
+    '''
+    from mayavi import mlab
 
-	n = len(A)
-	nr_edges = (n*n-1)//2
+    n = len(A)
+    nr_edges = (n*n-1)//2
 
-	#starts = np.zeros((nr_edges,3))
-	#vecs = np.zeros((nr_edges,3))
-	#adjdat = np.zeros((nr_edges,))
+    #starts = np.zeros((nr_edges,3))
+    #vecs = np.zeros((nr_edges,3))
+    #adjdat = np.zeros((nr_edges,))
 
-	ixes, = np.where(np.triu(np.ones((n,n)),1).flat)
+    ixes, = np.where(np.triu(np.ones((n,n)),1).flat)
 
-	#i=0
-	#for r2 in xrange(n):
-	#	for r1 in xrange(r2):
-	#		starts[i,:] = coor[r1,:]
-	#		vecs[i,:] = coor[r2,:] - coor[r1,:]
-	#		adjdat[i,:]
-	#		i+=1
+    #i=0
+    #for r2 in xrange(n):
+    #	for r1 in xrange(r2):
+    #		starts[i,:] = coor[r1,:]
+    #		vecs[i,:] = coor[r2,:] - coor[r1,:]
+    #		adjdat[i,:]
+    #		i+=1
 
-	adjdat = A.flat[ixes]
+    adjdat = A.flat[ixes]
 
-	A_r = np.tile(coor,(n,1,1))
-	starts = np.reshape(A_r,(n*n,3))[ixes,:]
+    A_r = np.tile(coor,(n,1,1))
+    starts = np.reshape(A_r,(n*n,3))[ixes,:]
 
-	vecs = np.reshape(A_r - np.transpose(A_r,(1,0,2)),(n*n,3))[ixes,:]
+    vecs = np.reshape(A_r - np.transpose(A_r,(1,0,2)),(n*n,3))[ixes,:]
 
-	#plotting
-	fig=mlab.figure()
-	
-	nodesource = mlab.pipeline.scalar_scatter(
-		coor[:,0],coor[:,1],coor[:,2],figure=fig)
+    #plotting
+    fig=mlab.figure()
+    
+    nodesource = mlab.pipeline.scalar_scatter(
+        coor[:,0],coor[:,1],coor[:,2],figure=fig)
 
-	nodes = mlab.pipeline.glyph(nodesource, scale_mode='none',
-		scale_factor=3., mode='sphere', figure=fig)
-	nodes.glyph.color_mode='color_by_scalar'
+    nodes = mlab.pipeline.glyph(nodesource, scale_mode='none',
+        scale_factor=3., mode='sphere', figure=fig)
+    nodes.glyph.color_mode='color_by_scalar'
 
-	vectorsrc = mlab.pipeline.vector_scatter(
-		starts[:,0],starts[:,1],starts[:,2],vecs[:,0],vecs[:,1],vecs[:,2],
-		figure=fig)
-	vectorsrc.mlab_source.dataset.point_data.scalars=adjdat
+    vectorsrc = mlab.pipeline.vector_scatter(
+        starts[:,0],starts[:,1],starts[:,2],vecs[:,0],vecs[:,1],vecs[:,2],
+        figure=fig)
+    vectorsrc.mlab_source.dataset.point_data.scalars=adjdat
 
-	thres=mlab.pipeline.threshold(vectorsrc,
-		low=0.0001,up=np.max(A),figure=fig)
-		
-	vectors=mlab.pipeline.vectors(thres, colormap='YlOrRd', 
-		scale_mode='vector', figure=fig)
-	vectors.glyph.glyph_source.glyph_source.glyph_type='dash'
-	vectors.glyph.glyph.clamping=False
-	vectors.actor.property.opacity=.7
-	vectors.glyph.glyph.color_mode='color_by_scalar'
-	vectors.glyph.color_mode='color_by_scalar'
-	vectors.glyph.glyph_source.glyph_position='head'
+    thres=mlab.pipeline.threshold(vectorsrc,
+        low=0.0001,up=np.max(A),figure=fig)
+        
+    vectors=mlab.pipeline.vectors(thres, colormap='YlOrRd', 
+        scale_mode='vector', figure=fig)
+    vectors.glyph.glyph_source.glyph_source.glyph_type='dash'
+    vectors.glyph.glyph.clamping=False
+    vectors.actor.property.opacity=.7
+    vectors.glyph.glyph.color_mode='color_by_scalar'
+    vectors.glyph.color_mode='color_by_scalar'
+    vectors.glyph.glyph_source.glyph_position='head'
 
-	return fig
+    return fig
 
 def align_matrices(m1,m2,dfun='sqrdiff',verbose=False,H=1e6,Texp=1,
-	T0=1e-3,Hbrk=10):
-	'''
+    T0=1e-3,Hbrk=10):
+    '''
 This function aligns two matrices relative to one another by reordering
 the nodes in M2.  The function uses a version of simulated annealing.
 
 Inputs:     M1             = first connection matrix (square)
-		    M2             = second connection matrix (square)
-		    dfun           = distance metric to use for matching:
-							'absdff' = absolute difference
-							'sqrdff' = squared difference (default)
-							'cosang' = cosine of vector angle
-			verbose		   = print out cost at each iteration
-			H			   = annealing parameter, has default value
-			Texp		   = annealing parameter, has default value
-				This parameter is a coefficient of H, s.t. Texp0=1-Texp/H
-			T0			   = annealing parameter, has default value
-			Hbrk		   = annealing parameter, has default value
-				This parameter is a coefficient of H, s.t. Hbrk0=H/Hbrk
+            M2             = second connection matrix (square)
+            dfun           = distance metric to use for matching:
+                            'absdff' = absolute difference
+                            'sqrdff' = squared difference (default)
+                            'cosang' = cosine of vector angle
+            verbose		   = print out cost at each iteration
+            H			   = annealing parameter, has default value
+            Texp		   = annealing parameter, has default value
+                This parameter is a coefficient of H, s.t. Texp0=1-Texp/H
+            T0			   = annealing parameter, has default value
+            Hbrk		   = annealing parameter, has default value
+                This parameter is a coefficient of H, s.t. Hbrk0=H/Hbrk
 
 Outputs:    Mreordered     = reordered connection matrix M2
-		    Mindices       = reordered indices
-		    cost           = distance between M1 and Mreordered
+            Mindices       = reordered indices
+            cost           = distance between M1 and Mreordered
 
 Connection matrices can be weighted or binary, directed or undirected.
 They must have the same number of nodes.  M1 can be entered in any
@@ -5904,154 +5904,154 @@ by reordering along their largest eigenvectors:
 
 Setting 'Texp' to zero cancels annealing and uses a greedy algorithm
 instead.
-	'''
-	n=len(m1)
-	if n<2:
-		raise BCTParamError("align_matrix will infinite loop on a singleton "
-			"or null matrix.")
+    '''
+    n=len(m1)
+    if n<2:
+        raise BCTParamError("align_matrix will infinite loop on a singleton "
+            "or null matrix.")
 
-	#define maxcost (greatest possible difference) and lowcost
-	if dfun in ('absdiff','absdff'):
-		maxcost=np.sum(np.abs(np.sort(m1.flat)-np.sort(m2.flat)[::-1]))
-		lowcost=np.sum(np.abs(m1-m2))/maxcost
-	elif dfun in ('sqrdiff','sqrdff'):
-		maxcost=np.sum((np.sort(m1.flat)-np.sort(m2.flat)[::-1])**2)
-		lowcost=np.sum((m1-m2)**2)/maxcost
-	elif dfun=='cosang':
-		maxcost=np.pi/2
-		lowcost=np.arccos(np.dot(m1.flat,m2.flat)/
-			np.sqrt(np.dot(m1.flat,m1.flat)*np.dot(m2.flat,m2.flat)))/maxcost
-	else:
-		raise BCTParamError('dfun must be absdiff or sqrdiff or cosang')
+    #define maxcost (greatest possible difference) and lowcost
+    if dfun in ('absdiff','absdff'):
+        maxcost=np.sum(np.abs(np.sort(m1.flat)-np.sort(m2.flat)[::-1]))
+        lowcost=np.sum(np.abs(m1-m2))/maxcost
+    elif dfun in ('sqrdiff','sqrdff'):
+        maxcost=np.sum((np.sort(m1.flat)-np.sort(m2.flat)[::-1])**2)
+        lowcost=np.sum((m1-m2)**2)/maxcost
+    elif dfun=='cosang':
+        maxcost=np.pi/2
+        lowcost=np.arccos(np.dot(m1.flat,m2.flat)/
+            np.sqrt(np.dot(m1.flat,m1.flat)*np.dot(m2.flat,m2.flat)))/maxcost
+    else:
+        raise BCTParamError('dfun must be absdiff or sqrdiff or cosang')
 
-	mincost=lowcost
-	anew=np.arange(n)
-	amin=np.arange(n)
-	h=0; hcnt=0
+    mincost=lowcost
+    anew=np.arange(n)
+    amin=np.arange(n)
+    h=0; hcnt=0
 
-	#adjust annealing parameters from user provided coefficients
-	#H determines the maximal number of steps (user-provided)
-	#Texp determines the steepness of the temperature gradient
-	Texp=1-Texp/H
-	#T0 sets the initial temperature and scales the energy term (user provided)
-	#Hbrk sets a break point for the stimulation
-	Hbrk=H/Hbrk
-	
-	while h<H:
-		h+=1; hcnt+=1
-		#terminate if no new mincost has been found for some time
-		if hcnt>Hbrk:
-			break
-		#current temperature
-		T=T0*(Texp**h)
+    #adjust annealing parameters from user provided coefficients
+    #H determines the maximal number of steps (user-provided)
+    #Texp determines the steepness of the temperature gradient
+    Texp=1-Texp/H
+    #T0 sets the initial temperature and scales the energy term (user provided)
+    #Hbrk sets a break point for the stimulation
+    Hbrk=H/Hbrk
+    
+    while h<H:
+        h+=1; hcnt+=1
+        #terminate if no new mincost has been found for some time
+        if hcnt>Hbrk:
+            break
+        #current temperature
+        T=T0*(Texp**h)
 
-		#choose two positions at random and flip them
-		atmp=anew.copy()
-		r1,r2=np.random.randint(n,size=(2,))
-		while r1==r2:
-			r2=np.random.randint(n)
-		atmp[r1]=anew[r2]
-		atmp[r2]=anew[r1]
-		m2atmp=m2[np.ix_(atmp,atmp)]
-		if dfun in ('absdiff','absdff'):
-			costnew=np.sum(np.abs(m1-m2atmp))/maxcost
-		elif dfun in ('sqrdiff','sqrdff'):
-			costnew=np.sum((m1-m2atmp)**2)/maxcost
-		elif dfun=='cosang':
-			costnew=np.arccos(np.dot(m1.flat,m2atmp.flat)/np.sqrt(
-				np.dot(m1.flat,m1.flat)*np.dot(m2.flat,m2.flat)))/maxcost
+        #choose two positions at random and flip them
+        atmp=anew.copy()
+        r1,r2=np.random.randint(n,size=(2,))
+        while r1==r2:
+            r2=np.random.randint(n)
+        atmp[r1]=anew[r2]
+        atmp[r2]=anew[r1]
+        m2atmp=m2[np.ix_(atmp,atmp)]
+        if dfun in ('absdiff','absdff'):
+            costnew=np.sum(np.abs(m1-m2atmp))/maxcost
+        elif dfun in ('sqrdiff','sqrdff'):
+            costnew=np.sum((m1-m2atmp)**2)/maxcost
+        elif dfun=='cosang':
+            costnew=np.arccos(np.dot(m1.flat,m2atmp.flat)/np.sqrt(
+                np.dot(m1.flat,m1.flat)*np.dot(m2.flat,m2.flat)))/maxcost
 
-		if costnew<lowcost or np.random.random()<np.exp(-(costnew-lowcost)/T):
-			anew=atmp
-			lowcost=costnew
-			#is this the absolute best?
-			if lowcost<mincost:
-				amin=anew
-				mincost=lowcost
-				if verbose:
-					print 'step %i ... current lowest cost = %f' % (h,mincost)
-				hcnt=0
-			#if the cost is 0 we're done
-			if mincost==0:
-				break
-	if verbose:
-		print 'step %i ... final lowest cost = %f' % (h,mincost)
+        if costnew<lowcost or np.random.random()<np.exp(-(costnew-lowcost)/T):
+            anew=atmp
+            lowcost=costnew
+            #is this the absolute best?
+            if lowcost<mincost:
+                amin=anew
+                mincost=lowcost
+                if verbose:
+                    print 'step %i ... current lowest cost = %f' % (h,mincost)
+                hcnt=0
+            #if the cost is 0 we're done
+            if mincost==0:
+                break
+    if verbose:
+        print 'step %i ... final lowest cost = %f' % (h,mincost)
 
-	M_reordered=m2[np.ix_(amin,amin)]
-	M_indices=amin
-	cost=mincost
-	return M_reordered,M_indices,cost
+    M_reordered=m2[np.ix_(amin,amin)]
+    M_indices=amin
+    cost=mincost
+    return M_reordered,M_indices,cost
 
 def backbone_wu(CIJ,avgdeg):
-	'''
+    '''
 The network backbone contains the dominant connections in the network
 and may be used to aid network visualization. This function computes
 the backbone of a given weighted and undirected connection matrix CIJ, 
 using a minimum-spanning-tree based algorithm.
 
 input:      CIJ,    connection/adjacency matrix (weighted, undirected)
-		 avgdeg,    desired average degree of backbone
+         avgdeg,    desired average degree of backbone
 output: 
-	    CIJtree,    connection matrix of the minimum spanning tree of CIJ
-	    CIJclus,    connection matrix of the minimum spanning tree plus
-				    strongest connections up to an average degree 'avgdeg'
-					Identical to CIJtree if degree requirement is already met.
+        CIJtree,    connection matrix of the minimum spanning tree of CIJ
+        CIJclus,    connection matrix of the minimum spanning tree plus
+                    strongest connections up to an average degree 'avgdeg'
+                    Identical to CIJtree if degree requirement is already met.
 
 NOTE: nodes with zero strength are discarded.
 NOTE: CIJclus will have a total average degree exactly equal to 
-	 (or very close to) 'avgdeg'.
+     (or very close to) 'avgdeg'.
 NOTE: 'avgdeg' backfill is handled slightly differently than in Hagmann
-	 et al 2008.
-	'''
-	n=len(CIJ)
-	if not np.all(CIJ==CIJ.T):
-		raise BCTParamError('backbone_wu can only be computed for undirected '
-			'matrices.  If your matrix is has noise, correct it with np.around')
-	CIJtree=np.zeros((n,n))
+     et al 2008.
+    '''
+    n=len(CIJ)
+    if not np.all(CIJ==CIJ.T):
+        raise BCTParamError('backbone_wu can only be computed for undirected '
+            'matrices.  If your matrix is has noise, correct it with np.around')
+    CIJtree=np.zeros((n,n))
 
-	#find strongest edge (if multiple edges are tied, use only first one)
-	i,j=np.where(np.max(CIJ)==CIJ)
-	im=[i[0],i[1]]	#what?  why take two values?  doesnt that mess up multiples?
-	jm=[j[0],j[1]]
+    #find strongest edge (if multiple edges are tied, use only first one)
+    i,j=np.where(np.max(CIJ)==CIJ)
+    im=[i[0],i[1]]	#what?  why take two values?  doesnt that mess up multiples?
+    jm=[j[0],j[1]]
 
-	#copy into tree graph
-	CIJtree[im,jm]=CIJ[im,jm]
-	in_=im
-	out=np.setdiff1d(xrange(n),in_)
+    #copy into tree graph
+    CIJtree[im,jm]=CIJ[im,jm]
+    in_=im
+    out=np.setdiff1d(xrange(n),in_)
 
-	#repeat n-2 times
-	for ix in xrange(n-2):
-		CIJ_io=CIJ[np.ix_(in_,out)]
-		i,j=np.where(np.max(CIJ_io)==CIJ_io)
-		#i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-		print i,j
-		im=in_[i[0]]
-		jm=out[j[0]]
+    #repeat n-2 times
+    for ix in xrange(n-2):
+        CIJ_io=CIJ[np.ix_(in_,out)]
+        i,j=np.where(np.max(CIJ_io)==CIJ_io)
+        #i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
+        print i,j
+        im=in_[i[0]]
+        jm=out[j[0]]
 
-		#copy into tree graph
-		CIJtree[im,jm]=CIJ[im,jm]
-		CIJtree[jm,im]=CIJ[jm,im]
-		in_=np.append(in_,jm)
-		out=np.setdiff1d(xrange(n),in_)
+        #copy into tree graph
+        CIJtree[im,jm]=CIJ[im,jm]
+        CIJtree[jm,im]=CIJ[jm,im]
+        in_=np.append(in_,jm)
+        out=np.setdiff1d(xrange(n),in_)
 
-	#now add connections back with the total number of added connections
-	#determined by the desired avgdeg
+    #now add connections back with the total number of added connections
+    #determined by the desired avgdeg
 
-	CIJnotintree=CIJ*np.logical_not(CIJtree)
-	ix,=np.where(CIJnotintree.flat)
-	a=np.sort(CIJnotintree.flat[ix])[::-1]
-	cutoff=avgdeg*n-2*(n-1)-1
-	#if the avgdeg req is already satisfied, skip this
-	if cutoff>=np.size(a):
-		CIJclus=CIJtree.copy()
-	else:
-		thr=a[cutoff]
-		CIJclus=CIJtree+CIJnotintree*(CIJnotintree>=thr)
+    CIJnotintree=CIJ*np.logical_not(CIJtree)
+    ix,=np.where(CIJnotintree.flat)
+    a=np.sort(CIJnotintree.flat[ix])[::-1]
+    cutoff=avgdeg*n-2*(n-1)-1
+    #if the avgdeg req is already satisfied, skip this
+    if cutoff>=np.size(a):
+        CIJclus=CIJtree.copy()
+    else:
+        thr=a[cutoff]
+        CIJclus=CIJtree+CIJnotintree*(CIJnotintree>=thr)
 
-	return CIJtree,CIJclus
+    return CIJtree,CIJclus
 
 def grid_communities(c):
-	'''
+    '''
     (X,Y,INDSORT) = GRID_COMMUNITIES(C) takes a vector of community
     assignments C and returns three output arguments for visualizing the
     communities. The third is INDSORT, which is an ordering of the vertices
@@ -6064,119 +6064,119 @@ def grid_communities(c):
     Outputs:    bounds,  list containing the communities
                 INDSORT, indices
 
-	Note: This function returns considerably different values than in
-	matlab due to differences between matplotlib and matlab.  This function
-	has been designed to work with matplotlib, as in the following example:
-	
-	ci,_=modularity_und(adj)
-	bounds,ixes=grid_communities(ci)
-	pylab.imshow(adj[np.ix_(ixes,ixes)],interpolation='none',cmap='BuGn')	
-	for b in bounds:
-	  pylab.axvline(x=b,color='red')
-	  pylab.axhline(y=b,color='red')
+    Note: This function returns considerably different values than in
+    matlab due to differences between matplotlib and matlab.  This function
+    has been designed to work with matplotlib, as in the following example:
+    
+    ci,_=modularity_und(adj)
+    bounds,ixes=grid_communities(ci)
+    pylab.imshow(adj[np.ix_(ixes,ixes)],interpolation='none',cmap='BuGn')	
+    for b in bounds:
+      pylab.axvline(x=b,color='red')
+      pylab.axhline(y=b,color='red')
 
-	Note that I adapted the idea from the matlab function of the same name,
-	and have not tested the functionality extensively.
-	'''
-	c=c.copy()
-	nr_c=np.max(c)
-	ixes=np.argsort(c)
-	c=c[ixes]
+    Note that I adapted the idea from the matlab function of the same name,
+    and have not tested the functionality extensively.
+    '''
+    c=c.copy()
+    nr_c=np.max(c)
+    ixes=np.argsort(c)
+    c=c[ixes]
 
-	bounds=[]
+    bounds=[]
 
-	for i in xrange(nr_c):
-		ind=np.where(c==i+1)
-		if np.size(ind):
-			mn=np.min(ind)-.5
-			mx=np.max(ind)+.5
-			bounds.extend([mn,mx])
+    for i in xrange(nr_c):
+        ind=np.where(c==i+1)
+        if np.size(ind):
+            mn=np.min(ind)-.5
+            mx=np.max(ind)+.5
+            bounds.extend([mn,mx])
 
-	bounds=np.unique(bounds)
-	return bounds,ixes
+    bounds=np.unique(bounds)
+    return bounds,ixes
 
 def reorderMAT(m,H=5000,cost='line'):
-	'''
+    '''
 This function reorders the connectivity matrix in order to place more
 edges closer to the diagonal. This often helps in displaying community
 structure, clusters, etc.
 
 Inputs:     MAT,            connection matrix
-		    H,              number of reordering attempts
-		    cost,           'line' or 'circ', for shape of lattice
-						    (linear or ring lattice, default linear)
+            H,              number of reordering attempts
+            cost,           'line' or 'circ', for shape of lattice
+                            (linear or ring lattice, default linear)
 
 Outputs:    MATreordered    reordered connection matrix
-		    MATindices      reordered indices
-		    MATcost         cost of reordered matrix
+            MATindices      reordered indices
+            MATcost         cost of reordered matrix
 
 Note: I'm not 100% sure how the algorithms between this and reorder_matrix
-	differ, but this code looks a ton sketchier and might have had some minor
-	bugs in it.  Considering reorder_matrix() does the same thing using a well
-	vetted simulated annealing algorithm, just use that. ~rlaplant
-	'''
-	from scipy import linalg,stats
-	m=m.copy()
-	n=len(m)
-	np.fill_diagonal(m, 0)
+    differ, but this code looks a ton sketchier and might have had some minor
+    bugs in it.  Considering reorder_matrix() does the same thing using a well
+    vetted simulated annealing algorithm, just use that. ~rlaplant
+    '''
+    from scipy import linalg,stats
+    m=m.copy()
+    n=len(m)
+    np.fill_diagonal(m, 0)
 
-	#generate cost function
-	if cost=='line':
-		profile=stats.norm.pdf(xrange(1,n+1),0,n/2)[::-1]
-	elif cost=='circ':
-		profile=stats.norm.pdf(xrange(1,n+1),n/2,n/4)[::-1]
-	else:
-		raise BCTParamError('dfun must be line or circ')
-	costf=linalg.toeplitz(profile,r=profile)
+    #generate cost function
+    if cost=='line':
+        profile=stats.norm.pdf(xrange(1,n+1),0,n/2)[::-1]
+    elif cost=='circ':
+        profile=stats.norm.pdf(xrange(1,n+1),n/2,n/4)[::-1]
+    else:
+        raise BCTParamError('dfun must be line or circ')
+    costf=linalg.toeplitz(profile,r=profile)
 
-	lowcost=np.sum(costf*m)
+    lowcost=np.sum(costf*m)
 
-	#keep track of starting configuration
-	m_start=m.copy()
-	starta=np.arange(n)
-	#reorder
-	for h in xrange(H):
-		a=np.arange(n)
-		#choose two positions and flip them
-		r1,r2=np.random.randint(n,size=(2,))
-		a[r1]=r2
-		a[r2]=r1
-		costnew=np.sum((m[np.ix_(a,a)])*costf)
-		#if this reduced the overall cost
-		if costnew<lowcost:
-			m=m[np.ix_(a,a)]
-			r2_swap=starta[r2]
-			r1_swap=starta[r1]
-			starta[r1]=r2_swap
-			starta[r2]=r1_swap
-			lowcost=costnew
+    #keep track of starting configuration
+    m_start=m.copy()
+    starta=np.arange(n)
+    #reorder
+    for h in xrange(H):
+        a=np.arange(n)
+        #choose two positions and flip them
+        r1,r2=np.random.randint(n,size=(2,))
+        a[r1]=r2
+        a[r2]=r1
+        costnew=np.sum((m[np.ix_(a,a)])*costf)
+        #if this reduced the overall cost
+        if costnew<lowcost:
+            m=m[np.ix_(a,a)]
+            r2_swap=starta[r2]
+            r1_swap=starta[r1]
+            starta[r1]=r2_swap
+            starta[r2]=r1_swap
+            lowcost=costnew
 
-	M_reordered=m_start[np.ix_(starta,starta)]
-	m_indices=starta
-	cost=lowcost
-	return M_reordered,m_indices,cost
+    M_reordered=m_start[np.ix_(starta,starta)]
+    m_indices=starta
+    cost=lowcost
+    return M_reordered,m_indices,cost
 
 def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
-	'''
+    '''
 This function rearranges the nodes in matrix M1 such that the matrix
 elements are squeezed along the main diagonal.  The function uses a
 version of simulated annealing. 
 
 Inputs:     M1             = connection matrix (weighted or binary, 
-							 directed or undirected)
-		    cost           = 'line' or 'circ', for shape of lattice
-							 cost (linear or ring lattice; linear default)
-			verbose		   = print steps of annealing
-			H			   = annealing parameter, has default value
-			Texp		   = annealing parameter, has default value
-				This parameter is a coefficient of H, s.t. Texp0=1-Texp/H
-			T0			   = annealing parameter, has default value
-			Hbrk		   = annealing parameter, has default value
-				This parameter is a coefficient of H, s.t. Hbrk0=Hbrk*H
+                             directed or undirected)
+            cost           = 'line' or 'circ', for shape of lattice
+                             cost (linear or ring lattice; linear default)
+            verbose		   = print steps of annealing
+            H			   = annealing parameter, has default value
+            Texp		   = annealing parameter, has default value
+                This parameter is a coefficient of H, s.t. Texp0=1-Texp/H
+            T0			   = annealing parameter, has default value
+            Hbrk		   = annealing parameter, has default value
+                This parameter is a coefficient of H, s.t. Hbrk0=Hbrk*H
 
 Outputs:    Mreordered     = reordered connection matrix
-		    Mindices       = reordered indices
-		    cost           = distance between M1 and Mreordered
+            Mindices       = reordered indices
+            cost           = distance between M1 and Mreordered
 
 Note that in general, the outcome will depend on the initial condition
 (the setting of the random number seed).  Also, there is no good way to 
@@ -6194,251 +6194,251 @@ multiple times and select the solution(s) with the lowest 'cost'.
 
 Setting 'Texp' to zero cancels annealing and uses a greedy algorithm
 instead.
-	'''
-	from scipy import linalg,stats
-	n=len(m1)
-	if n<2:
-		raise BCTParamError("align_matrix will infinite loop on a singleton "
-			"or null matrix.")
+    '''
+    from scipy import linalg,stats
+    n=len(m1)
+    if n<2:
+        raise BCTParamError("align_matrix will infinite loop on a singleton "
+            "or null matrix.")
 
-	#generate cost function
-	if cost=='line':
-		profile=stats.norm.pdf(xrange(1,n+1),loc=0,scale=n/2)[::-1]
-	elif cost=='circ':
-		profile=stats.norm.pdf(xrange(1,n+1),loc=n/2,scale=n/4)[::-1]
-	else:
-		raise BCTParamError('cost must be line or circ')
+    #generate cost function
+    if cost=='line':
+        profile=stats.norm.pdf(xrange(1,n+1),loc=0,scale=n/2)[::-1]
+    elif cost=='circ':
+        profile=stats.norm.pdf(xrange(1,n+1),loc=n/2,scale=n/4)[::-1]
+    else:
+        raise BCTParamError('cost must be line or circ')
 
-	costf=linalg.toeplitz(profile,r=profile)*np.logical_not(np.eye(n))
-	costf/=np.sum(costf)
+    costf=linalg.toeplitz(profile,r=profile)*np.logical_not(np.eye(n))
+    costf/=np.sum(costf)
 
-	#establish maxcost, lowcost, mincost
-	maxcost=np.sum(np.sort(costf.flat)*np.sort(m1.flat))
-	lowcost=np.sum(m1*costf)/maxcost
-	mincost=lowcost
+    #establish maxcost, lowcost, mincost
+    maxcost=np.sum(np.sort(costf.flat)*np.sort(m1.flat))
+    lowcost=np.sum(m1*costf)/maxcost
+    mincost=lowcost
 
-	#initialize
-	anew=np.arange(n)
-	amin=np.arange(n)
-	h=0; hcnt=0
+    #initialize
+    anew=np.arange(n)
+    amin=np.arange(n)
+    h=0; hcnt=0
 
-	#adjust annealing parameters
-	#H determines the maximal number of steps (user specified)
-	#Texp determines the steepness of the temperature gradient
-	Texp=1-Texp/H	
-	#T0 sets the initial temperature and scales the energy term (user provided)
-	#Hbrk sets a break point for the stimulation
-	Hbrk=H/Hbrk
+    #adjust annealing parameters
+    #H determines the maximal number of steps (user specified)
+    #Texp determines the steepness of the temperature gradient
+    Texp=1-Texp/H	
+    #T0 sets the initial temperature and scales the energy term (user provided)
+    #Hbrk sets a break point for the stimulation
+    Hbrk=H/Hbrk
 
-	while h<H:
-		h+=1; hcnt+=1
-		#terminate if no new mincost has been found for some time
-		if hcnt>Hbrk:
-			break
-		T=T0*Texp**h
-		atmp=anew.copy()
-		r1,r2=np.random.randint(n,size=(2,))
-		while r1==r2:
-			r2=np.random.randint(n)
-		atmp[r1]=anew[r2]
-		atmp[r2]=anew[r1]	
-		costnew=np.sum((m1[np.ix_(atmp,atmp)])*costf)/maxcost
-		#annealing
-		if costnew<lowcost or np.random.random()<np.exp(-(costnew-lowcost)/T):
-			anew=atmp
-			lowcost=costnew
-			#is this a new absolute best?
-			if lowcost<mincost:
-				amin=anew
-				mincost=lowcost
-				if verbose:
-					print 'step %i ... current lowest cost = %f' % (h,mincost)
-				hcnt=0
-	
-	if verbose:
-		print 'step %i ... final lowest cost = %f' % (h,mincost)
+    while h<H:
+        h+=1; hcnt+=1
+        #terminate if no new mincost has been found for some time
+        if hcnt>Hbrk:
+            break
+        T=T0*Texp**h
+        atmp=anew.copy()
+        r1,r2=np.random.randint(n,size=(2,))
+        while r1==r2:
+            r2=np.random.randint(n)
+        atmp[r1]=anew[r2]
+        atmp[r2]=anew[r1]	
+        costnew=np.sum((m1[np.ix_(atmp,atmp)])*costf)/maxcost
+        #annealing
+        if costnew<lowcost or np.random.random()<np.exp(-(costnew-lowcost)/T):
+            anew=atmp
+            lowcost=costnew
+            #is this a new absolute best?
+            if lowcost<mincost:
+                amin=anew
+                mincost=lowcost
+                if verbose:
+                    print 'step %i ... current lowest cost = %f' % (h,mincost)
+                hcnt=0
+    
+    if verbose:
+        print 'step %i ... final lowest cost = %f' % (h,mincost)
 
-	M_reordered=m1[np.ix_(amin,amin)]
-	M_indices=amin
-	cost=mincost
-	return M_reordered,M_indices,cost
+    M_reordered=m1[np.ix_(amin,amin)]
+    M_indices=amin
+    cost=mincost
+    return M_reordered,M_indices,cost
 
 def reorder_mod(A,ci):
-	'''
+    '''
 This function reorders the connectivity matrix by modular structure and
 may hence be useful in visualization of modular structure.
 
 Inputs:     A,          connectivity matrix (binary/weighted)
-		    Ci,         module affiliation vector
+            Ci,         module affiliation vector
 
 Outputs:    On,         new node order
-		    Ar,         reordered connectivity matrix
-	'''
-	from scipy import stats
-	_,max_module_size=stats.mode(ci)
-	u,ci=np.unique(ci,return_inverse=True)	#make consecutive
-	n=np.size(ci)							#number of nodes
-	m=np.size(u)							#number of modules
+            Ar,         reordered connectivity matrix
+    '''
+    from scipy import stats
+    _,max_module_size=stats.mode(ci)
+    u,ci=np.unique(ci,return_inverse=True)	#make consecutive
+    n=np.size(ci)							#number of nodes
+    m=np.size(u)							#number of modules
 
-	nm=np.zeros((m,))						#number of nodes in modules
-	knm=np.zeros((n,m))						#degree to other modules
+    nm=np.zeros((m,))						#number of nodes in modules
+    knm=np.zeros((n,m))						#degree to other modules
 
-	for i in xrange(m):
-		nm[i]=np.size(np.where(ci==i))
-		knm[:,i]=np.sum(A[:,ci==i],axis=1)
+    for i in xrange(m):
+        nm[i]=np.size(np.where(ci==i))
+        knm[:,i]=np.sum(A[:,ci==i],axis=1)
 
-	am=np.zeros((m,m))						#relative intermodular connectivity
-	for i in xrange(m):
-		am[i,:]=np.sum(knm[ci==i,:],axis=0)
-	am/=np.outer(nm,nm)
+    am=np.zeros((m,m))						#relative intermodular connectivity
+    for i in xrange(m):
+        am[i,:]=np.sum(knm[ci==i,:],axis=0)
+    am/=np.outer(nm,nm)
 
-	#1. Arrange densely connected modules together
-	i,j=np.where(np.tril(am,-1)+1)		#symmetrized intermodular connectivity
-	s=(np.tril(am,-1)+1)[i,j]
-	ord=np.argsort(s)[::-1]		#sort by high relative connectivity
-	i=i[ord]; j=j[ord]
-	i+=1; j+=1							#fix off by 1 error so np.where doesnt
-	om=np.array((i[0],j[0]))			#catch module 0
-	i[0]=0; j[0]=0
-	while len(om)<m:						#while not all modules ordered
-		ui,=np.where(np.logical_and(i,np.logical_or(j==om[0],j==om[-1])))
-		uj,=np.where(np.logical_and(j,np.logical_or(i==om[0],i==om[-1])))
+    #1. Arrange densely connected modules together
+    i,j=np.where(np.tril(am,-1)+1)		#symmetrized intermodular connectivity
+    s=(np.tril(am,-1)+1)[i,j]
+    ord=np.argsort(s)[::-1]		#sort by high relative connectivity
+    i=i[ord]; j=j[ord]
+    i+=1; j+=1							#fix off by 1 error so np.where doesnt
+    om=np.array((i[0],j[0]))			#catch module 0
+    i[0]=0; j[0]=0
+    while len(om)<m:						#while not all modules ordered
+        ui,=np.where(np.logical_and(i,np.logical_or(j==om[0],j==om[-1])))
+        uj,=np.where(np.logical_and(j,np.logical_or(i==om[0],i==om[-1])))
 
-		if np.size(ui): ui=ui[0]
-		if np.size(uj): uj=uj[0]
+        if np.size(ui): ui=ui[0]
+        if np.size(uj): uj=uj[0]
 
-		if ui==uj:
-			i[ui]=0; j[uj]=0;
-		if not np.size(ui): ui=np.inf
-		if not np.size(uj): uj=np.inf
-		if ui<uj:
-			old=j[ui]; new=i[ui]
-		if uj<ui:
-			old=i[uj]; new=j[uj]
-		if old==om[0]:
-			om=np.append((new,),om)
-		if old==om[-1]:
-			om=np.append(om,(new,))
+        if ui==uj:
+            i[ui]=0; j[uj]=0;
+        if not np.size(ui): ui=np.inf
+        if not np.size(uj): uj=np.inf
+        if ui<uj:
+            old=j[ui]; new=i[ui]
+        if uj<ui:
+            old=i[uj]; new=j[uj]
+        if old==om[0]:
+            om=np.append((new,),om)
+        if old==om[-1]:
+            om=np.append(om,(new,))
 
-		i[i==old]=0; j[j==old]=0
+        i[i==old]=0; j[j==old]=0
 
-	print om
+    print om
 
-	#2. Reorder nodes within modules
-	on=np.zeros((n,),dtype=long)
-	for y,x in enumerate(om):
-		ind,=np.where(ci==x-1)				#indices
-		pos,=np.where(om==x)				#position
-		#NOT DONE! OE NOES
+    #2. Reorder nodes within modules
+    on=np.zeros((n,),dtype=long)
+    for y,x in enumerate(om):
+        ind,=np.where(ci==x-1)				#indices
+        pos,=np.where(om==x)				#position
+        #NOT DONE! OE NOES
 
-		mod_imp=np.array((om,np.sign(np.arange(m)-pos),
-			np.abs(np.arange(m)-pos),am[x-1,om-1])).T
-		print np.shape((mod_imp[:,3][::-1],mod_imp[:,2]))
-		ix=np.lexsort((mod_imp[:,3][::-1],mod_imp[:,2]))
-		mod_imp=mod_imp[ix]
-		#at this point mod_imp agrees with the matlab version
-		signs=mod_imp[:,1]
-		mod_imp=np.abs(mod_imp[:,0]*mod_imp[:,1])
-		mod_imp=np.append(mod_imp[1:],x)
-		mod_imp=np.array(mod_imp-1,dtype=int)
-		print mod_imp,signs
-		#at this point mod_imp is the absolute value of that in the matlab
-		#version.  this limitation comes from sortrows ability to deal with
-		#negative indices, which we would have to do manually.
+        mod_imp=np.array((om,np.sign(np.arange(m)-pos),
+            np.abs(np.arange(m)-pos),am[x-1,om-1])).T
+        print np.shape((mod_imp[:,3][::-1],mod_imp[:,2]))
+        ix=np.lexsort((mod_imp[:,3][::-1],mod_imp[:,2]))
+        mod_imp=mod_imp[ix]
+        #at this point mod_imp agrees with the matlab version
+        signs=mod_imp[:,1]
+        mod_imp=np.abs(mod_imp[:,0]*mod_imp[:,1])
+        mod_imp=np.append(mod_imp[1:],x)
+        mod_imp=np.array(mod_imp-1,dtype=int)
+        print mod_imp,signs
+        #at this point mod_imp is the absolute value of that in the matlab
+        #version.  this limitation comes from sortrows ability to deal with
+        #negative indices, which we would have to do manually.
 
-		#instead, i punt on its importance; i only bother to order by the
-		#principal dimension.  some within-module orderings
-		#may potentially be a little bit out of order.   
+        #instead, i punt on its importance; i only bother to order by the
+        #principal dimension.  some within-module orderings
+        #may potentially be a little bit out of order.   
 
-		#ksmi=knm[ind,:].T[mod_imp[::-1]]
-		#reverse mod_imp to sort by the first column first and so on
-		#print ksmi
-		#for i,sin in enumerate(signs):
-		#	if sin==-1:
-		#		ksmi[i,:]=ksmi[i,:][::-1]
-		#print ksmi
-		#print np.shape(ksmi)
+        #ksmi=knm[ind,:].T[mod_imp[::-1]]
+        #reverse mod_imp to sort by the first column first and so on
+        #print ksmi
+        #for i,sin in enumerate(signs):
+        #	if sin==-1:
+        #		ksmi[i,:]=ksmi[i,:][::-1]
+        #print ksmi
+        #print np.shape(ksmi)
 
-		# ^ this is unworkable and wrong, lexsort alone cannot handle the
-		#negative indices problem of sortrows.  you would pretty much need
-		#to rewrite sortrows to do lexsort plus negative indices; the algorithm
-		#cant be further simplified.
+        # ^ this is unworkable and wrong, lexsort alone cannot handle the
+        #negative indices problem of sortrows.  you would pretty much need
+        #to rewrite sortrows to do lexsort plus negative indices; the algorithm
+        #cant be further simplified.
 
-		ord=np.lexsort(knm[np.ix_(ind,mod_imp[::-1])])
-		#ord=np.lexsort(knm[ind,:].T[mod_imp[::-1]])
-		if signs[mod_imp[0]]==-1:
-			ord=ord[::-1]
-			#reverse just the principal level and punt on the other levels.
-			#this will basically be fine for most purposes and probably won't
-			#ever show a difference for weighted graphs.
-		on[ind[ord]]=y*int(max_module_size)+np.arange(nm[x-1],dtype=int)
-		
-	on=np.argsort(on)
-	ar=A[np.ix_(on,on)]
+        ord=np.lexsort(knm[np.ix_(ind,mod_imp[::-1])])
+        #ord=np.lexsort(knm[ind,:].T[mod_imp[::-1]])
+        if signs[mod_imp[0]]==-1:
+            ord=ord[::-1]
+            #reverse just the principal level and punt on the other levels.
+            #this will basically be fine for most purposes and probably won't
+            #ever show a difference for weighted graphs.
+        on[ind[ord]]=y*int(max_module_size)+np.arange(nm[x-1],dtype=int)
+        
+    on=np.argsort(on)
+    ar=A[np.ix_(on,on)]
 
-	return on,ar
+    return on,ar
 
 def writetoPAJ(CIJ,fname,directed):
-	'''
+    '''
 This function writes a Pajek .net file from a numpy matrix
 
 Inputs:     CIJ,        adjacency matrix
-		    fname,      filename 
-			directed,	True if the network is directed, false otherwise.
-						The data format may be required to know this
-						so I am afraid to use directed as the default value.
-	'''
-	n=np.size(CIJ,axis=0)
-	with open(fname,'w') as fd:
-		fd.write('*vertices %i \r' % n)
-		for i in xrange(1,n+1): fd.write('%i "%i" \r' % (i,i))
-		if directed: fd.write('*arcs \r')
-		else: fd.write('*edges \r')
-		for i in xrange(n):
-			for j in xrange(n):
-				if CIJ[i,j]!=0:
-					fd.write('%i %i %.6f \r' % (i+1,j+1,CIJ[i,j]))
+            fname,      filename 
+            directed,	True if the network is directed, false otherwise.
+                        The data format may be required to know this
+                        so I am afraid to use directed as the default value.
+    '''
+    n=np.size(CIJ,axis=0)
+    with open(fname,'w') as fd:
+        fd.write('*vertices %i \r' % n)
+        for i in xrange(1,n+1): fd.write('%i "%i" \r' % (i,i))
+        if directed: fd.write('*arcs \r')
+        else: fd.write('*edges \r')
+        for i in xrange(n):
+            for j in xrange(n):
+                if CIJ[i,j]!=0:
+                    fd.write('%i %i %.6f \r' % (i+1,j+1,CIJ[i,j]))
 
 ##############################################################################
 # MISCELLANEOUS
 ##############################################################################
 def _cuberoot(x):
-	'''
+    '''
 Correctly handle the cube root for negative weights, instead of uselessly
 crashing as in python or returning the wrong root as in matlab
-	'''
-	return np.sign(x)*np.abs(x)**(1/3)
+    '''
+    return np.sign(x)*np.abs(x)**(1/3)
 
 def dummyvar(cis, return_sparse=False):
-	'''
-	This is an efficient implementation of matlab's "dummyvar" command
-	using sparse matrices.
+    '''
+    This is an efficient implementation of matlab's "dummyvar" command
+    using sparse matrices.
 
-	input: partitions, NxM array-like containing M partitions of N nodes
-		into <=N distinct communities
+    input: partitions, NxM array-like containing M partitions of N nodes
+        into <=N distinct communities
 
-	output: dummyvar, an NxR matrix containing R column variables (indicator
-		variables) with N entries, where R is the total number of communities
-		summed across each of the M partitions.
+    output: dummyvar, an NxR matrix containing R column variables (indicator
+        variables) with N entries, where R is the total number of communities
+        summed across each of the M partitions.
 
-		i.e.
-		r = sum((max(len(unique(partitions[i]))) for i in range(m)))
-	'''
-	#num_rows is not affected by partition indexes
-	n=np.size(cis,axis=0)
-	m=np.size(cis,axis=1)
-	r=np.sum((np.max(len(np.unique(cis[:,i])))) for i in range(m))
-	nnz=np.prod(cis.shape)
+        i.e.
+        r = sum((max(len(unique(partitions[i]))) for i in range(m)))
+    '''
+    #num_rows is not affected by partition indexes
+    n=np.size(cis,axis=0)
+    m=np.size(cis,axis=1)
+    r=np.sum((np.max(len(np.unique(cis[:,i])))) for i in range(m))
+    nnz=np.prod(cis.shape)
 
-	ix=np.argsort(cis,axis=0)
-	#s_cis=np.sort(cis,axis=0)
-	#FIXME use the sorted indices to sort by row efficiently
-	s_cis=cis[ix][:,xrange(m),xrange(m)]
+    ix=np.argsort(cis,axis=0)
+    #s_cis=np.sort(cis,axis=0)
+    #FIXME use the sorted indices to sort by row efficiently
+    s_cis=cis[ix][:,xrange(m),xrange(m)]
 
-	mask=np.hstack((((True,),)*m,(s_cis[:-1,:]!=s_cis[1:,:]).T))
-	indptr,=np.where(mask.flat)
-	indptr=np.append(indptr,nnz)
+    mask=np.hstack((((True,),)*m,(s_cis[:-1,:]!=s_cis[1:,:]).T))
+    indptr,=np.where(mask.flat)
+    indptr=np.append(indptr,nnz)
 
-	import scipy.sparse as sp
-	dv=sp.csc_matrix((np.repeat((1,),nnz),ix.T.flat,indptr),shape=(n,r))
-	return dv.toarray()
+    import scipy.sparse as sp
+    dv=sp.csc_matrix((np.repeat((1,),nnz),ix.T.flat,indptr),shape=(n,r))
+    return dv.toarray()

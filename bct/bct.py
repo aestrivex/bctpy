@@ -5762,7 +5762,7 @@ def corr_flat_dir(a1,a2):
 # VISUALIZATION
 ###############################################################################
 
-def adjacency_plot_und(A,coor):
+def adjacency_plot_und(A,coor,tube=False):
     '''
     This function in matlab is a visualization helper which translates an
     adjacency matrix and an Nx3 matrix of spatial coordinates, and plots a
@@ -5787,6 +5787,9 @@ def adjacency_plot_und(A,coor):
 
     Inputs:		A = Adjacency matrix
              coor = Nx3 matrix of node coordinates in the same order as A
+             tube = plot using cylindrical tubes for higher resolution.
+                    If true, plots cylindrical tube sources. If false, plots
+                    line sources. Default is false.
     Outputs:  fig, A handle to a mayavi figure.
 
     To display the output interactively, call
@@ -5845,12 +5848,17 @@ def adjacency_plot_und(A,coor):
         
     vectors=mlab.pipeline.vectors(thres, colormap='YlOrRd', 
         scale_mode='vector', figure=fig)
-    vectors.glyph.glyph_source.glyph_source.glyph_type='dash'
     vectors.glyph.glyph.clamping=False
-    vectors.actor.property.opacity=.7
     vectors.glyph.glyph.color_mode='color_by_scalar'
     vectors.glyph.color_mode='color_by_scalar'
     vectors.glyph.glyph_source.glyph_position='head'
+    vectors.actor.property.opacity=.7
+    if tube:
+        vectors.glyph.glyph_source.glyph_source = (vectors.glyph.glyph_source.
+            glyph_dict['cylinder_source'])
+        vectors.glyph.glyph_source.glyph_source.radius = 0.015
+    else:
+        vectors.glyph.glyph_source.glyph_source.glyph_type='dash'
 
     return fig
 

@@ -3892,9 +3892,10 @@ in x_25 are aleady <=0. This behavior is the same as in BCT. Be careful with mat
 
     I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-    en=round((n*n-n)*p/ud)			# number of links to be preserved
+    en=int(round((n*n-n)*p/ud))		# number of links to be preserved
 
     W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
+    #W[np.ix_(ind[0][I][en:], ind[1][I][en:])]=0
 
     if ud==2:						# if symmetric matrix
         W[:,:]=W+W.T						# reconstruct symmetry
@@ -5792,7 +5793,7 @@ def adjacency_plot_und(A,coor):
 
     fig=adjacency_plot_und(A,coor)
     from mayavi import mlab
-    mlab.show(figure=fig)
+    mlab.show()
 
     Note: Thresholding the matrix is strongly recommended.  It is recommended
     that the input matrix have fewer than 5000 total connections in order to

@@ -5358,7 +5358,6 @@ Notes:
             j.setflags(write=True)
             j[e1]=d; j[e2]=b			#reassign edge indices
             nswap+=1
-            break
 
 def randomizer_bin_und(R,alpha):
     '''

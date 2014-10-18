@@ -5330,6 +5330,7 @@ Notes:
     '''
     A=A.copy()
     i,j=np.where(np.triu(A,1))
+    i.setflags(write=True); j.setflags(write=True)
     m=len(i)
 
     nswap=0
@@ -5344,7 +5345,6 @@ Notes:
                 break					#all 4 vertices must be different
 
         if np.random.random()>.5:
-            i.setflags(write=True); j.setflags(write=True)
             i[e2]=d; j[e2]=c			#flip edge c-d with 50% probability
             c=i[e2]; d=j[e2]			#to explore all potential rewirings
             
@@ -5355,7 +5355,6 @@ Notes:
             A[c,b]=A[c,d]; A[c,d]=0
             A[b,c]=A[d,c]; A[d,c]=0
 
-            j.setflags(write=True)
             j[e1]=d; j[e2]=b			#reassign edge indices
             nswap+=1
 

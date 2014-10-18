@@ -5357,6 +5357,7 @@ Notes:
 
             j[e1]=d; j[e2]=b			#reassign edge indices
             nswap+=1
+    return A
 
 def randomizer_bin_und(R,alpha):
     '''

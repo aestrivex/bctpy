@@ -141,6 +141,9 @@ def nbs_bct(x,y,thresh,k=1000,tail='both',paired=False,verbose=False):
     #threshold
     ind_t,=np.where(t_stat>thresh)
 
+    if len(ind_t) == 0:
+        raise BCTParamError("Unsuitable threshold")
+
     #suprathreshold adjacency matrix
     adj=np.zeros((n,n))
     adj[(ixes[0][ind_t],ixes[1][ind_t])]=1

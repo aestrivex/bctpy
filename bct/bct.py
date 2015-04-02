@@ -1036,8 +1036,10 @@ and Sporns (2010) NeuroImage.
         else: raise ValueError('Flag must be 0-4')
 
     #compute assortativity
-    r=(( np.sum(degi*degj)/K - np.square(np.sum(.5*(degi+degj))/K)) /
-        np.sum(.5*(degi*degi+degj*degj))/K - np.square(sum(.5*(degi+degj))/K))
+    term1 = np.sum(degi*degj)/K
+    term2 = np.square(np.sum(.5*(degi+degj))/K)
+    term3 = np.sum(.5*(degi*degi+degj*degj))/K
+    r = (term1 - term2) / (term3 - term2)
     return r
 
 def assortativity_wei(CIJ,flag):
@@ -1079,8 +1081,11 @@ weights are ignored. The main diagonal should be empty. For flag 1
         else: raise ValueError('Flag must be 0-4')
 
     #compute assortativity
-    r=(( np.sum(stri*strj)/K - np.square(np.sum(.5*(stri+strj))/K)) /
-        np.sum(.5*(stri*stri+strj*strj))/K - np.square(sum(.5*(stri+strj))/K))
+    term1 = np.sum(stri*strj)/K
+    term2 = np.square(np.sum(.5*(stri+strj))/K)
+    term3 = np.sum(.5*(stri*stri+strj*strj))/K
+    r = (term1 - term2) / (term3 - term2)
+    return r
 
 def kcore_bd(CIJ,k,peel=False):
     '''

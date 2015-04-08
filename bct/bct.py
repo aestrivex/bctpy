@@ -887,7 +887,7 @@ python equivalent. If you think of a way to implement this better, let me know.
         else:
             import networkx as nx
         net=nx.from_numpy_matrix(A)
-        cpts=nx.connected_components(net)
+        cpts=list(nx.connected_components(net))
         
         cptvec=np.zeros((n,))
         cptsizes=np.zeros(len(cpts))

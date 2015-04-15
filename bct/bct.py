@@ -41,6 +41,9 @@ Output:     BC,     node betweenness centrality vector.
 Note: Betweenness centrality may be normalised to the range [0,1] as
 BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
+    G=np.array(G, dtype=float)      #force G to have float type so it can be
+                                    #compared to float np.inf
+    
     n=len(G)						#number of nodes
     I=np.eye(n)						#identity matrix
     d=1								#path length

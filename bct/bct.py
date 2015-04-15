@@ -596,8 +596,8 @@ Outputs:     Cs,        subgraph centrality
     from scipy import linalg
     
     vals,vecs=linalg.eig(CIJ)				#compute eigendecomposition
-    lambdas=np.diag(vals)
-    Cs=np.real(np.dot(vecs*vecs),np.exp(lambdas)) #compute eigenvectorcentrality
+    #lambdas=np.diag(vals)
+    Cs=np.real(np.dot(vecs*vecs, np.exp( vals ))) #compute eigenvector centr.
     return Cs							#imaginary part from precision error
 
 ###############################################################################

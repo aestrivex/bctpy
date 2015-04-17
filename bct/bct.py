@@ -521,19 +521,25 @@ nodes around 1000 or less)
     r/=np.sum(r)
     return r
 
-def participation_coef(W,ci):
+def participation_coef(W,ci,degree='undirected'):
     '''
 Participation coefficient is a measure of diversity of intermodular
 connections of individual nodes.
 
 Inputs:     W,      binary/weighted, directed/undirected connection matrix
            Ci,     	community affiliation vector
+       degree,      flagged argument to described undirected or directed graphs.
+                    For directed graphs, set to 'out' or 'in'. Default value is
+                    'undirected', which has the same behavior as out-degree.
 
 Output:     P,      participation coefficient
 
 Note: The output for directed graphs is the "out-neighbor"
      participation coefficient.
     '''
+    if degree=='in':
+        W = W.T
+
     _,ci=np.unique(ci,return_inverse=True)
     ci+=1
 
@@ -1061,8 +1067,7 @@ Inputs:     CIJ,    weighted directed/undirected connection matrix
 
 Outputs:    r,      assortativity coefficient
 
-Notes: The function accepts weighted networks, but all connection
-weights are ignored. The main diagonal should be empty. For flag 1
+Notes: The main diagonal should be empty. For flag 1
    the function computes the directed assortativity described in Rubinov
    and Sporns (2010) NeuroImage.
     '''
@@ -1575,13 +1580,15 @@ vertex 'source'.
 
     return distance,branch
 
-def charpath(D):
+def charpath(D, include_diagonal=False):
     '''
 The characteristic path length is the average shortest path length in 
 the network. The global efficiency is the average inverse shortest path
 length in the network.
 
 Input:      D,              distance matrix
+          include_diagonal, if True, include the weights on the diagonal.
+                            default value is false.
 
 Outputs:    lambda,         characteristic path length
             efficiency,     global efficiency
@@ -1596,6 +1603,11 @@ Characteristic path length is calculated as the global mean of
 the distance matrix D, excludings any 'Infs' but including distances on
 the main diagonal.
     '''
+    D = D.copy()
+
+    if not include_diagonal:
+        np.fill_diagonal(D, 0)
+
     #mean of finite entries of D[G]
     lambda_=np.sum(D[D!=np.inf])/len(np.where(D!=np.inf)[0])	
 
@@ -1694,6 +1706,7 @@ from node u to node v. The average shortest path length is the
 characteristic path length of the network.
 
 Input:      L,      Directed/undirected connection-length matrix.
+        NB L is not the adjacency matrix, see below
 
 Output:     D,      distance (shortest weighted path) matrix
             B,      number of edges in shortest weighted path matrix
@@ -2159,6 +2172,12 @@ def ls2ci(ls,zeroindexed=False):
         for j,y in enumerate(ls[i]):
             ci[ls[i][j]]=i+z
     return ci
+
+def community_louvain(W, gamma=1, ci=None, B='modularity'):
+    raise NotImplementedError('Not implemented yet')
+
+def link_communities(W):
+    raise NotImplementedError('Not implemented yet')
 
 def modularity_dir(A,gamma=1,kci=None):
     '''
@@ -3890,7 +3909,7 @@ in x_25 are aleady <=0. This behavior is the same as in BCT. Be careful with mat
     n=len(W)						# number of nodes
     np.fill_diagonal(W, 0)			# clear diagonal
 
-    if np.all(W==W.T):				# if symmetric matrix
+    if np.allclose(W, W.T):				# if symmetric matrix
         W[np.tril_indices(n)]=0		# ensure symmetry is preserved
         ud=2						# halve number of removed links
     else:
@@ -3994,6 +4013,29 @@ def invert(W,copy=True):
     E=np.where(W)
     W[E]=1./W[E]
     return W
+
+def autofix(W,copy=True):
+    '''
+    Fix a bunch of common problems. More specifically, remove Inf and NaN,
+    ensure exact binariness and symmetry (i.e. remove floating point
+    instability), and zero diagonal.
+    '''
+    if copy: W=W.copy()
+    
+    #zero diagonal
+    np.fill_diagonal(W, 0) 
+   
+    #remove np.inf and np.nan   
+    W[np.logical_or(np.where(np.isinf(W)), np.where(np.isnan(W)))] = 0
+
+    #ensure exact binarity
+    u = np.unique(W)
+    if np.all(np.logical_or( np.abs(u)<1e-8, np.abs(u-1)<1e-8 )):
+        W = np.around(W, decimal=5)
+
+    #ensure exact symmetry
+    if np.allclose(W, W.T):
+        W = np.around(W, decimals=5)
 
 ###############################################################################
 # PHYSICAL CONNECTIVITY
@@ -6290,6 +6332,8 @@ Inputs:     A,          connectivity matrix (binary/weighted)
 Outputs:    On,         new node order
             Ar,         reordered connectivity matrix
     '''
+    #TODO update function with 2015 changes
+
     from scipy import stats
     _,max_module_size=stats.mode(ci)
     u,ci=np.unique(ci,return_inverse=True)	#make consecutive

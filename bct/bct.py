@@ -548,7 +548,7 @@ Note: The output for directed graphs is the "out-neighbor"
     Gc=np.dot((W!=0),np.diag(ci))	#neighbor community affiliation
     Kc2=np.zeros((n,))				#community-specific neighbors
 
-    for i in xrange(int(np.max(ci))):
+    for i in xrange(1,int(np.max(ci))+1):
         Kc2+=np.square(np.sum(W*(Gc==i),axis=1))
 
     P=np.ones((n,))-Kc2/np.square(Ko)

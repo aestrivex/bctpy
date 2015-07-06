@@ -578,7 +578,7 @@ Output:     Ppos,   participation coefficient from positive weights
         Gc=np.dot(np.logical_not(W_),np.diag(ci)) #neighbor community affil.
         Sc2=np.zeros((n,))
         
-        for i in xrange(int(np.max(ci))):
+        for i in xrange(1,int(np.max(ci)+1)):
             Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
 
         P=np.ones((n,))-Sc2/np.square(S)

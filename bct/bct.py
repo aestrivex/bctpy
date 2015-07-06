@@ -447,7 +447,7 @@ output:    coreness,        node coreness.
 
     return coreness,kn
 
-def module_degree_zscore(W,Ci,flag=0):
+def module_degree_zscore(W,ci,flag=0):
     '''
 The within-module degree z-score is a within-module version of degree
 centrality.
@@ -463,6 +463,8 @@ Output:     Z,      within-module degree z-score.
 
 Note: The output for directed graphs is the "out-neighbor" z-score.
     '''
+    _,ci=np.unique(ci,return_inverse=True)
+    ci+=1
 
     if flag==2:
         W=W.copy(); W=W.T
@@ -471,9 +473,9 @@ Note: The output for directed graphs is the "out-neighbor" z-score.
 
     n=len(W)
     Z=np.zeros((n,))					#number of vertices
-    for i in xrange(int(np.max(Ci))):
-        Koi=np.sum(W[np.ix_(Ci==i,Ci==i)],axis=1)
-        Z[np.where(Ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
+    for i in xrange(1,int(np.max(ci)+1)):
+        Koi=np.sum(W[np.ix_(ci==i,ci==i)],axis=1)
+        Z[np.where(ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
 
     Z[np.where(np.isnan(Z))]=0
     return Z

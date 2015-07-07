@@ -2175,8 +2175,141 @@ def ls2ci(ls,zeroindexed=False):
             ci[ls[i][j]]=i+z
     return ci
 
-def community_louvain(W, gamma=1, ci=None, B='modularity'):
-    raise NotImplementedError('Not implemented yet')
+def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
+    '''
+    The optimal community structure is a subdivision of the network into
+    nonoverlapping groups of nodes which maximizes the number of within-group
+    edges and minimizes the number of between-group edges.
+
+    This function is a fast an accurate multi-iterative generalization of the
+    louvain community detection algorithm. This function subsumes and improves
+    upon modularity_[louvain,finetune]_[und,dir]() and additionally allows to
+    optimize other objective functions (includes built-in Potts Model i
+    Hamiltonian, allows for custom objective-function matrices).
+
+    Parameters
+    ----------
+    w : NxN np.array
+        directed/undirected weighted/binary adjacency matrix
+    gamma : float
+        resolution parameter. default value=1. Values 0 <= gamma < 1 detect
+        larger modules while gamma > 1 detects smaller modules.
+        ignored if an objective function matrix is specified.
+    ci : Nx1 np.arraylike
+        initial community affiliation vector. default value=None
+    B : str | NxN np.arraylike
+        string describing objective function type, or provides a custom
+        objective-function matrix. builtin values 'modularity' uses Q-metric
+        as objective function, or 'potts' uses Potts model Hamiltonian.
+        Default value 'modularity'.
+    seed : int
+        random seed. default value=None. if None, seeds from /dev/urandom.
+
+    Returns
+    -------
+    ci : Nx1 np.array
+        final community structure
+    q : float
+        optimized q-statistic (modularity only)
+    '''
+    np.random.seed(seed)
+
+    n = len(w)
+    current_n = n
+    s = np.sum(w)
+
+    if np.min(w) < 1e-10:
+        raise BCTParamError('adjmat must not contain negative weights')
+    
+    if ci is None:
+        ci = np.arange(n)+1
+    else:
+        if len(ci) != n:
+            raise BCTParamError('initial ci vector size must equal N')
+        _,ci = np.unique(ci, return_inverse=True)
+        ci+=1
+    Mb = ci.copy()
+    M = ci.copy()
+
+    if b=='modularity':
+        b = w-gamma*np.dot((np.sum(w,axis=1), np.sum(w,axis=0)))/s
+    elif b=='potts':
+        b = w-gamma*(!w)
+    else:
+        try:
+            b = np.array(b)
+        except:
+            raise BCTParamError('unknown objective function type')
+
+        if b.shape != w.shape:
+            raise BCTParamError('objective function matrix does not match '
+                'size of adjacency matrix')
+        if not np.allclose(b, b.T):
+            print ('Warning: objective function matrix not symmetric, ' 
+                'symmetrizing')
+            b = (b+b.T)/2
+
+    Hnm = np.zeros((n,n))
+    for m in xrange(1, int(np.max(ci))+1):
+        Hnm[:,m] = np.sum(b[:,ci==m], axis=1)   #node to module degree
+    H = np.sum(Hnm, axis=1)                     #node degree
+    Hm = np.sum(Hnm, axis=0)                    #module degree
+
+    q0 = -np.inf
+    #compute modularity
+    q = np.sum( b[np.tile(ci, (n,1)) == np.tile(ci, (n,1)).T ])/s
+
+    first_iteration = True
+    while q-q0 > 1e-10:
+        flag = True
+        while flag:
+            flag = False
+            for u in np.random.permutation(current_n):
+                ma = Mb[u]-1
+                dQ = Hmn[u,:] - Hnm[u,ma] + b[u,u]  #algorithm condition
+                dQ[ma] = 0
+
+                max_dq = np.max(dQ)
+                if max_dq>1e-10:
+                    flag=True
+                    mb = np.argmax(dQ)
+
+                    Hnm[:,mb] += b[:,u]
+                    Hnm[:,ma] -= b[:,u] #change node-to-module strengths
+
+                    Hm[mb] += H[u]
+                    Hm[ma] -= H[u]  #change module strengths
+
+        _,mb = np.unique(mb, return_inverse=True)
+        mb += 1
+        
+        M0 = M.copy()
+        if first_iteration:
+            M = mb.copy()
+            first_iteration = False
+        else:
+            for u in xrange(1, current_n+1):
+                M[M0==u]=mb[u-1]    #assign new modules
+
+        current_n = np.max(mb)
+        b1 = np.zeros((n,n))
+            for i in xrange(1, current_n+1):
+                for j in xrange(1, current_n+1):
+                    #pool weights of nodes in same module
+                    bm=np.sum(b[np.ix_(mb==i,mb==j)]
+                    b1[i,j] = bm    
+                    b1[j,i] = bm
+        b = b1
+
+        Mb = np.arange(1, n+1)
+        Hnm = b
+        H=np.sum(b, axis=0)
+        Hm=H
+
+        q0 = q
+        q=np.trace(b)/s         #compute modularity
+
+    return M,q
 
 def link_communities(W):
     raise NotImplementedError('Not implemented yet')
@@ -3969,6 +4102,8 @@ Output: W           connectivity matrix with converted weights
     elif wcm=='normalize': return normalize(W,copy)
     elif wcm=='lengths': return invert(W,copy)
     else: raise NotImplementedError('Unknown weight conversion command.')
+
+def 
 
 def binarize(W,copy=True):
     '''

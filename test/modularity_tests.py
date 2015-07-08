@@ -169,3 +169,10 @@ def test_modularity_finetune_dir():
 	#order .001) partitions despite returning 
 	#higher modularity partitions a slight majority of the time. i dont know
 	#what is wrong
+
+def test_community_louvain():
+    x = load_sample(thres=0.4)
+    seed = 39185
+    ci,q = bct.community_louvain(x, seed=seed)
+    print q
+    assert np.allclose(q, 0.2583, atol=0.015)

@@ -2189,7 +2189,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
 
     Parameters
     ----------
-    w : NxN np.array
+    W : NxN np.array
         directed/undirected weighted/binary adjacency matrix
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
@@ -2214,11 +2214,10 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
     '''
     np.random.seed(seed)
 
-    n = len(w)
-    current_n = n
-    s = np.sum(w)
+    n = len(W)
+    s = np.sum(W)
 
-    if np.min(w) < 1e-10:
+    if np.min(W) < -1e-10:
         raise BCTParamError('adjmat must not contain negative weights')
     
     if ci is None:
@@ -2229,87 +2228,94 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         _,ci = np.unique(ci, return_inverse=True)
         ci+=1
     Mb = ci.copy()
-    M = ci.copy()
 
-    if b=='modularity':
-        b = w-gamma*np.dot((np.sum(w,axis=1), np.sum(w,axis=0)))/s
-    elif b=='potts':
-        b = w-gamma*(!w)
+    if B=='modularity':
+        B = W-gamma*np.outer(np.sum(W,axis=1), np.sum(W,axis=0))/s
+    elif B=='potts':
+        B = W-gamma*np.logical_not(W)
     else:
         try:
-            b = np.array(b)
+            B = np.array(B)
         except:
             raise BCTParamError('unknown objective function type')
 
-        if b.shape != w.shape:
+        if B.shape != W.shape:
             raise BCTParamError('objective function matrix does not match '
                 'size of adjacency matrix')
-        if not np.allclose(b, b.T):
+        if not np.allclose(B, B.T):
             print ('Warning: objective function matrix not symmetric, ' 
                 'symmetrizing')
-            b = (b+b.T)/2
+            B = (B+B.T)/2
 
     Hnm = np.zeros((n,n))
-    for m in xrange(1, int(np.max(ci))+1):
-        Hnm[:,m] = np.sum(b[:,ci==m], axis=1)   #node to module degree
+    for m in xrange(1, n+1):
+        Hnm[:,m-1] = np.sum(B[:,ci==m], axis=1)   #node to module degree
     H = np.sum(Hnm, axis=1)                     #node degree
     Hm = np.sum(Hnm, axis=0)                    #module degree
 
     q0 = -np.inf
     #compute modularity
-    q = np.sum( b[np.tile(ci, (n,1)) == np.tile(ci, (n,1)).T ])/s
+    q = np.sum( B[np.tile(ci, (n,1)) == np.tile(ci, (n,1)).T ])/s
 
     first_iteration = True
+
     while q-q0 > 1e-10:
+        it=0
         flag = True
         while flag:
+            it+=1
+            if it>1000:
+                raise BCTParamError('Modularity infinite loop style G. '
+                    'Please contact the developer.')
             flag = False
-            for u in np.random.permutation(current_n):
+            for u in np.random.permutation(n):
                 ma = Mb[u]-1
-                dQ = Hmn[u,:] - Hnm[u,ma] + b[u,u]  #algorithm condition
+                dQ = Hnm[u,:] - Hnm[u,ma] + B[u,u]  #algorithm condition
                 dQ[ma] = 0
 
                 max_dq = np.max(dQ)
                 if max_dq>1e-10:
-                    flag=True
+                    flag = True
                     mb = np.argmax(dQ)
 
-                    Hnm[:,mb] += b[:,u]
-                    Hnm[:,ma] -= b[:,u] #change node-to-module strengths
+                    Hnm[:,mb] += B[:,u]
+                    Hnm[:,ma] -= B[:,u] #change node-to-module strengths
 
                     Hm[mb] += H[u]
                     Hm[ma] -= H[u]  #change module strengths
 
-        _,mb = np.unique(mb, return_inverse=True)
-        mb += 1
-        
-        M0 = M.copy()
+                    Mb[u] = mb+1
+
+        _,Mb = np.unique(Mb, return_inverse=True)
+        Mb += 1
+
+        M0 = ci.copy()
         if first_iteration:
-            M = mb.copy()
+            ci = Mb.copy()
             first_iteration = False
         else:
-            for u in xrange(1, current_n+1):
-                M[M0==u]=mb[u-1]    #assign new modules
+            for u in xrange(1, n+1):
+                ci[M0==u]=Mb[u-1]    #assign new modules
 
-        current_n = np.max(mb)
+        n = np.max(Mb)
         b1 = np.zeros((n,n))
-            for i in xrange(1, current_n+1):
-                for j in xrange(1, current_n+1):
-                    #pool weights of nodes in same module
-                    bm=np.sum(b[np.ix_(mb==i,mb==j)]
-                    b1[i,j] = bm    
-                    b1[j,i] = bm
-        b = b1
+        for i in xrange(1, n+1):
+            for j in xrange(i, n+1):
+                #pool weights of nodes in same module
+                bm=np.sum(B[np.ix_(Mb==i,Mb==j)])
+                b1[i-1,j-1] = bm    
+                b1[j-1,i-1] = bm
+        B = b1.copy()
 
         Mb = np.arange(1, n+1)
-        Hnm = b
-        H=np.sum(b, axis=0)
-        Hm=H
+        Hnm = B.copy()
+        H=np.sum(B, axis=0)
+        Hm=H.copy()
 
         q0 = q
-        q=np.trace(b)/s         #compute modularity
-
-    return M,q
+        q=np.trace(B)/s         #compute modularity
+        
+    return ci, q
 
 def link_communities(W):
     raise NotImplementedError('Not implemented yet')
@@ -4102,8 +4108,6 @@ Output: W           connectivity matrix with converted weights
     elif wcm=='normalize': return normalize(W,copy)
     elif wcm=='lengths': return invert(W,copy)
     else: raise NotImplementedError('Unknown weight conversion command.')
-
-def 
 
 def binarize(W,copy=True):
     '''

@@ -29,3 +29,13 @@ def test_zi():
     #sample standard deviation. i tend to think that using the population
     #estimator is acceptable in this case so i will allow the higher
     #tolerance.
+
+#TODO this test does not give the same results, why not
+def test_shannon_entropy():
+    x = load_sample(thres=0.4)
+    ci = np.load('mats/sample_partition.npy')
+    #ci, q = bct.modularity_und(x)
+    hpos, _ = bct.diversity_coef_sign(x, ci)
+    print np.sum(hpos)
+    print hpos[-1]
+    assert np.allclose(np.sum(hpos), 102.6402, atol=.01)

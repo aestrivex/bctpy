@@ -30,16 +30,20 @@ class BCTParamError(RuntimeError): pass
 
 def betweenness_bin(G):
     '''
-Node betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given node. Nodes with high values of 
-betweenness centrality participate in a large number of shortest paths.
+    Node betweenness centrality is the fraction of all shortest paths in 
+    the network that contain a given node. Nodes with high values of 
+    betweenness centrality participate in a large number of shortest paths.
 
-Input:      A,      binary (directed/undirected) connection matrix.
+    Parameters
+    ----------
+    A : NxN np.ndarray
+        binary directed/undirected connection matrix
 
-Output:     BC,     node betweenness centrality vector.
+    BC : Nx1 np.ndarray
+        node betweenness centrality vector
 
-Note: Betweenness centrality may be normalised to the range [0,1] as
-BC/[(N-1)(N-2)], where N is the number of nodes in the network.
+    Note: Betweenness centrality may be normalised to the range [0,1] as
+    BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
     G=np.array(G, dtype=float)      #force G to have float type so it can be
                                     #compared to float np.inf
@@ -78,22 +82,25 @@ BC/[(N-1)(N-2)], where N is the number of nodes in the network.
 
 def betweenness_wei(G):
     '''
-Node betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given node. Nodes with high values of 
-betweenness centrality participate in a large number of shortest paths.
+    Node betweenness centrality is the fraction of all shortest paths in 
+    the network that contain a given node. Nodes with high values of 
+    betweenness centrality participate in a large number of shortest paths.
 
-Input:      L,      Directed/undirected connection-length matrix.
+    Parameters
+    ----------
+    L : NxN np.ndarray
+        directed/undirected weighted connection matrix
+    BC : Nx1 np.ndarray
+        node betweenness centrality vector
 
-Output:     BC,     node betweenness centrality vector.
-
-Notes:
-   The input matrix must be a connection-length matrix, typically
-obtained via a mapping from weight to length. For instance, in a
-weighted correlation network higher correlations are more naturally
-interpreted as shorter distances and the input matrix should
-consequently be some inverse of the connectivity matrix. 
-   Betweenness centrality may be normalised to the range [0,1] as
-BC/[(N-1)(N-2)], where N is the number of nodes in the network.
+    Notes:
+       The input matrix must be a connection-length matrix, typically
+        obtained via a mapping from weight to length. For instance, in a
+        weighted correlation network higher correlations are more naturally
+        interpreted as shorter distances and the input matrix should
+        consequently be some inverse of the connectivity matrix. 
+       Betweenness centrality may be normalised to the range [0,1] as
+        BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
     n=len(G)
     BC=np.zeros((n,))					#vertex betweenness
@@ -140,26 +147,37 @@ BC/[(N-1)(N-2)], where N is the number of nodes in the network.
 
     return BC
 
-def diversity_coef_sign(W,Ci):
+def diversity_coef_sign(W,ci):
     '''
-The Shannon-entropy based diversity coefficient measures the diversity
-of intermodular connections of individual nodes and ranges from 0 to 1.
+    The Shannon-entropy based diversity coefficient measures the diversity
+    of intermodular connections of individual nodes and ranges from 0 to 1.
 
-Inputs:     W,      undirected connection matrix with positive and
-                    negative weights
-            Ci,     community affiliation vector
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        undirected connection matrix with positive and negative weights
+    ci : Nx1 np.ndarray
+        community affiliation vector
 
-Output:     Hpos,   diversity coefficient based on positive connections
-            Hneg,   diversity coefficient based on negative connections
+    Returns
+    -------
+    Hpos : Nx1 np.ndarray
+        diversity coefficient based on positive connections
+    Hneg : Nx1 np.ndarray
+        diversity coefficient based on negative connections
     '''
     n=len(W)							#number of nodes
-    m=np.max(Ci)						#number of modules		
+
+    _,ci=np.unique(ci,return_inverse=True)
+    ci += 1
+
+    m=np.max(ci)						#number of modules		
 
     def entropy(w_):
         S=np.sum(w_,axis=1)				#strength
         Snm=np.zeros((n,m))				#node-to-module degree
         for i in xrange(m):
-            Snm[:,i]=np.sum(w_[:,Ci==i+1],axis=1)
+            Snm[:,i]=np.sum(w_[:,ci==i+1],axis=1)
         pnm=Snm/(np.tile(S,(m,1)).T)
         pnm[np.isnan(pnm)]=0
         pnm[np.logical_not(pnm)]=1
@@ -2317,8 +2335,170 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         
     return ci, q
 
-def link_communities(W):
-    raise NotImplementedError('Not implemented yet')
+def link_communities(W, type_clustering='single'):
+    '''
+    The optimal community structure is a subdivision of the network into
+    nonoverlapping groups of nodes which maximizes the number of within-group
+    edges and minimizes the number of between-group edges.
+
+    This algorithm uncovers overlapping community structure via hierarchical
+    clustering of network links. This algorithm is generalized for
+    weighted/directed/fully-connected networks
+
+    Parameters
+    ----------
+    W : NxN np.array
+        directed weighted/binary adjacency matrix
+    type_clustering : str
+        type of hierarchical clustering. 'single' for single-linkage,
+        'complete' for complete-linkage. Default value='single'
+
+    Returns
+    -------
+    M : CxN np.ndarray
+        nodal community affiliation matrix.
+    '''
+    n = len(W)
+    W = normalize(W)
+
+    if type_clustering not in ('single', 'complete'):
+        raise BCTParamError('Unrecognized clustering type')
+
+    #set diagonal to mean weights
+    np.fill_diagonal(W, 0)
+    W[xrange(n), xrange(n)] = (
+        np.sum(W, axis=0)/np.sum(np.logical_not(W), axis=0) +
+        np.sum(W.T, axis=0)/np.sum(np.logical_not(W.T), axis=0))/2
+
+    #out/in norm squared
+    No = np.sum(W**2, axis=1)
+    Ni = np.sum(W**2, axis=0)
+
+    #weighted in/out jaccard
+    Jo = np.zeros((n,n))    
+    Ji = np.zeros((n,n))
+    
+    for b in xrange(n):
+        for c in xrange(n):
+            Do = np.dot(W[b,:], W[c,:].T)
+            Jo[b,c] = Do / (No[b]+No[c]-Do)
+
+            Di = np.dot(W[:,b].T, W[:,c])
+            Ji[b,c] = Di / (Ni[b]+Ni[c]-Di)
+
+    #get link similarity
+    A,B = np.where( np.logical_and( np.logical_or(W, W.T),
+                                    np.triu(np.ones((n,n)), 1)))
+    m = len(A)
+    Ln = np.zeros((m,2), dtype=np.int32)    #link nodes
+    Lw = np.zeros((m,))     #link weights
+
+    for i in xrange(m):
+        Ln[i,:] = (A[i], B[i])
+        Lw[i] = (W[A[i], B[i]] + W[B[i], A[i]]) / 2
+
+    ES = np.zeros((m,m), dtype=np.float32)    #link similarity
+    for i in xrange(m):
+        for j in xrange(m):
+            if Ln[i,0] == Ln[j,0]:
+                a=Ln[i,0]; b=Ln[i,1]; c=Ln[j,1]
+            elif Ln[i,0] == Ln[j,1]:
+                a=Ln[i,0]; b=Ln[i,1]; c=Ln[j,0]
+            elif Ln[i,1] == Ln[j,0]:
+                a=Ln[i,1]; b=Ln[i,0]; c=Ln[j,1]
+            elif Ln[i,1] == Ln[j,1]:
+                a=Ln[i,1]; b=Ln[i,0]; c=Ln[j,0]
+            else:
+                continue
+
+            ES[i,j] = (W[a,b]*W[a,c]*Ji[b,c] + W[b,a]*W[c,a]*Jo[b,c])/2
+    
+    np.fill_diagonal(ES, 0)
+
+    #perform hierarchical clustering
+
+    C = np.zeros((m,m), dtype=np.int32)   #community affiliation matrix
+
+    Nc = C.copy()
+    Mc = np.zeros((m,m), dtype=np.float32)
+    Dc = Mc.copy()           #community nodes, links, density
+
+    U = np.arange(m)        #initial community assignments
+    C[0,:] = np.arange(m)
+
+    for i in xrange(m-1):
+        print 'hierarchy %i'%i
+
+        for j in xrange(len(U)):     #loop over communities
+            ixes = C[i,:] == U[j]   #get link indices
+
+            links = np.sort(Lw[ixes])
+            #nodes = np.sort(Ln[ixes,:].flat)
+
+            nodes = np.sort(np.reshape(Ln[ixes,:], 2*np.size(np.where(ixes))))
+            
+            #get unique nodes
+            nodulo = np.append(nodes[0], (nodes[1:])[nodes[1:] != nodes[:-1]])
+            #nodulo = ((nodes[1:])[nodes[1:] != nodes[:-1]])
+
+            nc = len(nodulo)
+            #nc = len(nodulo)+1
+            mc = np.sum(links)
+            min_mc = np.sum( links[:nc-1] ) #minimal weight
+            dc = (mc - min_mc) / (nc*(nc-1)/2 - min_mc) #community density
+
+            Nc[i,j] = nc
+            Mc[i,j] = mc
+            Dc[i,j] = dc if not np.isnan(dc) else 0
+
+        C[i+1,:] = C[i,:]       #copy current partition
+        #import pdb
+        #pdb.set_trace()
+
+        u1,u2 = np.where( ES[np.ix_(U,U)]==np.max(ES[np.ix_(U,U)]) )
+
+        #get unique links (implementation of sortrows)
+        ugl = np.array((u1,u2))
+        ug_rows = ugl[np.argsort(ugl,axis=0 )[:,0]]
+        #implementation of matlab unique(A, 'rows')
+        unq_rows = np.vstack({tuple(row) for row in ug_rows})
+        V = U[unq_rows]
+
+        for j in xrange(len(V)):
+            if type_clustering=='single':
+                x = np.max(ES[V[j,:],:], axis=0)
+            elif type_clustering=='complete':
+                x = np.min(ES[V[j,:],:], axis=0)
+
+            #assign distances to whole clusters
+#            import pdb
+#            pdb.set_trace()
+            ES[V[j,:],:] = np.array((x,x))
+            ES[:,V[j,:]] = np.transpose((x,x))
+
+            # clear diagonal
+            ES[V[j,0], V[j,0]] = 0
+            ES[V[j,1], V[j,1]] = 0
+
+            #merge communities
+            C[i+1, C[i+1,:]==V[j,1]] = V[j,0]
+            V[V==V[j,1]] = V[j,0]
+
+        U = np.unique(C[i+1,:])
+        if len(U) == 1:
+            break
+
+    #Dc[ np.where(np.isnan(Dc)) ]=0 
+    i = np.argmax(np.sum(Dc*Mc, axis=1))
+
+    U=np.unique(C[i,:])
+    M=np.zeros((len(U),n))
+    for j in xrange(len(U)):
+        M[j, np.unique( Ln[C[i,:]==U[j],:])] = 1
+
+    M = M[np.sum(M, axis=1)>2,:]
+           
+    return M
 
 def modularity_dir(A,gamma=1,kci=None):
     '''
@@ -4128,10 +4308,18 @@ def normalize(W,copy=True):
     Normalizes an input weighted connection matrix.  If copy is not set, this
     function will *modify W in place.*
 
-    Inputs: W		weighted connectivity matrix
-            copy	copy W to avoid side effects, defaults to True
+    Parameters
+    ----------
+    W : np.ndarray
+        weighted connectivity matrix
+    copy : bool
+        if True, returns a copy of the matrix. Otherwise, modifies the matrix
+        in place. Default value=True.
 
-    Output: W		normalized connectivity matrix
+    Returns
+    -------
+    W : np.ndarray
+        normalized connectivity matrix
     '''
     if copy: W=W.copy()
     W/=np.max(np.abs(W))
@@ -4145,10 +4333,18 @@ def invert(W,copy=True):
 
     If copy is not set, this function will *modify W in place.*
 
-    Inputs: W		weighted connectivity matrix
-            copy	copy W to avoid side effects, defaults to True
+    Parameters
+    ----------
+    W : np.ndarray
+        weighted connectivity matrix
+    copy : bool
+        if True, returns a copy of the matrix. Otherwise, modifies the matrix
+        in place. Default value=True.
 
-    Output: W		inverted connectivity matrix
+    Returns
+    -------
+    W : np.ndarray
+        inverted connectivity matrix
     '''
     if copy: W=W.copy()
     E=np.where(W)

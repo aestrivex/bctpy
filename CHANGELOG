@@ -1,3 +1,7 @@
+BCT 0.4.0
+- Add various new functions from Jan 2015 release of BCT
+- Fix various bugs documented in github issues
+
 BCT 0.3.3
 
 - Fix small bug in latmio_und_connected causing failure for sparse matrices

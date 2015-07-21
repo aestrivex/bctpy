@@ -42,7 +42,9 @@ def betweenness_bin(G):
     BC : Nx1 np.ndarray
         node betweenness centrality vector
 
-    Note: Betweenness centrality may be normalised to the range [0,1] as
+    Notes
+    -----
+    Betweenness centrality may be normalised to the range [0,1] as
     BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
     G=np.array(G, dtype=float)      #force G to have float type so it can be
@@ -90,10 +92,14 @@ def betweenness_wei(G):
     ----------
     L : NxN np.ndarray
         directed/undirected weighted connection matrix
+
+    Returns
+    -------
     BC : Nx1 np.ndarray
         node betweenness centrality vector
 
-    Notes:
+    Notes
+    -----
        The input matrix must be a connection-length matrix, typically
         obtained via a mapping from weight to length. For instance, in a
         weighted correlation network higher correlations are more naturally
@@ -206,7 +212,9 @@ def edge_betweenness_bin(G):
     BC : Nx1 np.ndarray
         node betweenness centrality vector
 
-    Note: Betweenness centrality may be normalised to the range [0,1] as
+    Notes
+    -----
+    Betweenness centrality may be normalised to the range [0,1] as
     BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
     n=len(G)
@@ -268,13 +276,14 @@ def edge_betweenness_wei(G):
     BC : Nx1 np.ndarray
         nodal betweenness centrality vector
 
-    Notes:
-       The input matrix must be a connection-length matrix, typically
+    Notes
+    -----
+    The input matrix must be a connection-length matrix, typically
         obtained via a mapping from weight to length. For instance, in a
         weighted correlation network higher correlations are more naturally
         interpreted as shorter distances and the input matrix should
         consequently be some inverse of the connectivity matrix. 
-       Betweenness centrality may be normalised to the range [0,1] as
+    Betweenness centrality may be normalised to the range [0,1] as
         BC/[(N-1)(N-2)], where N is the number of nodes in the network.
     '''
     n=len(G)	
@@ -583,6 +592,8 @@ def pagerank_centrality(A,d,falff=None):
     r : Nx1 np.ndarray
         vectors of page rankings
     
+    Notes
+    -----
     Note: The algorithm will work well for smaller matrices (number of
     nodes around 1000 or less) 
     '''
@@ -805,10 +816,8 @@ def clustering_coef_bd(A):
     C : Nx1 np.ndarray
         clustering coefficient vector
 
-Input:      A,      binary directed connection matrix
-
-Output:     C,      clustering coefficient vector
-
+    Notes
+    -----
     Methodological note: In directed graphs, 3 nodes generate up to 8 
     triangles (2*2*2 edges). The number of existing triangles is the main 
     diagonal of S^3/2. The number of all (in or out) neighbour pairs is 
@@ -870,6 +879,8 @@ def clustering_coef_wd(W):
     C : Nx1 np.ndarray
         clustering coefficient vector
 
+    Notes
+    -----
     Methodological note (also see clustering_coef_bd)
     The weighted modification is as follows:
     - The numerator: adjacency matrix is replaced with weights matrix ^ 1/3
@@ -1023,6 +1034,8 @@ def get_components(A, no_depend=False):
     comp_sizes : Mx1 np.ndarray
         vector of component sizes
 
+    Notes
+    -----
     Note: disconnected nodes will appear as components with a component
     size of 1
 
@@ -1098,6 +1111,8 @@ def transitivity_bd(A):
     T : float
         transitivity scalar
 
+    Notes
+    -----
     Methodological note: In directed graphs, 3 nodes generate up to 8 
     triangles (2*2*2 edges). The number of existing triangles is the main 
     diagonal of S^3/2. The number of all (in or out) neighbour pairs is 
@@ -1212,7 +1227,9 @@ def assortativity_bin(CIJ,flag):
     r : float
         assortativity coefficient
 
-    Notes: The function accepts weighted networks, but all connection
+    Notes
+    -----
+    The function accepts weighted networks, but all connection
     weights are ignored. The main diagonal should be empty. For flag 1
     the function computes the directed assortativity described in Rubinov
     and Sporns (2010) NeuroImage.
@@ -1263,7 +1280,9 @@ def assortativity_wei(CIJ,flag):
     r : float
         assortativity coefficient
 
-    Notes: The main diagonal should be empty. For flag 1
+    Notes
+    -----
+    The main diagonal should be empty. For flag 1
        the function computes the directed assortativity described in Rubinov
        and Sporns (2010) NeuroImage.
     '''
@@ -1322,6 +1341,8 @@ def kcore_bd(CIJ,k,peel=False):
         corresponding level - nodes in at the same level have been peeled
         away at the same time. only return if peel is specified
 
+    Notes
+    -----
     'peelorder' and 'peellevel' are similar the the k-core sub-shells
     described in Modha and Singh (2010).
     '''
@@ -1381,6 +1402,8 @@ def kcore_bu(CIJ,k,peel=False):
         corresponding level - nodes in at the same level have been peeled
         away at the same time. only return if peel is specified
 
+    Notes
+    -----
     'peelorder' and 'peellevel' are similar the the k-core sub-shells
     described in Modha and Singh (2010).
     '''
@@ -1424,7 +1447,7 @@ def rich_club_bd(CIJ,klevel=None):
         calculated. If None (default), the maximum level is set to the
         maximum degree of the adjacency matrix
 
-    Results
+    Returns
     -------
     R : Kx1 np.ndarray
         vector of rich-club coefficients for levels 1 to klevel
@@ -1468,7 +1491,7 @@ def rich_club_bu(CIJ,klevel=None):
         calculated. If None (default), the maximum level is set to the
         maximum degree of the adjacency matrix
 
-    Results
+    Returns
     -------
     R : Kx1 np.ndarray
         vector of rich-club coefficients for levels 1 to klevel
@@ -1645,7 +1668,9 @@ def degrees_dir(CIJ):
     deg : Nx1 np.ndarray
         node degree (in-degree + out-degree)
 
-    Notes:  Inputs are assumed to be on the columns of the CIJ matrix.
+    Notes
+    -----
+    Inputs are assumed to be on the columns of the CIJ matrix.
            Weight information is discarded.
     '''
     CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
@@ -1668,7 +1693,9 @@ def degrees_und(CIJ):
     deg : Nx1 np.ndarray
         node degree
 
-    Note: Weight information is discarded.
+    Notes
+    -----
+    Weight information is discarded.
     '''
     CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
     return np.sum(CIJ,axis=0)
@@ -1696,7 +1723,9 @@ def jdegree(CIJ):
     J_bl : int
         number of vertices with id==od
 
-    Note: Weights are discarded.
+    Notes
+    -----
+    Weights are discarded.
     '''
     CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
     n=len(CIJ)
@@ -1742,7 +1771,9 @@ def strengths_dir(CIJ):
     str : Nx1 np.ndarray
         node strength (in-strength + out-strength)
 
-    Notes:  Inputs are assumed to be on the columns of the CIJ matrix.
+    Notes
+    -----
+    Inputs are assumed to be on the columns of the CIJ matrix.
     '''
     istr=np.sum(CIJ,axis=0)
     ostr=np.sum(CIJ,axis=1)
@@ -1821,7 +1852,9 @@ def breadthdist(CIJ):
     D : NxN np.ndarray 
         distance matrix
 
-    Note: slower but less memory intensive than "reachdist.m".
+    Notes
+    -----
+    slower but less memory intensive than "reachdist.m".
     '''
     n=len(CIJ)
 
@@ -1851,7 +1884,9 @@ def breadth(CIJ,source):
     branch : Nx1 np.ndarray
         vertex that precedes i in the breadth-first search (-1 for source)
 
-    Notes: Breadth-first search tree does not contain all paths (or all 
+    Notes
+    -----
+    Breadth-first search tree does not contain all paths (or all 
     shortest paths), but allows the determination of at least one path with
     minimum distance. The entire graph is explored, starting from source 
     vertex 'source'.
@@ -1915,7 +1950,8 @@ def charpath(D, include_diagonal=False):
     diameter : float
         diameter of graph
 
-    Notes:
+    Notes
+    -----
     The input distance matrix may be obtained with any of the distance
     functions, e.g. distance_bin, distance_wei.
     Characteristic path length is calculated as the global mean of 
@@ -2006,10 +2042,10 @@ def distance_bin(G):
     D : NxN 
         distance matrix
 
-    Notes: 
-       Lengths between disconnected nodes are set to Inf.
-       Lengths on the main diagonal are set to 0.
-
+    Notes
+    -----
+    Lengths between disconnected nodes are set to Inf.
+    Lengths on the main diagonal are set to 0.
     Algorithm: Algebraic shortest paths.
     '''
     G=binarize(G,copy=True)
@@ -2048,7 +2084,8 @@ def distance_wei(G):
     B : NxN np.ndarray
         matrix of number of edges in shortest weighted path
 
-    Notes:
+    Notes
+    -----
        The input matrix must be a connection-length matrix, typically
     obtained via a mapping from weight to length. For instance, in a
     weighted correlation network higher correlations are more naturally
@@ -2190,7 +2227,8 @@ def efficiency_wei(Gw,local=False):
     Eloc : Nx1 np.ndarray
         local efficiency, only if local=True
 
-    Notes:
+    Notes
+    -----
        The  efficiency is computed using an auxiliary connection-length
     matrix L, defined as L_ij = 1/W_ij for all nonzero L_ij; This has an
     intuitive interpretation, as higher connection weights intuitively
@@ -2303,6 +2341,8 @@ def findpaths(CIJ,qmax,sources,savepths=False):
     util : NxQ np.ndarray
         node use index
 
+    Notes
+    -----
     Note that Pq(:,:,N) can only carry entries on the diagonal, as all
     "legal" paths of length N-1 must terminate.  Cycles of length N are
     possible, with all vertices visited exactly once (except for source and
@@ -2433,7 +2473,9 @@ def findwalks(CIJ):
     wlq : Qx1 np.ndarray
         walk length distribution as a function of q
 
-    Notes: Wq grows very quickly for larger N,K,q. Weights are discarded.
+    Notes
+    -----
+    Wq grows very quickly for larger N,K,q. Weights are discarded.
     '''
     CIJ=binarize(CIJ,copy=True)
     n=len(CIJ)
@@ -2472,7 +2514,9 @@ def reachdist(CIJ):
     D : NxN np.ndarray
         distance matrix
 
-    Note: faster but more memory intensive than "breadthdist.m".
+    Notes
+    -----
+    faster but more memory intensive than "breadthdist.m".
     '''
     def reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row):
         CIJpwr=np.dot(CIJpwr,CIJ)
@@ -2916,14 +2960,16 @@ def modularity_dir(A,gamma=1,kci=None):
         Otherwise, if not specified, uses a spectral modularity maximization
         algorithm.
 
-    Results
+    Returns
     -------
     ci : Nx1 np.ndarray
         optimized community structure
     Q : float
         maximized modularity metric
 
-    Note: This algorithm is deterministic. The matlab function bearing this 
+    Notes
+    -----
+    This algorithm is deterministic. The matlab function bearing this 
     name incorrectly disclaims that the outcome depends on heuristics 
     involving a random seed. The louvain method does depend on a random seed, 
     but this function uses a deterministic modularity maximization algorithm.
@@ -3016,7 +3062,9 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
     Q : float
         optimized modularity metric
  
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3114,7 +3162,9 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
     Q : float
         optimized modularity metric
  
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3207,7 +3257,9 @@ def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
     Q : float
         optimized modularity metric
  
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3320,7 +3372,9 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
         optimized modularity metric. If hierarchical output enabled, becomes
         an Hx1 array of floats instead.
 
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3443,7 +3497,9 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
         optimized modularity metric. If hierarchical output enabled, becomes
         an Hx1 array of floats instead.
 
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3565,7 +3621,9 @@ def modularity_louvain_und_sign(W,qtype='sta',seed=None):
     Q : float
         optimized modularity metric
 
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3709,7 +3767,9 @@ def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
     Q : float
         optimized modularity metric
 
-    Note: Ci and Q may vary from run to run, due to heuristics in the
+    Notes
+    -----
+    Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
     np.random.seed(seed)
@@ -3805,14 +3865,16 @@ def modularity_und(A,gamma=1,kci=None):
         Otherwise, if not specified, uses a spectral modularity maximization
         algorithm.
 
-    Results
+    Returns
     -------
     ci : Nx1 np.ndarray
         optimized community structure
     Q : float
         maximized modularity metric
 
-    Note: This algorithm is deterministic. The matlab function bearing this 
+    Notes
+    -----
+    This algorithm is deterministic. The matlab function bearing this 
     name incorrectly disclaims that the outcome depends on heuristics 
     involving a random seed. The louvain method does depend on a random seed, 
     but this function uses a deterministic modularity maximization algorithm.
@@ -3892,14 +3954,16 @@ def modularity_und_sign(W,ci,qtype='sta'):
         modularity type. Can be 'sta' (default), 'pos', 'smp', 'gja', 'neg'.
         See Rubinov and Sporns (2011) for a description.
 
-    Results
+    Returns
     -------
     ci : Nx1 np.ndarray
         the partition which was input (for consistency of the API)
     Q : float
         maximized modularity metric
 
-    Note: uses a deterministic algorithm
+    Notes
+    -----
+    uses a deterministic algorithm
     '''
     n=len(W)
     _,ci=np.unique(ci, return_inverse=True)
@@ -3960,6 +4024,8 @@ def partition_distance(cx,cy):
     MIn : Nx1 np.ndarray
         normalized mutual information
     
+    Notes
+    -----
     (Definitions:
        VIn = [H(X) + H(Y) - 2MI(X,Y)]/log(n)
        MIn = 2MI(X,Y)/[H(X)+H(Y)]
@@ -4230,7 +4296,9 @@ def motif3funct_wei(W):
     F : 13xN np.ndarray
         motif frequency matrix
 
-    Note: Average intensity and coherence are given by I./F and Q./F.
+    Notes
+    -----
+    Average intensity and coherence are given by I./F and Q./F.
     '''
     from scipy import io; import os
     fname=os.path.join(os.path.dirname(__file__),motiflib)
@@ -4290,13 +4358,20 @@ def motif3funct_wei(W):
 
 def motif3struct_bin(A):
     '''
-Structural motifs are patterns of local connectivity. Motif frequency
-is the frequency of occurrence of motifs around a node.
+    Structural motifs are patterns of local connectivity. Motif frequency
+    is the frequency of occurrence of motifs around a node.
 
-Input:      A,      binary directed connection matrix
+    Parameters
+    ----------
+    A : NxN np.ndarray
+        binary directed connection matrix
 
-Output:     F,      motif frequency matrix
-            f,      motif frequency vector (averaged over all nodes)
+    Returns
+    -------
+    F : 13xN np.ndarray
+        motif frequency matrix
+    f : 13x1 np.ndarray
+        motif frequency vector (averaged over all nodes)
     '''
     from scipy import io; import os
     fname=os.path.join(os.path.dirname(__file__),motiflib)
@@ -4348,7 +4423,9 @@ def motif3struct_wei(W):
     F : 13xN np.ndarray
         motif frequency matrix
 
-    Note: Average intensity and coherence are given by I./F and Q./F.
+    Notes
+    -----
+    Average intensity and coherence are given by I./F and Q./F.
     '''
     from scipy import io; import os
     fname=os.path.join(os.path.dirname(__file__),motiflib)
@@ -4485,7 +4562,9 @@ def motif4funct_wei(W):
     F : 199xN np.ndarray
         motif frequency matrix
 
-    Note: Average intensity and coherence are given by I./F and Q./F.
+    Notes
+    -----
+    Average intensity and coherence are given by I./F and Q./F.
     '''
     from scipy import io; import os
     fname=os.path.join(os.path.dirname(__file__),motiflib)
@@ -4636,7 +4715,9 @@ def motif4struct_wei(W):
     F : 199xN np.ndarray
         motif frequency matrix
 
-    Note: Average intensity and coherence are given by I./F and Q./F.
+    Notes
+    -----
+    Average intensity and coherence are given by I./F and Q./F.
     '''
     from scipy import io; import os
     fname=os.path.join(os.path.dirname(__file__),motiflib)
@@ -4751,7 +4832,9 @@ def threshold_proportional(W,p,copy=True):
     W : np.ndarray
         thresholded connectivity matrix
 
-    Note: The proportion of elements set to 0 is a fraction of all elements 
+    Notes
+    -----
+    The proportion of elements set to 0 is a fraction of all elements 
     in the matrix, whether or not they are already 0. That is, this function 
     has the following behavior:
 
@@ -4839,7 +4922,9 @@ def weight_conversion(W,wcm,copy=True):
     W : NxN np.ndarray
         connectivity matrix with specified changes
 
-    Note: This function is included for compatibility with BCT. But there are
+    Notes
+    -----
+    This function is included for compatibility with BCT. But there are
     other functions binarize(), normalize() and invert() which are simpler to
     call directly.
     '''
@@ -4977,8 +5062,10 @@ def density_dir(CIJ):
     k : int
         number of edges
 
-    Notes:  Assumes CIJ is directed and has no self-connections.
-            Weight information is discarded.
+    Notes
+    -----
+    Assumes CIJ is directed and has no self-connections. 
+    Weight information is discarded.
     '''
     n=len(CIJ)
     k=np.size(np.where(CIJ.flatten()))
@@ -5003,7 +5090,9 @@ def density_und(CIJ):
     k : int
         number of edges
 
-    Notes:  Assumes CIJ is undirected and has no self-connections.
+    Notes
+    -----
+    Assumes CIJ is undirected and has no self-connections.
             Weight information is discarded.
     '''
     n=len(CIJ)
@@ -5049,6 +5138,8 @@ def rentian_scaling(A,xyz,n):
         Number of nodes in each of the M partitions
     E : Mx1 np.ndarray
 
+    Notes
+    -----
     Subsequent Analysis:
     Rentian scaling plots are then created by: figure; loglog(E,N,'*');
     To determine the Rent's exponent, p, it is important not to use 
@@ -5529,7 +5620,9 @@ def makeevenCIJ(n,k,sz_cl):
     CIJ : NxN np.ndarray
         connection matrix
 
-    Notes:  N must be a power of 2.
+    Notes
+    -----
+    N must be a power of 2.
             A warning is generated if all modules contain more edges than K.
             Cluster size is 2^sz_cl;
     '''
@@ -5650,7 +5743,9 @@ def makerandCIJdegreesfixed(inv,outv):
     -------
     CIJ : NxN np.ndarray
 
-    Notes:  Necessary conditions include:
+    Notes
+    -----
+    Necessary conditions include:
             length(in) = length(out) = n
             sum(in) = sum(out) = k
             in(i), out(i) < n-1
@@ -5726,7 +5821,9 @@ def makerandCIJ_dir(n,k):
     CIJ : NxN np.ndarray
         directed random connection matrix
 
-    Note: no connections are placed on the main diagonal.
+    Notes
+    -----
+    no connections are placed on the main diagonal.
     '''
     ix,=np.where(np.logical_not(np.eye(n)).flat)
     rp=np.random.permutation(np.size(ix))
@@ -5751,7 +5848,9 @@ def makerandCIJ_und(n,k):
     CIJ : NxN np.ndarray
         undirected random connection matrix
 
-    Note: no connections are placed on the main diagonal.
+    Notes
+    -----
+    no connections are placed on the main diagonal.
     '''
     ix,=np.where(np.triu(np.logical_not(np.eye(n))).flat)
     rp=np.random.permutation(np.size(ix))
@@ -5777,7 +5876,9 @@ def makeringlatticeCIJ(n,k):
     CIJ : NxN np.ndarray
         connection matrix
 
-    Note: The lattice is made by placing connections as close as possible 
+    Notes
+    -----
+    The lattice is made by placing connections as close as possible 
     to the main diagonal, with wrapping around. No connections are made 
     on the main diagonal. In/Outdegree is kept approx. constant at K/N.
     '''
@@ -5828,7 +5929,9 @@ def maketoeplitzCIJ(n,k,s):
     CIJ : NxN np.ndarray
         connection matrix
 
-    Note: no connections are placed on the main diagonal.
+    Notes
+    -----
+    no connections are placed on the main diagonal.
     '''
     from scipy import linalg,stats
     pf=stats.norm.pdf(xrange(1,n),.5,s)
@@ -5875,19 +5978,20 @@ def null_model_dir_sign(W,bin_swaps=5,wei_freq=.1):
         Correlation coefficients between strength sequences of input and
         output connection matrices, rpos_in, rpos_out, rneg_in, rneg_out
 
-    Notes:
-       The value of bin_swaps is ignored when binary topology is fully
-    connected (e.g. when the network has no negative weights).
-       Randomization may be better (and execution time will be slower) for
-    higher values of bin_swaps and wei_freq. Higher values of bin_swaps may
-    enable a more random binary organization, and higher values of wei_freq
-    may enable a more accurate conservation of strength sequences.
-       R are the correlation coefficients between positive and negative
-    in-strength and out-strength sequences of input and output connection
-    matrices and are used to evaluate the accuracy with which strengths
-    were preserved. Note that correlation coefficients may be a rough
-    measure of strength-sequence accuracy and one could implement more
-    formal tests (such as the Kolmogorov-Smirnov test) if desired.
+    Notes
+    -----
+    The value of bin_swaps is ignored when binary topology is fully
+       connected (e.g. when the network has no negative weights).
+    Randomization may be better (and execution time will be slower) for
+       higher values of bin_swaps and wei_freq. Higher values of bin_swaps may
+       enable a more random binary organization, and higher values of wei_freq
+       may enable a more accurate conservation of strength sequences.
+    R are the correlation coefficients between positive and negative
+       in-strength and out-strength sequences of input and output connection
+       matrices and are used to evaluate the accuracy with which strengths
+       were preserved. Note that correlation coefficients may be a rough
+       measure of strength-sequence accuracy and one could implement more
+       formal tests (such as the Kolmogorov-Smirnov test) if desired.
     '''
     W=W.copy()
     n=len(W)
@@ -5984,7 +6088,8 @@ def null_model_und_sign(W,bin_swaps=5,wei_freq=.1):
         Correlation coefficients between strength sequences of input and
         output connection matrices, rpos_in, rpos_out, rneg_in, rneg_out
 
-    Notes:
+    Notes
+    -----
     The value of bin_swaps is ignored when binary topology is fully
         connected (e.g. when the network has no negative weights).
     Randomization may be better (and execution time will be slower) for
@@ -6458,7 +6563,8 @@ def randomize_graph_partial_und(A,B,maxswap):
     A : NxN np.ndarray
         randomized matrix
 
-    Notes:
+    Notes
+    -----
     1. Graph may become disconnected as a result of rewiring. Always
       important to check.
     2. A can be weighted, though the weighted degree sequence will not be
@@ -6724,7 +6830,9 @@ def gtom(adj,nr_steps):
     gt : NxN np.ndarray
         GTOM matrix
 
-    NOTE: When numSteps is equal to 1, GTOM is identical to the topological
+    Notes
+    -----
+    When numSteps is equal to 1, GTOM is identical to the topological
     overlap measure (TOM) from reference [2]. In that case the 'gt' matrix
     records, for each pair of nodes, the fraction of neighbors the two
     nodes share in common, where "neighbors" are one step removed. As
@@ -6784,10 +6892,11 @@ def matching_ind(CIJ):
     Mall : NxN np.ndarray
         matching index for all connections
 
-    Notes:
-        Does not use self- or cross connections for comparison.
-        Does not use connections that are not present in BOTH u and v.
-        All output matrices are calculated for upper triangular only.
+    Notes
+    -----
+    Does not use self- or cross connections for comparison.
+    Does not use connections that are not present in BOTH u and v.
+    All output matrices are calculated for upper triangular only.
     '''
     n=len(CIJ)
 
@@ -7004,6 +7113,8 @@ def adjacency_plot_und(A,coor,tube=False):
     fig : Instance(Scene)
         handle to a mayavi figure.
 
+    Notes
+    -----
     To display the output interactively, call
 
     fig=adjacency_plot_und(A,coor)
@@ -7113,6 +7224,8 @@ def align_matrices(m1,m2,dfun='sqrdiff',verbose=False,H=1e6,Texp=1,
     cost : float
         objective function distance between M1 and Mreordered
 
+    Notes
+    -----
     Connection matrices can be weighted or binary, directed or undirected.
     They must have the same number of nodes.  M1 can be entered in any
     node ordering.
@@ -7241,6 +7354,8 @@ def backbone_wu(CIJ,avgdeg):
         connections up to some average degree 'avgdeg'. Identical to CIJtree
         if the degree requirement is already met.
 
+    Notes
+    -----
     NOTE: nodes with zero strength are discarded.
     NOTE: CIJclus will have a total average degree exactly equal to 
          (or very close to) 'avgdeg'.
@@ -7315,6 +7430,8 @@ def grid_communities(c):
     indsort : np.ndarray
         indices
 
+    Notes
+    -----
     Note: This function returns considerably different values than in
     matlab due to differences between matplotlib and matlab.  This function
     has been designed to work with matplotlib, as in the following example:
@@ -7371,7 +7488,9 @@ def reorderMAT(m,H=5000,cost='line'):
     MATcost : float
         objective function cost of reordered matrix
 
-    Note: I'm not 100% sure how the algorithms between this and reorder_matrix
+    Notes
+    -----
+    I'm not 100% sure how the algorithms between this and reorder_matrix
     differ, but this code looks a ton sketchier and might have had some minor
     bugs in it.  Considering reorder_matrix() does the same thing using a well
     vetted simulated annealing algorithm, just use that. ~rlaplant
@@ -7452,6 +7571,8 @@ def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
     Mcost : float
         objective function cost of reordered matrix
 
+    Notes
+    -----
     Note that in general, the outcome will depend on the initial condition
     (the setting of the random number seed).  Also, there is no good way to 
     determine optimal annealing parameters in advance - these paramters 
@@ -7676,10 +7797,6 @@ def writetoPAJ(CIJ,fname,directed):
         True if the network is directed and False otherwise. The data format
         may be required to know this for some reason so I am afraid to just
         use directed as the default value.
-
-    Returns
-    ------- 
-    None
     '''
     n=np.size(CIJ,axis=0)
     with open(fname,'w') as fd:

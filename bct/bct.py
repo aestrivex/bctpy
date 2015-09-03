@@ -736,8 +736,8 @@ def agreement(ci,buffsz=None):
 
     Parameters
     ----------
-    ci : NxM np.ndarray
-        set of (possibly degenerate) partitions
+    ci : MxN np.ndarray
+        set of M (possibly degenerate) partitions of N nodes
     buffsz : int | None
         sets buffer size. If not specified, defaults to 1000
  
@@ -746,6 +746,7 @@ def agreement(ci,buffsz=None):
     D : NxN np.ndarray
         agreement matrix
     '''
+    ci = np.array(ci)
     m,n=ci.shape
 
     if buffsz is None: buffsz=1000	
@@ -782,8 +783,8 @@ def agreement_weighted(ci,wts):
  
     Parameters
     ----------
-    ci : NxM np.ndarray
-        set of (possibly degenerate) partitions
+    ci : MxN np.ndarray
+        set of M (possibly degenerate) partitions of N nodes
     wts : Mx1 np.ndarray
         relative weight of each partition
  
@@ -792,6 +793,7 @@ def agreement_weighted(ci,wts):
     D : NxN np.ndarray
         weighted agreement matrix
     '''
+    ci = np.array(ci)
     m,n=ci.shape
     wts=np.array(wts)/np.sum(wts)
 
@@ -1115,6 +1117,7 @@ def transitivity_bd(A):
     -----
     Methodological note: In directed graphs, 3 nodes generate up to 8 
     triangles (2*2*2 edges). The number of existing triangles is the main 
+    
     diagonal of S^3/2. The number of all (in or out) neighbour pairs is 
     K(K-1)/2. Each neighbour pair may generate two triangles. "False pairs"
     are i<->j edge pairs (these do not generate triangles). The number of 
@@ -3226,7 +3229,7 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
     q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
     return ci,q
 
-def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
+def modularity_finetune_und_sign(W,qtype='sta',gamma=1,ci=None,seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -3245,6 +3248,9 @@ def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
     qtype : str
         modularity type. Can be 'sta' (default), 'pos', 'smp', 'gja', 'neg'.
         See Rubinov and Sporns (2011) for a description.
+    gamma : float
+        resolution parameter. default value=1. Values 0 <= gamma < 1 detect
+        larger modules while gamma > 1 detects smaller modules.
     ci : Nx1 np.ndarray | None
         initial community affiliation vector
     seed : int | None
@@ -3308,8 +3314,10 @@ def modularity_finetune_und_sign(W,qtype='sta',ci=None,seed=None):
         flag=False
         for u in np.random.permutation(n):	#loop over nodes in random order
             ma=ci[u]-1						#current module of u
-            dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
-            dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
+            dq0=((Knm0[u,:]+W0[u,u]-Knm0[u,ma])-
+                gamma*Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0)
+            dq1=((Knm1[u,:]+W1[u,u]-Knm1[u,ma])-
+                gamma*Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1)
             dq=d0*dq0-d1*dq1			#rescaled changes in modularity
             dq[ma]=0					#no changes for same module
 
@@ -3587,7 +3595,7 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
     else:
         return ci[h-1],q[h-1]
 
-def modularity_louvain_und_sign(W,qtype='sta',seed=None):
+def modularity_louvain_und_sign(W,gamma=1,qtype='sta',seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -3611,6 +3619,9 @@ def modularity_louvain_und_sign(W,qtype='sta',seed=None):
     qtype : str
         modularity type. Can be 'sta' (default), 'pos', 'smp', 'gja', 'neg'.
         See Rubinov and Sporns (2011) for a description.
+    gamma : float
+        resolution parameter. default value=1. Values 0 <= gamma < 1 detect
+        larger modules while gamma > 1 detects smaller modules.
     seed : int | None
         random seed. default value=None. if None, seeds from /dev/urandom.
 
@@ -3673,10 +3684,10 @@ def modularity_louvain_und_sign(W,qtype='sta',seed=None):
             flag=False
             for u in np.random.permutation(nh):	#loop over nodes in random order
                 ma=m[u]-1
-                dQ0=(knm0[u,:]+W0[u,u]-knm0[u,ma])-kn0[u]*(
-                    km0+kn0[u]-km0[ma])/s0	#positive dQ
-                dQ1=(knm1[u,:]+W1[u,u]-knm1[u,ma])-kn1[u]*(
-                    km1+kn1[u]-km1[ma])/s1	#negative dQ
+                dQ0=((knm0[u,:]+W0[u,u]-knm0[u,ma])-
+                    gamma*kn0[u]*(km0+kn0[u]-km0[ma])/s0)	#positive dQ
+                dQ1=((knm1[u,:]+W1[u,u]-knm1[u,ma])-
+                    gamma*kn1[u]*(km1+kn1[u]-km1[ma])/s1)	#negative dQ
 
                 dQ=d0*dQ0-d1*dQ1		#rescaled changes in modularity
                 dQ[ma]=0				#no changes for same module
@@ -3730,7 +3741,8 @@ def modularity_louvain_und_sign(W,qtype='sta',seed=None):
 
     return ci_ret,q[-1]
                 
-def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
+def modularity_probtune_und_sign(W,qtype='sta',gamma=1,ci=None,p=.45,
+    seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -3752,7 +3764,10 @@ def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
         negative weights
     qtype : str
         modularity type. Can be 'sta' (default), 'pos', 'smp', 'gja', 'neg'.
-        See Rubinov and Sporns (2011) for a description.
+        See Rubinov and Sporns (2011) for a description. 
+    gamma : float
+        resolution parameter. default value=1. Values 0 <= gamma < 1 detect
+        larger modules while gamma > 1 detects smaller modules.
     ci : Nx1 np.ndarray | None
         initial community affiliation vector
     p : float
@@ -3815,8 +3830,10 @@ def modularity_probtune_und_sign(W,qtype='sta',ci=None,p=.45,seed=None):
         if r:
             mb=np.random.randint(n)		 #select new module randomly
         else:
-            dq0=(Knm0[u,:]+W0[u,u]-Knm0[u,ma])-Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0
-            dq1=(Knm1[u,:]+W1[u,u]-Knm1[u,ma])-Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1
+            dq0=((Knm0[u,:]+W0[u,u]-Knm0[u,ma])-
+                gamma*Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0)
+            dq1=((Knm1[u,:]+W1[u,u]-Knm1[u,ma])-
+                gamma*Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1)
             dq=d0*dq0-d1*dq1
             dq[ma]=0
 
@@ -5039,6 +5056,8 @@ def autofix(W,copy=True):
     #ensure exact symmetry
     if np.allclose(W, W.T):
         W = np.around(W, decimals=5)
+
+    return W
 
 ##############################################################################
 # PHYSICAL CONNECTIVITY

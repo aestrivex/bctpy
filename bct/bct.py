@@ -3521,6 +3521,10 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
     q.append(-1)						#hierarchical modularity values
     n0=n
 
+    #knm = np.zeros((n,n))
+    #for j in np.xrange(n0+1):
+    #    knm[:,j] = np.sum(w[;, 
+
     while True:
         if h>300:
             raise BCTParamError('Modularity Infinite Loop Style B.  Please '
@@ -3567,10 +3571,12 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
         m+=1
         h+=1
         ci.append(np.zeros((n0,)))
-        for i,mi in enumerate(m):	#loop through initial module assignments
+        #for i,mi in enumerate(m):	#loop through initial module assignments
+        for i in xrange(n0):
             #print i,mi,m[i],h
             #print np.where(ci[h-1]==i+1)
-            ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+            ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
+            #ci[h][np.where(ci[h-1]==i+1)] = m[i]
 
         n=np.max(m)						#new number of modules
         W1=np.zeros((n,n))				#new weighted matrix

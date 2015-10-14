@@ -4058,10 +4058,14 @@ def partition_distance(cx,cy):
     _,cx=np.unique(cx,return_inverse=True)
     _,cy=np.unique(cy,return_inverse=True)
     _,cxy=np.unique(cx+cy*1j,return_inverse=True)
+
+    cx += 1
+    cy += 1
+    cxy += 1
     
     Px=np.histogram(cx,bins=np.max(cx))[0]/n
     Py=np.histogram(cy,bins=np.max(cy))[0]/n
-    Pxy=np.histogram(cxy,bins=np.max(cxy)+1)[0]/n
+    Pxy=np.histogram(cxy,bins=np.max(cxy))[0]/n
 
     Hx=-np.sum(Px*np.log(Px))
     Hy=-np.sum(Py*np.log(Py))

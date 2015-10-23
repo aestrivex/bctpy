@@ -672,7 +672,7 @@ def participation_coef_sign(W,ci):
         participation coefficient from positive weights
     Pneg : Nx1 np.ndarray
         participation coefficient from negative weights
-    '''	
+    '''
     _,ci=np.unique(ci,return_inverse=True)
     ci+=1
 
@@ -680,18 +680,21 @@ def participation_coef_sign(W,ci):
 
     def pcoef(W_):
         S=np.sum(W_,axis=1)			#strength
-        Gc=np.dot(np.logical_not(W_),np.diag(ci)) #neighbor community affil.
+        Gc=np.dot(np.logical_not(W_==0),np.diag(ci)) #neighbor community affil.
         Sc2=np.zeros((n,))
-        
+
         for i in xrange(1,int(np.max(ci)+1)):
             Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
 
         P=np.ones((n,))-Sc2/np.square(S)
         P[np.where(np.isnan(P))]=0
         P[np.where(np.logical_not(P))]=0	#p_ind=0 if no (out)neighbors
-        
-    Ppos=pcoef(r*(r>0))
-    Pneg=pcoef(-r*(r<0))
+        return P
+
+    Ppos=pcoef(W*(W>0))
+    Pneg=pcoef(-W*(W<0))
+
+    return Ppos, Pneg
 
 def subgraph_centrality(CIJ):
     '''

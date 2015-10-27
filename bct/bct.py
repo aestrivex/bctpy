@@ -19,7 +19,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
+
 import numpy as np
 
 class BCTParamError(RuntimeError): pass
@@ -76,7 +76,7 @@ def betweenness_bin(G):
     diam=d-1
 
     #calculate DP
-    for d in xrange(diam,1,-1):
+    for d in range(diam,1,-1):
         DPd1=np.dot(((L==d)*(1+DP)/NSP),G.T)*((L==(d-1))*NSP)	
         DP+=DPd1
         
@@ -111,7 +111,7 @@ def betweenness_wei(G):
     n=len(G)
     BC=np.zeros((n,))					#vertex betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D=np.tile(np.inf,(n,)); D[u]=0	#distance from u
         NP=np.zeros((n,)); NP[u]=1		#number of paths from u
         S=np.ones((n,),dtype=bool)		#distance permanence
@@ -182,7 +182,7 @@ def diversity_coef_sign(W,ci):
     def entropy(w_):
         S=np.sum(w_,axis=1)				#strength
         Snm=np.zeros((n,m))				#node-to-module degree
-        for i in xrange(m):
+        for i in range(m):
             Snm[:,i]=np.sum(w_[:,ci==i+1],axis=1)
         pnm=Snm/(np.tile(S,(m,1)).T)
         pnm[np.isnan(pnm)]=0
@@ -221,7 +221,7 @@ def edge_betweenness_bin(G):
     BC=np.zeros((n,))					#vertex betweenness
     EBC=np.zeros((n,n))					#edge betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D=np.zeros((n,)); D[u]=1		#distance from u
         NP=np.zeros((n,)); NP[u]=1		#number of paths from u
         P=np.zeros((n,n))				#predecessors
@@ -290,7 +290,7 @@ def edge_betweenness_wei(G):
     BC=np.zeros((n,))					#vertex betweenness
     EBC=np.zeros((n,n))					#edge betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D=np.tile(np.inf,n); D[u]=0		#distance from u
         NP=np.zeros((n,)); NP[u]=1		#number of paths from u
         S=np.ones((n,),dtype=bool)		#distance permanence
@@ -386,7 +386,7 @@ def erange(CIJ):
     Erange=np.zeros((N,N))
     i,j=np.where(CIJ)
 
-    for c in xrange(len(i)):
+    for c in range(len(i)):
         CIJcut=CIJ.copy()
         CIJcut[i[c],j[c]]=0
         R,D=reachdist(CIJcut)
@@ -435,14 +435,14 @@ def flow_coef_bd(CIJ):
     max_flo=np.zeros((N,))
 
     #loop over nodes
-    for v in xrange(N):
+    for v in range(N):
         #find neighbors - note: both incoming and outgoing connections
         nb,=np.where(CIJ[v,:]+CIJ[:,v].T)
         fc[v]=0
         if np.where(nb)[0].size:
             CIJflo=-CIJ[np.ix_(nb,nb)]
-            for i in xrange(len(nb)):
-                for j in xrange(len(nb)):
+            for i in range(len(nb)):
+                for j in range(len(nb)):
                     if CIJ[nb[i],v] and CIJ[v,nb[j]]:
                         CIJflo[i,j]+=1
             total_flo[v]=np.sum((CIJflo==1)*np.logical_not(np.eye(len(nb))))
@@ -478,7 +478,7 @@ def kcoreness_centrality_bd(CIJ):
     coreness=np.zeros((N,))
     kn=np.zeros((N,))
     
-    for k in xrange(N):
+    for k in range(N):
         CIJkcore,kn[k]=kcore_bd(CIJ,k)
         ss=np.sum(CIJkcore,axis=0)>0
         coreness[ss]=k
@@ -514,7 +514,7 @@ def	kcoreness_centrality_bu(CIJ):
     
     coreness=np.zeros((N,))
     kn=np.zeros((N,))
-    for k in xrange(N):
+    for k in range(N):
         CIJkcore,kn[k]=kcore_bu(CIJ,k)
         ss=np.sum(CIJkcore,axis=0)>0
         coreness[ss]=k
@@ -553,7 +553,7 @@ def module_degree_zscore(W,ci,flag=0):
 
     n=len(W)
     Z=np.zeros((n,))					#number of vertices
-    for i in xrange(1,int(np.max(ci)+1)):
+    for i in range(1,int(np.max(ci)+1)):
         Koi=np.sum(W[np.ix_(ci==i,ci==i)],axis=1)
         Z[np.where(ci==i)]=(Koi-np.mean(Koi))/np.std(Koi)
 
@@ -646,7 +646,7 @@ def participation_coef(W,ci,degree='undirected'):
     Gc=np.dot((W!=0),np.diag(ci))	#neighbor community affiliation
     Kc2=np.zeros((n,))				#community-specific neighbors
 
-    for i in xrange(1,int(np.max(ci))+1):
+    for i in range(1,int(np.max(ci))+1):
         Kc2+=np.square(np.sum(W*(Gc==i),axis=1))
 
     P=np.ones((n,))-Kc2/np.square(Ko)
@@ -683,7 +683,7 @@ def participation_coef_sign(W,ci):
         Gc=np.dot(np.logical_not(W_==0),np.diag(ci)) #neighbor community affil.
         Sc2=np.zeros((n,))
 
-        for i in xrange(1,int(np.max(ci)+1)):
+        for i in range(1,int(np.max(ci)+1)):
             Sc2+=np.square(np.sum(W_*(Gc==i),axis=1))
 
         P=np.ones((n,))-Sc2/np.square(S)
@@ -801,7 +801,7 @@ def agreement_weighted(ci,wts):
     wts=np.array(wts)/np.sum(wts)
 
     D=np.zeros((n,n))
-    for i in xrange(m):
+    for i in range(m):
         d=dummyvar(ci[i,:].reshape(1,n))
         D+=np.dot(d,d.T)*wts[i]
     return D
@@ -860,7 +860,7 @@ def clustering_coef_bu(G):
     n=len(G)
     C=np.zeros((n,))
 
-    for u in xrange(n):
+    for u in range(n):
         V,=np.where(G[u,:])
         k=len(V)
         if k>=2:						#degree must be at least 2
@@ -971,7 +971,7 @@ def consensus_und(D,tau,reps=1000):
         n,r = np.shape(cis)			#ci represents one vector for each rep
         ci_tmp = np.zeros(n)
 
-        for i in xrange(r):
+        for i in range(r):
             for j,u in enumerate(sorted(
                     np.unique(cis[:,i],return_index=True)[1])):
                 ci_tmp[np.where(cis[:,i]==cis[u,i])]=j
@@ -1472,7 +1472,7 @@ def rich_club_bd(CIJ,klevel=None):
     R=np.zeros((klevel,))
     Nk=np.zeros((klevel,))
     Ek=np.zeros((klevel,))
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
         subCIJ=np.delete(CIJ,SmallNodes,axis=0)
         subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
@@ -1514,7 +1514,7 @@ def rich_club_bu(CIJ,klevel=None):
     R=np.zeros((klevel,))
     Nk=np.zeros((klevel,))
     Ek=np.zeros((klevel,))
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
         subCIJ=np.delete(CIJ,SmallNodes,axis=0)
         subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
@@ -1550,7 +1550,7 @@ def rich_club_wd(CIJ,klevel=None):
     #sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes,=np.where(deg<k+1)
         if np.size(SmallNodes) == 0:
             Rw[k]=np.nan
@@ -1593,7 +1593,7 @@ def rich_club_wu(CIJ,klevel=None):
     #sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes,=np.where(deg<k+1)
         if np.size(SmallNodes) == 0:
             Rw[k]=np.nan
@@ -1748,7 +1748,7 @@ def jdegree(CIJ):
     szJ=np.max((id,od))+1
     J=np.zeros((szJ,szJ))
     
-    for i in xrange(n):
+    for i in range(n):
         J[id[i],od[i]]+=1
 
     J_od=np.sum(np.triu(J,1))
@@ -1865,7 +1865,7 @@ def breadthdist(CIJ):
     n=len(CIJ)
 
     D=np.zeros((n,n))
-    for i in xrange(n):
+    for i in range(n):
         D[i,:],_=breadth(CIJ,i)
 
     D[D==0]=np.inf;
@@ -2012,7 +2012,7 @@ def cycprob(Pq):
 
     #note: fcyc[1] must be zero, as there cannot be cycles of length 1
     fcyc=np.zeros(np.size(Pq,axis=2))
-    for q in xrange(np.size(Pq,axis=2)):
+    for q in range(np.size(Pq,axis=2)):
         if np.sum(Pq[:,:,q])>0:
             fcyc[q]=np.sum(np.diag(Pq[:,:,q]))/np.sum(Pq[:,:,q])
         else:
@@ -2022,7 +2022,7 @@ def cycprob(Pq):
     #note: pcyc[2] is equal to the fraction of reciprocal connections
     #note: there are no non-cyclic paths of length N and no cycles of len N+1
     pcyc=np.zeros(np.size(Pq,axis=2))
-    for q in xrange(np.size(Pq,axis=2)):
+    for q in range(np.size(Pq,axis=2)):
         if np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1]))>0:
             pcyc[q]=(np.sum(np.diag(Pq[:,:,q-1]))/
                 np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1])))
@@ -2112,7 +2112,7 @@ def distance_wei(G):
     D[np.logical_not(np.eye(n))]=np.inf	
     B=np.zeros((n,n))					#number of edges matrix
 
-    for u in xrange(n):
+    for u in range(n):
         S=np.ones((n,),dtype=bool)		#distance permanence (true is temporary)
         G1=G.copy()
         V=[u]
@@ -2183,7 +2183,7 @@ def efficiency_bin(G,local=False):
     if local:							
         E=np.zeros((n,))				#local efficiency	
 
-        for u in xrange(n):
+        for u in range(n):
             #V,=np.where(G[u,:])			#neighbors
             #k=len(V)					#degree
             #if k>=2:					#degree must be at least 2
@@ -2255,7 +2255,7 @@ def efficiency_wei(Gw,local=False):
         D=np.zeros((n,n))				#distance matrix
         D[np.logical_not(np.eye(n))]=np.inf
 
-        for u in xrange(n):
+        for u in range(n):
             S=np.ones((n,),dtype=bool)	#distance permanence (true is temporary)
             G1=G.copy()
             V=[u]
@@ -2284,7 +2284,7 @@ def efficiency_wei(Gw,local=False):
     A=np.array((Gw!=0),dtype=int)
     if local:
         E=np.zeros((n,))				#local efficiency
-        for u in xrange(n):
+        for u in range(n):
             #V,=np.where(Gw[u,:])		#neighbors
             #k=len(V)					#degree
             #if k>=2:					#degree must be at least 2
@@ -2369,8 +2369,8 @@ def findpaths(CIJ,qmax,sources,savepths=False):
     #this code is for pathlength=1
     #paths are seeded from sources
     q=1
-    for j in xrange(n):
-        for i in xrange(len(sources)):
+    for j in range(n):
+        for i in range(len(sources)):
             i_s=sources[i]
             if CIJ[i_s,j]==1:
                 pths.append([i_s,j])
@@ -2379,7 +2379,7 @@ def findpaths(CIJ,qmax,sources,savepths=False):
     #calculate the use index per vertex (for paths of length 1)
     util[:,q],_=np.histogram(pths,bins=n)
     #now enter the found paths of length 1 into the pathmatrix Pq
-    for nrp in xrange(np.size(pths,axis=0)):
+    for nrp in range(np.size(pths,axis=0)):
         Pq[pths[nrp,0],pths[nrp,q],q-1]+=1
 
     #begin saving allpths
@@ -2391,9 +2391,9 @@ def findpaths(CIJ,qmax,sources,savepths=False):
     npthscnt=k
 
     #big loop for all other pathlengths q
-    for q in xrange(2,qmax+1):
+    for q in range(2,qmax+1):
         #to keep track of time...
-        print ('current pathlength (q=i, number of paths so far (up to q-1)=i'			%(q,np.sum(Pq)))
+        print(('current pathlength (q=i, number of paths so far (up to q-1)=i'			%(q,np.sum(Pq))))
 
         #old paths are now in 'pths'
         #new paths are about to be collected in 'npths'
@@ -2488,7 +2488,7 @@ def findwalks(CIJ):
     Wq=np.zeros((n,n,n))
     CIJpwr=CIJ.copy()
     Wq[:,:,1]=CIJ
-    for q in xrange(n):
+    for q in range(n):
         CIJpwr=np.dot(CIJpwr,CIJ)
         Wq[:,:,q]=CIJpwr
 
@@ -2546,8 +2546,8 @@ def reachdist(CIJ):
     id0,=np.where(id==0)	#nothing goes in, so column(R) will be 0
     od0,=np.where(od==0)	#nothing comes out, so row(R) will be 0
     #use these colums and rows to check for reachability
-    col=range(10); col=np.delete(col,id0)
-    row=range(10); row=np.delete(row,od0)
+    col=list(range(10)); col=np.delete(col,id0)
+    row=list(range(10)); row=np.delete(row,od0)
     
     R,D,powr=reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row)
 
@@ -2694,7 +2694,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             B = (B+B.T)/2
 
     Hnm = np.zeros((n,n))
-    for m in xrange(1, n+1):
+    for m in range(1, n+1):
         Hnm[:,m-1] = np.sum(B[:,ci==m], axis=1)   #node to module degree
     H = np.sum(Hnm, axis=1)                     #node degree
     Hm = np.sum(Hnm, axis=0)                    #module degree
@@ -2740,13 +2740,13 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             ci = Mb.copy()
             first_iteration = False
         else:
-            for u in xrange(1, n+1):
+            for u in range(1, n+1):
                 ci[M0==u]=Mb[u-1]    #assign new modules
 
         n = np.max(Mb)
         b1 = np.zeros((n,n))
-        for i in xrange(1, n+1):
-            for j in xrange(i, n+1):
+        for i in range(1, n+1):
+            for j in range(i, n+1):
                 #pool weights of nodes in same module
                 bm=np.sum(B[np.ix_(Mb==i,Mb==j)])
                 b1[i-1,j-1] = bm    
@@ -2794,7 +2794,7 @@ def link_communities(W, type_clustering='single'):
 
     #set diagonal to mean weights
     np.fill_diagonal(W, 0)
-    W[xrange(n), xrange(n)] = (
+    W[range(n), range(n)] = (
         np.sum(W, axis=0)/np.sum(np.logical_not(W), axis=0) +
         np.sum(W.T, axis=0)/np.sum(np.logical_not(W.T), axis=0))/2
 
@@ -2806,8 +2806,8 @@ def link_communities(W, type_clustering='single'):
     Jo = np.zeros((n,n))    
     Ji = np.zeros((n,n))
     
-    for b in xrange(n):
-        for c in xrange(n):
+    for b in range(n):
+        for c in range(n):
             Do = np.dot(W[b,:], W[c,:].T)
             Jo[b,c] = Do / (No[b]+No[c]-Do)
 
@@ -2821,13 +2821,13 @@ def link_communities(W, type_clustering='single'):
     Ln = np.zeros((m,2), dtype=np.int32)    #link nodes
     Lw = np.zeros((m,))     #link weights
 
-    for i in xrange(m):
+    for i in range(m):
         Ln[i,:] = (A[i], B[i])
         Lw[i] = (W[A[i], B[i]] + W[B[i], A[i]]) / 2
 
     ES = np.zeros((m,m), dtype=np.float32)    #link similarity
-    for i in xrange(m):
-        for j in xrange(m):
+    for i in range(m):
+        for j in range(m):
             if Ln[i,0] == Ln[j,0]:
                 a=Ln[i,0]; b=Ln[i,1]; c=Ln[j,1]
             elif Ln[i,0] == Ln[j,1]:
@@ -2854,10 +2854,10 @@ def link_communities(W, type_clustering='single'):
     U = np.arange(m)        #initial community assignments
     C[0,:] = np.arange(m)
 
-    for i in xrange(m-1):
-        print 'hierarchy %i'%i
+    for i in range(m-1):
+        print('hierarchy %i'%i)
 
-        for j in xrange(len(U)):     #loop over communities
+        for j in range(len(U)):     #loop over communities
             ixes = C[i,:] == U[j]   #get link indices
 
             links = np.sort(Lw[ixes])
@@ -2876,8 +2876,8 @@ def link_communities(W, type_clustering='single'):
             dc = (mc - min_mc) / (nc*(nc-1)/2 - min_mc) #community density
 
             if np.array(dc).shape is not ():
-                print dc
-                print dc.shape
+                print(dc)
+                print(dc.shape)
 
             Nc[i,j] = nc
             Mc[i,j] = mc
@@ -2909,7 +2909,7 @@ def link_communities(W, type_clustering='single'):
         unq_rows = np.vstack({tuple(row) for row in ug_rows})
         V = U[unq_rows]
 
-        for j in xrange(len(V)):
+        for j in range(len(V)):
             if type_clustering=='single':
                 x = np.max(ES[V[j,:],:], axis=0)
             elif type_clustering=='complete':
@@ -2938,7 +2938,7 @@ def link_communities(W, type_clustering='single'):
 
     U=np.unique(C[i,:])
     M=np.zeros((len(U),n))
-    for j in xrange(len(U)):
+    for j in range(len(U)):
         M[j, np.unique( Ln[C[i,:]==U[j],:])] = 1
 
     M = M[np.sum(M, axis=1)>2,:]
@@ -3086,7 +3086,7 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
     knm_o=np.zeros((n,n))				#node-to-module out degree
     knm_i=np.zeros((n,n))				#node-to-module in degree
 
-    for m in xrange(np.max(ci)):
+    for m in range(np.max(ci)):
         knm_o[:,m]=np.sum(W[:,ci==(m+1)],axis=1)	
         knm_i[:,m]=np.sum(W[ci==(m+1),:],axis=0)
 
@@ -3130,8 +3130,8 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
     m=np.max(ci)						#new number of modules
     w=np.zeros((m,m))					#new weighted matrix
 
-    for u in xrange(m):
-        for v in xrange(m):
+    for u in range(m):
+        for v in range(m):
             #pool weights of nodes in same module
             w[u,v]=np.sum(W[np.ix_(ci==u+1,ci==v+1)]) 
 
@@ -3185,7 +3185,7 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
 
     s=np.sum(W)							#total weight of edges
     knm=np.zeros((n,n))					#node-to-module degree
-    for m in xrange(np.max(ci)):
+    for m in range(np.max(ci)):
         knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
     k=np.sum(knm,axis=1)				#node degree
     km=np.sum(knm,axis=0)				#module degree
@@ -3222,8 +3222,8 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
 
     m=np.max(ci)
     w=np.zeros((m,m))
-    for u in xrange(m):
-        for v in xrange(m):
+    for u in range(m):
+        for v in range(m):
             #pool weights of nodes in same module
             wm=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
             w[u,v]=wm
@@ -3287,7 +3287,7 @@ def modularity_finetune_und_sign(W,qtype='sta',gamma=1,ci=None,seed=None):
     Knm0=np.zeros((n,n))				#positive node-to-module-degree
     Knm1=np.zeros((n,n))				#negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):	#loop over modules
+    for m in range(int(np.max(ci))):	#loop over modules
         Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
         Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
@@ -3457,8 +3457,8 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
 
         n=np.max(m)						#new number of modules
         W1=np.zeros((n,n))				#new weighted matrix
-        for i in xrange(n):
-            for j in xrange(n):
+        for i in range(n):
+            for j in range(n):
                 #pool weights of nodes in same module
                 W1[i,j]=np.sum(W[np.ix_(m==i+1,m==j+1)])
 
@@ -3575,7 +3575,7 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
         h+=1
         ci.append(np.zeros((n0,)))
         #for i,mi in enumerate(m):	#loop through initial module assignments
-        for i in xrange(n0):
+        for i in range(n0):
             #print i,mi,m[i],h
             #print np.where(ci[h-1]==i+1)
             ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
@@ -3583,8 +3583,8 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
 
         n=np.max(m)						#new number of modules
         W1=np.zeros((n,n))				#new weighted matrix
-        for i in xrange(n):
-            for j in xrange(n):
+        for i in range(n):
+            for j in range(n):
                 #pool weights of nodes in same module
                 wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
                 W1[i,j]=wp
@@ -3722,15 +3722,15 @@ def modularity_louvain_und_sign(W,gamma=1,qtype='sta',seed=None):
         _,m=np.unique(m,return_inverse=True)
         m+=1
 
-        for u in xrange(nh):		#loop through initial module assignments
+        for u in range(nh):		#loop through initial module assignments
             ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
 
         nh=np.max(m)					#number of new nodes
         wn0=np.zeros((nh,nh))			#new positive weights matrix
         wn1=np.zeros((nh,nh))
         
-        for u in xrange(nh):
-            for v in xrange(u,nh):
+        for u in range(nh):
+            for v in range(u,nh):
                 wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
                 wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
                 wn0[v,u]=wn0[u,v]
@@ -3812,7 +3812,7 @@ def modularity_probtune_und_sign(W,qtype='sta',gamma=1,ci=None,p=.45,
     Knm0=np.zeros((n,n))					#positive node-to-module degree
     Knm1=np.zeros((n,n))					#negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):		#loop over initial modules
+    for m in range(int(np.max(ci))):		#loop over initial modules
         Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
         Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
@@ -4002,7 +4002,7 @@ def modularity_und_sign(W,ci,qtype='sta'):
     Knm0=np.zeros((n,n))					#positive node-to-module degree
     Knm1=np.zeros((n,n))					#negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):		#loop over initial modules
+    for m in range(int(np.max(ci))):		#loop over initial modules
         Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
         Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
 
@@ -4162,7 +4162,7 @@ def make_motif34lib():
         M=np.zeros((54,6),dtype=bool)	#isomorphs
         CL=np.zeros((54,6),dtype=np.uint8)#canonical labels (predecssors of IDs)
         cl=np.zeros((6,),dtype=np.uint8)
-        for i in xrange(2**6):			#loop through all subgraphs
+        for i in range(2**6):			#loop through all subgraphs
             m='{0:b}'.format(i)
             m=str().zfill(6-len(m))+m
             G=np.array(((0,m[2],m[4]),(m[0],0,m[5]),(m[1],m[3],0)),dtype=int)
@@ -4198,14 +4198,14 @@ def make_motif34lib():
         M=np.zeros((3834,12),dtype=bool)	#isomorphs
         CL=np.zeros((3834,16),dtype=np.uint8)	#canonical labels
         cl=np.zeros((16,),dtype=np.uint8)
-        for i in xrange (2**12):			#loop through all subgraphs
+        for i in range (2**12):			#loop through all subgraphs
             m='{0:b}'.format(i)
             m=str().zfill(12-len(m))+m
             G=np.array(((0,m[3],m[6],m[9]),(m[0],0,m[7],m[10]),
                 (m[1],m[4],0,m[11]),(m[2],m[5],m[8],0)),dtype=int)
             Gs=G+G.T
             v=Gs[0,:]
-            for j in xrange(2):
+            for j in range(2):
                 v=np.any(Gs[v!=0,:],axis=0)+v
             if np.all(v):					#if subgraph weakly connected
                 G2=np.dot(G,G)!=0
@@ -4236,7 +4236,7 @@ def make_motif34lib():
     dir=os.path.dirname(__file__)
     fname=os.path.join(dir,motiflib)
     if os.path.exists(fname):
-        print "motif34lib already exists"; return
+        print("motif34lib already exists"); return
 
     m3,m3n,id3,n3=motif3generate()
     m4,m4n,id4,n4=motif4generate()
@@ -4274,7 +4274,7 @@ def motif3funct_bin(A):
     A=binarize(A,copy=True)				#ensure A is binary
     As=np.logical_or(A,A.T)				#symmetrized adjmat
 
-    for u in xrange(n-2):
+    for u in range(n-2):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4295,7 +4295,7 @@ def motif3funct_bin(A):
 
                 mu=len(idu)				#number of unique motifs
                 f2=np.zeros((mu,))
-                for h in xrange(mu):	#for each unique motif
+                for h in range(mu):	#for each unique motif
                     f2[h]=jx[h+1]-jx[h]	#and frequencies
 
                 #then add to a cumulative count
@@ -4343,7 +4343,7 @@ def motif3funct_wei(W):
     A=binarize(W,copy=True)			#create binary adjmat
     As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-    for u in xrange(n-2):
+    for u in range(n-2):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4374,7 +4374,7 @@ def motif3funct_wei(W):
                 mu=len(idu)				#number of unique motifs
                 i2,q2,f2=np.zeros((3,mu))
 
-                for h in xrange(mu):
+                for h in range(mu):
                     i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
                     q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
                     f2[h]=jx[h+1]-jx[h]
@@ -4415,7 +4415,7 @@ def motif3struct_bin(A):
     A=binarize(A,copy=True)				#ensure A is binary
     As=np.logical_or(A,A.T)				#symmetrized adjmat
 
-    for u in xrange(n-2):
+    for u in range(n-2):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4470,7 +4470,7 @@ def motif3struct_wei(W):
     A=binarize(W,copy=True)			#create binary adjmat
     As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-    for u in xrange(n-2):
+    for u in range(n-2):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4531,7 +4531,7 @@ def motif4funct_bin(A):
     A=binarize(A,copy=True)			#ensure A is binary	
     As=np.logical_or(A,A.T)			#symmetrized adjmat
     
-    for u in xrange(n-3):
+    for u in range(n-3):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4562,7 +4562,7 @@ def motif4funct_bin(A):
                     jx=np.append((0,),jx)
                     mu=len(idu)				#number of unique motifs
                     f2=np.zeros((mu,))
-                    for h in xrange(mu):
+                    for h in range(mu):
                         f2[h]=jx[h+1]-jx[h]
                     
                     #add to cumulative count
@@ -4609,7 +4609,7 @@ def motif4funct_wei(W):
     A=binarize(W,copy=True)			#ensure A is binary	
     As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-    for u in xrange(n-3):
+    for u in range(n-3):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4653,7 +4653,7 @@ def motif4funct_wei(W):
                     mu=len(idu)				#number of unique motifs
                     i2,q2,f2=np.zeros((3,mu))
 
-                    for h in xrange(mu):
+                    for h in range(mu):
                         i2[h]=np.sum(i[jx[h]+1:jx[h+1]+1])
                         q2[h]=np.sum(q[jx[h]+1:jx[h+1]+1])
                         f2[h]=jx[h+1]-jx[h]
@@ -4694,7 +4694,7 @@ def motif4struct_bin(A):
     A=binarize(A,copy=True)			#ensure A is binary	
     As=np.logical_or(A,A.T)			#symmetrized adjmat
     
-    for u in xrange(n-3):
+    for u in range(n-3):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -4762,7 +4762,7 @@ def motif4struct_wei(W):
     A=binarize(W,copy=True)			#ensure A is binary	
     As=np.logical_or(A,A.T)			#symmetrized adjmat
 
-    for u in xrange(n-3):
+    for u in range(n-3):
         #v1: neighbors of u (>u)
         V1=np.append(np.zeros((u,),dtype=int),As[u,u+1:n+1])
         for v1 in np.where(V1)[0]:
@@ -5217,7 +5217,7 @@ def rentian_scaling(A,xyz,n):
         L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
         if np.size(L):
             #count edges crossing at the boundary of the cube
-            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(xrange(m),L))])
+            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(range(m),L))])
             #count nodes inside of the cube
             N[count]=np.size(L)
             count+=1
@@ -5267,11 +5267,11 @@ def latmio_dir_connected(R,iter,D=None):
     #create distance to diagonal matrix if not specified by user
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(xrange(1,n),n)
-        um=np.mod(xrange(n-1,0,-1),n)
+        un=np.mod(range(1,n),n)
+        um=np.mod(range(n-1,0,-1),n)
         u=np.append((0,),np.where(un<um,un,um))
 
-        for v in xrange(int(np.ceil(n/2))):
+        for v in range(int(np.ceil(n/2))):
             D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
             D[v,:]=D[n-v-1,:][::-1]
 
@@ -5285,7 +5285,7 @@ def latmio_dir_connected(R,iter,D=None):
     #actual number of successful rewirings
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             rewire=True
@@ -5374,11 +5374,11 @@ def latmio_dir(R,iter,D=None):
     #create distance to diagonal matrix if not specified by user
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(xrange(1,n),n)
-        um=np.mod(xrange(n-1,0,-1),n)
+        un=np.mod(range(1,n),n)
+        um=np.mod(range(n-1,0,-1),n)
         u=np.append((0,),np.where(un<um,un,um))
 
-        for v in xrange(int(np.ceil(n/2))):
+        for v in range(int(np.ceil(n/2))):
             D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
             D[v,:]=D[n-v-1,:][::-1]
 
@@ -5392,7 +5392,7 @@ def latmio_dir(R,iter,D=None):
     #actual number of successful rewirings
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             while True:
@@ -5467,11 +5467,11 @@ def latmio_und_connected(R,iter,D=None):
 
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(xrange(1,n),n)
-        um=np.mod(xrange(n-1,0,-1),n)
+        un=np.mod(range(1,n),n)
+        um=np.mod(range(n-1,0,-1),n)
         u=np.append((0,),np.where(un<um,un,um))
 
-        for v in xrange(int(np.ceil(n/2))):
+        for v in range(int(np.ceil(n/2))):
             D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
             D[v,:]=D[n-v-1,:][::-1]
 
@@ -5485,7 +5485,7 @@ def latmio_und_connected(R,iter,D=None):
     #actual number of successful rewirings
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:
             rewire=True
@@ -5577,11 +5577,11 @@ def latmio_und(R,iter,D=None):
 
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(xrange(1,n),n)
-        um=np.mod(xrange(n-1,0,-1),n)
+        un=np.mod(range(1,n),n)
+        um=np.mod(range(n-1,0,-1),n)
         u=np.append((0,),np.where(un<um,un,um))
 
-        for v in xrange(int(np.ceil(n/2))):
+        for v in range(int(np.ceil(n/2))):
             D[n-v-1,:]=np.append(u[v+1:],u[:v+1])
             D[v,:]=D[n-v-1,:][::-1]
 
@@ -5595,7 +5595,7 @@ def latmio_und(R,iter,D=None):
     #actual number of successful rewirings
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:
             while True:
@@ -5668,15 +5668,15 @@ def makeevenCIJ(n,k,sz_cl):
     #check n against the number of levels
     Nlvl=2**mx_lvl
     if Nlvl!=n:
-        print "Warning: n must be a power of 2"
+        print("Warning: n must be a power of 2")
     n=Nlvl
 
     #create hierarchical template
-    for lvl in xrange(1,mx_lvl):
+    for lvl in range(1,mx_lvl):
         s=2**(lvl+1)
         CIJ=np.ones((s,s))
-        grp1=xrange(int(s/2))
-        grp2=xrange(int(s/2),s)
+        grp1=range(int(s/2))
+        grp2=range(int(s/2),s)
         ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
         ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
         CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
@@ -5692,7 +5692,7 @@ def makeevenCIJ(n,k,sz_cl):
     #determine nr of non-cluster connections left and their possible positions
     rem_k=k-np.size(np.where(CIJp.flatten()))
     if rem_k<0:
-        print "Warning: K is too small, output matrix contains clusters only"
+        print("Warning: K is too small, output matrix contains clusters only")
         return CIJp
     a,b=np.where(np.logical_not(CIJp+np.eye(n)))
 
@@ -5734,11 +5734,11 @@ def makefractalCIJ(mx_lvl,E,sz_cl):
     n=2**mx_lvl
     sz_cl-=1
 
-    for lvl in xrange(1,mx_lvl):
+    for lvl in range(1,mx_lvl):
         s=2**(lvl+1)
         CIJ=np.ones((s,s))
-        grp1=xrange(int(s/2))
-        grp2=xrange(int(s/2),s)
+        grp1=range(int(s/2))
+        grp2=range(int(s/2),s)
         ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
         ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
         CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
@@ -5799,7 +5799,7 @@ def makerandCIJdegreesfixed(inv,outv):
     out_inv=np.zeros((k,))
     i_in=0; i_out=0	
 
-    for i in xrange(n):
+    for i in range(n):
         in_inv[i_in:i_in+inv[i]]=i
         out_inv[i_out:i_out+outv[i]]=i
         i_in+=inv[i]
@@ -5809,7 +5809,7 @@ def makerandCIJdegreesfixed(inv,outv):
     edges=np.array((out_inv,in_inv[np.random.permutation(k)]))
 
     #create CIJ and check for double edges and self connections
-    for i in xrange(k):
+    for i in range(k):
         if CIJ[edges[0,i],edges[1,i]]:
             tried=set()
             while True:
@@ -5919,8 +5919,8 @@ def makeringlatticeCIJ(n,k):
     CIJ1=np.ones((n,n))
     kk=0
     count=0
-    seq=xrange(1,n)
-    seq2=xrange(n-1,0,-1)
+    seq=range(1,n)
+    seq2=range(n-1,0,-1)
 
     #fill in
     while kk<k:
@@ -5936,7 +5936,7 @@ def makeringlatticeCIJ(n,k):
     if overby:
         i,j=np.where(dCIJ)
         rp=np.random.permutation(np.size(i))
-        for ii in xrange(overby):
+        for ii in range(overby):
             CIJ[i[rp[ii]],j[rp[ii]]]=0
 
     return CIJ
@@ -5966,7 +5966,7 @@ def maketoeplitzCIJ(n,k,s):
     no connections are placed on the main diagonal.
     '''
     from scipy import linalg,stats
-    pf=stats.norm.pdf(xrange(1,n),.5,s)
+    pf=stats.norm.pdf(range(1,n),.5,s)
     template=linalg.toeplitz(np.append((0,),pf),r=np.append((0,),pf))
     template*=(k/np.sum(template))
 
@@ -6240,7 +6240,7 @@ def randmio_dir_connected(R,iter):
     max_attempts=np.round(n*k/(n*(n-1)))
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             rewire=True
@@ -6319,7 +6319,7 @@ def randmio_dir(R,iter):
     max_attempts=np.round(n*k/(n*(n-1)))
     eff=0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             while True:
@@ -6386,7 +6386,7 @@ def randmio_und_connected(R,iter):
     #actual number of successful rewirings
     eff=0
     
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             rewire=True
@@ -6474,7 +6474,7 @@ def randmio_und(R,iter):
     #actual number of successful rewirings
     eff=0
     
-    for it in xrange(iter):
+    for it in range(iter):
         att=0
         while att<=max_attempts:			#while not rewired
             while True:
@@ -6539,7 +6539,7 @@ def randmio_und_signed(R,iter):
     if not (k_p and k_m):
         return randmio_und(R,iter)[0]
 
-    for it in xrange(iter):					#while not rewired
+    for it in range(iter):					#while not rewired
         while True:
             while True:
                 #choose two edges to rewire but make sure they are either
@@ -6689,7 +6689,7 @@ def randomizer_bin_und(R,alpha):
     if k==0 or k>=(nr_poss_edges-1):
         raise BCTParamError("No possible randomization")
     
-    for it in xrange(k):
+    for it in range(k):
         if np.random.random()>alpha:
             continue						#rewire alpha% of edges
 
@@ -6722,7 +6722,7 @@ def randomizer_bin_und(R,alpha):
             R[c,a]=1; R[d,b]=1
 
             #update the edge index (this is inefficient)
-            for m in xrange(k):
+            for m in range(k):
                 if i[m]==d and j[m]==c:
                     i.setflags(write=True); j.setflags(write=True)
                     i[it]=c; j[m]=b
@@ -6783,7 +6783,7 @@ def edge_nei_overlap_bd(CIJ):
 
     ec=np.zeros((lel,))
     degij=np.zeros((2,lel))
-    for e in xrange(lel):
+    for e in range(lel):
         neiik=np.setdiff1d(np.union1d(
             np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
         neijk=np.setdiff1d(np.union1d(
@@ -6828,7 +6828,7 @@ def edge_nei_overlap_bu(CIJ):
 
     ec=np.zeros((lel,))
     degij=np.zeros((2,lel))
-    for e in xrange(lel):
+    for e in range(lel):
         neiik=np.setdiff1d(np.union1d(
             np.where(CIJ[ik[e],:]),np.where(CIJ[:,ik[e]])),(ik[e],jk[e]))
         neijk=np.setdiff1d(np.union1d(
@@ -6877,12 +6877,12 @@ def gtom(adj,nr_steps):
     nr_nodes=len(adj)
 
     if nr_steps>nr_nodes:
-        print "Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes"
+        print("Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes")
     if nr_steps==0:
         return bm
     else:
-        for steps in xrange(2,nr_steps):
-            for i in xrange(nr_nodes):
+        for steps in range(2,nr_steps):
+            for i in range(nr_nodes):
                 #neighbors of node i
                 ng_col,=np.where(bm_aux[i,:]==1)
                 #neighbors of neighbors of node i
@@ -6937,8 +6937,8 @@ def matching_ind(CIJ):
     Mall=np.zeros((n,n))
 
     #compare incoming connections
-    for i in xrange(n-1):
-        for j in xrange(i+1,n):
+    for i in range(n-1):
+        for j in range(i+1,n):
             c1i=CIJ[:,i]
             c2i=CIJ[:,j]
             usei=np.logical_or(c1i,c2i)
@@ -7000,7 +7000,7 @@ def matching_ind_und(CIJ0):
     I=np.logical_not(np.eye(N))
     M=np.zeros((N,N))
 
-    for i in xrange(N):
+    for i in range(N):
         c1=CIJ[i,:]
         use=np.logical_or(c1,CIJ)
         use[:,i]=0
@@ -7009,7 +7009,7 @@ def matching_ind_und(CIJ0):
         ncon1=c1*use
         ncon2=c1*CIJ
         ncon=np.sum(ncon1+ncon2,axis=1)
-        print ncon
+        print(ncon)
 
         M[:,i] = 2*np.sum(np.logical_and(ncon1,ncon2),axis=1)/ncon
 
@@ -7047,7 +7047,7 @@ def dice_pairwise_und(a1,a2):
     d=np.zeros((n,))					#dice similarity
 
     #calculate the common neighbors for each vertex
-    for i in xrange(n):
+    for i in range(n):
         d[i]=2*(np.sum(np.logical_and(a1[:,i],a2[:,i]))/
             (np.sum(a1[:,i])+np.sum(a2[:,i])))
 
@@ -7350,13 +7350,13 @@ def align_matrices(m1,m2,dfun='sqrdiff',verbose=False,H=1e6,Texp=1,
                 amin=anew
                 mincost=lowcost
                 if verbose:
-                    print 'step %i ... current lowest cost = %f' % (h,mincost)
+                    print('step %i ... current lowest cost = %f' % (h,mincost))
                 hcnt=0
             #if the cost is 0 we're done
             if mincost==0:
                 break
     if verbose:
-        print 'step %i ... final lowest cost = %f' % (h,mincost)
+        print('step %i ... final lowest cost = %f' % (h,mincost))
 
     M_reordered=m2[np.ix_(amin,amin)]
     M_indices=amin
@@ -7408,14 +7408,14 @@ def backbone_wu(CIJ,avgdeg):
     #copy into tree graph
     CIJtree[im,jm]=CIJ[im,jm]
     in_=im
-    out=np.setdiff1d(xrange(n),in_)
+    out=np.setdiff1d(range(n),in_)
 
     #repeat n-2 times
-    for ix in xrange(n-2):
+    for ix in range(n-2):
         CIJ_io=CIJ[np.ix_(in_,out)]
         i,j=np.where(np.max(CIJ_io)==CIJ_io)
         #i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-        print i,j
+        print(i,j)
         im=in_[i[0]]
         jm=out[j[0]]
 
@@ -7423,7 +7423,7 @@ def backbone_wu(CIJ,avgdeg):
         CIJtree[im,jm]=CIJ[im,jm]
         CIJtree[jm,im]=CIJ[jm,im]
         in_=np.append(in_,jm)
-        out=np.setdiff1d(xrange(n),in_)
+        out=np.setdiff1d(range(n),in_)
 
     #now add connections back with the total number of added connections
     #determined by the desired avgdeg
@@ -7485,7 +7485,7 @@ def grid_communities(c):
 
     bounds=[]
 
-    for i in xrange(nr_c):
+    for i in range(nr_c):
         ind=np.where(c==i+1)
         if np.size(ind):
             mn=np.min(ind)-.5
@@ -7534,9 +7534,9 @@ def reorderMAT(m,H=5000,cost='line'):
 
     #generate cost function
     if cost=='line':
-        profile=stats.norm.pdf(xrange(1,n+1),0,n/2)[::-1]
+        profile=stats.norm.pdf(range(1,n+1),0,n/2)[::-1]
     elif cost=='circ':
-        profile=stats.norm.pdf(xrange(1,n+1),n/2,n/4)[::-1]
+        profile=stats.norm.pdf(range(1,n+1),n/2,n/4)[::-1]
     else:
         raise BCTParamError('dfun must be line or circ')
     costf=linalg.toeplitz(profile,r=profile)
@@ -7547,7 +7547,7 @@ def reorderMAT(m,H=5000,cost='line'):
     m_start=m.copy()
     starta=np.arange(n)
     #reorder
-    for h in xrange(H):
+    for h in range(H):
         a=np.arange(n)
         #choose two positions and flip them
         r1,r2=np.random.randint(n,size=(2,))
@@ -7630,9 +7630,9 @@ def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
 
     #generate cost function
     if cost=='line':
-        profile=stats.norm.pdf(xrange(1,n+1),loc=0,scale=n/2)[::-1]
+        profile=stats.norm.pdf(range(1,n+1),loc=0,scale=n/2)[::-1]
     elif cost=='circ':
-        profile=stats.norm.pdf(xrange(1,n+1),loc=n/2,scale=n/4)[::-1]
+        profile=stats.norm.pdf(range(1,n+1),loc=n/2,scale=n/4)[::-1]
     else:
         raise BCTParamError('cost must be line or circ')
 
@@ -7679,11 +7679,11 @@ def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
                 amin=anew
                 mincost=lowcost
                 if verbose:
-                    print 'step %i ... current lowest cost = %f' % (h,mincost)
+                    print('step %i ... current lowest cost = %f' % (h,mincost))
                 hcnt=0
     
     if verbose:
-        print 'step %i ... final lowest cost = %f' % (h,mincost)
+        print('step %i ... final lowest cost = %f' % (h,mincost))
 
     M_reordered=m1[np.ix_(amin,amin)]
     M_indices=amin
@@ -7720,12 +7720,12 @@ def reorder_mod(A,ci):
     nm=np.zeros((m,))						#number of nodes in modules
     knm=np.zeros((n,m))						#degree to other modules
 
-    for i in xrange(m):
+    for i in range(m):
         nm[i]=np.size(np.where(ci==i))
         knm[:,i]=np.sum(A[:,ci==i],axis=1)
 
     am=np.zeros((m,m))						#relative intermodular connectivity
-    for i in xrange(m):
+    for i in range(m):
         am[i,:]=np.sum(knm[ci==i,:],axis=0)
     am/=np.outer(nm,nm)
 
@@ -7759,10 +7759,10 @@ def reorder_mod(A,ci):
 
         i[i==old]=0; j[j==old]=0
 
-    print om
+    print(om)
 
     #2. Reorder nodes within modules
-    on=np.zeros((n,),dtype=long)
+    on=np.zeros((n,),dtype=int)
     for y,x in enumerate(om):
         ind,=np.where(ci==x-1)				#indices
         pos,=np.where(om==x)				#position
@@ -7770,7 +7770,7 @@ def reorder_mod(A,ci):
 
         mod_imp=np.array((om,np.sign(np.arange(m)-pos),
             np.abs(np.arange(m)-pos),am[x-1,om-1])).T
-        print np.shape((mod_imp[:,3][::-1],mod_imp[:,2]))
+        print(np.shape((mod_imp[:,3][::-1],mod_imp[:,2])))
         ix=np.lexsort((mod_imp[:,3][::-1],mod_imp[:,2]))
         mod_imp=mod_imp[ix]
         #at this point mod_imp agrees with the matlab version
@@ -7778,7 +7778,7 @@ def reorder_mod(A,ci):
         mod_imp=np.abs(mod_imp[:,0]*mod_imp[:,1])
         mod_imp=np.append(mod_imp[1:],x)
         mod_imp=np.array(mod_imp-1,dtype=int)
-        print mod_imp,signs
+        print(mod_imp,signs)
         #at this point mod_imp is the absolute value of that in the matlab
         #version.  this limitation comes from sortrows ability to deal with
         #negative indices, which we would have to do manually.
@@ -7833,11 +7833,11 @@ def writetoPAJ(CIJ,fname,directed):
     n=np.size(CIJ,axis=0)
     with open(fname,'w') as fd:
         fd.write('*vertices %i \r' % n)
-        for i in xrange(1,n+1): fd.write('%i "%i" \r' % (i,i))
+        for i in range(1,n+1): fd.write('%i "%i" \r' % (i,i))
         if directed: fd.write('*arcs \r')
         else: fd.write('*edges \r')
-        for i in xrange(n):
-            for j in xrange(n):
+        for i in range(n):
+            for j in range(n):
                 if CIJ[i,j]!=0:
                     fd.write('%i %i %.6f \r' % (i+1,j+1,CIJ[i,j]))
 
@@ -7875,7 +7875,7 @@ def dummyvar(cis, return_sparse=False):
     ix=np.argsort(cis,axis=0)
     #s_cis=np.sort(cis,axis=0)
     #FIXME use the sorted indices to sort by row efficiently
-    s_cis=cis[ix][:,xrange(m),xrange(m)]
+    s_cis=cis[ix][:,range(m),range(m)]
 
     mask=np.hstack((((True,),)*m,(s_cis[:-1,:]!=s_cis[1:,:]).T))
     indptr,=np.where(mask.flat)

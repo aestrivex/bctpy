@@ -14,6 +14,6 @@ def test_partition_distance():
 
     vi, mi = bct.partition_distance(qi, di)
 
-    print vi, mi
+    print(vi, mi)
     assert np.allclose(vi, 0.1964, atol=0.01)
     assert np.allclose(mi, 0.6394, atol=0.01)

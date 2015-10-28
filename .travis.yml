@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.4"
+sudo: false
+#virtualenv:
+#  system_site_packages: true
+addons:
+  apt:
+    packages:
+    - python3-numpy
+    - python3-scipy
+install: true
+script: nosetests

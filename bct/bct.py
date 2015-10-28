@@ -3452,8 +3452,10 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
         m+=1
         h+=1
         ci.append(np.zeros((n0,)))
-        for i,mi in enumerate(m):		#loop through module assignments
-            ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+        #for i,mi in enumerate(m):		#loop through module assignments
+        for i in xrange(n):
+            #ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+            ci[h][np.where(ci[h-1]==i+1)] = m[i]
 
         n=np.max(m)						#new number of modules
         W1=np.zeros((n,n))				#new weighted matrix
@@ -3468,7 +3470,7 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
         if q[h]-q[h-1]<1e-10:			#if modularity does not increase
             break
 
-    ci=np.array(ci)+1
+    ci=np.array(ci, dtype=int)
     if hierarchy:
         ci=ci[1:-1]; q=q[1:-1]
         return ci,q
@@ -3575,16 +3577,15 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
         h+=1
         ci.append(np.zeros((n0,)))
         #for i,mi in enumerate(m):	#loop through initial module assignments
-        for i in xrange(n0):
-            #print i,mi,m[i],h
-            #print np.where(ci[h-1]==i+1)
-            ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
-            #ci[h][np.where(ci[h-1]==i+1)] = m[i]
+        for i in xrange(n):
+            #print i, m[i], n0, h, len(m), n
+            #ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
+            ci[h][np.where(ci[h-1]==i+1)] = m[i]
 
         n=np.max(m)						#new number of modules
         W1=np.zeros((n,n))				#new weighted matrix
         for i in xrange(n):
-            for j in xrange(n):
+            for j in xrange(i,n):
                 #pool weights of nodes in same module
                 wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
                 W1[i,j]=wp
@@ -3597,7 +3598,7 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
         if q[h]-q[h-1]<1e-10:			#if modularity does not increase
             break
 
-    ci=np.array(ci)+1
+    ci=np.array(ci, dtype=int)
     if hierarchy:
         ci=ci[1:-1]; q=q[1:-1]
         return ci,q
@@ -3663,7 +3664,7 @@ def modularity_louvain_und_sign(W,gamma=1,qtype='sta',seed=None):
     else: raise KeyError('modularity type unknown')
 
     if not s0:							#adjust for absent positive weights
-        s0=1; d1=0
+        s0=1; d0=0
     if not s1:							#adjust for absent negative weights
         s1=1; d1=0
 

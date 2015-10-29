@@ -1,8 +1,8 @@
 from __future__ import division
 import numpy as np
 from .modularity import modularity_louvain_und_sign
-from .miscellaneous_utilities import _cuberoot, BCTParamError, dummyvar
-from .other import binarize
+from bct.bct.utils.miscellaneous_utilities import _cuberoot, BCTParamError, dummyvar
+from bct.bct.utils.other import binarize
 from .distance import breadthdist
 
 def agreement(ci,buffsz=None):

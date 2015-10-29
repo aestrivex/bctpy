@@ -1,8 +1,8 @@
 from __future__ import division
 import numpy as np
-from .miscellaneous_utilities import BCTParamError
+from bct.bct.utils.miscellaneous_utilities import BCTParamError
 from .degree import degrees_dir, degrees_und
-from .other import binarize
+from bct.bct.utils.other import binarize
 
 def edge_nei_overlap_bd(CIJ):
     '''

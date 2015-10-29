@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
-from .miscellaneous_utilities import _cuberoot
-from .other import binarize, invert
+from bct.bct.utils.miscellaneous_utilities import _cuberoot
+from bct.bct.utils.other import binarize, invert
 
 
 def breadthdist(CIJ):

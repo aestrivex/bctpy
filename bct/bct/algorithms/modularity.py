@@ -1,7 +1,7 @@
 from __future__ import division
 import numpy as np
-from .miscellaneous_utilities import BCTParamError
-from .other import normalize
+from bct.bct.utils.miscellaneous_utilities import BCTParamError
+from bct.bct.utils.other import normalize
 
 def ci2ls(ci):
     '''

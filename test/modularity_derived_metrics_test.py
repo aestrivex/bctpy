@@ -5,9 +5,9 @@ import bct
 def test_pc():
     x = load_sample(thres=.4)
     #ci,q = bct.modularity_und(x)
-    ci = np.load('mats/sample_partition.npy')
+    ci = np.load(mat_path('sample_partition.npy'))
 
-    pc = np.load('mats/sample_pc.npy')
+    pc = np.load(mat_path('sample_pc.npy'))
 
     pc_ = bct.participation_coef(x, ci)
     print zip(pc, pc_)
@@ -39,9 +39,9 @@ def participation_test():
 
 def test_zi():
     x = load_sample(thres=.4)
-    ci = np.load('mats/sample_partition.npy')
+    ci = np.load(mat_path('sample_partition.npy'))
 
-    zi = np.load('mats/sample_zi.npy')
+    zi = np.load(mat_path('sample_zi.npy'))
 
     zi_ = bct.module_degree_zscore(x, ci)
     print zip(zi,zi_)
@@ -56,7 +56,7 @@ def test_zi():
 #TODO this test does not give the same results, why not
 def test_shannon_entropy():
     x = load_sample(thres=0.4)
-    ci = np.load('mats/sample_partition.npy')
+    ci = np.load(mat_path('sample_partition.npy'))
     #ci, q = bct.modularity_und(x)
     hpos, _ = bct.diversity_coef_sign(x, ci)
     print np.sum(hpos)

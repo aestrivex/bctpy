@@ -2,6 +2,7 @@ from load_samples import *
 import numpy as np
 import bct
 
+
 def test_partition_distance():
     q = load_sample_group_qball()
     d = load_sample_group_dsi()

@@ -31,18 +31,18 @@ def breadthdist(CIJ):
     -----
     slower but less memory intensive than "reachdist.m".
     '''
-    n=len(CIJ)
+    n = len(CIJ)
 
-    D=np.zeros((n,n))
+    D = np.zeros((n, n))
     for i in xrange(n):
-        D[i,:],_=breadth(CIJ,i)
+        D[i, :], _ = breadth(CIJ, i)
 
-    D[D==0]=np.inf;
-    R=(D!=np.inf);
-    return R,D
+    D[D == 0] = np.inf
+    R = (D != np.inf)
+    return R, D
 
 
-def breadth(CIJ,source):
+def breadth(CIJ, source):
     '''
     Implementation of breadth-first search.
 
@@ -67,38 +67,40 @@ def breadth(CIJ,source):
     minimum distance. The entire graph is explored, starting from source
     vertex 'source'.
     '''
-    n=len(CIJ)
+    n = len(CIJ)
 
-    #colors: white,gray,black
-    white=0; gray=1; black=2
+    # colors: white,gray,black
+    white = 0
+    gray = 1
+    black = 2
 
-    color=np.zeros((n,))
-    distance=np.inf*np.ones((n,))
-    branch=np.zeros((n,))
+    color = np.zeros((n,))
+    distance = np.inf * np.ones((n,))
+    branch = np.zeros((n,))
 
-    #start on vertex source
-    color[source]=gray
-    distance[source]=0
-    branch[source]=-1
-    Q=[source]
+    # start on vertex source
+    color[source] = gray
+    distance[source] = 0
+    branch[source] = -1
+    Q = [source]
 
-    #keep going until the entire graph is explored
+    # keep going until the entire graph is explored
     while Q:
-        u=Q[0]
-        ns,=np.where(CIJ[u,:])
+        u = Q[0]
+        ns, = np.where(CIJ[u, :])
         for v in ns:
-            #this allows the source distance itself to be recorded
-            if distance[v]==0:
-                distance[v]=distance[u]+1
-            if color[v]==white:
-                color[v]=gray
-                distance[v]=distance[u]+1
-                branch[v]=u
+            # this allows the source distance itself to be recorded
+            if distance[v] == 0:
+                distance[v] = distance[u] + 1
+            if color[v] == white:
+                color[v] = gray
+                distance[v] = distance[u] + 1
+                branch[v] = u
                 Q.append(v)
-        Q=Q[1:]
-        color[u]=black
+        Q = Q[1:]
+        color[u] = black
 
-    return distance,branch
+    return distance, branch
 
 
 def charpath(D, include_diagonal=False):
@@ -140,25 +142,25 @@ def charpath(D, include_diagonal=False):
     if not include_diagonal:
         np.fill_diagonal(D, 0)
 
-    #mean of finite entries of D[G]
-    lambda_=np.sum(D[D!=np.inf])/len(np.where(D!=np.inf)[0])
+    # mean of finite entries of D[G]
+    lambda_ = np.sum(D[D != np.inf]) / len(np.where(D != np.inf)[0])
 
-    #eccentricity for each vertex (ignore inf)
-    ecc=np.max(D*(D!=np.inf),axis=1)
+    # eccentricity for each vertex (ignore inf)
+    ecc = np.max(D * (D != np.inf), axis=1)
 
-    #radius of graph
-    radius=np.min(ecc)	#but what about zeros?
+    # radius of graph
+    radius = np.min(ecc)  # but what about zeros?
 
-    #diameter of graph
-    diameter=np.max(ecc)
+    # diameter of graph
+    diameter = np.max(ecc)
 
-    #efficiency: mean of inverse entries of D[G]
-    n=len(D)
-    D=1/D								#invert distance
-    np.fill_diagonal(D, 0)				#set diagonal to 0
-    efficiency=np.sum(D)/(n*(n-1))		#compute global efficiency
+    # efficiency: mean of inverse entries of D[G]
+    n = len(D)
+    D = 1 / D  # invert distance
+    np.fill_diagonal(D, 0)  # set diagonal to 0
+    efficiency = np.sum(D) / (n * (n - 1))  # compute global efficiency
 
-    return lambda_,efficiency,ecc,radius,diameter
+    return lambda_, efficiency, ecc, radius, diameter
 
 
 def cycprob(Pq):
@@ -182,26 +184,26 @@ def cycprob(Pq):
         form a cycle of length q for each path length q
     '''
 
-    #note: fcyc[1] must be zero, as there cannot be cycles of length 1
-    fcyc=np.zeros(np.size(Pq,axis=2))
-    for q in xrange(np.size(Pq,axis=2)):
-        if np.sum(Pq[:,:,q])>0:
-            fcyc[q]=np.sum(np.diag(Pq[:,:,q]))/np.sum(Pq[:,:,q])
+    # note: fcyc[1] must be zero, as there cannot be cycles of length 1
+    fcyc = np.zeros(np.size(Pq, axis=2))
+    for q in xrange(np.size(Pq, axis=2)):
+        if np.sum(Pq[:, :, q]) > 0:
+            fcyc[q] = np.sum(np.diag(Pq[:, :, q])) / np.sum(Pq[:, :, q])
         else:
-            fcyc[q]=0
+            fcyc[q] = 0
 
-    #note: pcyc[1] is not defined (set to zero)
-    #note: pcyc[2] is equal to the fraction of reciprocal connections
-    #note: there are no non-cyclic paths of length N and no cycles of len N+1
-    pcyc=np.zeros(np.size(Pq,axis=2))
-    for q in xrange(np.size(Pq,axis=2)):
-        if np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1]))>0:
-            pcyc[q]=(np.sum(np.diag(Pq[:,:,q-1]))/
-                np.sum(Pq[:,:,q-1])-np.sum(np.diag(Pq[:,:,q-1])))
+    # note: pcyc[1] is not defined (set to zero)
+    # note: pcyc[2] is equal to the fraction of reciprocal connections
+    # note: there are no non-cyclic paths of length N and no cycles of len N+1
+    pcyc = np.zeros(np.size(Pq, axis=2))
+    for q in xrange(np.size(Pq, axis=2)):
+        if np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])) > 0:
+            pcyc[q] = (np.sum(np.diag(Pq[:, :, q - 1])) /
+                       np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])))
         else:
-            pcyc[q]=0
+            pcyc[q] = 0
 
-    return fcyc,pcyc
+    return fcyc, pcyc
 
 
 def distance_bin(G):
@@ -227,19 +229,19 @@ def distance_bin(G):
     Lengths on the main diagonal are set to 0.
     Algorithm: Algebraic shortest paths.
     '''
-    G=binarize(G,copy=True)
-    D=np.eye(len(G))
-    n=1
-    nPATH=G.copy()						#n path matrix
-    L=(nPATH!=0)						#shortest n-path matrix
+    G = binarize(G, copy=True)
+    D = np.eye(len(G))
+    n = 1
+    nPATH = G.copy()  # n path matrix
+    L = (nPATH != 0)  # shortest n-path matrix
 
     while np.any(L):
-        D+=n*L
-        n+=1
-        nPATH=np.dot(nPATH,G)
-        L=(nPATH!=0)*(D==0)
+        D += n * L
+        n += 1
+        nPATH = np.dot(nPATH, G)
+        L = (nPATH != 0) * (D == 0)
 
-    D[D==0]=np.inf						#disconnected nodes are assigned d=inf
+    D[D == 0] = np.inf  # disconnected nodes are assigned d=inf
     np.fill_diagonal(D, 0)
     return D
 
@@ -281,41 +283,44 @@ def distance_wei(G):
 
     Algorithm: Dijkstra's algorithm.
     '''
-    n=len(G)
-    D=np.zeros((n,n))					#distance matrix
-    D[np.logical_not(np.eye(n))]=np.inf
-    B=np.zeros((n,n))					#number of edges matrix
+    n = len(G)
+    D = np.zeros((n, n))  # distance matrix
+    D[np.logical_not(np.eye(n))] = np.inf
+    B = np.zeros((n, n))  # number of edges matrix
 
     for u in xrange(n):
-        S=np.ones((n,),dtype=bool)		#distance permanence (true is temporary)
-        G1=G.copy()
-        V=[u]
+        # distance permanence (true is temporary)
+        S = np.ones((n,), dtype=bool)
+        G1 = G.copy()
+        V = [u]
         while True:
-            S[V]=0						#distance u->V is now permanent
-            G1[:,V]=0					#no in-edges as already shortest
+            S[V] = 0  # distance u->V is now permanent
+            G1[:, V] = 0  # no in-edges as already shortest
             for v in V:
-                W,=np.where(G1[v,:])	#neighbors of shortest nodes
+                W, = np.where(G1[v, :])  # neighbors of shortest nodes
 
-                td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
-                d=np.min(td,axis=0)
-                wi=np.argmin(td,axis=0)
+                td = np.array(
+                    [D[u, W].flatten(), (D[u, v] + G1[v, W]).flatten()])
+                d = np.min(td, axis=0)
+                wi = np.argmin(td, axis=0)
 
-                D[u,W]=d				#smallest of old/new path lengths
-                ind=W[np.where(wi==1)]	#indices of lengthened paths
-                B[u,ind]=B[u,v]+1		#increment nr_edges for lengthened paths
+                D[u, W] = d  # smallest of old/new path lengths
+                ind = W[np.where(wi == 1)]  # indices of lengthened paths
+                # increment nr_edges for lengthened paths
+                B[u, ind] = B[u, v] + 1
 
-            if D[u,S].size==0:			#all nodes reached
+            if D[u, S].size == 0:  # all nodes reached
                 break
-            minD=np.min(D[u,S])
-            if np.isinf(minD):			#some nodes cannot be reached
+            minD = np.min(D[u, S])
+            if np.isinf(minD):  # some nodes cannot be reached
                 break
 
-            V,=np.where(D[u,:]==minD)
+            V, = np.where(D[u, :] == minD)
 
-    return D,B
+    return D, B
 
 
-def efficiency_bin(G,local=False):
+def efficiency_bin(G, local=False):
     '''
     The global efficiency is the average of inverse shortest path length,
     and is inversely related to the characteristic path length.
@@ -339,53 +344,53 @@ def efficiency_bin(G,local=False):
         local efficiency, only if local=True
     '''
     def distance_inv(g):
-        D=np.eye(len(g))
-        n=1
-        nPATH=g.copy()
-        L=(nPATH!=0)
+        D = np.eye(len(g))
+        n = 1
+        nPATH = g.copy()
+        L = (nPATH != 0)
 
         while np.any(L):
-            D+=n*L
-            n+=1
-            nPATH=np.dot(nPATH,g)
-            L=(nPATH!=0)*(D==0)
-        D[np.logical_not(D)]=np.inf
-        D=1/D
+            D += n * L
+            n += 1
+            nPATH = np.dot(nPATH, g)
+            L = (nPATH != 0) * (D == 0)
+        D[np.logical_not(D)] = np.inf
+        D = 1 / D
         np.fill_diagonal(D, 0)
         return D
 
-    n=len(G)							#number of nodes
+    n = len(G)  # number of nodes
     if local:
-        E=np.zeros((n,))				#local efficiency
+        E = np.zeros((n,))  # local efficiency
 
         for u in xrange(n):
-            #V,=np.where(G[u,:])			#neighbors
-            #k=len(V)					#degree
-            #if k>=2:					#degree must be at least 2
+            # V,=np.where(G[u,:])			#neighbors
+            # k=len(V)					#degree
+            # if k>=2:					#degree must be at least 2
             #	e=distance_inv(G[V].T[V])
             #	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
 
-            #find pairs of neighbors
-            V,=np.where(np.logical_or(G[u,:], G[u,:].T))
-            #inverse distance matrix
-            e=distance_inv(G[np.ix_(V,V)])
-            #symmetrized inverse distance matrix
-            se=e+e.T
+            # find pairs of neighbors
+            V, = np.where(np.logical_or(G[u, :], G[u, :].T))
+            # inverse distance matrix
+            e = distance_inv(G[np.ix_(V, V)])
+            # symmetrized inverse distance matrix
+            se = e + e.T
 
-            #symmetrized adjacency vector
-            sa=G[u,V]+G[V,u].T
-            numer = np.sum(np.dot(sa.T,sa)*se)/2
-            if numer!=0:
-                denom = np.sum(sa)**2 - np.sum(sa*sa)
-                E[u] = numer/denom		#local efficiency
+            # symmetrized adjacency vector
+            sa = G[u, V] + G[V, u].T
+            numer = np.sum(np.dot(sa.T, sa) * se) / 2
+            if numer != 0:
+                denom = np.sum(sa)**2 - np.sum(sa * sa)
+                E[u] = numer / denom  # local efficiency
 
     else:
-        e=distance_inv(G)
-        E=np.sum(e)/(n*n-n)				#global efficiency
+        e = distance_inv(G)
+        E = np.sum(e) / (n * n - n)  # global efficiency
     return E
 
 
-def efficiency_wei(Gw,local=False):
+def efficiency_wei(Gw, local=False):
     '''
     The global efficiency is the average of inverse shortest path length,
     and is inversely related to the characteristic path length.
@@ -427,70 +432,72 @@ def efficiency_wei(Gw,local=False):
     Algorithm:  Dijkstra's algorithm
     '''
     def distance_inv_wei(G):
-        n=len(G)
-        D=np.zeros((n,n))				#distance matrix
-        D[np.logical_not(np.eye(n))]=np.inf
+        n = len(G)
+        D = np.zeros((n, n))  # distance matrix
+        D[np.logical_not(np.eye(n))] = np.inf
 
         for u in xrange(n):
-            S=np.ones((n,),dtype=bool)	#distance permanence (true is temporary)
-            G1=G.copy()
-            V=[u]
+            # distance permanence (true is temporary)
+            S = np.ones((n,), dtype=bool)
+            G1 = G.copy()
+            V = [u]
             while True:
-                S[V]=0					#distance u->V is now permanent
-                G1[:,V]=0				#no in-edges as already shortest
+                S[V] = 0  # distance u->V is now permanent
+                G1[:, V] = 0  # no in-edges as already shortest
                 for v in V:
-                    W,=np.where(G1[v,:])	#neighbors of smallest nodes
-                    td=np.array([D[u,W].flatten(),(D[u,v]+G1[v,W]).flatten()])
-                    D[u,W]=np.min(td,axis=0)
+                    W, = np.where(G1[v, :])  # neighbors of smallest nodes
+                    td = np.array(
+                        [D[u, W].flatten(), (D[u, v] + G1[v, W]).flatten()])
+                    D[u, W] = np.min(td, axis=0)
 
-                if D[u,S].size==0:		#all nodes reached
+                if D[u, S].size == 0:  # all nodes reached
                     break
-                minD=np.min(D[u,S])
-                if np.isinf(minD):		#some nodes cannot be reached
+                minD = np.min(D[u, S])
+                if np.isinf(minD):  # some nodes cannot be reached
                     break
-                V,=np.where(D[u,:]==minD)
+                V, = np.where(D[u, :] == minD)
 
         np.fill_diagonal(D, 1)
-        D=1/D
+        D = 1 / D
         np.fill_diagonal(D, 0)
         return D
 
-    n=len(Gw)
-    Gl=invert(Gw,copy=True)				#connection length matrix
-    A=np.array((Gw!=0),dtype=int)
+    n = len(Gw)
+    Gl = invert(Gw, copy=True)  # connection length matrix
+    A = np.array((Gw != 0), dtype=int)
     if local:
-        E=np.zeros((n,))				#local efficiency
+        E = np.zeros((n,))  # local efficiency
         for u in xrange(n):
-            #V,=np.where(Gw[u,:])		#neighbors
-            #k=len(V)					#degree
-            #if k>=2:					#degree must be at least 2
+            # V,=np.where(Gw[u,:])		#neighbors
+            # k=len(V)					#degree
+            # if k>=2:					#degree must be at least 2
             #	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
             #	E[u]=np.sum(e)/(k*k-k)
 
-            #find pairs of neighbors
-            V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
-            #symmetrized vector of weights
-            sw=_cuberoot(Gw[u,V])+_cuberoot(Gw[V,u].T)
-            #inverse distance matrix
-            e=distance_inv_wei(Gl[np.ix_(V,V)])
-            #symmetrized inverse distance matrix
-            se=_cuberoot(e)+_cuberoot(e.T)
+            # find pairs of neighbors
+            V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
+            # symmetrized vector of weights
+            sw = _cuberoot(Gw[u, V]) + _cuberoot(Gw[V, u].T)
+            # inverse distance matrix
+            e = distance_inv_wei(Gl[np.ix_(V, V)])
+            # symmetrized inverse distance matrix
+            se = _cuberoot(e) + _cuberoot(e.T)
 
-            numer=np.sum(np.outer(sw.T,sw)*se)/2
-            if numer!=0:
-                #symmetrized adjacency vector
-                sa=A[u,V]+A[V,u].T
-                denom=np.sum(sa)**2 - np.sum(sa*sa)
-                #print numer,denom
-                E[u] = numer/denom		#local efficiency
+            numer = np.sum(np.outer(sw.T, sw) * se) / 2
+            if numer != 0:
+                # symmetrized adjacency vector
+                sa = A[u, V] + A[V, u].T
+                denom = np.sum(sa)**2 - np.sum(sa * sa)
+                # print numer,denom
+                E[u] = numer / denom  # local efficiency
 
     else:
-        e=distance_inv_wei(Gl)
-        E=np.sum(e)/(n*n-n)
+        e = distance_inv_wei(Gl)
+        E = np.sum(e) / (n * n - n)
     return E
 
 
-def findpaths(CIJ,qmax,sources,savepths=False):
+def findpaths(CIJ, qmax, sources, savepths=False):
     '''
     Paths are sequences of linked nodes, that never visit a single node
     more than once. This function finds all paths that start at a set of
@@ -536,105 +543,108 @@ def findpaths(CIJ,qmax,sources,savepths=False):
     suggestions for improvements are welcome.
 
     '''
-    CIJ=binarize(CIJ,copy=True)				#ensure CIJ is binary
-    n=len(CIJ)
-    k=np.sum(CIJ)
-    pths=[]
-    Pq=np.zeros((n,n,qmax))
-    util=np.zeros((n,qmax))
+    CIJ = binarize(CIJ, copy=True)  # ensure CIJ is binary
+    n = len(CIJ)
+    k = np.sum(CIJ)
+    pths = []
+    Pq = np.zeros((n, n, qmax))
+    util = np.zeros((n, qmax))
 
-    #this code is for pathlength=1
-    #paths are seeded from sources
-    q=1
+    # this code is for pathlength=1
+    # paths are seeded from sources
+    q = 1
     for j in xrange(n):
         for i in xrange(len(sources)):
-            i_s=sources[i]
-            if CIJ[i_s,j]==1:
-                pths.append([i_s,j])
-    pths=np.array(pths)
+            i_s = sources[i]
+            if CIJ[i_s, j] == 1:
+                pths.append([i_s, j])
+    pths = np.array(pths)
 
-    #calculate the use index per vertex (for paths of length 1)
-    util[:,q],_=np.histogram(pths,bins=n)
-    #now enter the found paths of length 1 into the pathmatrix Pq
-    for nrp in xrange(np.size(pths,axis=0)):
-        Pq[pths[nrp,0],pths[nrp,q],q-1]+=1
+    # calculate the use index per vertex (for paths of length 1)
+    util[:, q], _ = np.histogram(pths, bins=n)
+    # now enter the found paths of length 1 into the pathmatrix Pq
+    for nrp in xrange(np.size(pths, axis=0)):
+        Pq[pths[nrp, 0], pths[nrp, q], q - 1] += 1
 
-    #begin saving allpths
+    # begin saving allpths
     if savepths:
-        allpths=pths.copy()
+        allpths = pths.copy()
     else:
-        allpths=[]
+        allpths = []
 
-    npthscnt=k
+    npthscnt = k
 
-    #big loop for all other pathlengths q
-    for q in xrange(2,qmax+1):
-        #to keep track of time...
-        print ('current pathlength (q=i, number of paths so far (up to q-1)=i'			%(q,np.sum(Pq)))
+    # big loop for all other pathlengths q
+    for q in xrange(2, qmax + 1):
+        # to keep track of time...
+        print (
+            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq)))
 
-        #old paths are now in 'pths'
-        #new paths are about to be collected in 'npths'
-        #estimate needed allocation for new paths
-        len_npths=np.min((np.ceil(1.1*npthscnt*k/n),100000000))
-        npths=np.zeros((q+1,len_npths))
+        # old paths are now in 'pths'
+        # new paths are about to be collected in 'npths'
+        # estimate needed allocation for new paths
+        len_npths = np.min((np.ceil(1.1 * npthscnt * k / n), 100000000))
+        npths = np.zeros((q + 1, len_npths))
 
-        #find the unique set of endpoints of 'pths'
-        endp=np.unique(pths[:,q-1])
-        npthscnt=0
+        # find the unique set of endpoints of 'pths'
+        endp = np.unique(pths[:, q - 1])
+        npthscnt = 0
 
-        for i in endp:	#set of endpoints of previous paths
-            #in 'pb' collect all previous paths with 'i' as their endpoint
-            pb,=np.where(pths[:,q-1]==i)
-            #find the outgoing connections from i (breadth-first)
-            nendp,=np.where(CIJ[i,:]==1)
-            #if i is not a dead end
+        for i in endp:  # set of endpoints of previous paths
+            # in 'pb' collect all previous paths with 'i' as their endpoint
+            pb, = np.where(pths[:, q - 1] == i)
+            # find the outgoing connections from i (breadth-first)
+            nendp, = np.where(CIJ[i, :] == 1)
+            # if i is not a dead end
             if nendp.size:
-                for j in nendp:			#endpoints of next edge
-                    #find new paths -- only legal ones, no vertex twice visited
-                    pb_temp=pb[np.sum(j==pths[pb,1:q],axis=1)==0]
+                for j in nendp:  # endpoints of next edge
+                    # find new paths -- only legal ones, no vertex twice
+                    # visited
+                    pb_temp = pb[np.sum(j == pths[pb, 1:q], axis=1) == 0]
 
-                    #add new paths to 'npths'
-                    pbx=pths[pb_temp-1,:]
-                    npx=np.ones((len(pb_temp),1))*j
-                    npths[:,npthscnt:npthscnt+len(pb_temp)]=np.append(
-                        pbx,npx,axis=1).T
-                    npthscnt+=len(pb_temp)
-                    #count new paths and add the number to P
-                    Pq[:n,j,q-1]+=np.histogram(pths[pb_temp-1,0],bins=n)[0]
+                    # add new paths to 'npths'
+                    pbx = pths[pb_temp - 1, :]
+                    npx = np.ones((len(pb_temp), 1)) * j
+                    npths[:, npthscnt:npthscnt + len(pb_temp)] = np.append(
+                        pbx, npx, axis=1).T
+                    npthscnt += len(pb_temp)
+                    # count new paths and add the number to P
+                    Pq[:n, j, q -
+                        1] += np.histogram(pths[pb_temp - 1, 0], bins=n)[0]
 
-        #note: 'npths' now contains a list of all the paths of length q
-        if len_npths>npthscnt:
-            npths=npths[:,:npthscnt]
+        # note: 'npths' now contains a list of all the paths of length q
+        if len_npths > npthscnt:
+            npths = npths[:, :npthscnt]
 
-        #append the matrix of all paths
-        #FIXME
+        # append the matrix of all paths
+        # FIXME
         if savepths:
             raise NotImplementedError("Sorry allpaths is not yet implemented")
 
-        #calculate the use index per vertex (correct for cycles, count
-        #source/target only once)
-        util[:,q-1]+=(np.histogram(npths[:,:npthscnt],bins=n)[0]-
-            np.diag(Pq[:,:,q-1]))
+        # calculate the use index per vertex (correct for cycles, count
+        # source/target only once)
+        util[:, q - 1] += (np.histogram(npths[:, :npthscnt], bins=n)[0] -
+                           np.diag(Pq[:, :, q - 1]))
 
-        #elininate cycles from "making it" to the next level, so that "pths"
-        #contains all the paths that have a chance of being continued
+        # elininate cycles from "making it" to the next level, so that "pths"
+        # contains all the paths that have a chance of being continued
         if npths.size:
-            pths=np.squeeze(npths[:,np.where(npths[0,:]!=npths[q,:])]).T
+            pths = np.squeeze(npths[:, np.where(npths[0, :] != npths[q, :])]).T
         else:
-            pths=[]
+            pths = []
 
-        #if there are no 'pths' paths left, end the search
+        # if there are no 'pths' paths left, end the search
         if not pths.size:
-            qstop=q
-            tpath=np.sum(Pq)
-            plq=np.sum(np.sum(Pq,axis=0),axis=0)
+            qstop = q
+            tpath = np.sum(Pq)
+            plq = np.sum(np.sum(Pq, axis=0), axis=0)
             return
 
-    qstop=q
-    tpath=np.sum(Pq)						#total number of paths
-    plq=np.sum(np.sum(Pq,axis=0),axis=0)	#path length distribution
+    qstop = q
+    tpath = np.sum(Pq)  # total number of paths
+    plq = np.sum(np.sum(Pq, axis=0), axis=0)  # path length distribution
 
-    return Pq,tpath,plq,qstop,allpths,util
+    return Pq, tpath, plq, qstop, allpths, util
 
 
 def findwalks(CIJ):
@@ -661,18 +671,18 @@ def findwalks(CIJ):
     -----
     Wq grows very quickly for larger N,K,q. Weights are discarded.
     '''
-    CIJ=binarize(CIJ,copy=True)
-    n=len(CIJ)
-    Wq=np.zeros((n,n,n))
-    CIJpwr=CIJ.copy()
-    Wq[:,:,1]=CIJ
+    CIJ = binarize(CIJ, copy=True)
+    n = len(CIJ)
+    Wq = np.zeros((n, n, n))
+    CIJpwr = CIJ.copy()
+    Wq[:, :, 1] = CIJ
     for q in xrange(n):
-        CIJpwr=np.dot(CIJpwr,CIJ)
-        Wq[:,:,q]=CIJpwr
+        CIJpwr = np.dot(CIJpwr, CIJ)
+        Wq[:, :, q] = CIJpwr
 
-    twalk=np.sum(Wq)						#total number of walks
-    wlq=np.sum(np.sum(Wq,axis=0),axis=0)
-    return Wq,twalk,wlq
+    twalk = np.sum(Wq)  # total number of walks
+    wlq = np.sum(np.sum(Wq, axis=0), axis=0)
+    return Wq, twalk, wlq
 
 
 def reachdist(CIJ):
@@ -703,39 +713,41 @@ def reachdist(CIJ):
     -----
     faster but more memory intensive than "breadthdist.m".
     '''
-    def reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row):
-        CIJpwr=np.dot(CIJpwr,CIJ)
-        R=np.logical_or(R,CIJpwr!=0)
-        D+=R
-        if powr<=n and np.any(R[row,col]==0):
-            powr+=1
-            R,D,powr=reachdist2(CIJ,CIJpwr,R,D,N,powr,col,row)
-        return R,D,powr
+    def reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row):
+        CIJpwr = np.dot(CIJpwr, CIJ)
+        R = np.logical_or(R, CIJpwr != 0)
+        D += R
+        if powr <= n and np.any(R[row, col] == 0):
+            powr += 1
+            R, D, powr = reachdist2(CIJ, CIJpwr, R, D, N, powr, col, row)
+        return R, D, powr
 
-    R=CIJ.copy()
-    D=CIJ.copy()
-    powr=2
-    n=len(CIJ)
-    CIJpwr=CIJ.copy()
+    R = CIJ.copy()
+    D = CIJ.copy()
+    powr = 2
+    n = len(CIJ)
+    CIJpwr = CIJ.copy()
 
-    #check for vertices that have no incoming or outgoing connections
-    #these are ignored by reachdist
-    id=np.sum(CIJ,axis=0)
-    od=np.sum(CIJ,axis=1)
-    id0,=np.where(id==0)	#nothing goes in, so column(R) will be 0
-    od0,=np.where(od==0)	#nothing comes out, so row(R) will be 0
-    #use these colums and rows to check for reachability
-    col=range(10); col=np.delete(col,id0)
-    row=range(10); row=np.delete(row,od0)
+    # check for vertices that have no incoming or outgoing connections
+    # these are ignored by reachdist
+    id = np.sum(CIJ, axis=0)
+    od = np.sum(CIJ, axis=1)
+    id0, = np.where(id == 0)  # nothing goes in, so column(R) will be 0
+    od0, = np.where(od == 0)  # nothing comes out, so row(R) will be 0
+    # use these colums and rows to check for reachability
+    col = range(10)
+    col = np.delete(col, id0)
+    row = range(10)
+    row = np.delete(row, od0)
 
-    R,D,powr=reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row)
+    R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
 
     #'invert' CIJdist to get distances
-    D=powr-D+1
+    D = powr - D + 1
 
-    #put inf if no path found
-    D[D==n+2]=np.inf
-    D[:,id0]=np.inf
-    D[od0,:]=np.inf
+    # put inf if no path found
+    D[D == n + 2] = np.inf
+    D[:, id0] = np.inf
+    D[od0, :] = np.inf
 
-    return R,D
+    return R, D

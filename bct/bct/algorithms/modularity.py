@@ -3,6 +3,7 @@ import numpy as np
 from bct.bct.utils.miscellaneous_utilities import BCTParamError
 from bct.bct.utils.other import normalize
 
+
 def ci2ls(ci):
     '''
     Convert from a community index vector to a 2D python list of modules
@@ -21,18 +22,20 @@ def ci2ls(ci):
         pure python list with lowest value zero-indexed
         (regardless of zero-indexing parameter)
     '''
-    if not np.size(ci): return ci #list is empty
-    _,ci=np.unique(ci,return_inverse=True)
-    ci+=1
-    nr_indices=int(max(ci))
-    ls=[]
+    if not np.size(ci):
+        return ci  # list is empty
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
+    nr_indices = int(max(ci))
+    ls = []
     for c in range(nr_indices):
         ls.append([])
-    for i,x in enumerate(ci):
-        ls[ci[i]-1].append(i)
+    for i, x in enumerate(ci):
+        ls[ci[i] - 1].append(i)
     return ls
 
-def ls2ci(ls,zeroindexed=False):
+
+def ls2ci(ls, zeroindexed=False):
     '''
     Convert from a 2D python list of modules to a community index vector.
     The list is a pure python list, not requiring numpy.
@@ -50,14 +53,16 @@ def ls2ci(ls,zeroindexed=False):
     ci : Nx1 np.ndarray
         community index vector
     '''
-    if ls is None or np.size(ls)==0: return ()	#list is empty
-    nr_indices=sum(map(len,ls))
-    ci=np.zeros((nr_indices,),dtype=int)
-    z=int(not zeroindexed)
-    for i,x in enumerate(ls):
-        for j,y in enumerate(ls[i]):
-            ci[ls[i][j]]=i+z
+    if ls is None or np.size(ls) == 0:
+        return ()  # list is empty
+    nr_indices = sum(map(len, ls))
+    ci = np.zeros((nr_indices,), dtype=int)
+    z = int(not zeroindexed)
+    for i, x in enumerate(ls):
+        for j, y in enumerate(ls[i]):
+            ci[ls[i][j]] = i + z
     return ci
+
 
 def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
     '''
@@ -105,18 +110,18 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         raise BCTParamError('adjmat must not contain negative weights')
 
     if ci is None:
-        ci = np.arange(n)+1
+        ci = np.arange(n) + 1
     else:
         if len(ci) != n:
             raise BCTParamError('initial ci vector size must equal N')
-        _,ci = np.unique(ci, return_inverse=True)
-        ci+=1
+        _, ci = np.unique(ci, return_inverse=True)
+        ci += 1
     Mb = ci.copy()
 
-    if B=='modularity':
-        B = W-gamma*np.outer(np.sum(W,axis=1), np.sum(W,axis=0))/s
-    elif B=='potts':
-        B = W-gamma*np.logical_not(W)
+    if B == 'modularity':
+        B = W - gamma * np.outer(np.sum(W, axis=1), np.sum(W, axis=0)) / s
+    elif B == 'potts':
+        B = W - gamma * np.logical_not(W)
     else:
         try:
             B = np.array(B)
@@ -125,52 +130,52 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
 
         if B.shape != W.shape:
             raise BCTParamError('objective function matrix does not match '
-                'size of adjacency matrix')
+                                'size of adjacency matrix')
         if not np.allclose(B, B.T):
             print ('Warning: objective function matrix not symmetric, '
-                'symmetrizing')
-            B = (B+B.T)/2
+                   'symmetrizing')
+            B = (B + B.T) / 2
 
-    Hnm = np.zeros((n,n))
-    for m in xrange(1, n+1):
-        Hnm[:,m-1] = np.sum(B[:,ci==m], axis=1)   #node to module degree
-    H = np.sum(Hnm, axis=1)                     #node degree
-    Hm = np.sum(Hnm, axis=0)                    #module degree
+    Hnm = np.zeros((n, n))
+    for m in xrange(1, n + 1):
+        Hnm[:, m - 1] = np.sum(B[:, ci == m], axis=1)  # node to module degree
+    H = np.sum(Hnm, axis=1)  # node degree
+    Hm = np.sum(Hnm, axis=0)  # module degree
 
     q0 = -np.inf
-    #compute modularity
-    q = np.sum( B[np.tile(ci, (n,1)) == np.tile(ci, (n,1)).T ])/s
+    # compute modularity
+    q = np.sum(B[np.tile(ci, (n, 1)) == np.tile(ci, (n, 1)).T]) / s
 
     first_iteration = True
 
-    while q-q0 > 1e-10:
-        it=0
+    while q - q0 > 1e-10:
+        it = 0
         flag = True
         while flag:
-            it+=1
-            if it>1000:
+            it += 1
+            if it > 1000:
                 raise BCTParamError('Modularity infinite loop style G. '
-                    'Please contact the developer.')
+                                    'Please contact the developer.')
             flag = False
             for u in np.random.permutation(n):
-                ma = Mb[u]-1
-                dQ = Hnm[u,:] - Hnm[u,ma] + B[u,u]  #algorithm condition
+                ma = Mb[u] - 1
+                dQ = Hnm[u, :] - Hnm[u, ma] + B[u, u]  # algorithm condition
                 dQ[ma] = 0
 
                 max_dq = np.max(dQ)
-                if max_dq>1e-10:
+                if max_dq > 1e-10:
                     flag = True
                     mb = np.argmax(dQ)
 
-                    Hnm[:,mb] += B[:,u]
-                    Hnm[:,ma] -= B[:,u] #change node-to-module strengths
+                    Hnm[:, mb] += B[:, u]
+                    Hnm[:, ma] -= B[:, u]  # change node-to-module strengths
 
                     Hm[mb] += H[u]
-                    Hm[ma] -= H[u]  #change module strengths
+                    Hm[ma] -= H[u]  # change module strengths
 
-                    Mb[u] = mb+1
+                    Mb[u] = mb + 1
 
-        _,Mb = np.unique(Mb, return_inverse=True)
+        _, Mb = np.unique(Mb, return_inverse=True)
         Mb += 1
 
         M0 = ci.copy()
@@ -178,28 +183,29 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             ci = Mb.copy()
             first_iteration = False
         else:
-            for u in xrange(1, n+1):
-                ci[M0==u]=Mb[u-1]    #assign new modules
+            for u in xrange(1, n + 1):
+                ci[M0 == u] = Mb[u - 1]  # assign new modules
 
         n = np.max(Mb)
-        b1 = np.zeros((n,n))
-        for i in xrange(1, n+1):
-            for j in xrange(i, n+1):
-                #pool weights of nodes in same module
-                bm=np.sum(B[np.ix_(Mb==i,Mb==j)])
-                b1[i-1,j-1] = bm
-                b1[j-1,i-1] = bm
+        b1 = np.zeros((n, n))
+        for i in xrange(1, n + 1):
+            for j in xrange(i, n + 1):
+                # pool weights of nodes in same module
+                bm = np.sum(B[np.ix_(Mb == i, Mb == j)])
+                b1[i - 1, j - 1] = bm
+                b1[j - 1, i - 1] = bm
         B = b1.copy()
 
-        Mb = np.arange(1, n+1)
+        Mb = np.arange(1, n + 1)
         Hnm = B.copy()
-        H=np.sum(B, axis=0)
-        Hm=H.copy()
+        H = np.sum(B, axis=0)
+        Hm = H.copy()
 
         q0 = q
-        q=np.trace(B)/s         #compute modularity
+        q = np.trace(B) / s  # compute modularity
 
     return ci, q
+
 
 def link_communities(W, type_clustering='single'):
     '''
@@ -230,107 +236,118 @@ def link_communities(W, type_clustering='single'):
     if type_clustering not in ('single', 'complete'):
         raise BCTParamError('Unrecognized clustering type')
 
-    #set diagonal to mean weights
+    # set diagonal to mean weights
     np.fill_diagonal(W, 0)
     W[xrange(n), xrange(n)] = (
-        np.sum(W, axis=0)/np.sum(np.logical_not(W), axis=0) +
-        np.sum(W.T, axis=0)/np.sum(np.logical_not(W.T), axis=0))/2
+        np.sum(W, axis=0) / np.sum(np.logical_not(W), axis=0) +
+        np.sum(W.T, axis=0) / np.sum(np.logical_not(W.T), axis=0)) / 2
 
-    #out/in norm squared
+    # out/in norm squared
     No = np.sum(W**2, axis=1)
     Ni = np.sum(W**2, axis=0)
 
-    #weighted in/out jaccard
-    Jo = np.zeros((n,n))
-    Ji = np.zeros((n,n))
+    # weighted in/out jaccard
+    Jo = np.zeros((n, n))
+    Ji = np.zeros((n, n))
 
     for b in xrange(n):
         for c in xrange(n):
-            Do = np.dot(W[b,:], W[c,:].T)
-            Jo[b,c] = Do / (No[b]+No[c]-Do)
+            Do = np.dot(W[b, :], W[c, :].T)
+            Jo[b, c] = Do / (No[b] + No[c] - Do)
 
-            Di = np.dot(W[:,b].T, W[:,c])
-            Ji[b,c] = Di / (Ni[b]+Ni[c]-Di)
+            Di = np.dot(W[:, b].T, W[:, c])
+            Ji[b, c] = Di / (Ni[b] + Ni[c] - Di)
 
-    #get link similarity
-    A,B = np.where( np.logical_and( np.logical_or(W, W.T),
-                                    np.triu(np.ones((n,n)), 1)))
+    # get link similarity
+    A, B = np.where(np.logical_and(np.logical_or(W, W.T),
+                                   np.triu(np.ones((n, n)), 1)))
     m = len(A)
-    Ln = np.zeros((m,2), dtype=np.int32)    #link nodes
-    Lw = np.zeros((m,))     #link weights
+    Ln = np.zeros((m, 2), dtype=np.int32)  # link nodes
+    Lw = np.zeros((m,))  # link weights
 
     for i in xrange(m):
-        Ln[i,:] = (A[i], B[i])
+        Ln[i, :] = (A[i], B[i])
         Lw[i] = (W[A[i], B[i]] + W[B[i], A[i]]) / 2
 
-    ES = np.zeros((m,m), dtype=np.float32)    #link similarity
+    ES = np.zeros((m, m), dtype=np.float32)  # link similarity
     for i in xrange(m):
         for j in xrange(m):
-            if Ln[i,0] == Ln[j,0]:
-                a=Ln[i,0]; b=Ln[i,1]; c=Ln[j,1]
-            elif Ln[i,0] == Ln[j,1]:
-                a=Ln[i,0]; b=Ln[i,1]; c=Ln[j,0]
-            elif Ln[i,1] == Ln[j,0]:
-                a=Ln[i,1]; b=Ln[i,0]; c=Ln[j,1]
-            elif Ln[i,1] == Ln[j,1]:
-                a=Ln[i,1]; b=Ln[i,0]; c=Ln[j,0]
+            if Ln[i, 0] == Ln[j, 0]:
+                a = Ln[i, 0]
+                b = Ln[i, 1]
+                c = Ln[j, 1]
+            elif Ln[i, 0] == Ln[j, 1]:
+                a = Ln[i, 0]
+                b = Ln[i, 1]
+                c = Ln[j, 0]
+            elif Ln[i, 1] == Ln[j, 0]:
+                a = Ln[i, 1]
+                b = Ln[i, 0]
+                c = Ln[j, 1]
+            elif Ln[i, 1] == Ln[j, 1]:
+                a = Ln[i, 1]
+                b = Ln[i, 0]
+                c = Ln[j, 0]
             else:
                 continue
 
-            ES[i,j] = (W[a,b]*W[a,c]*Ji[b,c] + W[b,a]*W[c,a]*Jo[b,c])/2
+            ES[i, j] = (W[a, b] * W[a, c] * Ji[b, c] +
+                        W[b, a] * W[c, a] * Jo[b, c]) / 2
 
     np.fill_diagonal(ES, 0)
 
-    #perform hierarchical clustering
+    # perform hierarchical clustering
 
-    C = np.zeros((m,m), dtype=np.int32)   #community affiliation matrix
+    C = np.zeros((m, m), dtype=np.int32)  # community affiliation matrix
 
     Nc = C.copy()
-    Mc = np.zeros((m,m), dtype=np.float32)
-    Dc = Mc.copy()           #community nodes, links, density
+    Mc = np.zeros((m, m), dtype=np.float32)
+    Dc = Mc.copy()  # community nodes, links, density
 
-    U = np.arange(m)        #initial community assignments
-    C[0,:] = np.arange(m)
+    U = np.arange(m)  # initial community assignments
+    C[0, :] = np.arange(m)
 
-    for i in xrange(m-1):
-        print 'hierarchy %i'%i
+    for i in xrange(m - 1):
+        print 'hierarchy %i' % i
 
-        for j in xrange(len(U)):     #loop over communities
-            ixes = C[i,:] == U[j]   #get link indices
+        for j in xrange(len(U)):  # loop over communities
+            ixes = C[i, :] == U[j]  # get link indices
 
             links = np.sort(Lw[ixes])
             #nodes = np.sort(Ln[ixes,:].flat)
 
-            nodes = np.sort(np.reshape(Ln[ixes,:], 2*np.size(np.where(ixes))))
+            nodes = np.sort(np.reshape(
+                Ln[ixes, :], 2 * np.size(np.where(ixes))))
 
-            #get unique nodes
+            # get unique nodes
             nodulo = np.append(nodes[0], (nodes[1:])[nodes[1:] != nodes[:-1]])
             #nodulo = ((nodes[1:])[nodes[1:] != nodes[:-1]])
 
             nc = len(nodulo)
             #nc = len(nodulo)+1
             mc = np.sum(links)
-            min_mc = np.sum( links[:nc-1] ) #minimal weight
-            dc = (mc - min_mc) / (nc*(nc-1)/2 - min_mc) #community density
+            min_mc = np.sum(links[:nc - 1])  # minimal weight
+            dc = (mc - min_mc) / (nc * (nc - 1) /
+                                  2 - min_mc)  # community density
 
             if np.array(dc).shape is not ():
                 print dc
                 print dc.shape
 
-            Nc[i,j] = nc
-            Mc[i,j] = mc
-            Dc[i,j] = dc if not np.isnan(dc) else 0
+            Nc[i, j] = nc
+            Mc[i, j] = mc
+            Dc[i, j] = dc if not np.isnan(dc) else 0
 
-        C[i+1,:] = C[i,:]       #copy current partition
+        C[i + 1, :] = C[i, :]  # copy current partition
 
         if i in (6, 2692, 2693):
             import pdb
             pdb.set_trace()
 
-        u1,u2 = np.where( ES[np.ix_(U,U)]==np.max(ES[np.ix_(U,U)]) )
+        u1, u2 = np.where(ES[np.ix_(U, U)] == np.max(ES[np.ix_(U, U)]))
 
         if np.size(u1) > 2:
-            #pick one
+            # pick one
             wehr = np.where((u1 == u2[0]))
 
             uc = np.array((u1[0], u2[0]))
@@ -339,51 +356,52 @@ def link_communities(W, type_clustering='single'):
             u1 = uc
             u2 = ud
 
-        #get unique links (implementation of sortrows)
+        # get unique links (implementation of sortrows)
         #ugl = np.array((u1,u2))
-        ugl = np.sort((u1,u2), axis=1)
-        ug_rows = ugl[np.argsort(ugl,axis=0 )[:,0]]
-        #implementation of matlab unique(A, 'rows')
+        ugl = np.sort((u1, u2), axis=1)
+        ug_rows = ugl[np.argsort(ugl, axis=0)[:, 0]]
+        # implementation of matlab unique(A, 'rows')
         unq_rows = np.vstack({tuple(row) for row in ug_rows})
         V = U[unq_rows]
 
         for j in xrange(len(V)):
-            if type_clustering=='single':
-                x = np.max(ES[V[j,:],:], axis=0)
-            elif type_clustering=='complete':
-                x = np.min(ES[V[j,:],:], axis=0)
+            if type_clustering == 'single':
+                x = np.max(ES[V[j, :], :], axis=0)
+            elif type_clustering == 'complete':
+                x = np.min(ES[V[j, :], :], axis=0)
 
-            #assign distances to whole clusters
+            # assign distances to whole clusters
 #            import pdb
 #            pdb.set_trace()
-            ES[V[j,:],:] = np.array((x,x))
-            ES[:,V[j,:]] = np.transpose((x,x))
+            ES[V[j, :], :] = np.array((x, x))
+            ES[:, V[j, :]] = np.transpose((x, x))
 
             # clear diagonal
-            ES[V[j,0], V[j,0]] = 0
-            ES[V[j,1], V[j,1]] = 0
+            ES[V[j, 0], V[j, 0]] = 0
+            ES[V[j, 1], V[j, 1]] = 0
 
-            #merge communities
-            C[i+1, C[i+1,:]==V[j,1]] = V[j,0]
-            V[V==V[j,1]] = V[j,0]
+            # merge communities
+            C[i + 1, C[i + 1, :] == V[j, 1]] = V[j, 0]
+            V[V == V[j, 1]] = V[j, 0]
 
-        U = np.unique(C[i+1,:])
+        U = np.unique(C[i + 1, :])
         if len(U) == 1:
             break
 
     #Dc[ np.where(np.isnan(Dc)) ]=0
-    i = np.argmax(np.sum(Dc*Mc, axis=1))
+    i = np.argmax(np.sum(Dc * Mc, axis=1))
 
-    U=np.unique(C[i,:])
-    M=np.zeros((len(U),n))
+    U = np.unique(C[i, :])
+    M = np.zeros((len(U), n))
     for j in xrange(len(U)):
-        M[j, np.unique( Ln[C[i,:]==U[j],:])] = 1
+        M[j, np.unique(Ln[C[i, :] == U[j], :])] = 1
 
-    M = M[np.sum(M, axis=1)>2,:]
+    M = M[np.sum(M, axis=1) > 2, :]
 
     return M
 
-def modularity_dir(A,gamma=1,kci=None):
+
+def modularity_dir(A, gamma=1, kci=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -419,67 +437,71 @@ def modularity_dir(A,gamma=1,kci=None):
     but this function uses a deterministic modularity maximization algorithm.
     '''
     from scipy import linalg
-    n=len(A)							#number of vertices
-    ki=np.sum(A,axis=0)					#in degree
-    ko=np.sum(A,axis=1)					#out degree
-    m=np.sum(ki)						#number of edges
-    b=A-gamma*np.outer(ko,ki)/m
-    B=b+b.T								#directed modularity matrix
+    n = len(A)  # number of vertices
+    ki = np.sum(A, axis=0)  # in degree
+    ko = np.sum(A, axis=1)  # out degree
+    m = np.sum(ki)  # number of edges
+    b = A - gamma * np.outer(ko, ki) / m
+    B = b + b.T  # directed modularity matrix
 
-    init_mod=np.arange(n)				#initial one big module
-    modules=[]							#output modules list
+    init_mod = np.arange(n)  # initial one big module
+    modules = []  # output modules list
 
     def recur(module):
-        n=len(module)
-        modmat=B[module][:,module]
+        n = len(module)
+        modmat = B[module][:, module]
 
         np.save('latest_modmat.npy', modmat)
 
-        vals,vecs=linalg.eig(modmat)	#biggest eigendecomposition
+        vals, vecs = linalg.eig(modmat)  # biggest eigendecomposition
         rlvals = np.real(vals)
-        max_eigvec=np.squeeze(vecs[:,np.where(rlvals==np.max(rlvals))])
-        if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
-            max_eigvec=max_eigvec[:,0]
-        mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
-        q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
+        max_eigvec = np.squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
+        if max_eigvec.ndim > 1:  # if multiple max eigenvalues, pick one
+            max_eigvec = max_eigvec[:, 0]
+        # initial module assignments
+        mod_asgn = np.squeeze((max_eigvec >= 0) * 2 - 1)
+        q = np.dot(mod_asgn, np.dot(modmat, mod_asgn))  # modularity change
 
-        if q>0:							#change in modularity was positive
-            qmax=q
+        if q > 0:  # change in modularity was positive
+            qmax = q
             np.fill_diagonal(modmat, 0)
-            it=np.ma.masked_array(np.ones((n,)),False)
-            mod_asgn_iter=mod_asgn.copy()
-            while np.any(it):			#do some iterative fine tuning
-                #this line is linear algebra voodoo
-                q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
-                qmax=np.max(q_iter*it)
-                imax,=np.where(q_iter==qmax)
-                mod_asgn_iter[imax]*=-1	#does switching increase modularity?
-                it[imax]=np.ma.masked
-                if qmax>q:
-                    q=qmax
-                    mod_asgn=mod_asgn_iter
-            if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
+            it = np.ma.masked_array(np.ones((n,)), False)
+            mod_asgn_iter = mod_asgn.copy()
+            while np.any(it):  # do some iterative fine tuning
+                # this line is linear algebra voodoo
+                q_iter = qmax - 4 * mod_asgn_iter * \
+                    (np.dot(modmat, mod_asgn_iter))
+                qmax = np.max(q_iter * it)
+                imax, = np.where(q_iter == qmax)
+                # does switching increase modularity?
+                mod_asgn_iter[imax] *= -1
+                it[imax] = np.ma.masked
+                if qmax > q:
+                    q = qmax
+                    mod_asgn = mod_asgn_iter
+            if np.abs(np.sum(mod_asgn)) == n:  # iteration yielded null module
                 modules.append(np.array(module).tolist())
             else:
-                mod1=module[np.where(mod_asgn==1)]
-                mod2=module[np.where(mod_asgn==-1)]
+                mod1 = module[np.where(mod_asgn == 1)]
+                mod2 = module[np.where(mod_asgn == -1)]
 
                 recur(mod1)
                 recur(mod2)
-        else:							#change in modularity was negative or 0
+        else:  # change in modularity was negative or 0
             modules.append(np.array(module).tolist())
 
-    #adjustment to one-based indexing occurs in ls2ci
+    # adjustment to one-based indexing occurs in ls2ci
     if kci is None:
         recur(init_mod)
-        ci=ls2ci(modules)
+        ci = ls2ci(modules)
     else:
-        ci=kci
-    s=np.tile(ci,(n,1))
-    q=np.sum(np.logical_not(s-s.T)*B/(2*m))
-    return ci,q
+        ci = kci
+    s = np.tile(ci, (n, 1))
+    q = np.sum(np.logical_not(s - s.T) * B / (2 * m))
+    return ci, q
 
-def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
+
+def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -516,70 +538,71 @@ def modularity_finetune_dir(W,ci=None,gamma=1,seed=None):
     '''
     np.random.seed(seed)
 
-    n=len(W)							#number of nodes
+    n = len(W)  # number of nodes
     if ci is None:
-        ci=np.arange(n)+1
+        ci = np.arange(n) + 1
     else:
-        _,ci=np.unique(ci,return_inverse=True)
-        ci+=1
+        _, ci = np.unique(ci, return_inverse=True)
+        ci += 1
 
-    s=np.sum(W)							#weight of edges
-    knm_o=np.zeros((n,n))				#node-to-module out degree
-    knm_i=np.zeros((n,n))				#node-to-module in degree
+    s = np.sum(W)  # weight of edges
+    knm_o = np.zeros((n, n))  # node-to-module out degree
+    knm_i = np.zeros((n, n))  # node-to-module in degree
 
     for m in xrange(np.max(ci)):
-        knm_o[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
-        knm_i[:,m]=np.sum(W[ci==(m+1),:],axis=0)
+        knm_o[:, m] = np.sum(W[:, ci == (m + 1)], axis=1)
+        knm_i[:, m] = np.sum(W[ci == (m + 1), :], axis=0)
 
-    k_o=np.sum(knm_o,axis=1)			#node out-degree
-    k_i=np.sum(knm_i,axis=1)			#node in-degree
-    km_o=np.sum(knm_o,axis=0)			#module out-degree
-    km_i=np.sum(knm_i,axis=0)			#module out-degree
+    k_o = np.sum(knm_o, axis=1)  # node out-degree
+    k_i = np.sum(knm_i, axis=1)  # node in-degree
+    km_o = np.sum(knm_o, axis=0)  # module out-degree
+    km_i = np.sum(knm_i, axis=0)  # module out-degree
 
-    flag=True
+    flag = True
     while flag:
-        flag=False
-        for u in np.random.permutation(n):	#loop over nodes in random order
-            ma=ci[u]-1					#current module of u
-            #algorithm condition
-            dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
-                gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
-            dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-
-                gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
-            dq = (dq_o+dq_i)/2
-            dq[ma]=0
+        flag = False
+        for u in np.random.permutation(n):  # loop over nodes in random order
+            ma = ci[u] - 1  # current module of u
+            # algorithm condition
+            dq_o = ((knm_o[u, :] - knm_o[u, ma] + W[u, u]) -
+                    gamma * k_o[u] * (km_i - km_i[ma] + k_i[u]) / s)
+            dq_i = ((knm_i[u, :] - knm_i[u, ma] + W[u, u]) -
+                    gamma * k_i[u] * (km_o - km_o[ma] + k_o[u]) / s)
+            dq = (dq_o + dq_i) / 2
+            dq[ma] = 0
 
-            max_dq=np.max(dq)			#find maximal modularity increase
-            if max_dq>1e-10:			#if maximal increase positive
-                mb=np.argmax(dq)		#take only one value
-                #print max_dq,mb
+            max_dq = np.max(dq)  # find maximal modularity increase
+            if max_dq > 1e-10:  # if maximal increase positive
+                mb = np.argmax(dq)  # take only one value
+                # print max_dq,mb
 
-                knm_o[:,mb]+=W[u,:].T	#change node-to-module out-degrees
-                knm_o[:,ma]-=W[u,:].T
-                knm_i[:,mb]+=W[:,u]		#change node-to-module in-degrees
-                knm_i[:,ma]-=W[:,u]
-                km_o[mb]+=k_o[u]		#change module out-degrees
-                km_o[ma]-=k_o[u]
-                km_i[mb]+=k_i[u]		#change module in-degrees
-                km_i[ma]-=k_i[u]
+                knm_o[:, mb] += W[u, :].T  # change node-to-module out-degrees
+                knm_o[:, ma] -= W[u, :].T
+                knm_i[:, mb] += W[:, u]  # change node-to-module in-degrees
+                knm_i[:, ma] -= W[:, u]
+                km_o[mb] += k_o[u]  # change module out-degrees
+                km_o[ma] -= k_o[u]
+                km_i[mb] += k_i[u]  # change module in-degrees
+                km_i[ma] -= k_i[u]
 
-                ci[u]=mb+1				#reassign module
-                flag=True
+                ci[u] = mb + 1  # reassign module
+                flag = True
 
-    _,ci=np.unique(ci,return_inverse=True)
-    ci+=1
-    m=np.max(ci)						#new number of modules
-    w=np.zeros((m,m))					#new weighted matrix
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
+    m = np.max(ci)  # new number of modules
+    w = np.zeros((m, m))  # new weighted matrix
 
     for u in xrange(m):
         for v in xrange(m):
-            #pool weights of nodes in same module
-            w[u,v]=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
+            # pool weights of nodes in same module
+            w[u, v] = np.sum(W[np.ix_(ci == u + 1, ci == v + 1)])
 
-    q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
-    return ci,q
+    q = np.trace(w) / s - gamma * np.sum(np.dot(w / s, w / s))
+    return ci, q
 
-def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
+
+def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -617,63 +640,66 @@ def modularity_finetune_und(W,ci=None,gamma=1,seed=None):
     np.random.seed(seed)
 
     #import time
-    n=len(W)							#number of nodes
+    n = len(W)  # number of nodes
     if ci is None:
-        ci=np.arange(n)+1
+        ci = np.arange(n) + 1
     else:
-        _,ci=np.unique(ci,return_inverse=True)
-        ci+=1
+        _, ci = np.unique(ci, return_inverse=True)
+        ci += 1
 
-    s=np.sum(W)							#total weight of edges
-    knm=np.zeros((n,n))					#node-to-module degree
+    s = np.sum(W)  # total weight of edges
+    knm = np.zeros((n, n))  # node-to-module degree
     for m in xrange(np.max(ci)):
-        knm[:,m]=np.sum(W[:,ci==(m+1)],axis=1)
-    k=np.sum(knm,axis=1)				#node degree
-    km=np.sum(knm,axis=0)				#module degree
+        knm[:, m] = np.sum(W[:, ci == (m + 1)], axis=1)
+    k = np.sum(knm, axis=1)  # node degree
+    km = np.sum(knm, axis=0)  # module degree
 
-    flag=True
+    flag = True
     while flag:
-        flag=False
+        flag = False
 
         for u in np.random.permutation(n):
-        #for u in np.arange(n):
-            ma=ci[u]-1
-            #time.sleep(1)
-            #algorithm condition
-            dq=(knm[u,:]-knm[u,ma]+W[u,u])-gamma*k[u]*(km-km[ma]+k[u])/s
-            #print np.sum(knm[u,:],knm[u,ma],W[u,u],gamma,k[u],np.sum(km),km[ma],k[u],s
-            dq[ma]=0
+            # for u in np.arange(n):
+            ma = ci[u] - 1
+            # time.sleep(1)
+            # algorithm condition
+            dq = (knm[u, :] - knm[u, ma] + W[u, u]) - \
+                gamma * k[u] * (km - km[ma] + k[u]) / s
+            # print
+            # np.sum(knm[u,:],knm[u,ma],W[u,u],gamma,k[u],np.sum(km),km[ma],k[u],s
+            dq[ma] = 0
 
-            max_dq=np.max(dq)			#find maximal modularity increase
-            if max_dq>1e-10:			#if maximal increase positive
-                mb=np.argmax(dq)		#take only one value
+            max_dq = np.max(dq)  # find maximal modularity increase
+            if max_dq > 1e-10:  # if maximal increase positive
+                mb = np.argmax(dq)  # take only one value
 
-                #print max_dq, mb
+                # print max_dq, mb
 
-                knm[:,mb]+=W[:,u]		#change node-to-module degrees
-                knm[:,ma]-=W[:,u]
-                km[mb]+=k[u]			#change module degrees
-                km[ma]-=k[u]
+                knm[:, mb] += W[:, u]  # change node-to-module degrees
+                knm[:, ma] -= W[:, u]
+                km[mb] += k[u]  # change module degrees
+                km[ma] -= k[u]
 
-                ci[u]=mb+1
-                flag=True
+                ci[u] = mb + 1
+                flag = True
 
-    _,ci=np.unique(ci,return_inverse=True)
-    ci+=1
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
 
-    m=np.max(ci)
-    w=np.zeros((m,m))
+    m = np.max(ci)
+    w = np.zeros((m, m))
     for u in xrange(m):
         for v in xrange(m):
-            #pool weights of nodes in same module
-            wm=np.sum(W[np.ix_(ci==u+1,ci==v+1)])
-            w[u,v]=wm
-            w[v,u]=wm
+            # pool weights of nodes in same module
+            wm = np.sum(W[np.ix_(ci == u + 1, ci == v + 1)])
+            w[u, v] = wm
+            w[v, u] = wm
 
-    q=np.trace(w)/s-gamma*np.sum(np.dot(w/s,w/s))
-    return ci,q
+    q = np.trace(w) / s - gamma * np.sum(np.dot(w / s, w / s))
+    return ci, q
 
-def modularity_finetune_und_sign(W,qtype='sta',gamma=1,ci=None,seed=None):
+
+def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -714,84 +740,99 @@ def modularity_finetune_und_sign(W,qtype='sta',gamma=1,ci=None,seed=None):
     '''
     np.random.seed(seed)
 
-    n=len(W)							#number of nodes/modules
+    n = len(W)  # number of nodes/modules
     if ci is None:
-        ci=np.arange(n)+1
+        ci = np.arange(n) + 1
     else:
-        _,ci=np.unique(ci,return_inverse=True);
-        ci+=1
+        _, ci = np.unique(ci, return_inverse=True)
+        ci += 1
 
-    W0=W*(W>0)							#positive weights matrix
-    W1=-W*(W<0)							#negative weights matrix
-    s0=np.sum(W0)						#positive sum of weights
-    s1=np.sum(W1)						#negative sum of weights
-    Knm0=np.zeros((n,n))				#positive node-to-module-degree
-    Knm1=np.zeros((n,n))				#negative node-to-module degree
+    W0 = W * (W > 0)  # positive weights matrix
+    W1 = -W * (W < 0)  # negative weights matrix
+    s0 = np.sum(W0)  # positive sum of weights
+    s1 = np.sum(W1)  # negative sum of weights
+    Knm0 = np.zeros((n, n))  # positive node-to-module-degree
+    Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):	#loop over modules
-        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):  # loop over modules
+        Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
+        Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 
-    Kn0=np.sum(Knm0,axis=1)				#positive node degree
-    Kn1=np.sum(Knm1,axis=1)				#negative node degree
-    Km0=np.sum(Knm0,axis=0)				#positive module degree
-    Km1=np.sum(Knm1,axis=0)				#negative module degree
+    Kn0 = np.sum(Knm0, axis=1)  # positive node degree
+    Kn1 = np.sum(Knm1, axis=1)  # negative node degree
+    Km0 = np.sum(Knm0, axis=0)  # positive module degree
+    Km1 = np.sum(Knm1, axis=0)  # negative module degree
 
-    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-    else: raise KeyError('modularity type unknown')
+    if qtype == 'smp':
+        d0 = 1 / s0
+        d1 = 1 / s1  # dQ=dQ0/s0-dQ1/s1
+    elif qtype == 'gja':
+        d0 = 1 / (s0 + s1)
+        d1 = 1 / (s0 + s1)  # dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype == 'sta':
+        d0 = 1 / s0
+        d1 = 1 / (s0 + s1)  # dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype == 'pos':
+        d0 = 1 / s0
+        d1 = 0  # dQ=dQ0/s0
+    elif qtype == 'neg':
+        d0 = 0
+        d1 = 1 / s1  # dQ=-dQ1/s1
+    else:
+        raise KeyError('modularity type unknown')
 
-    if not s0:							#adjust for absent positive weights
-        s0=1; d0=0
-    if not s1:							#adjust for absent negative weights
-        s1=1; d1=0
+    if not s0:  # adjust for absent positive weights
+        s0 = 1
+        d0 = 0
+    if not s1:  # adjust for absent negative weights
+        s1 = 1
+        d1 = 0
 
-    flag=True							#flag for within hierarchy search
-    h=0
+    flag = True  # flag for within hierarchy search
+    h = 0
     while flag:
-        h+=1
-        if h>1000:
+        h += 1
+        if h > 1000:
             raise BCTParamError('Modularity infinite loop style D')
-        flag=False
-        for u in np.random.permutation(n):	#loop over nodes in random order
-            ma=ci[u]-1						#current module of u
-            dq0=((Knm0[u,:]+W0[u,u]-Knm0[u,ma])-
-                gamma*Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0)
-            dq1=((Knm1[u,:]+W1[u,u]-Knm1[u,ma])-
-                gamma*Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1)
-            dq=d0*dq0-d1*dq1			#rescaled changes in modularity
-            dq[ma]=0					#no changes for same module
+        flag = False
+        for u in np.random.permutation(n):  # loop over nodes in random order
+            ma = ci[u] - 1  # current module of u
+            dq0 = ((Knm0[u, :] + W0[u, u] - Knm0[u, ma]) -
+                   gamma * Kn0[u] * (Km0 + Kn0[u] - Km0[ma]) / s0)
+            dq1 = ((Knm1[u, :] + W1[u, u] - Knm1[u, ma]) -
+                   gamma * Kn1[u] * (Km1 + Kn1[u] - Km1[ma]) / s1)
+            dq = d0 * dq0 - d1 * dq1  # rescaled changes in modularity
+            dq[ma] = 0  # no changes for same module
 
-            #print dq,ma,u
+            # print dq,ma,u
 
-            max_dq=np.max(dq)			#maximal increase in modularity
-            mb=np.argmax(dq)			#corresponding module
-            if max_dq>1e-10:			#if maximal increase is positive
-                #print h,max_dq,mb,u
-                flag=True
-                ci[u]=mb+1				#reassign module
+            max_dq = np.max(dq)  # maximal increase in modularity
+            mb = np.argmax(dq)  # corresponding module
+            if max_dq > 1e-10:  # if maximal increase is positive
+                # print h,max_dq,mb,u
+                flag = True
+                ci[u] = mb + 1  # reassign module
 
-                Knm0[:,mb]+=W0[:,u]
-                Knm0[:,ma]-=W0[:,u]
-                Knm1[:,mb]+=W1[:,u]
-                Knm1[:,ma]-=W1[:,u]
-                Km0[mb]+=Kn0[u]
-                Km0[ma]-=Kn0[u]
-                Km1[mb]+=Kn1[u]
-                Km1[ma]-=Kn1[u]
+                Knm0[:, mb] += W0[:, u]
+                Knm0[:, ma] -= W0[:, u]
+                Knm1[:, mb] += W1[:, u]
+                Knm1[:, ma] -= W1[:, u]
+                Km0[mb] += Kn0[u]
+                Km0[ma] -= Kn0[u]
+                Km1[mb] += Kn1[u]
+                Km1[ma] -= Kn1[u]
 
-    _,ci=np.unique(ci,return_inverse=True); ci+=1
-    m=np.tile(ci,(n,1))
-    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-    q=d0*np.sum(q0)-d1*np.sum(q1)
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
+    m = np.tile(ci, (n, 1))
+    q0 = (W0 - np.outer(Kn0, Kn0) / s0) * (m == m.T)
+    q1 = (W1 - np.outer(Kn1, Kn1) / s1) * (m == m.T)
+    q = d0 * np.sum(q0) - d1 * np.sum(q1)
 
-    return ci,q
+    return ci, q
 
-def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
+
+def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -831,94 +872,96 @@ def modularity_louvain_dir(W,gamma=1,hierarchy=False,seed=None):
     '''
     np.random.seed(seed)
 
-    n=len(W)							#number of nodes
-    s=np.sum(W)							#total weight of edges
-    h=0									#hierarchy index
-    ci=[]
-    ci.append(np.arange(n)+1)			#hierarchical module assignments
-    q=[]
-    q.append(-1)						#hierarchical modularity index
-    n0=n
+    n = len(W)  # number of nodes
+    s = np.sum(W)  # total weight of edges
+    h = 0  # hierarchy index
+    ci = []
+    ci.append(np.arange(n) + 1)  # hierarchical module assignments
+    q = []
+    q.append(-1)  # hierarchical modularity index
+    n0 = n
 
     while True:
-        if h>300:
+        if h > 300:
             raise BCTParamError('Modularity Infinite Loop Style E.  Please '
-                'contact the developer with this error.')
-        k_o=np.sum(W,axis=1)			#node in/out degrees
-        k_i=np.sum(W,axis=0)
-        km_o=k_o.copy()					#module in/out degrees
-        km_i=k_i.copy()
-        knm_o=W.copy()					#node-to-module in/out degrees
-        knm_i=W.copy()
+                                'contact the developer with this error.')
+        k_o = np.sum(W, axis=1)  # node in/out degrees
+        k_i = np.sum(W, axis=0)
+        km_o = k_o.copy()  # module in/out degrees
+        km_i = k_i.copy()
+        knm_o = W.copy()  # node-to-module in/out degrees
+        knm_i = W.copy()
 
-        m=np.arange(n)+1				#initial module assignments
+        m = np.arange(n) + 1  # initial module assignments
 
-        flag=True						#flag for within hierarchy search
-        it=0
+        flag = True  # flag for within hierarchy search
+        it = 0
         while flag:
-            it+=1
-            if it>1000:
+            it += 1
+            if it > 1000:
                 raise BCTParamError('Modularity Infinite Loop Style F.  Please '
-                    'contact the developer with this error.')
-            flag=False
+                                    'contact the developer with this error.')
+            flag = False
 
-            #loop over nodes in random order
+            # loop over nodes in random order
             for u in np.random.permutation(n):
-                ma=m[u]-1
-                #algorithm condition
-                dq_o=((knm_o[u,:]-knm_o[u,ma]+W[u,u])-
-                    gamma*k_o[u]*(km_i-km_i[ma]+k_i[u])/s)
-                dq_i=((knm_i[u,:]-knm_i[u,ma]+W[u,u])-
-                    gamma*k_i[u]*(km_o-km_o[ma]+k_o[u])/s)
-                dq = (dq_o+dq_i)/2
-                dq[ma]=0
+                ma = m[u] - 1
+                # algorithm condition
+                dq_o = ((knm_o[u, :] - knm_o[u, ma] + W[u, u]) -
+                        gamma * k_o[u] * (km_i - km_i[ma] + k_i[u]) / s)
+                dq_i = ((knm_i[u, :] - knm_i[u, ma] + W[u, u]) -
+                        gamma * k_i[u] * (km_o - km_o[ma] + k_o[u]) / s)
+                dq = (dq_o + dq_i) / 2
+                dq[ma] = 0
 
-                max_dq=np.max(dq)		#find maximal modularity increase
-                if max_dq>1e-10:		#if maximal increase positive
-                    mb=np.argmax(dq)	#take only one value
+                max_dq = np.max(dq)  # find maximal modularity increase
+                if max_dq > 1e-10:  # if maximal increase positive
+                    mb = np.argmax(dq)  # take only one value
 
-                    knm_o[:,mb]+=W[u,:].T	#change node-to-module degrees
-                    knm_o[:,ma]-=W[u,:].T
-                    knm_i[:,mb]+=W[:,u]
-                    knm_i[:,ma]-=W[:,u]
-                    km_o[mb]+=k_o[u]		#change module out-degrees
-                    km_o[ma]-=k_o[u]
-                    km_i[mb]+=k_i[u]
-                    km_i[ma]-=k_i[u]
+                    knm_o[:, mb] += W[u, :].T  # change node-to-module degrees
+                    knm_o[:, ma] -= W[u, :].T
+                    knm_i[:, mb] += W[:, u]
+                    knm_i[:, ma] -= W[:, u]
+                    km_o[mb] += k_o[u]  # change module out-degrees
+                    km_o[ma] -= k_o[u]
+                    km_i[mb] += k_i[u]
+                    km_i[ma] -= k_i[u]
 
-                    m[u]=mb+1			#reassign module
-                    flag=True
+                    m[u] = mb + 1  # reassign module
+                    flag = True
 
-        _,m=np.unique(m,return_inverse=True)
-        m+=1
-        h+=1
+        _, m = np.unique(m, return_inverse=True)
+        m += 1
+        h += 1
         ci.append(np.zeros((n0,)))
-        #for i,mi in enumerate(m):		#loop through module assignments
+        # for i,mi in enumerate(m):		#loop through module assignments
         for i in xrange(n):
-            #ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
-            ci[h][np.where(ci[h-1]==i+1)] = m[i]
+            # ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
+            ci[h][np.where(ci[h - 1] == i + 1)] = m[i]
 
-        n=np.max(m)						#new number of modules
-        W1=np.zeros((n,n))				#new weighted matrix
+        n = np.max(m)  # new number of modules
+        W1 = np.zeros((n, n))  # new weighted matrix
         for i in xrange(n):
             for j in xrange(n):
-                #pool weights of nodes in same module
-                W1[i,j]=np.sum(W[np.ix_(m==i+1,m==j+1)])
+                # pool weights of nodes in same module
+                W1[i, j] = np.sum(W[np.ix_(m == i + 1, m == j + 1)])
 
         q.append(0)
-        #compute modularity
-        q[h]=np.trace(W1)/s-gamma*np.sum(np.dot(W1/s,W1/s))
-        if q[h]-q[h-1]<1e-10:			#if modularity does not increase
+        # compute modularity
+        q[h] = np.trace(W1) / s - gamma * np.sum(np.dot(W1 / s, W1 / s))
+        if q[h] - q[h - 1] < 1e-10:  # if modularity does not increase
             break
 
-    ci=np.array(ci, dtype=int)
+    ci = np.array(ci, dtype=int)
     if hierarchy:
-        ci=ci[1:-1]; q=q[1:-1]
-        return ci,q
+        ci = ci[1:-1]
+        q = q[1:-1]
+        return ci, q
     else:
-        return ci[h-1],q[h-1]
+        return ci[h - 1], q[h - 1]
 
-def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
+
+def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -958,95 +1001,97 @@ def modularity_louvain_und(W,gamma=1,hierarchy=False,seed=None):
     '''
     np.random.seed(seed)
 
-    n=len(W)							#number of nodes
-    s=np.sum(W)							#weight of edges
-    h=0									#hierarchy index
-    ci=[]
-    ci.append(np.arange(n)+1)			#hierarchical module assignments
-    q=[]
-    q.append(-1)						#hierarchical modularity values
-    n0=n
+    n = len(W)  # number of nodes
+    s = np.sum(W)  # weight of edges
+    h = 0  # hierarchy index
+    ci = []
+    ci.append(np.arange(n) + 1)  # hierarchical module assignments
+    q = []
+    q.append(-1)  # hierarchical modularity values
+    n0 = n
 
     #knm = np.zeros((n,n))
-    #for j in np.xrange(n0+1):
+    # for j in np.xrange(n0+1):
     #    knm[:,j] = np.sum(w[;,
 
     while True:
-        if h>300:
+        if h > 300:
             raise BCTParamError('Modularity Infinite Loop Style B.  Please '
-            'contact the developer with this error.')
-        k=np.sum(W,axis=0)				#node degree
-        Km=k.copy()						#module degree
-        Knm=W.copy()					#node-to-module degree
+                                'contact the developer with this error.')
+        k = np.sum(W, axis=0)  # node degree
+        Km = k.copy()  # module degree
+        Knm = W.copy()  # node-to-module degree
 
-        m=np.arange(n)+1				#initial module assignments
+        m = np.arange(n) + 1  # initial module assignments
 
-        flag=True						#flag for within-hierarchy search
-        it=0
+        flag = True  # flag for within-hierarchy search
+        it = 0
         while flag:
-            it+=1
-            if it>1000:
+            it += 1
+            if it > 1000:
                 raise BCTParamError('Modularity Infinite Loop Style C.  Please '
-                'contact the developer with this error.')
-            flag=False
+                                    'contact the developer with this error.')
+            flag = False
 
-            #loop over nodes in random order
+            # loop over nodes in random order
             for i in np.random.permutation(n):
-                ma=m[i]-1
-                #algorithm condition
-                dQ=((Knm[i,:]-Knm[i,ma]+W[i,i])-
-                    gamma*k[i]*(Km-Km[ma]+k[i])/s)
-                dQ[ma]=0
+                ma = m[i] - 1
+                # algorithm condition
+                dQ = ((Knm[i, :] - Knm[i, ma] + W[i, i]) -
+                      gamma * k[i] * (Km - Km[ma] + k[i]) / s)
+                dQ[ma] = 0
 
-                max_dq=np.max(dQ)		#find maximal modularity increase
-                if max_dq>1e-10:		#if maximal increase positive
-                    j=np.argmax(dQ)		#take only one value
-                    #print max_dq,j,dQ[j]
+                max_dq = np.max(dQ)  # find maximal modularity increase
+                if max_dq > 1e-10:  # if maximal increase positive
+                    j = np.argmax(dQ)  # take only one value
+                    # print max_dq,j,dQ[j]
 
-                    Knm[:,j]+=W[:,i]	#change node-to-module degrees
-                    Knm[:,ma]-=W[:,i]
+                    Knm[:, j] += W[:, i]  # change node-to-module degrees
+                    Knm[:, ma] -= W[:, i]
 
-                    Km[j]+=k[i]			#change module degrees
-                    Km[ma]-=k[i]
+                    Km[j] += k[i]  # change module degrees
+                    Km[ma] -= k[i]
 
-                    m[i]=j+1			#reassign module
-                    flag=True
+                    m[i] = j + 1  # reassign module
+                    flag = True
 
-        _,m=np.unique(m,return_inverse=True)	#new module assignments
-        #print m,h
-        m+=1
-        h+=1
+        _, m = np.unique(m, return_inverse=True)  # new module assignments
+        # print m,h
+        m += 1
+        h += 1
         ci.append(np.zeros((n0,)))
-        #for i,mi in enumerate(m):	#loop through initial module assignments
+        # for i,mi in enumerate(m):	#loop through initial module assignments
         for i in xrange(n):
-            #print i, m[i], n0, h, len(m), n
-            #ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
-            ci[h][np.where(ci[h-1]==i+1)] = m[i]
+            # print i, m[i], n0, h, len(m), n
+            # ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
+            ci[h][np.where(ci[h - 1] == i + 1)] = m[i]
 
-        n=np.max(m)						#new number of modules
-        W1=np.zeros((n,n))				#new weighted matrix
+        n = np.max(m)  # new number of modules
+        W1 = np.zeros((n, n))  # new weighted matrix
         for i in xrange(n):
-            for j in xrange(i,n):
-                #pool weights of nodes in same module
-                wp=np.sum(W[np.ix_(m==i+1,m==j+1)])
-                W1[i,j]=wp
-                W1[j,i]=wp
-        W=W1
+            for j in xrange(i, n):
+                # pool weights of nodes in same module
+                wp = np.sum(W[np.ix_(m == i + 1, m == j + 1)])
+                W1[i, j] = wp
+                W1[j, i] = wp
+        W = W1
 
         q.append(0)
-        #compute modularity
-        q[h]=np.trace(W)/s-gamma*np.sum(np.dot(W/s,W/s))
-        if q[h]-q[h-1]<1e-10:			#if modularity does not increase
+        # compute modularity
+        q[h] = np.trace(W) / s - gamma * np.sum(np.dot(W / s, W / s))
+        if q[h] - q[h - 1] < 1e-10:  # if modularity does not increase
             break
 
-    ci=np.array(ci, dtype=int)
+    ci = np.array(ci, dtype=int)
     if hierarchy:
-        ci=ci[1:-1]; q=q[1:-1]
-        return ci,q
+        ci = ci[1:-1]
+        q = q[1:-1]
+        return ci, q
     else:
-        return ci[h-1],q[h-1]
+        return ci[h - 1], q[h - 1]
 
-def modularity_louvain_und_sign(W,gamma=1,qtype='sta',seed=None):
+
+def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -1090,110 +1135,127 @@ def modularity_louvain_und_sign(W,gamma=1,qtype='sta',seed=None):
     '''
     np.random.seed(seed)
 
-    n=len(W)							#number of nodes
+    n = len(W)  # number of nodes
 
-    W0=W*(W>0)							#positive weights matrix
-    W1=-W*(W<0)							#negative weights matrix
-    s0=np.sum(W0)						#weight of positive links
-    s1=np.sum(W1)						#weight of negative links
+    W0 = W * (W > 0)  # positive weights matrix
+    W1 = -W * (W < 0)  # negative weights matrix
+    s0 = np.sum(W0)  # weight of positive links
+    s1 = np.sum(W1)  # weight of negative links
 
-    if qtype=='smp': d0=1/s0; d1=1/s1			#dQ=dQ0/s0-sQ1/s1
-    elif qtype=='gja': d0=1/(s0+s1); d1=d0		#dQ=(dQ0-dQ1)/(s0+s1)
-    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)	#dQ=dQ0/s0-dQ1/(s0+s1)
-    elif qtype=='pos': d0=1/s0; d1=0			#dQ=dQ0/s0
-    elif qtype=='neg': d0=0; d1=1/s1			#dQ=-dQ1/s1
-    else: raise KeyError('modularity type unknown')
+    if qtype == 'smp':
+        d0 = 1 / s0
+        d1 = 1 / s1  # dQ=dQ0/s0-sQ1/s1
+    elif qtype == 'gja':
+        d0 = 1 / (s0 + s1)
+        d1 = d0  # dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype == 'sta':
+        d0 = 1 / s0
+        d1 = 1 / (s0 + s1)  # dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype == 'pos':
+        d0 = 1 / s0
+        d1 = 0  # dQ=dQ0/s0
+    elif qtype == 'neg':
+        d0 = 0
+        d1 = 1 / s1  # dQ=-dQ1/s1
+    else:
+        raise KeyError('modularity type unknown')
 
-    if not s0:							#adjust for absent positive weights
-        s0=1; d0=0
-    if not s1:							#adjust for absent negative weights
-        s1=1; d1=0
+    if not s0:  # adjust for absent positive weights
+        s0 = 1
+        d0 = 0
+    if not s1:  # adjust for absent negative weights
+        s1 = 1
+        d1 = 0
 
-    h=1									#hierarchy index
-    nh=n								#number of nodes in hierarchy
-    ci=[None,np.arange(n)+1]			#hierarchical module assignments
-    q=[-1,0]							#hierarchical modularity values
-    while q[h]-q[h-1]>1e-10:
-        if h>300:
+    h = 1  # hierarchy index
+    nh = n  # number of nodes in hierarchy
+    ci = [None, np.arange(n) + 1]  # hierarchical module assignments
+    q = [-1, 0]  # hierarchical modularity values
+    while q[h] - q[h - 1] > 1e-10:
+        if h > 300:
             raise BCTParamError('Modularity Infinite Loop Style A.  Please '
-            'contact the developer with this error.')
-        kn0=np.sum(W0,axis=0)			#positive node degree
-        kn1=np.sum(W1,axis=0)			#negative node degree
-        km0=kn0.copy()					#positive module degree
-        km1=kn1.copy()					#negative module degree
-        knm0=W0.copy()					#positive node-to-module degree
-        knm1=W1.copy()					#negative node-to-module degree
+                                'contact the developer with this error.')
+        kn0 = np.sum(W0, axis=0)  # positive node degree
+        kn1 = np.sum(W1, axis=0)  # negative node degree
+        km0 = kn0.copy()  # positive module degree
+        km1 = kn1.copy()  # negative module degree
+        knm0 = W0.copy()  # positive node-to-module degree
+        knm1 = W1.copy()  # negative node-to-module degree
 
-        m=np.arange(nh)+1				#initial module assignments
-        flag=True						#flag for within hierarchy search
-        it=0
+        m = np.arange(nh) + 1  # initial module assignments
+        flag = True  # flag for within hierarchy search
+        it = 0
         while flag:
-            it+=1
-            if it>1000:
+            it += 1
+            if it > 1000:
                 raise BCTParamError('Infinite Loop was detected and stopped. '
-                'This was probably caused by passing in a directed matrix.')
-            flag=False
-            for u in np.random.permutation(nh):	#loop over nodes in random order
-                ma=m[u]-1
-                dQ0=((knm0[u,:]+W0[u,u]-knm0[u,ma])-
-                    gamma*kn0[u]*(km0+kn0[u]-km0[ma])/s0)	#positive dQ
-                dQ1=((knm1[u,:]+W1[u,u]-knm1[u,ma])-
-                    gamma*kn1[u]*(km1+kn1[u]-km1[ma])/s1)	#negative dQ
+                                    'This was probably caused by passing in a directed matrix.')
+            flag = False
+            # loop over nodes in random order
+            for u in np.random.permutation(nh):
+                ma = m[u] - 1
+                dQ0 = ((knm0[u, :] + W0[u, u] - knm0[u, ma]) -
+                       gamma * kn0[u] * (km0 + kn0[u] - km0[ma]) / s0)  # positive dQ
+                dQ1 = ((knm1[u, :] + W1[u, u] - knm1[u, ma]) -
+                       gamma * kn1[u] * (km1 + kn1[u] - km1[ma]) / s1)  # negative dQ
 
-                dQ=d0*dQ0-d1*dQ1		#rescaled changes in modularity
-                dQ[ma]=0				#no changes for same module
+                dQ = d0 * dQ0 - d1 * dQ1  # rescaled changes in modularity
+                dQ[ma] = 0  # no changes for same module
 
-                max_dQ=np.max(dQ)		#maximal increase in modularity
-                if max_dQ>1e-10:		#if maximal increase is positive
-                    flag=True
-                    mb=np.argmax(dQ)
+                max_dQ = np.max(dQ)  # maximal increase in modularity
+                if max_dQ > 1e-10:  # if maximal increase is positive
+                    flag = True
+                    mb = np.argmax(dQ)
 
-                    knm0[:,mb]+=W0[:,u]	#change positive node-to-module degrees
-                    knm0[:,ma]-=W0[:,u]
-                    knm1[:,mb]+=W1[:,u]	#change negative node-to-module degrees
-                    knm1[:,ma]-=W1[:,u]
-                    km0[mb]+=kn0[u]		#change positive module degrees
-                    km0[ma]-=kn0[u]
-                    km1[mb]+=kn1[u]		#change negative module degrees
-                    km1[ma]-=kn1[u]
+                    # change positive node-to-module degrees
+                    knm0[:, mb] += W0[:, u]
+                    knm0[:, ma] -= W0[:, u]
+                    # change negative node-to-module degrees
+                    knm1[:, mb] += W1[:, u]
+                    knm1[:, ma] -= W1[:, u]
+                    km0[mb] += kn0[u]  # change positive module degrees
+                    km0[ma] -= kn0[u]
+                    km1[mb] += kn1[u]  # change negative module degrees
+                    km1[ma] -= kn1[u]
 
-                    m[u]=mb+1			#reassign module
+                    m[u] = mb + 1  # reassign module
 
-        h+=1
+        h += 1
         ci.append(np.zeros((n,)))
-        _,m=np.unique(m,return_inverse=True)
-        m+=1
+        _, m = np.unique(m, return_inverse=True)
+        m += 1
 
-        for u in xrange(nh):		#loop through initial module assignments
-            ci[h][np.where(ci[h-1]==u+1)]=m[u]	#assign new modules
+        for u in xrange(nh):  # loop through initial module assignments
+            ci[h][np.where(ci[h - 1] == u + 1)] = m[u]  # assign new modules
 
-        nh=np.max(m)					#number of new nodes
-        wn0=np.zeros((nh,nh))			#new positive weights matrix
-        wn1=np.zeros((nh,nh))
+        nh = np.max(m)  # number of new nodes
+        wn0 = np.zeros((nh, nh))  # new positive weights matrix
+        wn1 = np.zeros((nh, nh))
 
         for u in xrange(nh):
-            for v in xrange(u,nh):
-                wn0[u,v]=np.sum(W0[np.ix_(m==u+1,m==v+1)])
-                wn1[u,v]=np.sum(W1[np.ix_(m==u+1,m==v+1)])
-                wn0[v,u]=wn0[u,v]
-                wn1[v,u]=wn1[u,v]
+            for v in xrange(u, nh):
+                wn0[u, v] = np.sum(W0[np.ix_(m == u + 1, m == v + 1)])
+                wn1[u, v] = np.sum(W1[np.ix_(m == u + 1, m == v + 1)])
+                wn0[v, u] = wn0[u, v]
+                wn1[v, u] = wn1[u, v]
 
-        W0=wn0
-        W1=wn1
+        W0 = wn0
+        W1 = wn1
 
         q.append(0)
-        #compute modularity
-        q0=np.trace(W0)-np.sum(np.dot(W0,W0))/s0
-        q1=np.trace(W1)-np.sum(np.dot(W1,W1))/s1
-        q[h]=d0*q0-d1*q1
+        # compute modularity
+        q0 = np.trace(W0) - np.sum(np.dot(W0, W0)) / s0
+        q1 = np.trace(W1) - np.sum(np.dot(W1, W1)) / s1
+        q[h] = d0 * q0 - d1 * q1
 
-    _,ci_ret=np.unique(ci[-1],return_inverse=True)
-    ci_ret+=1
+    _, ci_ret = np.unique(ci[-1], return_inverse=True)
+    ci_ret += 1
 
-    return ci_ret,q[-1]
+    return ci_ret, q[-1]
 
-def modularity_probtune_und_sign(W,qtype='sta',gamma=1,ci=None,p=.45,
-    seed=None):
+
+def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
+                                 seed=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -1240,79 +1302,93 @@ def modularity_probtune_und_sign(W,qtype='sta',gamma=1,ci=None,p=.45,
     '''
     np.random.seed(seed)
 
-    n=len(W)
+    n = len(W)
     if ci is None:
-        ci=np.arange(n)+1
+        ci = np.arange(n) + 1
     else:
-        _,ci=np.unique(ci,return_inverse=True)
-        ci+=1
+        _, ci = np.unique(ci, return_inverse=True)
+        ci += 1
 
-    W0=W*(W>0)								#positive weights matrix
-    W1=-W*(W<0)								#negative weights matrix
-    s0=np.sum(W0)							#positive sum of weights
-    s1=np.sum(W1)							#negative sum of weights
-    Knm0=np.zeros((n,n))					#positive node-to-module degree
-    Knm1=np.zeros((n,n))					#negative node-to-module degree
+    W0 = W * (W > 0)  # positive weights matrix
+    W1 = -W * (W < 0)  # negative weights matrix
+    s0 = np.sum(W0)  # positive sum of weights
+    s1 = np.sum(W1)  # negative sum of weights
+    Knm0 = np.zeros((n, n))  # positive node-to-module degree
+    Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):		#loop over initial modules
-        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):  # loop over initial modules
+        Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
+        Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 
-    Kn0=np.sum(Knm0,axis=1)					#positive node degree
-    Kn1=np.sum(Knm1,axis=1)					#negative node degree
-    Km0=np.sum(Knm0,axis=0)					#positive module degree
-    Km1=np.sum(Knm1,axis=0)					#negaitve module degree
+    Kn0 = np.sum(Knm0, axis=1)  # positive node degree
+    Kn1 = np.sum(Knm1, axis=1)  # negative node degree
+    Km0 = np.sum(Knm0, axis=0)  # positive module degree
+    Km1 = np.sum(Knm1, axis=0)  # negaitve module degree
 
-    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-    else: raise KeyError('modularity type unknown')
+    if qtype == 'smp':
+        d0 = 1 / s0
+        d1 = 1 / s1  # dQ=dQ0/s0-dQ1/s1
+    elif qtype == 'gja':
+        d0 = 1 / (s0 + s1)
+        d1 = 1 / (s0 + s1)  # dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype == 'sta':
+        d0 = 1 / s0
+        d1 = 1 / (s0 + s1)  # dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype == 'pos':
+        d0 = 1 / s0
+        d1 = 0  # dQ=dQ0/s0
+    elif qtype == 'neg':
+        d0 = 0
+        d1 = 1 / s1  # dQ=-dQ1/s1
+    else:
+        raise KeyError('modularity type unknown')
 
-    if not s0:							#adjust for absent positive weights
-        s0=1; d0=0
-    if not s1:							#adjust for absent negative weights
-        s1=1; d1=0
+    if not s0:  # adjust for absent positive weights
+        s0 = 1
+        d0 = 0
+    if not s1:  # adjust for absent negative weights
+        s1 = 1
+        d1 = 0
 
-    for u in np.random.permutation(n):		#loop over nodes in random order
-        ma=ci[u]-1							#current module
-        r=np.random.random()<p
+    for u in np.random.permutation(n):  # loop over nodes in random order
+        ma = ci[u] - 1  # current module
+        r = np.random.random() < p
         if r:
-            mb=np.random.randint(n)		 #select new module randomly
+            mb = np.random.randint(n)  # select new module randomly
         else:
-            dq0=((Knm0[u,:]+W0[u,u]-Knm0[u,ma])-
-                gamma*Kn0[u]*(Km0+Kn0[u]-Km0[ma])/s0)
-            dq1=((Knm1[u,:]+W1[u,u]-Knm1[u,ma])-
-                gamma*Kn1[u]*(Km1+Kn1[u]-Km1[ma])/s1)
-            dq=d0*dq0-d1*dq1
-            dq[ma]=0
+            dq0 = ((Knm0[u, :] + W0[u, u] - Knm0[u, ma]) -
+                   gamma * Kn0[u] * (Km0 + Kn0[u] - Km0[ma]) / s0)
+            dq1 = ((Knm1[u, :] + W1[u, u] - Knm1[u, ma]) -
+                   gamma * Kn1[u] * (Km1 + Kn1[u] - Km1[ma]) / s1)
+            dq = d0 * dq0 - d1 * dq1
+            dq[ma] = 0
 
-            max_dq=np.max(dq)
-            mb=np.argmax(dq)
+            max_dq = np.max(dq)
+            mb = np.argmax(dq)
 
-        if r or max_dq>1e-10:
-            ci[u]=mb+1
+        if r or max_dq > 1e-10:
+            ci[u] = mb + 1
 
-            Knm0[:,mb]+=W0[:,u]
-            Knm0[:,ma]-=W0[:,u]
-            Knm1[:,mb]+=W1[:,u]
-            Knm1[:,ma]-=W1[:,u]
-            Km0[mb]+=Kn0[u]
-            Km0[ma]-=Kn0[u]
-            Km1[mb]+=Kn1[u]
-            Km1[ma]-=Kn1[u]
+            Knm0[:, mb] += W0[:, u]
+            Knm0[:, ma] -= W0[:, u]
+            Knm1[:, mb] += W1[:, u]
+            Knm1[:, ma] -= W1[:, u]
+            Km0[mb] += Kn0[u]
+            Km0[ma] -= Kn0[u]
+            Km1[mb] += Kn1[u]
+            Km1[ma] -= Kn1[u]
 
-    _,ci=np.unique(ci,return_inverse=True)
-    ci+=1
-    m=np.tile(ci,(n,1))
-    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-    q=d0*np.sum(q0)-d1*np.sum(q1)
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
+    m = np.tile(ci, (n, 1))
+    q0 = (W0 - np.outer(Kn0, Kn0) / s0) * (m == m.T)
+    q1 = (W1 - np.outer(Kn1, Kn1) / s1) * (m == m.T)
+    q = d0 * np.sum(q0) - d1 * np.sum(q1)
 
-    return ci,q
+    return ci, q
 
-def modularity_und(A,gamma=1,kci=None):
+
+def modularity_und(A, gamma=1, kci=None):
     '''
     The optimal community structure is a subdivision of the network into
     nonoverlapping groups of nodes in a way that maximizes the number of
@@ -1348,66 +1424,70 @@ def modularity_und(A,gamma=1,kci=None):
     but this function uses a deterministic modularity maximization algorithm.
     '''
     from scipy import linalg
-    n=len(A)							#number of vertices
-    k=np.sum(A,axis=0)					#degree
-    m=np.sum(k)							#number of edges (each undirected edge
-                                            #is counted twice)
-    B=A-gamma*np.outer(k,k)/m			#initial modularity matrix
+    n = len(A)  # number of vertices
+    k = np.sum(A, axis=0)  # degree
+    m = np.sum(k)  # number of edges (each undirected edge
+    # is counted twice)
+    B = A - gamma * np.outer(k, k) / m  # initial modularity matrix
 
-    init_mod=np.arange(n)				#initial one big module
-    modules=[]							#output modules list
+    init_mod = np.arange(n)  # initial one big module
+    modules = []  # output modules list
 
     def recur(module):
-        n=len(module)
-        modmat=B[module][:,module]
-        modmat-=np.diag(np.sum(modmat,axis=0))
+        n = len(module)
+        modmat = B[module][:, module]
+        modmat -= np.diag(np.sum(modmat, axis=0))
 
-        vals,vecs=linalg.eigh(modmat)	#biggest eigendecomposition
+        vals, vecs = linalg.eigh(modmat)  # biggest eigendecomposition
         rlvals = np.real(vals)
-        max_eigvec=np.squeeze(vecs[:,np.where(rlvals==np.max(rlvals))])
-        if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
-            max_eigvec=max_eigvec[:,0]
-        mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
-        q=np.dot(mod_asgn,np.dot(modmat,mod_asgn))	#modularity change
+        max_eigvec = np.squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
+        if max_eigvec.ndim > 1:  # if multiple max eigenvalues, pick one
+            max_eigvec = max_eigvec[:, 0]
+        # initial module assignments
+        mod_asgn = np.squeeze((max_eigvec >= 0) * 2 - 1)
+        q = np.dot(mod_asgn, np.dot(modmat, mod_asgn))  # modularity change
 
-        if q>0:							#change in modularity was positive
-            qmax=q
+        if q > 0:  # change in modularity was positive
+            qmax = q
             np.fill_diagonal(modmat, 0)
-            it=np.ma.masked_array(np.ones((n,)),False)
-            mod_asgn_iter=mod_asgn.copy()
-            while np.any(it):			#do some iterative fine tuning
-                #this line is linear algebra voodoo
-                q_iter=qmax-4*mod_asgn_iter*(np.dot(modmat,mod_asgn_iter))
-                qmax=np.max(q_iter*it)
-                imax,=np.where(q_iter==qmax)
-                mod_asgn_iter[imax]*=-1	#does switching increase modularity?
-                it[imax]=np.ma.masked
-                if qmax>q:
-                    q=qmax
-                    mod_asgn=mod_asgn_iter
-            if np.abs(np.sum(mod_asgn))==n:	#iteration yielded null module
+            it = np.ma.masked_array(np.ones((n,)), False)
+            mod_asgn_iter = mod_asgn.copy()
+            while np.any(it):  # do some iterative fine tuning
+                # this line is linear algebra voodoo
+                q_iter = qmax - 4 * mod_asgn_iter * \
+                    (np.dot(modmat, mod_asgn_iter))
+                qmax = np.max(q_iter * it)
+                imax, = np.where(q_iter == qmax)
+                # does switching increase modularity?
+                mod_asgn_iter[imax] *= -1
+                it[imax] = np.ma.masked
+                if qmax > q:
+                    q = qmax
+                    mod_asgn = mod_asgn_iter
+            if np.abs(np.sum(mod_asgn)) == n:  # iteration yielded null module
                 modules.append(np.array(module).tolist())
                 return
             else:
-                mod1=module[np.where(mod_asgn==1)]
-                mod2=module[np.where(mod_asgn==-1)]
+                mod1 = module[np.where(mod_asgn == 1)]
+                mod2 = module[np.where(mod_asgn == -1)]
 
                 recur(mod1)
                 recur(mod2)
-        else:							#change in modularity was negative or 0
+        else:  # change in modularity was negative or 0
             modules.append(np.array(module).tolist())
 
-    #adjustment to one-based indexing occurs in ls2ci
+    # adjustment to one-based indexing occurs in ls2ci
     if kci is None:
         recur(init_mod)
-        ci=ls2ci(modules)
+        ci = ls2ci(modules)
     else:
-        ci=kci
-    s=np.tile(ci,(n,1))
-    q=np.sum(np.logical_not(s-s.T)*B/m)
-    return ci,q
+        ci = kci
+    s = np.tile(ci, (n, 1))
+    q = np.sum(np.logical_not(s - s.T) * B / m)
+    return ci, q
 
-def modularity_und_sign(W,ci,qtype='sta'):
+
+def modularity_und_sign(W, ci, qtype='sta'):
     '''
     This function simply calculates the signed modularity for a given
     partition. It does not do automatic partition generation right now.
@@ -1434,47 +1514,61 @@ def modularity_und_sign(W,ci,qtype='sta'):
     -----
     uses a deterministic algorithm
     '''
-    n=len(W)
-    _,ci=np.unique(ci, return_inverse=True)
-    ci+=1
+    n = len(W)
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
 
-    W0=W*(W>0)								#positive weights matrix
-    W1=-W*(W<0)								#negative weights matrix
-    s0=np.sum(W0)							#positive sum of weights
-    s1=np.sum(W1)							#negative sum of weights
-    Knm0=np.zeros((n,n))					#positive node-to-module degree
-    Knm1=np.zeros((n,n))					#negative node-to-module degree
+    W0 = W * (W > 0)  # positive weights matrix
+    W1 = -W * (W < 0)  # negative weights matrix
+    s0 = np.sum(W0)  # positive sum of weights
+    s1 = np.sum(W1)  # negative sum of weights
+    Knm0 = np.zeros((n, n))  # positive node-to-module degree
+    Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in xrange(int(np.max(ci))):		#loop over initial modules
-        Knm0[:,m]=np.sum(W0[:,ci==m+1],axis=1)
-        Knm1[:,m]=np.sum(W1[:,ci==m+1],axis=1)
+    for m in xrange(int(np.max(ci))):  # loop over initial modules
+        Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
+        Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 
-    Kn0=np.sum(Knm0,axis=1)					#positive node degree
-    Kn1=np.sum(Knm1,axis=1)					#negative node degree
-    Km0=np.sum(Knm0,axis=0)					#positive module degree
-    Km1=np.sum(Knm1,axis=0)					#negaitve module degree
+    Kn0 = np.sum(Knm0, axis=1)  # positive node degree
+    Kn1 = np.sum(Knm1, axis=1)  # negative node degree
+    Km0 = np.sum(Knm0, axis=0)  # positive module degree
+    Km1 = np.sum(Knm1, axis=0)  # negaitve module degree
 
-    if qtype=='smp': d0=1/s0; d1=1/s1				#dQ=dQ0/s0-dQ1/s1
-    elif qtype=='gja': d0=1/(s0+s1); d1=1/(s0+s1)	#dQ=(dQ0-dQ1)/(s0+s1)
-    elif qtype=='sta': d0=1/s0; d1=1/(s0+s1)		#dQ=dQ0/s0-dQ1/(s0+s1)
-    elif qtype=='pos': d0=1/s0; d1=0				#dQ=dQ0/s0
-    elif qtype=='neg': d0=0; d1=1/s1				#dQ=-dQ1/s1
-    else: raise KeyError('modularity type unknown')
+    if qtype == 'smp':
+        d0 = 1 / s0
+        d1 = 1 / s1  # dQ=dQ0/s0-dQ1/s1
+    elif qtype == 'gja':
+        d0 = 1 / (s0 + s1)
+        d1 = 1 / (s0 + s1)  # dQ=(dQ0-dQ1)/(s0+s1)
+    elif qtype == 'sta':
+        d0 = 1 / s0
+        d1 = 1 / (s0 + s1)  # dQ=dQ0/s0-dQ1/(s0+s1)
+    elif qtype == 'pos':
+        d0 = 1 / s0
+        d1 = 0  # dQ=dQ0/s0
+    elif qtype == 'neg':
+        d0 = 0
+        d1 = 1 / s1  # dQ=-dQ1/s1
+    else:
+        raise KeyError('modularity type unknown')
 
-    if not s0:							#adjust for absent positive weights
-        s0=1; d0=0
-    if not s1:							#adjust for absent negative weights
-        s1=1; d1=0
+    if not s0:  # adjust for absent positive weights
+        s0 = 1
+        d0 = 0
+    if not s1:  # adjust for absent negative weights
+        s1 = 1
+        d1 = 0
 
-    m=np.tile(ci,(n,1))
+    m = np.tile(ci, (n, 1))
 
-    q0=(W0-np.outer(Kn0,Kn0)/s0)*(m==m.T)
-    q1=(W1-np.outer(Kn1,Kn1)/s1)*(m==m.T)
-    q=d0*np.sum(q0)-d1*np.sum(q1)
+    q0 = (W0 - np.outer(Kn0, Kn0) / s0) * (m == m.T)
+    q1 = (W1 - np.outer(Kn1, Kn1) / s1) * (m == m.T)
+    q = d0 * np.sum(q0) - d1 * np.sum(q1)
 
-    return ci,q
+    return ci, q
 
-def partition_distance(cx,cy):
+
+def partition_distance(cx, cy):
     '''
     This function quantifies the distance between pairs of community
     partitions with information theoretic measures.
@@ -1500,23 +1594,23 @@ def partition_distance(cx,cy):
        MIn = 2MI(X,Y)/[H(X)+H(Y)]
     where H is entropy, MI is mutual information and n is number of nodes)
     '''
-    n=np.size(cx)
-    _,cx=np.unique(cx,return_inverse=True)
-    _,cy=np.unique(cy,return_inverse=True)
-    _,cxy=np.unique(cx+cy*1j,return_inverse=True)
+    n = np.size(cx)
+    _, cx = np.unique(cx, return_inverse=True)
+    _, cy = np.unique(cy, return_inverse=True)
+    _, cxy = np.unique(cx + cy * 1j, return_inverse=True)
 
     cx += 1
     cy += 1
     cxy += 1
 
-    Px=np.histogram(cx,bins=np.max(cx))[0]/n
-    Py=np.histogram(cy,bins=np.max(cy))[0]/n
-    Pxy=np.histogram(cxy,bins=np.max(cxy))[0]/n
+    Px = np.histogram(cx, bins=np.max(cx))[0] / n
+    Py = np.histogram(cy, bins=np.max(cy))[0] / n
+    Pxy = np.histogram(cxy, bins=np.max(cxy))[0] / n
 
-    Hx=-np.sum(Px*np.log(Px))
-    Hy=-np.sum(Py*np.log(Py))
-    Hxy=-np.sum(Pxy*np.log(Pxy))
+    Hx = -np.sum(Px * np.log(Px))
+    Hy = -np.sum(Py * np.log(Py))
+    Hxy = -np.sum(Pxy * np.log(Pxy))
 
-    Vin=(2*Hxy-Hx-Hy)/np.log(n)
-    Min=2*(Hx+Hy-Hxy)/(Hx+Hy)
-    return Vin,Min
+    Vin = (2 * Hxy - Hx - Hy) / np.log(n)
+    Min = 2 * (Hx + Hy - Hxy) / (Hx + Hy)
+    return Vin, Min

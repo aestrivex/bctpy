@@ -2996,7 +2996,9 @@ def modularity_dir(A,gamma=1,kci=None):
         modmat=B[module][:,module]
 
         vals,vecs=linalg.eig(modmat)	#biggest eigendecomposition
-        max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
+
+        rlvals = np.real(vals)
+        max_eigvec=np.squeeze(vecs[:,np.where(rlvals==np.max(rlvals))])
         if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
             max_eigvec=max_eigvec[:,0]
         mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments
@@ -3922,7 +3924,8 @@ def modularity_und(A,gamma=1,kci=None):
         modmat-=np.diag(np.sum(modmat,axis=0))
 
         vals,vecs=linalg.eigh(modmat)	#biggest eigendecomposition
-        max_eigvec=np.squeeze(vecs[:,np.where(vals==np.max(np.real(vals)))])
+        rlvals = np.real(vals)
+        max_eigvec=np.squeeze(vecs[:,np.where(rlvals==np.max(rlvals))])
         if max_eigvec.ndim>1:			#if multiple max eigenvalues, pick one
             max_eigvec=max_eigvec[:,0]
         mod_asgn=np.squeeze((max_eigvec>=0)*2-1)	#initial module assignments

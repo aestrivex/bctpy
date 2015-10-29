@@ -5,7 +5,6 @@ import pydoc
 from .docscrape import NumpyDocString
 from .docscrape import FunctionDoc
 from .docscrape import ClassDoc
-import collections
 
 
 class SphinxDocString(NumpyDocString):
@@ -137,7 +136,7 @@ class SphinxDocString(NumpyDocString):
             return out
 
         out += ['.. index:: %s' % idx.get('default', '')]
-        for section, references in idx.items():
+        for section, references in idx.iteritems():
             if section == 'default':
                 continue
             elif section == 'refguide':
@@ -226,7 +225,7 @@ def get_doc_object(obj, what=None, doc=None, config={}):
             what = 'class'
         elif inspect.ismodule(obj):
             what = 'module'
-        elif isinstance(obj, collections.Callable):
+        elif callable(obj):
             what = 'function'
         else:
             what = 'object'

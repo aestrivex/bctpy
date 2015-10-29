@@ -41,9 +41,8 @@ def load_directed_low_modularity_sample(thres=1):
 def load_binary_directed_low_modularity_sample(thres=.35):
     return bct.binarize(load_directed_low_modularity_sample(thres=thres))
 
+
 # unimplemented samples
-
-
 def load_binary_sparse_sample(thres=.35):
     raise NotImplementedError()
 
@@ -67,9 +66,8 @@ def load_directed_signed_sparse_sample(thres=.03):
 def load_signed_sparse_sample(thres=.06):
     raise NotImplementedError()
 
+
 # NBS samples
-
-
 def load_sample_group_qball():
     q = np.load(mat_path('sample_group_qball.npy'))
     return np.transpose(

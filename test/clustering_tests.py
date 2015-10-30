@@ -14,9 +14,10 @@ def test_transitivity_wu():
     t = bct.transitivity_wu(x)
     assert np.allclose(t, 1.32927829)
 
-
 # test signed clustering so that the cuberoot functionality is tested
 # there is no equivalent matlab functionality
+
+
 def test_cluscoef_signed():
     x = load_signed_sample(thres=.85)
     cc = bct.clustering_coef_wu(x)
@@ -28,8 +29,9 @@ def test_transitivity_signed():
     t = bct.transitivity_wu(x)
     assert np.imag(t) == 0
 
-
 # test functions dealing with components on very sparse dataset
+
+
 def test_component():
     from scipy import stats
     x = load_sparse_sample()

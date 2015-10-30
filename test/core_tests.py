@@ -19,7 +19,7 @@ def test_threshold_proportional_directed():
     x = load_directed_sample()
     bct.threshold_proportional(x, .28, copy=False)
     assert np.sum(x) == 3410
-    # assert np.allclose( np.sum(x), 32852.72485433 )
+    #assert np.allclose( np.sum(x), 32852.72485433 )
 
 
 def test_threshold_absolute():

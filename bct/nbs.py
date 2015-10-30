@@ -1,7 +1,8 @@
 from __future__ import division
 import numpy as np
 
-from .bct import BCTParamError,get_components
+from .utils import BCTParamError
+from .algorithms import get_components
 
 #FIXME considerable gains could be realized using vectorization, although
 #generating the null distribution will take a while

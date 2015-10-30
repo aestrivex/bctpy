@@ -48,7 +48,7 @@ def test_consensus():
 	x = load_sample(thres=.38)
 	ci = bct.consensus_und(x, .1, reps=50)
 	assert np.max(ci)==4
-	_,q = bct.modularity_und(x, kci=ci)	
+	_,q = bct.modularity_und(x, kci=ci)
 	assert np.allclose(q, 0.27, atol=.01)
 
 def test_cluscoef_wd():

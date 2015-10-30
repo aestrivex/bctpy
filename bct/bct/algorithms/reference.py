@@ -1477,7 +1477,7 @@ def randomizer_bin_und(R,alpha):
     fullnodes=np.where((np.sum(np.triu(R,1),axis=0)+
         np.sum(np.triu(R,1),axis=1).T)==(ax-1))
     if np.size(fullnodes):
-        R[fullnode,:]=0; R[:,fullnode]=0
+        R[fullnodes,:]=0; R[:,fullnodes]=0
         np.fill_diagonal(R, np.inf)
         i,j=np.where(np.triu(R,1))
         k=len(i)

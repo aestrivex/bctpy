@@ -709,7 +709,7 @@ def reachdist(CIJ):
         D+=R
         if powr<=n and np.any(R[row,col]==0):
             powr+=1
-            R,D,powr=reachdist2(CIJ,CIJpwr,R,D,N,powr,col,row)
+            R,D,powr=reachdist2(CIJ,CIJpwr,R,D,n,powr,col,row)
         return R,D,powr
 
     R=CIJ.copy()

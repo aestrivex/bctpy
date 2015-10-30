@@ -128,7 +128,7 @@ def gtom(adj,nr_steps):
     Elements of 'gt' are bounded between 0 and 1.  The 'gt' matrix can be
     converted from a similarity to a distance matrix by taking 1-gt.
     '''
-    bm=binarize(bm,copy=True)
+    bm=binarize(adj,copy=True)
     bm_aux=bm.copy()
     nr_nodes=len(adj)
 

@@ -353,6 +353,7 @@ def efficiency_bin(G,local=False):
         np.fill_diagonal(D, 0)
         return D
 
+    G=binarize(G)
     n=len(G)							#number of nodes
     if local:
         E=np.zeros((n,))				#local efficiency
@@ -382,7 +383,6 @@ def efficiency_bin(G,local=False):
         e=distance_inv(G)
         E=np.sum(e)/(n*n-n)				#global efficiency
     return E
-
 
 def efficiency_wei(Gw,local=False):
     '''

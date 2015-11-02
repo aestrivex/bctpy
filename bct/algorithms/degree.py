@@ -1,6 +1,6 @@
 from __future__ import division
 import numpy as np
-from bct.bct.utils.other import binarize
+from bct.utils import binarize
 
 
 def degrees_dir(CIJ):

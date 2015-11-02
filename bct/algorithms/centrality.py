@@ -1,5 +1,7 @@
 from __future__ import division
 import numpy as np
+from .core import kcore_bd, kcore_bu
+from .distance import reachdist
 
 def betweenness_bin(G):
     '''

@@ -1,3 +1,11 @@
+BCT 0.4.1
+
+- Refactor code into multiple files
+- Fix bug in efficiency_bin
+- Fix bugs in modularity_louvain_und
+- Fix bugs in participation_coef_b*
+- Add some test cases
+
 BCT 0.4.0
 - Add various new functions from Jan 2015 release of BCT
 - Fix various bugs documented in github issues

@@ -6,7 +6,7 @@ class BCTParamError(RuntimeError):
     pass
 
 
-def _cuberoot(x):
+def cuberoot(x):
     '''
     Correctly handle the cube root for negative weights, instead of uselessly
     crashing as in python or returning the wrong root as in matlab

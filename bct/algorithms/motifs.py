@@ -1,7 +1,6 @@
 from __future__ import division
 import numpy as np
-from bct.bct.utils.miscellaneous_utilities import BCTParamError
-from bct.bct.utils.other import binarize
+from bct.utils import BCTParamError, binarize
 
 motiflib='motif34lib.mat'
 

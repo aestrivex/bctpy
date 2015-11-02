@@ -1,7 +1,6 @@
 from __future__ import division
 import numpy as np
-from bct.bct.utils.miscellaneous_utilities import _cuberoot
-from bct.bct.utils.other import binarize, invert
+from bct.utils import cuberoot, binarize, invert
 
 
 def breadthdist(CIJ):
@@ -470,11 +469,11 @@ def efficiency_wei(Gw,local=False):
             #find pairs of neighbors
             V,=np.where(np.logical_or(Gw[u,:],Gw[:,u].T))
             #symmetrized vector of weights
-            sw=_cuberoot(Gw[u,V])+_cuberoot(Gw[V,u].T)
+            sw=cuberoot(Gw[u,V])+cuberoot(Gw[V,u].T)
             #inverse distance matrix
             e=distance_inv_wei(Gl[np.ix_(V,V)])
             #symmetrized inverse distance matrix
-            se=_cuberoot(e)+_cuberoot(e.T)
+            se=cuberoot(e)+cuberoot(e.T)
 
             numer=np.sum(np.outer(sw.T,sw)*se)/2
             if numer!=0:

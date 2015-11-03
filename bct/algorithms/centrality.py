@@ -164,8 +164,10 @@ def diversity_coef_sign(W,ci):
         pnm[np.logical_not(pnm)]=1
         return -np.sum(pnm*np.log(pnm),axis=1)/np.log(m)
 
-    Hpos=entropy(W*(W>0))
-    Hneg=entropy(-W*(W<0))
+    #explicitly ignore compiler warning for division by zero
+    with np.errstate(invalid='ignore'):
+        Hpos=entropy(W*(W>0))
+        Hneg=entropy(-W*(W<0))
 
     return Hpos,Hneg
 
@@ -666,8 +668,10 @@ def participation_coef_sign(W,ci):
         P[np.where(np.logical_not(P))]=0	#p_ind=0 if no (out)neighbors
         return P
 
-    Ppos=pcoef(W*(W>0))
-    Pneg=pcoef(-W*(W<0))
+    #explicitly ignore compiler warning for division by zero
+    with np.errstate(invalid='ignore'):
+        Ppos=pcoef(W*(W>0))
+        Pneg=pcoef(-W*(W<0))
 
     return Ppos, Pneg
 

@@ -1,8 +1,7 @@
 from __future__ import division
 import numpy as np
 from .modularity import modularity_louvain_und_sign
-from bct.bct.utils.miscellaneous_utilities import _cuberoot, BCTParamError, dummyvar
-from bct.bct.utils.other import binarize
+from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
 from .distance import breadthdist
 
 def agreement(ci,buffsz=None):
@@ -178,7 +177,7 @@ def clustering_coef_wd(W):
     coefficient for respective graphs.
     '''
     A=np.logical_not(W==0).astype(float)	#adjacency matrix
-    S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    S=cuberoot(W)+cuberoot(W.T)			#symmetrized weights matrix ^1/3
     K=np.sum(A+A.T,axis=1)					#total degree (in+out)
     cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
     K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
@@ -202,7 +201,7 @@ def clustering_coef_wu(W):
         clustering coefficient vector
     '''
     K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
-    ws=_cuberoot(W)
+    ws=cuberoot(W)
     cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
     K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
     C=cyc3/(K*(K-1))
@@ -462,7 +461,7 @@ def transitivity_wd(W):
     coefficient for respective graphs.
     '''
     A=np.logical_not(W==0).astype(float)	#adjacency matrix
-    S=_cuberoot(W)+_cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    S=cuberoot(W)+cuberoot(W.T)			#symmetrized weights matrix ^1/3
     K=np.sum(A+A.T,axis=1)			 		#total degree (in+out)
     cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
     K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
@@ -485,6 +484,6 @@ def transitivity_wu(W):
         transitivity scalar
     '''
     K=np.sum(np.logical_not(W==0),axis=1)
-    ws=_cuberoot(W)
+    ws=cuberoot(W)
     cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
     return np.sum(cyc3,axis=0)/np.sum(K*(K-1),axis=0)

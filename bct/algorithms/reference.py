@@ -1,8 +1,7 @@
 from __future__ import division
 import numpy as np
-from bct.bct.utils.miscellaneous_utilities import BCTParamError
+from bct.utils import BCTParamError, binarize
 from .clustering import number_of_components
-from bct.bct.utils.other import binarize
 
 
 def latmio_dir_connected(R,iter,D=None):

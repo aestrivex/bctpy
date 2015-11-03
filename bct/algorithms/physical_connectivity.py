@@ -25,10 +25,10 @@ def density_dir(CIJ):
     Assumes CIJ is directed and has no self-connections.
     Weight information is discarded.
     '''
-    n=len(CIJ)
-    k=np.size(np.where(CIJ.flatten()))
-    kden=k/(n*n-n)
-    return kden,n,k
+    n = len(CIJ)
+    k = np.size(np.where(CIJ.flatten()))
+    kden = k / (n * n - n)
+    return kden, n, k
 
 
 def density_und(CIJ):
@@ -54,13 +54,13 @@ def density_und(CIJ):
     Assumes CIJ is undirected and has no self-connections.
             Weight information is discarded.
     '''
-    n=len(CIJ)
-    k=np.size(np.where(np.triu(CIJ).flatten()))
-    kden=k/((n*n-n)/2)
-    return kden,n,k
+    n = len(CIJ)
+    k = np.size(np.where(np.triu(CIJ).flatten()))
+    kden = k / ((n * n - n) / 2)
+    return kden, n, k
 
 
-def rentian_scaling(A,xyz,n):
+def rentian_scaling(A, xyz, n):
     '''
     Physical Rentian scaling (or more simply Rentian scaling) is a property
     of systems that are cost-efficiently embedded into physical space. It is
@@ -118,36 +118,39 @@ def rentian_scaling(A,xyz,n):
 
     Note: n=5000 was used in Bassett et al. 2010 in PLoS CB.
     '''
-    m=np.size(xyz,axis=0)			#find number of nodes in system
+    m = np.size(xyz, axis=0)  # find number of nodes in system
 
-    #rescale coordinates so they are all greater than unity
-    xyzn=xyz-np.tile(np.min(xyz,axis=0)-1,(m,1))
+    # rescale coordinates so they are all greater than unity
+    xyzn = xyz - np.tile(np.min(xyz, axis=0) - 1, (m, 1))
 
-    #find the absolute minimum and maximum over all directions
-    nmax=np.max(xyzn)
-    nmin=np.min(xyzn)
+    # find the absolute minimum and maximum over all directions
+    nmax = np.max(xyzn)
+    nmin = np.min(xyzn)
 
-    count=0
-    N=np.zeros((n,))
-    E=np.zeros((n,))
+    count = 0
+    N = np.zeros((n,))
+    E = np.zeros((n,))
 
-    #create partitions and count the number of nodes inside the partition (n)
-    #and the number of edges traversing the boundary of the partition (e)
-    while count<n:
-        #define cube endpoints
-        randx=np.sort((1+nmax-nmin)*np.random.random((2,)))
+    # create partitions and count the number of nodes inside the partition (n)
+    # and the number of edges traversing the boundary of the partition (e)
+    while count < n:
+        # define cube endpoints
+        randx = np.sort((1 + nmax - nmin) * np.random.random((2,)))
 
-        #find nodes in cube
-        l1=xyzn[:,0]>randx[0]; l2=xyzn[:,0]<randx[1]
-        l3=xyzn[:,1]>randx[0]; l4=xyzn[:,1]<randx[1]
-        l5=xyzn[:,2]>randx[0]; l6=xyzn[:,2]<randx[1]
+        # find nodes in cube
+        l1 = xyzn[:, 0] > randx[0]
+        l2 = xyzn[:, 0] < randx[1]
+        l3 = xyzn[:, 1] > randx[0]
+        l4 = xyzn[:, 1] < randx[1]
+        l5 = xyzn[:, 2] > randx[0]
+        l6 = xyzn[:, 2] < randx[1]
 
-        L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
+        L, = np.where((l1 & l2 & l3 & l4 & l5 & l6).flatten())
         if np.size(L):
-            #count edges crossing at the boundary of the cube
-            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(xrange(m),L))])
-            #count nodes inside of the cube
-            N[count]=np.size(L)
-            count+=1
+            # count edges crossing at the boundary of the cube
+            E[count] = np.sum(A[np.ix_(L, np.setdiff1d(xrange(m), L))])
+            # count nodes inside of the cube
+            N[count] = np.size(L)
+            count += 1
 
-    return N,E
+    return N, E

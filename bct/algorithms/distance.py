@@ -358,6 +358,7 @@ def efficiency_bin(G, local=False):
         np.fill_diagonal(D, 0)
         return D
 
+    G = binarize(G)
     n = len(G)  # number of nodes
     if local:
         E = np.zeros((n,))  # local efficiency
@@ -378,7 +379,7 @@ def efficiency_bin(G, local=False):
 
             # symmetrized adjacency vector
             sa = G[u, V] + G[V, u].T
-            numer = np.sum(np.dot(sa.T, sa) * se) / 2
+            numer = np.sum(np.outer(sa.T, sa) * se) / 2
             if numer != 0:
                 denom = np.sum(sa)**2 - np.sum(sa * sa)
                 E[u] = numer / denom  # local efficiency

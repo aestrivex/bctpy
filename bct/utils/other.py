@@ -2,8 +2,7 @@ from __future__ import division
 import numpy as np
 from .miscellaneous_utilities import BCTParamError
 
-
-def threshold_absolute(W, thr, copy=True):
+def threshold_absolute(W,thr,copy=True):
     '''
     This function thresholds the connectivity matrix by absolute weight
     magnitude. All weights below the given threshold, and all weights
@@ -26,14 +25,12 @@ def threshold_absolute(W, thr, copy=True):
     W : np.ndarray
         thresholded connectivity matrix
     '''
-    if copy:
-        W = W.copy()
-    np.fill_diagonal(W, 0)  # clear diagonal
-    W[W < thr] = 0  # apply threshold
+    if copy: W=W.copy()
+    np.fill_diagonal(W, 0)				#clear diagonal
+    W[W<thr]=0							#apply threshold
     return W
 
-
-def threshold_proportional(W, p, copy=True):
+def threshold_proportional(W,p,copy=True):
     '''
     This function "thresholds" the connectivity matrix by preserving a
     proportion p (0<p<1) of the strongest weights. All other weights, and
@@ -77,35 +74,33 @@ def threshold_proportional(W, p, copy=True):
     elements in x_25 are aleady <=0. This behavior is the same as in BCT. Be
     careful with matrices that are both signed and sparse.
     '''
-    if p > 1 or p < 0:
+    if p>1 or p<0:
         raise BCTParamError('Threshold must be in range [0,1]')
-    if copy:
-        W = W.copy()
-    n = len(W)						# number of nodes
+    if copy: W=W.copy()
+    n=len(W)						# number of nodes
     np.fill_diagonal(W, 0)			# clear diagonal
 
     if np.allclose(W, W.T):				# if symmetric matrix
-        W[np.tril_indices(n)] = 0		# ensure symmetry is preserved
-        ud = 2						# halve number of removed links
+        W[np.tril_indices(n)]=0		# ensure symmetry is preserved
+        ud=2						# halve number of removed links
     else:
-        ud = 1
+        ud=1
 
-    ind = np.where(W)					# find all links
+    ind=np.where(W)					# find all links
 
-    I = np.argsort(W[ind])[::-1]		# sort indices by magnitude
+    I=np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-    en = int(round((n * n - n) * p / ud))		# number of links to be preserved
+    en=int(round((n*n-n)*p/ud))		# number of links to be preserved
 
-    W[(ind[0][I][en:], ind[1][I][en:])] = 0  # apply threshold
+    W[(ind[0][I][en:],ind[1][I][en:])]=0	# apply threshold
     #W[np.ix_(ind[0][I][en:], ind[1][I][en:])]=0
 
-    if ud == 2:						# if symmetric matrix
-        W[:, :] = W + W.T						# reconstruct symmetry
+    if ud==2:						# if symmetric matrix
+        W[:,:]=W+W.T						# reconstruct symmetry
 
     return W
 
-
-def weight_conversion(W, wcm, copy=True):
+def weight_conversion(W,wcm,copy=True):
     '''
     W_bin = weight_conversion(W, 'binarize');
     W_nrm = weight_conversion(W, 'normalize');
@@ -154,17 +149,12 @@ def weight_conversion(W, wcm, copy=True):
     other functions binarize(), normalize() and invert() which are simpler to
     call directly.
     '''
-    if wcm == 'binarize':
-        return binarize(W, copy)
-    elif wcm == 'normalize':
-        return normalize(W, copy)
-    elif wcm == 'lengths':
-        return invert(W, copy)
-    else:
-        raise NotImplementedError('Unknown weight conversion command.')
+    if wcm=='binarize': return binarize(W,copy)
+    elif wcm=='normalize': return normalize(W,copy)
+    elif wcm=='lengths': return invert(W,copy)
+    else: raise NotImplementedError('Unknown weight conversion command.')
 
-
-def binarize(W, copy=True):
+def binarize(W,copy=True):
     '''
     Binarizes an input weighted connection matrix.  If copy is not set, this
     function will *modify W in place.*
@@ -182,13 +172,11 @@ def binarize(W, copy=True):
     W : NxN np.ndarray
         binary connectivity matrix
     '''
-    if copy:
-        W = W.copy()
-    W[W != 0] = 1
+    if copy: W=W.copy()
+    W[W!=0]=1
     return W
 
-
-def normalize(W, copy=True):
+def normalize(W,copy=True):
     '''
     Normalizes an input weighted connection matrix.  If copy is not set, this
     function will *modify W in place.*
@@ -206,13 +194,11 @@ def normalize(W, copy=True):
     W : np.ndarray
         normalized connectivity matrix
     '''
-    if copy:
-        W = W.copy()
-    W /= np.max(np.abs(W))
+    if copy: W=W.copy()
+    W/=np.max(np.abs(W))
     return W
 
-
-def invert(W, copy=True):
+def invert(W,copy=True):
     '''
     Inverts elementwise the weights in an input connection matrix.
     In other words, change the from the matrix of internode strengths to the
@@ -233,14 +219,12 @@ def invert(W, copy=True):
     W : np.ndarray
         inverted connectivity matrix
     '''
-    if copy:
-        W = W.copy()
-    E = np.where(W)
-    W[E] = 1. / W[E]
+    if copy: W=W.copy()
+    E=np.where(W)
+    W[E]=1./W[E]
     return W
 
-
-def autofix(W, copy=True):
+def autofix(W,copy=True):
     '''
     Fix a bunch of common problems. More specifically, remove Inf and NaN,
     ensure exact binariness and symmetry (i.e. remove floating point
@@ -260,21 +244,20 @@ def autofix(W, copy=True):
     W : np.ndarray
         connectivity matrix with fixes applied
     '''
-    if copy:
-        W = W.copy()
+    if copy: W=W.copy()
 
-    # zero diagonal
+    #zero diagonal
     np.fill_diagonal(W, 0)
 
-    # remove np.inf and np.nan
+    #remove np.inf and np.nan
     W[np.logical_or(np.where(np.isinf(W)), np.where(np.isnan(W)))] = 0
 
-    # ensure exact binarity
+    #ensure exact binarity
     u = np.unique(W)
-    if np.all(np.logical_or(np.abs(u) < 1e-8, np.abs(u - 1) < 1e-8)):
+    if np.all(np.logical_or( np.abs(u)<1e-8, np.abs(u-1)<1e-8 )):
         W = np.around(W, decimal=5)
 
-    # ensure exact symmetry
+    #ensure exact symmetry
     if np.allclose(W, W.T):
         W = np.around(W, decimals=5)
 

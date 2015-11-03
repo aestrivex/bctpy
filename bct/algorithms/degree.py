@@ -28,11 +28,11 @@ def degrees_dir(CIJ):
     Inputs are assumed to be on the columns of the CIJ matrix.
            Weight information is discarded.
     '''
-    CIJ = binarize(CIJ, copy=True)  # ensure CIJ is binary
-    id = np.sum(CIJ, axis=0)  # indegree = column sum of CIJ
-    od = np.sum(CIJ, axis=1)  # outdegree = row sum of CIJ
-    deg = id + od  # degree = indegree+outdegree
-    return id, od, deg
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
+    od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
+    deg=id+od						#degree = indegree+outdegree
+    return id,od,deg
 
 
 def degrees_und(CIJ):
@@ -53,8 +53,8 @@ def degrees_und(CIJ):
     -----
     Weight information is discarded.
     '''
-    CIJ = binarize(CIJ, copy=True)  # ensure CIJ is binary
-    return np.sum(CIJ, axis=0)
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    return np.sum(CIJ,axis=0)
 
 
 def jdegree(CIJ):
@@ -84,28 +84,28 @@ def jdegree(CIJ):
     -----
     Weights are discarded.
     '''
-    CIJ = binarize(CIJ, copy=True)  # ensure CIJ is binary
-    n = len(CIJ)
-    id = np.sum(CIJ, axis=0)  # indegree = column sum of CIJ
-    od = np.sum(CIJ, axis=1)  # outdegree = row sum of CIJ
+    CIJ=binarize(CIJ,copy=True)		#ensure CIJ is binary
+    n=len(CIJ)
+    id=np.sum(CIJ,axis=0)			#indegree = column sum of CIJ
+    od=np.sum(CIJ,axis=1)			#outdegree = row sum of CIJ
 
-    # create the joint degree distribution matrix
-    # note: the matrix is shifted by one, to accomodate zero id and od in the
-    # first row/column
-    # upper triangular part of the matrix has vertices with od>id
-    # lower triangular part has vertices with id>od
-    # main diagonal has units with id=od
+    #create the joint degree distribution matrix
+    #note: the matrix is shifted by one, to accomodate zero id and od in the
+    #first row/column
+    #upper triangular part of the matrix has vertices with od>id
+    #lower triangular part has vertices with id>od
+    #main diagonal has units with id=od
 
-    szJ = np.max((id, od)) + 1
-    J = np.zeros((szJ, szJ))
+    szJ=np.max((id,od))+1
+    J=np.zeros((szJ,szJ))
 
     for i in xrange(n):
-        J[id[i], od[i]] += 1
+        J[id[i],od[i]]+=1
 
-    J_od = np.sum(np.triu(J, 1))
-    J_id = np.sum(np.tril(J, -1))
-    J_bl = np.sum(np.diag(J))
-    return J, J_od, J_id, J_bl
+    J_od=np.sum(np.triu(J,1))
+    J_id=np.sum(np.tril(J,-1))
+    J_bl=np.sum(np.diag(J))
+    return J,J_od,J_id,J_bl
 
 
 def strengths_dir(CIJ):
@@ -132,9 +132,9 @@ def strengths_dir(CIJ):
     -----
     Inputs are assumed to be on the columns of the CIJ matrix.
     '''
-    istr = np.sum(CIJ, axis=0)
-    ostr = np.sum(CIJ, axis=1)
-    return istr + ostr
+    istr=np.sum(CIJ,axis=0)
+    ostr=np.sum(CIJ,axis=1)
+    return istr+ostr
 
 
 def strengths_und(CIJ):
@@ -151,7 +151,7 @@ def strengths_und(CIJ):
     str : Nx1 np.ndarray
         node strengths
     '''
-    return np.sum(CIJ, axis=0)
+    return np.sum(CIJ,axis=0)
 
 
 def strengths_und_sign(W):
@@ -174,12 +174,12 @@ def strengths_und_sign(W):
     vneg : float
         total negative weight
     '''
-    W = W.copy()
-    n = len(W)
-    np.fill_diagonal(W, 0)  # clear diagonal
-    Spos = W * (W > 0)  # positive strengths
-    Sneg = W * (W < 0)  # negative strengths
+    W=W.copy()
+    n=len(W)
+    np.fill_diagonal(W, 0)				#clear diagonal
+    Spos=W*(W>0)						#positive strengths
+    Sneg=W*(W<0)						#negative strengths
 
-    vpos = np.sum(W[W > 0])  # positive weight
-    vneg = np.sum(W[W < 0])  # negative weight
+    vpos=np.sum(W[W>0])					#positive weight
+    vneg=np.sum(W[W<0])					#negative weight
     return Spos, Sneg, vpos, vneg

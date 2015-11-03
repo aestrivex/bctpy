@@ -2,8 +2,7 @@ from __future__ import division
 import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 
-
-def assortativity_bin(CIJ, flag):
+def assortativity_bin(CIJ,flag):
     '''
     The assortativity coefficient is a correlation coefficient between the
     degrees of all nodes on two opposite ends of a link. A positive
@@ -33,41 +32,30 @@ def assortativity_bin(CIJ, flag):
     the function computes the directed assortativity described in Rubinov
     and Sporns (2010) NeuroImage.
     '''
-    if flag == 0:  # undirected version
-        deg = degrees_und(CIJ)
-        i, j = np.where(np.triu(CIJ, 1) > 0)
-        K = len(i)
-        degi = deg[i]
-        degj = deg[j]
-    else:  # directed version
-        id, od, deg = degrees_dir(CIJ)
-        i, j = np.where(CIJ > 0)
-        K = len(i)
+    if flag==0:								#undirected version
+        deg=degrees_und(CIJ)
+        i,j=np.where(np.triu(CIJ,1)>0)
+        K=len(i)
+        degi=deg[i]; degj=deg[j]
+    else:									#directed version
+        id,od,deg=degrees_dir(CIJ)
+        i,j=np.where(CIJ>0)
+        K=len(i)
 
-        if flag == 1:
-            degi = od[i]
-            degj = id[j]
-        elif flag == 2:
-            degi = id[i]
-            degj = od[j]
-        elif flag == 3:
-            degi = od[i]
-            degj = od[j]
-        elif flag == 4:
-            degi = id[i]
-            degj = id[j]
-        else:
-            raise ValueError('Flag must be 0-4')
+        if flag==1: degi=od[i]; degj=id[j]
+        elif flag==2: degi=id[i]; degj=od[j]
+        elif flag==3: degi=od[i]; degj=od[j]
+        elif flag==4: degi=id[i]; degj=id[j]
+        else: raise ValueError('Flag must be 0-4')
 
-    # compute assortativity
-    term1 = np.sum(degi * degj) / K
-    term2 = np.square(np.sum(.5 * (degi + degj)) / K)
-    term3 = np.sum(.5 * (degi * degi + degj * degj)) / K
+    #compute assortativity
+    term1 = np.sum(degi*degj)/K
+    term2 = np.square(np.sum(.5*(degi+degj))/K)
+    term3 = np.sum(.5*(degi*degi+degj*degj))/K
     r = (term1 - term2) / (term3 - term2)
     return r
 
-
-def assortativity_wei(CIJ, flag):
+def assortativity_wei(CIJ,flag):
     '''
     The assortativity coefficient is a correlation coefficient between the
     strengths (weighted degrees) of all nodes on two opposite ends of a link.
@@ -96,41 +84,31 @@ def assortativity_wei(CIJ, flag):
        the function computes the directed assortativity described in Rubinov
        and Sporns (2010) NeuroImage.
     '''
-    if flag == 0:  # undirected version
-        str = strengths_und(CIJ)
-        i, j = np.where(np.triu(CIJ, 1) > 0)
-        K = len(i)
-        stri = str[i]
-        strj = str[j]
+    if flag==0:							#undirected version
+        str=strengths_und(CIJ)
+        i,j=np.where(np.triu(CIJ,1)>0)
+        K=len(i)
+        stri=str[i]
+        strj=str[j]
     else:
-        ist, ost = strengths_dir(CIJ)  # directed version
-        i, j = np.where(CIJ > 0)
-        K = len(i)
+        ist,ost=strengths_dir(CIJ)		#directed version
+        i,j=np.where(CIJ>0)
+        K=len(i)
 
-        if flag == 1:
-            stri = ost[i]
-            strj = ist[j]
-        elif flag == 2:
-            stri = ist[i]
-            strj = ost[j]
-        elif flag == 3:
-            stri = ost[i]
-            strj = ost[j]
-        elif flag == 4:
-            stri = ist[i]
-            strj = ost[j]
-        else:
-            raise ValueError('Flag must be 0-4')
+        if flag==1: stri=ost[i]; strj=ist[j]
+        elif flag==2: stri=ist[i]; strj=ost[j]
+        elif flag==3: stri=ost[i]; strj=ost[j]
+        elif flag==4: stri=ist[i]; strj=ost[j]
+        else: raise ValueError('Flag must be 0-4')
 
-    # compute assortativity
-    term1 = np.sum(stri * strj) / K
-    term2 = np.square(np.sum(.5 * (stri + strj)) / K)
-    term3 = np.sum(.5 * (stri * stri + strj * strj)) / K
+    #compute assortativity
+    term1 = np.sum(stri*strj)/K
+    term2 = np.square(np.sum(.5*(stri+strj))/K)
+    term3 = np.sum(.5*(stri*stri+strj*strj))/K
     r = (term1 - term2) / (term3 - term2)
     return r
 
-
-def kcore_bd(CIJ, k, peel=False):
+def kcore_bd(CIJ,k,peel=False):
     '''
     The k-core is the largest subnetwork comprising nodes of degree at
     least k. This function computes the k-core for a given binary directed
@@ -166,39 +144,32 @@ def kcore_bd(CIJ, k, peel=False):
     'peelorder' and 'peellevel' are similar the the k-core sub-shells
     described in Modha and Singh (2010).
     '''
-    if peel:
-        peelorder, peellevel = ([], [])
-    iter = 0
-    CIJkcore = CIJ.copy()
+    if peel: peelorder,peellevel=([],[])
+    iter=0
+    CIJkcore=CIJ.copy()
 
     while True:
-        id, od, deg = degrees_dir(CIJkcore)  # get degrees of matrix
+        id,od,deg=degrees_dir(CIJkcore)		#get degrees of matrix
 
-        # find nodes with degree <k
-        ff, = np.where(np.logical_and(deg < k, deg > 0))
+        #find nodes with degree <k
+        ff,=np.where(np.logical_and(deg<k,deg>0))
 
-        if ff.size == 0:
-            break  # if none found -> stop
+        if ff.size==0: break				#if none found -> stop
 
-        # else peel away found nodes
-        iter += 1
-        CIJkcore[ff, :] = 0
-        CIJkcore[:, ff] = 0
+        #else peel away found nodes
+        iter+=1
+        CIJkcore[ff,:]=0
+        CIJkcore[:,ff]=0
 
-        if peel:
-            peelorder.append(ff)
-        if peel:
-            peellevel.append(iter * np.ones((len(ff),)))
+        if peel: peelorder.append(ff)
+        if peel: peellevel.append(iter*np.ones((len(ff),)))
 
-    kn = np.sum(deg > 0)
+    kn=np.sum(deg>0)
 
-    if peel:
-        return CIJkcore, kn, peelorder, peellevel
-    else:
-        return CIJkcore, kn
+    if peel: return CIJkcore,kn,peelorder,peellevel
+    else: return CIJkcore,kn
 
-
-def kcore_bu(CIJ, k, peel=False):
+def kcore_bu(CIJ,k,peel=False):
     '''
     The k-core is the largest subnetwork comprising nodes of degree at
     least k. This function computes the k-core for a given binary
@@ -234,39 +205,32 @@ def kcore_bu(CIJ, k, peel=False):
     'peelorder' and 'peellevel' are similar the the k-core sub-shells
     described in Modha and Singh (2010).
     '''
-    if peel:
-        peelorder, peellevel = ([], [])
-    iter = 0
-    CIJkcore = CIJ.copy()
+    if peel: peelorder,peellevel=([],[])
+    iter=0
+    CIJkcore=CIJ.copy()
 
     while True:
-        deg = degrees_und(CIJkcore)  # get degrees of matrix
+        deg=degrees_und(CIJkcore)		#get degrees of matrix
 
-        # find nodes with degree <k
-        ff, = np.where(np.logical_and(deg < k, deg > 0))
+        #find nodes with degree <k
+        ff,=np.where(np.logical_and(deg<k,deg>0))
 
-        if ff.size == 0:
-            break  # if none found -> stop
+        if ff.size==0: break			#if none found -> stop
 
-        # else peel away found nodes
-        iter += 1
-        CIJkcore[ff, :] = 0
-        CIJkcore[:, ff] = 0
+        #else peel away found nodes
+        iter+=1
+        CIJkcore[ff,:]=0
+        CIJkcore[:,ff]=0
 
-        if peel:
-            peelorder.append(ff)
-        if peel:
-            peellevel.append(iter * np.ones((len(ff),)))
+        if peel: peelorder.append(ff)
+        if peel: peellevel.append(iter*np.ones((len(ff),)))
 
-    kn = np.sum(deg > 0)
+    kn=np.sum(deg>0)
 
-    if peel:
-        return CIJkcore, kn, peelorder, peellevel
-    else:
-        return CIJkcore, kn
+    if peel: return CIJkcore,kn,peelorder,peellevel
+    else: return CIJkcore,kn
 
-
-def rich_club_bd(CIJ, klevel=None):
+def rich_club_bd(CIJ,klevel=None):
     '''
     The rich club coefficient, R, at level k is the fraction of edges that
     connect nodes of degree k or higher out of the maximum number of edges
@@ -290,29 +254,27 @@ def rich_club_bd(CIJ, klevel=None):
     Ek : int
         number of edges remaining in subgraph with degree > k
     '''
-    # definition of degree as used for RC coefficients
-    # degree is taken to be the sum of incoming and outgoing connections
-    id, od, deg = degrees_dir(CIJ)
+    #definition of degree as used for RC coefficients
+    #degree is taken to be the sum of incoming and outgoing connections
+    id,od,deg=degrees_dir(CIJ)
 
     if klevel is None:
-        klevel = int(np.max(deg))
+        klevel=int(np.max(deg))
 
-    R = np.zeros((klevel,))
-    Nk = np.zeros((klevel,))
-    Ek = np.zeros((klevel,))
+    R=np.zeros((klevel,))
+    Nk=np.zeros((klevel,))
+    Ek=np.zeros((klevel,))
     for k in xrange(klevel):
-        SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
-        subCIJ = np.delete(CIJ, SmallNodes, axis=0)
-        subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
-        Nk[k] = np.size(subCIJ, axis=1)  # number of nodes with degree >k
-        Ek[k] = np.sum(subCIJ)  # number of connections in subgraph
-        # unweighted rich club coefficient
-        R[k] = Ek[k] / (Nk[k] * (Nk[k] - 1))
+        SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
+        subCIJ=np.delete(CIJ,SmallNodes,axis=0)
+        subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
+        Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
+        Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
+        R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
 
-    return R, Nk, Ek
+    return R,Nk,Ek
 
-
-def rich_club_bu(CIJ, klevel=None):
+def rich_club_bu(CIJ,klevel=None):
     '''
     The rich club coefficient, R, at level k is the fraction of edges that
     connect nodes of degree k or higher out of the maximum number of edges
@@ -336,27 +298,25 @@ def rich_club_bu(CIJ, klevel=None):
     Ek : int
         number of edges remaining in subgraph with degree > k
     '''
-    deg = degrees_und(CIJ)  # compute degree of each node
+    deg=degrees_und(CIJ)					#compute degree of each node
 
-    if klevel == None:
-        klevel = int(np.max(deg))
+    if klevel==None:
+        klevel=int(np.max(deg))
 
-    R = np.zeros((klevel,))
-    Nk = np.zeros((klevel,))
-    Ek = np.zeros((klevel,))
+    R=np.zeros((klevel,))
+    Nk=np.zeros((klevel,))
+    Ek=np.zeros((klevel,))
     for k in xrange(klevel):
-        SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
-        subCIJ = np.delete(CIJ, SmallNodes, axis=0)
-        subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
-        Nk[k] = np.size(subCIJ, axis=1)  # number of nodes with degree >k
-        Ek[k] = np.sum(subCIJ)  # number of connections in subgraph
-        # unweighted rich club coefficient
-        R[k] = Ek[k] / (Nk[k] * (Nk[k] - 1))
+        SmallNodes,=np.where(deg<=k+1)		#get small nodes with degree <=k
+        subCIJ=np.delete(CIJ,SmallNodes,axis=0)
+        subCIJ=np.delete(subCIJ,SmallNodes,axis=1)
+        Nk[k]=np.size(subCIJ,axis=1)		#number of nodes with degree >k
+        Ek[k]=np.sum(subCIJ)				#number of connections in subgraph
+        R[k]=Ek[k]/(Nk[k]*(Nk[k]-1))		#unweighted rich club coefficient
 
-    return R, Nk, Ek
+    return R,Nk,Ek
 
-
-def rich_club_wd(CIJ, klevel=None):
+def rich_club_wd(CIJ,klevel=None):
     '''
     Parameters
     ----------
@@ -373,37 +333,34 @@ def rich_club_wd(CIJ, klevel=None):
         vector of rich-club coefficients for levels 1 to klevel
     '''
     nr_nodes = len(CIJ)
-    # degree of each node is defined here as in+out
-    deg = np.sum((CIJ != 0), axis=0) + np.sum((CIJ.T != 0), axis=0)
+    #degree of each node is defined here as in+out
+    deg = np.sum((CIJ != 0),axis=0)+np.sum((CIJ.T != 0),axis=0)
 
-    if klevel is None:
-        klevel = np.max(deg)
-    Rw = np.zeros((klevel,))
+    if klevel is None: klevel = np.max(deg)
+    Rw=np.zeros((klevel,))
 
-    # sort the weights of the network, with the strongest connection first
+    #sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
     for k in xrange(klevel):
-        SmallNodes, = np.where(deg < k + 1)
+        SmallNodes,=np.where(deg<k+1)
         if np.size(SmallNodes) == 0:
-            Rw[k] = np.nan
+            Rw[k]=np.nan
             continue
 
-        # remove small nodes with node degree < k
-        cutCIJ = np.delete(
-            np.delete(CIJ, SmallNodes, axis=0), SmallNodes, axis=1)
-        # total weight of connections in subset E>r
+        #remove small nodes with node degree < k
+        cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+        #total weight of connections in subset E>r
         Wr = np.sum(cutCIJ)
-        # total number of connections in subset E>r
-        Er = np.size(np.where(cutCIJ.flat != 0), axis=1)
-        # E>r number of connections with max weight in network
+        #total number of connections in subset E>r
+        Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+        #E>r number of connections with max weight in network
         wrank_r = wrank[:Er]
-        # weighted rich-club coefficient
-        Rw[k] = Wr / np.sum(wrank_r)
+        #weighted rich-club coefficient
+        Rw[k] = Wr/np.sum(wrank_r)
     return Rw
 
-
-def rich_club_wu(CIJ, klevel=None):
+def rich_club_wu(CIJ,klevel=None):
     '''
     Parameters
     ----------
@@ -420,36 +377,33 @@ def rich_club_wu(CIJ, klevel=None):
         vector of rich-club coefficients for levels 1 to klevel
     '''
     nr_nodes = len(CIJ)
-    deg = np.sum((CIJ != 0), axis=0)
+    deg = np.sum((CIJ != 0),axis=0)
 
-    if klevel is None:
-        klevel = np.max(deg)
-    Rw = np.zeros((klevel,))
+    if klevel is None: klevel = np.max(deg)
+    Rw=np.zeros((klevel,))
 
-    # sort the weights of the network, with the strongest connection first
+    #sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
     for k in xrange(klevel):
-        SmallNodes, = np.where(deg < k + 1)
+        SmallNodes,=np.where(deg<k+1)
         if np.size(SmallNodes) == 0:
-            Rw[k] = np.nan
+            Rw[k]=np.nan
             continue
 
-        # remove small nodes with node degree < k
-        cutCIJ = np.delete(
-            np.delete(CIJ, SmallNodes, axis=0), SmallNodes, axis=1)
-        # total weight of connections in subset E>r
+        #remove small nodes with node degree < k
+        cutCIJ=np.delete(np.delete(CIJ,SmallNodes,axis=0),SmallNodes,axis=1)
+        #total weight of connections in subset E>r
         Wr = np.sum(cutCIJ)
-        # total number of connections in subset E>r
-        Er = np.size(np.where(cutCIJ.flat != 0), axis=1)
-        # E>r number of connections with max weight in network
+        #total number of connections in subset E>r
+        Er = np.size(np.where(cutCIJ.flat != 0),axis=1)
+        #E>r number of connections with max weight in network
         wrank_r = wrank[:Er]
-        # weighted rich-club coefficient
-        Rw[k] = Wr / np.sum(wrank_r)
+        #weighted rich-club coefficient
+        Rw[k] = Wr/np.sum(wrank_r)
     return Rw
 
-
-def score_wu(CIJ, s):
+def score_wu(CIJ,s):
     '''
     The s-core is the largest subnetwork comprising nodes of strength at
     least s. This function computes the s-core for a given weighted
@@ -472,19 +426,18 @@ def score_wu(CIJ, s):
     sn : int
         size of s-core
     '''
-    CIJscore = CIJ.copy()
+    CIJscore=CIJ.copy()
     while True:
-        str = strengths_und(CIJscore)  # get strengths of matrix
+        str=strengths_und(CIJscore)			#get strengths of matrix
 
-        # find nodes with strength <s
-        ff, = np.where(np.logical_and(str < s, str > 0))
+        #find nodes with strength <s
+        ff,=np.where(np.logical_and(str<s,str>0))
 
-        if ff.size == 0:
-            break  # if none found -> stop
+        if ff.size==0: break			#if none found -> stop
 
-        # else peel away found nodes
-        CIJscore[ff, :] = 0
-        CIJscore[:, ff] = 0
+        #else peel away found nodes
+        CIJscore[ff,:]=0
+        CIJscore[:,ff]=0
 
-    sn = np.sum(str > 0)
-    return CIJscore, sn
+    sn=np.sum(str>0)
+    return CIJscore,sn

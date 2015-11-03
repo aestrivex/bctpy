@@ -4,8 +4,7 @@ from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
 from .distance import breadthdist
 
-
-def agreement(ci, buffsz=None):
+def agreement(ci,buffsz=None):
     '''
     Takes as input a set of vertex partitions CI of
     dimensions [vertex x partition]. Each column in CI contains the
@@ -33,30 +32,28 @@ def agreement(ci, buffsz=None):
         agreement matrix
     '''
     ci = np.array(ci)
-    m, n = ci.shape
+    m,n=ci.shape
 
-    if buffsz is None:
-        buffsz = 1000
+    if buffsz is None: buffsz=1000
 
-    if m <= buffsz:
-        ind = dummyvar(ci)
-        D = np.dot(ind, ind.T)
+    if m<=buffsz:
+        ind=dummyvar(ci)
+        D=np.dot(ind,ind.T)
     else:
-        a = np.arange(0, m, buffsz)
-        b = np.arange(buffsz, m, buffsz)
-        if len(a) != len(b):
-            b = np.append(b, m)
-        D = np.zeros((n,))
-        for i, j in zip(a, b):
-            y = ci[:, i:j + 1]
-            ind = dummyvar(y)
-            D += np.dot(ind, ind.T)
+        a=np.arange(0,m,buffsz)
+        b=np.arange(buffsz,m,buffsz)
+        if len(a)!=len(b):
+            b=np.append(b,m)
+        D=np.zeros((n,))
+        for i,j in zip(a,b):
+            y=ci[:,i:j+1]
+            ind=dummyvar(y)
+            D+=np.dot(ind,ind.T)
 
-    np.fill_diagonal(D, 0)
+    np.fill_diagonal(D,0)
     return D
 
-
-def agreement_weighted(ci, wts):
+def agreement_weighted(ci,wts):
     '''
     D = AGREEMENT_WEIGHTED(CI,WTS) is identical to AGREEMENT, with the
     exception that each partitions contribution is weighted according to
@@ -82,15 +79,14 @@ def agreement_weighted(ci, wts):
         weighted agreement matrix
     '''
     ci = np.array(ci)
-    m, n = ci.shape
-    wts = np.array(wts) / np.sum(wts)
+    m,n=ci.shape
+    wts=np.array(wts)/np.sum(wts)
 
-    D = np.zeros((n, n))
+    D=np.zeros((n,n))
     for i in xrange(m):
-        d = dummyvar(ci[i, :].reshape(1, n))
-        D += np.dot(d, d.T) * wts[i]
+        d=dummyvar(ci[i,:].reshape(1,n))
+        D+=np.dot(d,d.T)*wts[i]
     return D
-
 
 def clustering_coef_bd(A):
     '''
@@ -120,15 +116,13 @@ def clustering_coef_bd(A):
            = 2 * (K(K-1)/2 - diag(A^2))
            = K(K-1) - 2(diag(A^2))
     '''
-    S = A + A.T  # symmetrized input graph
-    K = np.sum(S, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make C=0
-    # number of all possible 3 cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
-    C = cyc3 / CYC3
+    S=A+A.T								#symmetrized input graph
+    K=np.sum(S,axis=1)					#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2 #number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf			#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))	#number of all possible 3 cycles
+    C=cyc3/CYC3
     return C
-
 
 def clustering_coef_bu(G):
     '''
@@ -145,18 +139,17 @@ def clustering_coef_bu(G):
     C : Nx1 np.ndarray
         clustering coefficient vector
     '''
-    n = len(G)
-    C = np.zeros((n,))
+    n=len(G)
+    C=np.zeros((n,))
 
     for u in xrange(n):
-        V, = np.where(G[u, :])
-        k = len(V)
-        if k >= 2:  # degree must be at least 2
-            S = G[np.ix_(V, V)]
-            C[u] = np.sum(S) / (k * k - k)
+        V,=np.where(G[u,:])
+        k=len(V)
+        if k>=2:						#degree must be at least 2
+            S=G[np.ix_(V,V)]
+            C[u]=np.sum(S)/(k*k-k)
 
     return C
-
 
 def clustering_coef_wd(W):
     '''
@@ -183,16 +176,14 @@ def clustering_coef_wd(W):
     The above reduces to symmetric and/or binary versions of the clustering
     coefficient for respective graphs.
     '''
-    A = np.logical_not(W == 0).astype(float)  # adjacency matrix
-    S = cuberoot(W) + cuberoot(W.T)  # symmetrized weights matrix ^1/3
-    K = np.sum(A + A.T, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make C=0
-    # number of all possible 3 cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
-    C = cyc3 / CYC3  # clustering coefficient
+    A=np.logical_not(W==0).astype(float)	#adjacency matrix
+    S=cuberoot(W)+cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    K=np.sum(A+A.T,axis=1)					#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3 cycles
+    C=cyc3/CYC3								#clustering coefficient
     return C
-
 
 def clustering_coef_wu(W):
     '''
@@ -209,15 +200,14 @@ def clustering_coef_wu(W):
     C : Nx1 np.ndarray
         clustering coefficient vector
     '''
-    K = np.array(np.sum(np.logical_not(W == 0), axis=1), dtype=float)
-    ws = cuberoot(W)
-    cyc3 = np.diag(np.dot(ws, np.dot(ws, ws)))
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, set C=0
-    C = cyc3 / (K * (K - 1))
+    K=np.array(np.sum(np.logical_not(W==0),axis=1),dtype=float)
+    ws=cuberoot(W)
+    cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
+    K[np.where(cyc3==0)]=np.inf					#if no 3-cycles exist, set C=0
+    C=cyc3/(K*(K-1))
     return C
 
-
-def consensus_und(D, tau, reps=1000):
+def consensus_und(D,tau,reps=1000):
     '''
     This algorithm seeks a consensus partition of the
     agreement matrix D. The algorithm used here is almost identical to the
@@ -258,59 +248,56 @@ def consensus_und(D, tau, reps=1000):
         consensus partition
     '''
     def unique_partitions(cis):
-        # relabels the partitions to recognize different numbers on same
-        # topology
+        #relabels the partitions to recognize different numbers on same topology
 
-        n, r = np.shape(cis)  # ci represents one vector for each rep
+        n,r = np.shape(cis)			#ci represents one vector for each rep
         ci_tmp = np.zeros(n)
 
         for i in xrange(r):
-            for j, u in enumerate(sorted(
-                    np.unique(cis[:, i], return_index=True)[1])):
-                ci_tmp[np.where(cis[:, i] == cis[u, i])] = j
-            cis[:, i] = ci_tmp
-            # so far no partitions have been deleted from ci
+            for j,u in enumerate(sorted(
+                    np.unique(cis[:,i],return_index=True)[1])):
+                ci_tmp[np.where(cis[:,i]==cis[u,i])]=j
+            cis[:,i]=ci_tmp
+            #so far no partitions have been deleted from ci
 
-        # now squash any of the partitions that are completely identical
-        # do not delete them from ci which needs to stay same size, so make
-        # copy
+        #now squash any of the partitions that are completely identical
+        #do not delete them from ci which needs to stay same size, so make copy
         ciu = []
         cis = cis.copy()
         c = np.arange(r)
-        # count=0
-        while (c != 0).sum() > 0:
-            ciu.append(cis[:, 0])
-            dup = np.where(np.sum(np.abs(cis.T - cis[:, 0]), axis=1) == 0)
-            cis = np.delete(cis, dup, axis=1)
-            c = np.delete(c, dup)
-            # count+=1
-            # print count,c,dup
-            # if count>10:
+        #count=0
+        while (c!=0).sum() > 0:
+            ciu.append(cis[:,0])
+            dup = np.where(np.sum(np.abs(cis.T-cis[:,0]),axis=1)==0)
+            cis = np.delete(cis,dup,axis=1)
+            c = np.delete(c,dup)
+            #count+=1
+            #print count,c,dup
+            #if count>10:
             #	class QualitativeError(): pass
             #	raise QualitativeError()
         return np.transpose(ciu)
 
-    n = len(D)
-    flag = True
+    n=len(D)
+    flag=True
     while flag:
-        flag = False
-        dt = D * (D >= tau)
-        np.fill_diagonal(dt, 0)
+        flag=False
+        dt = D*(D >= tau)
+        np.fill_diagonal(dt,0)
 
-        if np.size(np.where(dt == 0)) == 0:
-            ciu = np.arange(1, n + 1)
+        if np.size(np.where(dt==0)) == 0:
+            ciu = np.arange(1,n+1)
         else:
-            cis = np.zeros((n, reps))
+            cis = np.zeros((n,reps))
             for i in np.arange(reps):
-                cis[:, i], _ = modularity_louvain_und_sign(dt)
+                cis[:,i],_ = modularity_louvain_und_sign(dt)
             ciu = unique_partitions(cis)
             nu = np.size(ciu, axis=1)
             if nu > 1:
                 flag = True
-                D = agreement(cis) / reps
+                D = agreement(cis)/reps
 
-    return np.squeeze(ciu + 1)
-
+    return np.squeeze(ciu+1)
 
 def get_components(A, no_depend=False):
     '''
@@ -351,14 +338,14 @@ def get_components(A, no_depend=False):
     appear to be a python equivalent. If you think of a way to implement this
     better, let me know.
         '''
-    # nonsquare matrices cannot be symmetric; no need to check
+        #nonsquare matrices cannot be symmetric; no need to check
 
-    if not np.all(A == A.T):  # ensure matrix is undirected
+    if not np.all(A==A.T):			#ensure matrix is undirected
         raise BCTParamError('get_components can only be computed for undirected'
-                            ' matrices.  If your matrix is noisy, correct it with np.around')
+            ' matrices.  If your matrix is noisy, correct it with np.around')
 
-    A = binarize(A, copy=True)
-    n = len(A)
+    A=binarize(A,copy=True)
+    n=len(A)
     np.fill_diagonal(A, 1)
 
     try:
@@ -366,37 +353,35 @@ def get_components(A, no_depend=False):
             raise ImportError()
         else:
             import networkx as nx
-        net = nx.from_numpy_matrix(A)
-        cpts = list(nx.connected_components(net))
+        net=nx.from_numpy_matrix(A)
+        cpts=list(nx.connected_components(net))
 
-        cptvec = np.zeros((n,))
-        cptsizes = np.zeros(len(cpts))
-        for i, cpt in enumerate(cpts):
-            cptsizes[i] = len(cpt)
+        cptvec=np.zeros((n,))
+        cptsizes=np.zeros(len(cpts))
+        for i,cpt in enumerate(cpts):
+            cptsizes[i]=len(cpt)
             for node in cpt:
-                cptvec[node] = i + 1
+                cptvec[node]=i+1
 
     except ImportError:
-        # if networkx is not available use less efficient breadth first search
-        cptvec = np.zeros((n,))
-        r, _ = breadthdist(A)
-        for node, reach in enumerate(r):
+        #if networkx is not available use less efficient breadth first search
+        cptvec=np.zeros((n,))
+        r,_ = breadthdist(A)
+        for node,reach in enumerate(r):
             if cptvec[node] > 0:
                 continue
             else:
-                cptvec[np.where(reach)] = np.max(cptvec) + 1
+                cptvec[np.where(reach)] = np.max(cptvec)+1
 
-        cptsizes = np.zeros(np.max(cptvec))
+        cptsizes=np.zeros(np.max(cptvec))
         for i in np.arange(np.max(cptvec)):
-            cptsizes[i] = np.size(np.where(cptvec == i + 1))
+            cptsizes[i]=np.size(np.where(cptvec==i+1))
 
-    return cptvec, cptsizes
-
+    return cptvec,cptsizes
 
 def number_of_components(A):
-    _, csizes = get_components(A)
+    _,csizes = get_components(A)
     return len(csizes)
-
 
 def transitivity_bd(A):
     '''
@@ -426,14 +411,12 @@ def transitivity_bd(A):
                         = 2 * (K(K-1)/2 - diag(A^2))
                         = K(K-1) - 2(diag(A^2))
     '''
-    S = A + A.T  # symmetrized input graph
-    K = np.sum(S, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make C=0
-    # number of all possible 3-cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
-    return np.sum(cyc3) / np.sum(CYC3)
-
+    S=A+A.T									#symmetrized input graph
+    K=np.sum(S,axis=1)						#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make C=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
+    return np.sum(cyc3)/np.sum(CYC3)
 
 def transitivity_bu(A):
     '''
@@ -450,10 +433,9 @@ def transitivity_bu(A):
     T : float
         transitivity scalar
     '''
-    tri3 = np.trace(np.dot(A, np.dot(A, A)))
-    tri2 = np.sum(np.dot(A, A)) - np.trace(np.dot(A, A))
-    return tri3 / tri2
-
+    tri3=np.trace(np.dot(A,np.dot(A,A)))
+    tri2=np.sum(np.dot(A,A))-np.trace(np.dot(A,A))
+    return tri3/tri2
 
 def transitivity_wd(W):
     '''
@@ -478,15 +460,13 @@ def transitivity_wd(W):
     The above reduces to symmetric and/or binary versions of the clustering
     coefficient for respective graphs.
     '''
-    A = np.logical_not(W == 0).astype(float)  # adjacency matrix
-    S = cuberoot(W) + cuberoot(W.T)  # symmetrized weights matrix ^1/3
-    K = np.sum(A + A.T, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make T=0
-    # number of all possible 3-cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
-    return np.sum(cyc3) / np.sum(CYC3)  # transitivity
-
+    A=np.logical_not(W==0).astype(float)	#adjacency matrix
+    S=cuberoot(W)+cuberoot(W.T)			#symmetrized weights matrix ^1/3
+    K=np.sum(A+A.T,axis=1)			 		#total degree (in+out)
+    cyc3=np.diag(np.dot(S,np.dot(S,S)))/2	#number of 3-cycles
+    K[np.where(cyc3==0)]=np.inf				#if no 3-cycles exist, make T=0
+    CYC3=K*(K-1)-2*np.diag(np.dot(A,A))		#number of all possible 3-cycles
+    return np.sum(cyc3)/np.sum(CYC3)		#transitivity
 
 def transitivity_wu(W):
     '''
@@ -503,7 +483,7 @@ def transitivity_wu(W):
     T : int
         transitivity scalar
     '''
-    K = np.sum(np.logical_not(W == 0), axis=1)
-    ws = cuberoot(W)
-    cyc3 = np.diag(np.dot(ws, np.dot(ws, ws)))
-    return np.sum(cyc3, axis=0) / np.sum(K * (K - 1), axis=0)
+    K=np.sum(np.logical_not(W==0),axis=1)
+    ws=cuberoot(W)
+    cyc3=np.diag(np.dot(ws,np.dot(ws,ws)))
+    return np.sum(cyc3,axis=0)/np.sum(K*(K-1),axis=0)

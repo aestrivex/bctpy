@@ -17,7 +17,7 @@ It will:
 
 """
 
-
+from __future__ import unicode_literals
 
 import sys # Only needed to check Python version
 import os
@@ -26,7 +26,6 @@ import pydoc
 from .docscrape_sphinx import get_doc_object
 from .docscrape_sphinx import SphinxDocString
 import inspect
-import collections
 
 
 def mangle_docstrings(app, what, name, obj, options, lines,
@@ -43,7 +42,7 @@ def mangle_docstrings(app, what, name, obj, options, lines,
     else:
         doc = get_doc_object(obj, what, "\n".join(lines), config=cfg)
         if sys.version_info[0] < 3:
-            lines[:] = str(doc).splitlines()
+            lines[:] = unicode(doc).splitlines()
         else:
             lines[:] = str(doc).splitlines()
 
@@ -53,8 +52,8 @@ def mangle_docstrings(app, what, name, obj, options, lines,
             v = dict(full_name="%s.%s" % (obj.__module__, obj.__name__))
         else:
             v = dict(full_name=obj.__name__)
-        lines += ['', '.. htmlonly::', '']
-        lines += ['    %s' % x for x in
+        lines += [u'', u'.. htmlonly::', '']
+        lines += [u'    %s' % x for x in
                   (app.config.numpydoc_edit_link % v).split("\n")]
 
     # replace reference numbers so that there are no duplicates
@@ -73,11 +72,11 @@ def mangle_docstrings(app, what, name, obj, options, lines,
                 if re.match(r'^\d+$', r):
                     new_r = "R%d" % (reference_offset[0] + int(r))
                 else:
-                    new_r = "%s%d" % (r, reference_offset[0])
-                lines[i] = lines[i].replace('[%s]_' % r,
-                                            '[%s]_' % new_r)
-                lines[i] = lines[i].replace('.. [%s]' % r,
-                                            '.. [%s]' % new_r)
+                    new_r = u"%s%d" % (r, reference_offset[0])
+                lines[i] = lines[i].replace(u'[%s]_' % r,
+                                            u'[%s]_' % new_r)
+                lines[i] = lines[i].replace(u'.. [%s]' % r,
+                                            u'.. [%s]' % new_r)
 
     reference_offset[0] += len(references)
 
@@ -90,7 +89,7 @@ def mangle_signature(app, what, name, obj,
         'initializes x; see ' in pydoc.getdoc(obj.__init__))):
         return '', ''
 
-    if not (isinstance(obj, collections.Callable) or hasattr(obj, '__argspec_is_invalid_')):
+    if not (callable(obj) or hasattr(obj, '__argspec_is_invalid_')):
         return
     if not hasattr(obj, '__doc__'):
         return
@@ -140,7 +139,7 @@ class ManglingDomainBase(object):
         self.wrap_mangling_directives()
 
     def wrap_mangling_directives(self):
-        for name, objtype in list(self.directive_mangling_map.items()):
+        for name, objtype in self.directive_mangling_map.items():
             self.directives[name] = wrap_mangling_directive(
                 self.directives[name], objtype)
 

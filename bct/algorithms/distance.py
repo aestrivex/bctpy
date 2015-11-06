@@ -145,7 +145,7 @@ def charpath(D, include_diagonal=False):
     lambda_ = np.sum(D[D != np.inf]) / len(np.where(D != np.inf)[0])
 
     # eccentricity for each vertex (ignore inf)
-    ecc = np.max(D * (D != np.inf), axis=1)
+    ecc = np.array(np.ma.masked_equal(D, np.inf).max(axis=1))
 
     # radius of graph
     radius = np.min(ecc)  # but what about zeros?
@@ -155,8 +155,8 @@ def charpath(D, include_diagonal=False):
 
     # efficiency: mean of inverse entries of D[G]
     n = len(D)
+    np.fill_diagonal(D, np.inf)  # so that the inverse is 0
     D = 1 / D  # invert distance
-    np.fill_diagonal(D, 0)  # set diagonal to 0
     efficiency = np.sum(D) / (n * (n - 1))  # compute global efficiency
 
     return lambda_, efficiency, ecc, radius, diameter

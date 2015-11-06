@@ -2794,7 +2794,7 @@ def link_communities(W, type_clustering='single'):
 
     #set diagonal to mean weights
     np.fill_diagonal(W, 0)
-    W[range(n), range(n)] = (
+    W[list(range(n)), list(range(n))] = (
         np.sum(W, axis=0)/np.sum(np.logical_not(W), axis=0) +
         np.sum(W.T, axis=0)/np.sum(np.logical_not(W.T), axis=0))/2
 
@@ -2855,7 +2855,7 @@ def link_communities(W, type_clustering='single'):
     C[0,:] = np.arange(m)
 
     for i in range(m-1):
-        print('hierarchy %i'%i)
+        print(('hierarchy %i'%i))
 
         for j in range(len(U)):     #loop over communities
             ixes = C[i,:] == U[j]   #get link indices
@@ -2877,7 +2877,7 @@ def link_communities(W, type_clustering='single'):
 
             if np.array(dc).shape is not ():
                 print(dc)
-                print(dc.shape)
+                print((dc.shape))
 
             Nc[i,j] = nc
             Mc[i,j] = mc
@@ -5221,7 +5221,7 @@ def rentian_scaling(A,xyz,n):
         L,=np.where((l1&l2&l3&l4&l5&l6).flatten())
         if np.size(L):
             #count edges crossing at the boundary of the cube
-            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(range(m),L))])
+            E[count]=np.sum(A[np.ix_(L,np.setdiff1d(list(range(m)),L))])
             #count nodes inside of the cube
             N[count]=np.size(L)
             count+=1
@@ -5271,8 +5271,8 @@ def latmio_dir_connected(R,iter,D=None):
     #create distance to diagonal matrix if not specified by user
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(range(1,n),n)
-        um=np.mod(range(n-1,0,-1),n)
+        un=np.mod(list(range(1,n)),n)
+        um=np.mod(list(range(n-1,0,-1)),n)
         u=np.append((0,),np.where(un<um,un,um))
 
         for v in range(int(np.ceil(n/2))):
@@ -5378,8 +5378,8 @@ def latmio_dir(R,iter,D=None):
     #create distance to diagonal matrix if not specified by user
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(range(1,n),n)
-        um=np.mod(range(n-1,0,-1),n)
+        un=np.mod(list(range(1,n)),n)
+        um=np.mod(list(range(n-1,0,-1)),n)
         u=np.append((0,),np.where(un<um,un,um))
 
         for v in range(int(np.ceil(n/2))):
@@ -5471,8 +5471,8 @@ def latmio_und_connected(R,iter,D=None):
 
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(range(1,n),n)
-        um=np.mod(range(n-1,0,-1),n)
+        un=np.mod(list(range(1,n)),n)
+        um=np.mod(list(range(n-1,0,-1)),n)
         u=np.append((0,),np.where(un<um,un,um))
 
         for v in range(int(np.ceil(n/2))):
@@ -5581,8 +5581,8 @@ def latmio_und(R,iter,D=None):
 
     if D is None:
         D=np.zeros((n,n))
-        un=np.mod(range(1,n),n)
-        um=np.mod(range(n-1,0,-1),n)
+        un=np.mod(list(range(1,n)),n)
+        um=np.mod(list(range(n-1,0,-1)),n)
         u=np.append((0,),np.where(un<um,un,um))
 
         for v in range(int(np.ceil(n/2))):
@@ -5679,8 +5679,8 @@ def makeevenCIJ(n,k,sz_cl):
     for lvl in range(1,mx_lvl):
         s=2**(lvl+1)
         CIJ=np.ones((s,s))
-        grp1=range(int(s/2))
-        grp2=range(int(s/2),s)
+        grp1=list(range(int(s/2)))
+        grp2=list(range(int(s/2),s))
         ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
         ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
         CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
@@ -5741,8 +5741,8 @@ def makefractalCIJ(mx_lvl,E,sz_cl):
     for lvl in range(1,mx_lvl):
         s=2**(lvl+1)
         CIJ=np.ones((s,s))
-        grp1=range(int(s/2))
-        grp2=range(int(s/2),s)
+        grp1=list(range(int(s/2)))
+        grp2=list(range(int(s/2),s))
         ix1=np.add.outer(np.array(grp1)*s,grp1).flatten()
         ix2=np.add.outer(np.array(grp2)*s,grp2).flatten()
         CIJ.flat[ix1]=t					#numpy indexing is teh sucks :(
@@ -5923,8 +5923,8 @@ def makeringlatticeCIJ(n,k):
     CIJ1=np.ones((n,n))
     kk=0
     count=0
-    seq=range(1,n)
-    seq2=range(n-1,0,-1)
+    seq=list(range(1,n))
+    seq2=list(range(n-1,0,-1))
 
     #fill in
     while kk<k:
@@ -5970,7 +5970,7 @@ def maketoeplitzCIJ(n,k,s):
     no connections are placed on the main diagonal.
     '''
     from scipy import linalg,stats
-    pf=stats.norm.pdf(range(1,n),.5,s)
+    pf=stats.norm.pdf(list(range(1,n)),.5,s)
     template=linalg.toeplitz(np.append((0,),pf),r=np.append((0,),pf))
     template*=(k/np.sum(template))
 
@@ -7354,13 +7354,13 @@ def align_matrices(m1,m2,dfun='sqrdiff',verbose=False,H=1e6,Texp=1,
                 amin=anew
                 mincost=lowcost
                 if verbose:
-                    print('step %i ... current lowest cost = %f' % (h,mincost))
+                    print(('step %i ... current lowest cost = %f' % (h,mincost)))
                 hcnt=0
             #if the cost is 0 we're done
             if mincost==0:
                 break
     if verbose:
-        print('step %i ... final lowest cost = %f' % (h,mincost))
+        print(('step %i ... final lowest cost = %f' % (h,mincost)))
 
     M_reordered=m2[np.ix_(amin,amin)]
     M_indices=amin
@@ -7412,14 +7412,14 @@ def backbone_wu(CIJ,avgdeg):
     #copy into tree graph
     CIJtree[im,jm]=CIJ[im,jm]
     in_=im
-    out=np.setdiff1d(range(n),in_)
+    out=np.setdiff1d(list(range(n)),in_)
 
     #repeat n-2 times
     for ix in range(n-2):
         CIJ_io=CIJ[np.ix_(in_,out)]
         i,j=np.where(np.max(CIJ_io)==CIJ_io)
         #i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-        print(i,j)
+        print((i,j))
         im=in_[i[0]]
         jm=out[j[0]]
 
@@ -7427,7 +7427,7 @@ def backbone_wu(CIJ,avgdeg):
         CIJtree[im,jm]=CIJ[im,jm]
         CIJtree[jm,im]=CIJ[jm,im]
         in_=np.append(in_,jm)
-        out=np.setdiff1d(range(n),in_)
+        out=np.setdiff1d(list(range(n)),in_)
 
     #now add connections back with the total number of added connections
     #determined by the desired avgdeg
@@ -7538,9 +7538,9 @@ def reorderMAT(m,H=5000,cost='line'):
 
     #generate cost function
     if cost=='line':
-        profile=stats.norm.pdf(range(1,n+1),0,n/2)[::-1]
+        profile=stats.norm.pdf(list(range(1,n+1)),0,n/2)[::-1]
     elif cost=='circ':
-        profile=stats.norm.pdf(range(1,n+1),n/2,n/4)[::-1]
+        profile=stats.norm.pdf(list(range(1,n+1)),n/2,n/4)[::-1]
     else:
         raise BCTParamError('dfun must be line or circ')
     costf=linalg.toeplitz(profile,r=profile)
@@ -7634,9 +7634,9 @@ def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
 
     #generate cost function
     if cost=='line':
-        profile=stats.norm.pdf(range(1,n+1),loc=0,scale=n/2)[::-1]
+        profile=stats.norm.pdf(list(range(1,n+1)),loc=0,scale=n/2)[::-1]
     elif cost=='circ':
-        profile=stats.norm.pdf(range(1,n+1),loc=n/2,scale=n/4)[::-1]
+        profile=stats.norm.pdf(list(range(1,n+1)),loc=n/2,scale=n/4)[::-1]
     else:
         raise BCTParamError('cost must be line or circ')
 
@@ -7683,11 +7683,11 @@ def reorder_matrix(m1,cost='line',verbose=False,H=1e4,Texp=10,T0=1e-3,Hbrk=10):
                 amin=anew
                 mincost=lowcost
                 if verbose:
-                    print('step %i ... current lowest cost = %f' % (h,mincost))
+                    print(('step %i ... current lowest cost = %f' % (h,mincost)))
                 hcnt=0
     
     if verbose:
-        print('step %i ... final lowest cost = %f' % (h,mincost))
+        print(('step %i ... final lowest cost = %f' % (h,mincost)))
 
     M_reordered=m1[np.ix_(amin,amin)]
     M_indices=amin
@@ -7774,7 +7774,7 @@ def reorder_mod(A,ci):
 
         mod_imp=np.array((om,np.sign(np.arange(m)-pos),
             np.abs(np.arange(m)-pos),am[x-1,om-1])).T
-        print(np.shape((mod_imp[:,3][::-1],mod_imp[:,2])))
+        print((np.shape((mod_imp[:,3][::-1],mod_imp[:,2]))))
         ix=np.lexsort((mod_imp[:,3][::-1],mod_imp[:,2]))
         mod_imp=mod_imp[ix]
         #at this point mod_imp agrees with the matlab version
@@ -7782,7 +7782,7 @@ def reorder_mod(A,ci):
         mod_imp=np.abs(mod_imp[:,0]*mod_imp[:,1])
         mod_imp=np.append(mod_imp[1:],x)
         mod_imp=np.array(mod_imp-1,dtype=int)
-        print(mod_imp,signs)
+        print((mod_imp,signs))
         #at this point mod_imp is the absolute value of that in the matlab
         #version.  this limitation comes from sortrows ability to deal with
         #negative indices, which we would have to do manually.
@@ -7879,7 +7879,7 @@ def dummyvar(cis, return_sparse=False):
     ix=np.argsort(cis,axis=0)
     #s_cis=np.sort(cis,axis=0)
     #FIXME use the sorted indices to sort by row efficiently
-    s_cis=cis[ix][:,range(m),range(m)]
+    s_cis=cis[ix][:,list(range(m)),list(range(m))]
 
     mask=np.hstack((((True,),)*m,(s_cis[:-1,:]!=s_cis[1:,:]).T))
     indptr,=np.where(mask.flat)

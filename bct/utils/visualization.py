@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from .miscellaneous_utilities import BCTParamError
 
@@ -251,13 +251,13 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
                 amin = anew
                 mincost = lowcost
                 if verbose:
-                    print('step %i ... current lowest cost = %f' % (h, mincost))
+                    print 'step %i ... current lowest cost = %f' % (h, mincost)
                 hcnt = 0
             # if the cost is 0 we're done
             if mincost == 0:
                 break
     if verbose:
-        print('step %i ... final lowest cost = %f' % (h, mincost))
+        print 'step %i ... final lowest cost = %f' % (h, mincost)
 
     M_reordered = m2[np.ix_(amin, amin)]
     M_indices = amin
@@ -310,14 +310,14 @@ def backbone_wu(CIJ, avgdeg):
     # copy into tree graph
     CIJtree[im, jm] = CIJ[im, jm]
     in_ = im
-    out = np.setdiff1d(range(n), in_)
+    out = np.setdiff1d(xrange(n), in_)
 
     # repeat n-2 times
-    for ix in range(n - 2):
+    for ix in xrange(n - 2):
         CIJ_io = CIJ[np.ix_(in_, out)]
         i, j = np.where(np.max(CIJ_io) == CIJ_io)
         # i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-        print(i, j)
+        print i, j
         im = in_[i[0]]
         jm = out[j[0]]
 
@@ -325,7 +325,7 @@ def backbone_wu(CIJ, avgdeg):
         CIJtree[im, jm] = CIJ[im, jm]
         CIJtree[jm, im] = CIJ[jm, im]
         in_ = np.append(in_, jm)
-        out = np.setdiff1d(range(n), in_)
+        out = np.setdiff1d(xrange(n), in_)
 
     # now add connections back with the total number of added connections
     # determined by the desired avgdeg
@@ -388,7 +388,7 @@ def grid_communities(c):
 
     bounds = []
 
-    for i in range(nr_c):
+    for i in xrange(nr_c):
         ind = np.where(c == i + 1)
         if np.size(ind):
             mn = np.min(ind) - .5
@@ -438,9 +438,9 @@ def reorderMAT(m, H=5000, cost='line'):
 
     # generate cost function
     if cost == 'line':
-        profile = stats.norm.pdf(range(1, n + 1), 0, n / 2)[::-1]
+        profile = stats.norm.pdf(xrange(1, n + 1), 0, n / 2)[::-1]
     elif cost == 'circ':
-        profile = stats.norm.pdf(range(1, n + 1), n / 2, n / 4)[::-1]
+        profile = stats.norm.pdf(xrange(1, n + 1), n / 2, n / 4)[::-1]
     else:
         raise BCTParamError('dfun must be line or circ')
     costf = linalg.toeplitz(profile, r=profile)
@@ -451,7 +451,7 @@ def reorderMAT(m, H=5000, cost='line'):
     m_start = m.copy()
     starta = np.arange(n)
     # reorder
-    for h in range(H):
+    for h in xrange(H):
         a = np.arange(n)
         # choose two positions and flip them
         r1, r2 = np.random.randint(n, size=(2,))
@@ -535,10 +535,10 @@ def reorder_matrix(m1, cost='line', verbose=False, H=1e4, Texp=10, T0=1e-3, Hbrk
 
     # generate cost function
     if cost == 'line':
-        profile = stats.norm.pdf(range(1, n + 1), loc=0, scale=n / 2)[::-1]
+        profile = stats.norm.pdf(xrange(1, n + 1), loc=0, scale=n / 2)[::-1]
     elif cost == 'circ':
         profile = stats.norm.pdf(
-            range(1, n + 1), loc=n / 2, scale=n / 4)[::-1]
+            xrange(1, n + 1), loc=n / 2, scale=n / 4)[::-1]
     else:
         raise BCTParamError('cost must be line or circ')
 
@@ -587,11 +587,11 @@ def reorder_matrix(m1, cost='line', verbose=False, H=1e4, Texp=10, T0=1e-3, Hbrk
                 amin = anew
                 mincost = lowcost
                 if verbose:
-                    print('step %i ... current lowest cost = %f' % (h, mincost))
+                    print 'step %i ... current lowest cost = %f' % (h, mincost)
                 hcnt = 0
 
     if verbose:
-        print('step %i ... final lowest cost = %f' % (h, mincost))
+        print 'step %i ... final lowest cost = %f' % (h, mincost)
 
     M_reordered = m1[np.ix_(amin, amin)]
     M_indices = amin
@@ -629,12 +629,12 @@ def reorder_mod(A, ci):
     nm = np.zeros((m,))  # number of nodes in modules
     knm = np.zeros((n, m))  # degree to other modules
 
-    for i in range(m):
+    for i in xrange(m):
         nm[i] = np.size(np.where(ci == i))
         knm[:, i] = np.sum(A[:, ci == i], axis=1)
 
     am = np.zeros((m, m))  # relative intermodular connectivity
-    for i in range(m):
+    for i in xrange(m):
         am[i, :] = np.sum(knm[ci == i, :], axis=0)
     am /= np.outer(nm, nm)
 
@@ -682,10 +682,10 @@ def reorder_mod(A, ci):
         i[i == old] = 0
         j[j == old] = 0
 
-    print(om)
+    print om
 
     # 2. Reorder nodes within modules
-    on = np.zeros((n,), dtype=int)
+    on = np.zeros((n,), dtype=long)
     for y, x in enumerate(om):
         ind, = np.where(ci == x - 1)  # indices
         pos, = np.where(om == x)  # position
@@ -693,7 +693,7 @@ def reorder_mod(A, ci):
 
         mod_imp = np.array((om, np.sign(np.arange(m) - pos),
                             np.abs(np.arange(m) - pos), am[x - 1, om - 1])).T
-        print(np.shape((mod_imp[:, 3][::-1], mod_imp[:, 2])))
+        print np.shape((mod_imp[:, 3][::-1], mod_imp[:, 2]))
         ix = np.lexsort((mod_imp[:, 3][::-1], mod_imp[:, 2]))
         mod_imp = mod_imp[ix]
         # at this point mod_imp agrees with the matlab version
@@ -701,7 +701,7 @@ def reorder_mod(A, ci):
         mod_imp = np.abs(mod_imp[:, 0] * mod_imp[:, 1])
         mod_imp = np.append(mod_imp[1:], x)
         mod_imp = np.array(mod_imp - 1, dtype=int)
-        print(mod_imp, signs)
+        print mod_imp, signs
         # at this point mod_imp is the absolute value of that in the matlab
         # version.  this limitation comes from sortrows ability to deal with
         # negative indices, which we would have to do manually.
@@ -758,13 +758,13 @@ def writetoPAJ(CIJ, fname, directed):
     n = np.size(CIJ, axis=0)
     with open(fname, 'w') as fd:
         fd.write('*vertices %i \r' % n)
-        for i in range(1, n + 1):
+        for i in xrange(1, n + 1):
             fd.write('%i "%i" \r' % (i, i))
         if directed:
             fd.write('*arcs \r')
         else:
             fd.write('*edges \r')
-        for i in range(n):
-            for j in range(n):
+        for i in xrange(n):
+            for j in xrange(n):
                 if CIJ[i, j] != 0:
                     fd.write('%i %i %.6f \r' % (i + 1, j + 1, CIJ[i, j]))

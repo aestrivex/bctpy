@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 
 
@@ -148,7 +148,7 @@ def rentian_scaling(A, xyz, n):
         L, = np.where((l1 & l2 & l3 & l4 & l5 & l6).flatten())
         if np.size(L):
             # count edges crossing at the boundary of the cube
-            E[count] = np.sum(A[np.ix_(L, np.setdiff1d(range(m), L))])
+            E[count] = np.sum(A[np.ix_(L, np.setdiff1d(xrange(m), L))])
             # count nodes inside of the cube
             N[count] = np.size(L)
             count += 1

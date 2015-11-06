@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from bct.utils import BCTParamError, normalize
 
@@ -136,7 +136,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             B = (B + B.T) / 2
 
     Hnm = np.zeros((n, n))
-    for m in range(1, n + 1):
+    for m in xrange(1, n + 1):
         Hnm[:, m - 1] = np.sum(B[:, ci == m], axis=1)  # node to module degree
     H = np.sum(Hnm, axis=1)  # node degree
     Hm = np.sum(Hnm, axis=0)  # module degree
@@ -182,13 +182,13 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             ci = Mb.copy()
             first_iteration = False
         else:
-            for u in range(1, n + 1):
+            for u in xrange(1, n + 1):
                 ci[M0 == u] = Mb[u - 1]  # assign new modules
 
         n = np.max(Mb)
         b1 = np.zeros((n, n))
-        for i in range(1, n + 1):
-            for j in range(i, n + 1):
+        for i in xrange(1, n + 1):
+            for j in xrange(i, n + 1):
                 # pool weights of nodes in same module
                 bm = np.sum(B[np.ix_(Mb == i, Mb == j)])
                 b1[i - 1, j - 1] = bm
@@ -237,7 +237,7 @@ def link_communities(W, type_clustering='single'):
 
     # set diagonal to mean weights
     np.fill_diagonal(W, 0)
-    W[range(n), range(n)] = (
+    W[xrange(n), xrange(n)] = (
         np.sum(W, axis=0) / np.sum(np.logical_not(W), axis=0) +
         np.sum(W.T, axis=0) / np.sum(np.logical_not(W.T), axis=0)) / 2
 
@@ -249,8 +249,8 @@ def link_communities(W, type_clustering='single'):
     Jo = np.zeros((n, n))
     Ji = np.zeros((n, n))
 
-    for b in range(n):
-        for c in range(n):
+    for b in xrange(n):
+        for c in xrange(n):
             Do = np.dot(W[b, :], W[c, :].T)
             Jo[b, c] = Do / (No[b] + No[c] - Do)
 
@@ -264,13 +264,13 @@ def link_communities(W, type_clustering='single'):
     Ln = np.zeros((m, 2), dtype=np.int32)  # link nodes
     Lw = np.zeros((m,))  # link weights
 
-    for i in range(m):
+    for i in xrange(m):
         Ln[i, :] = (A[i], B[i])
         Lw[i] = (W[A[i], B[i]] + W[B[i], A[i]]) / 2
 
     ES = np.zeros((m, m), dtype=np.float32)  # link similarity
-    for i in range(m):
-        for j in range(m):
+    for i in xrange(m):
+        for j in xrange(m):
             if Ln[i, 0] == Ln[j, 0]:
                 a = Ln[i, 0]
                 b = Ln[i, 1]
@@ -306,10 +306,10 @@ def link_communities(W, type_clustering='single'):
     U = np.arange(m)  # initial community assignments
     C[0, :] = np.arange(m)
 
-    for i in range(m - 1):
-        print('hierarchy %i' % i)
+    for i in xrange(m - 1):
+        print 'hierarchy %i' % i
 
-        for j in range(len(U)):  # loop over communities
+        for j in xrange(len(U)):  # loop over communities
             ixes = C[i, :] == U[j]  # get link indices
 
             links = np.sort(Lw[ixes])
@@ -330,8 +330,8 @@ def link_communities(W, type_clustering='single'):
                                   2 - min_mc)  # community density
 
             if np.array(dc).shape is not ():
-                print(dc)
-                print(dc.shape)
+                print dc
+                print dc.shape
 
             Nc[i, j] = nc
             Mc[i, j] = mc
@@ -363,7 +363,7 @@ def link_communities(W, type_clustering='single'):
         unq_rows = np.vstack({tuple(row) for row in ug_rows})
         V = U[unq_rows]
 
-        for j in range(len(V)):
+        for j in xrange(len(V)):
             if type_clustering == 'single':
                 x = np.max(ES[V[j, :], :], axis=0)
             elif type_clustering == 'complete':
@@ -392,7 +392,7 @@ def link_communities(W, type_clustering='single'):
 
     U = np.unique(C[i, :])
     M = np.zeros((len(U), n))
-    for j in range(len(U)):
+    for j in xrange(len(U)):
         M[j, np.unique(Ln[C[i, :] == U[j], :])] = 1
 
     M = M[np.sum(M, axis=1) > 2, :]
@@ -548,7 +548,7 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     knm_o = np.zeros((n, n))  # node-to-module out degree
     knm_i = np.zeros((n, n))  # node-to-module in degree
 
-    for m in range(np.max(ci)):
+    for m in xrange(np.max(ci)):
         knm_o[:, m] = np.sum(W[:, ci == (m + 1)], axis=1)
         knm_i[:, m] = np.sum(W[ci == (m + 1), :], axis=0)
 
@@ -592,8 +592,8 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     m = np.max(ci)  # new number of modules
     w = np.zeros((m, m))  # new weighted matrix
 
-    for u in range(m):
-        for v in range(m):
+    for u in xrange(m):
+        for v in xrange(m):
             # pool weights of nodes in same module
             w[u, v] = np.sum(W[np.ix_(ci == u + 1, ci == v + 1)])
 
@@ -648,7 +648,7 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
 
     s = np.sum(W)  # total weight of edges
     knm = np.zeros((n, n))  # node-to-module degree
-    for m in range(np.max(ci)):
+    for m in xrange(np.max(ci)):
         knm[:, m] = np.sum(W[:, ci == (m + 1)], axis=1)
     k = np.sum(knm, axis=1)  # node degree
     km = np.sum(knm, axis=0)  # module degree
@@ -687,8 +687,8 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
 
     m = np.max(ci)
     w = np.zeros((m, m))
-    for u in range(m):
-        for v in range(m):
+    for u in xrange(m):
+        for v in xrange(m):
             # pool weights of nodes in same module
             wm = np.sum(W[np.ix_(ci == u + 1, ci == v + 1)])
             w[u, v] = wm
@@ -753,7 +753,7 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
     Knm0 = np.zeros((n, n))  # positive node-to-module-degree
     Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in range(int(np.max(ci))):  # loop over modules
+    for m in xrange(int(np.max(ci))):  # loop over modules
         Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
         Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 
@@ -934,14 +934,14 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
         h += 1
         ci.append(np.zeros((n0,)))
         # for i,mi in enumerate(m):		#loop through module assignments
-        for i in range(n):
+        for i in xrange(n):
             # ci[h][np.where(ci[h-1]==i)]=mi	#assign new modules
             ci[h][np.where(ci[h - 1] == i + 1)] = m[i]
 
         n = np.max(m)  # new number of modules
         W1 = np.zeros((n, n))  # new weighted matrix
-        for i in range(n):
-            for j in range(n):
+        for i in xrange(n):
+            for j in xrange(n):
                 # pool weights of nodes in same module
                 W1[i, j] = np.sum(W[np.ix_(m == i + 1, m == j + 1)])
 
@@ -1060,15 +1060,15 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
         h += 1
         ci.append(np.zeros((n0,)))
         # for i,mi in enumerate(m):	#loop through initial module assignments
-        for i in range(n):
+        for i in xrange(n):
             # print i, m[i], n0, h, len(m), n
             # ci[h][np.where(ci[h-1]==i+1)]=mi	#assign new modules
             ci[h][np.where(ci[h - 1] == i + 1)] = m[i]
 
         n = np.max(m)  # new number of modules
         W1 = np.zeros((n, n))  # new weighted matrix
-        for i in range(n):
-            for j in range(i, n):
+        for i in xrange(n):
+            for j in xrange(i, n):
                 # pool weights of nodes in same module
                 wp = np.sum(W[np.ix_(m == i + 1, m == j + 1)])
                 W1[i, j] = wp
@@ -1224,15 +1224,15 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
         _, m = np.unique(m, return_inverse=True)
         m += 1
 
-        for u in range(nh):  # loop through initial module assignments
+        for u in xrange(nh):  # loop through initial module assignments
             ci[h][np.where(ci[h - 1] == u + 1)] = m[u]  # assign new modules
 
         nh = np.max(m)  # number of new nodes
         wn0 = np.zeros((nh, nh))  # new positive weights matrix
         wn1 = np.zeros((nh, nh))
 
-        for u in range(nh):
-            for v in range(u, nh):
+        for u in xrange(nh):
+            for v in xrange(u, nh):
                 wn0[u, v] = np.sum(W0[np.ix_(m == u + 1, m == v + 1)])
                 wn1[u, v] = np.sum(W1[np.ix_(m == u + 1, m == v + 1)])
                 wn0[v, u] = wn0[u, v]
@@ -1315,7 +1315,7 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
     Knm0 = np.zeros((n, n))  # positive node-to-module degree
     Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in range(int(np.max(ci))):  # loop over initial modules
+    for m in xrange(int(np.max(ci))):  # loop over initial modules
         Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
         Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 
@@ -1524,7 +1524,7 @@ def modularity_und_sign(W, ci, qtype='sta'):
     Knm0 = np.zeros((n, n))  # positive node-to-module degree
     Knm1 = np.zeros((n, n))  # negative node-to-module degree
 
-    for m in range(int(np.max(ci))):  # loop over initial modules
+    for m in xrange(int(np.max(ci))):  # loop over initial modules
         Knm0[:, m] = np.sum(W0[:, ci == m + 1], axis=1)
         Knm1[:, m] = np.sum(W1[:, ci == m + 1], axis=1)
 

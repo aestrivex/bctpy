@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from bct.utils import BCTParamError, binarize
 
@@ -90,7 +90,7 @@ def make_motif34lib():
         # canonical labels (predecssors of IDs)
         CL = np.zeros((54, 6), dtype=np.uint8)
         cl = np.zeros((6,), dtype=np.uint8)
-        for i in range(2**6):  # loop through all subgraphs
+        for i in xrange(2**6):  # loop through all subgraphs
             m = '{0:b}'.format(i)
             m = str().zfill(6 - len(m)) + m
             G = np.array(((0, m[2], m[4]), (m[0], 0, m[5]),
@@ -129,14 +129,14 @@ def make_motif34lib():
         M = np.zeros((3834, 12), dtype=bool)  # isomorphs
         CL = np.zeros((3834, 16), dtype=np.uint8)  # canonical labels
         cl = np.zeros((16,), dtype=np.uint8)
-        for i in range(2**12):  # loop through all subgraphs
+        for i in xrange(2**12):  # loop through all subgraphs
             m = '{0:b}'.format(i)
             m = str().zfill(12 - len(m)) + m
             G = np.array(((0, m[3], m[6], m[9]), (m[0], 0, m[7], m[10]),
                           (m[1], m[4], 0, m[11]), (m[2], m[5], m[8], 0)), dtype=int)
             Gs = G + G.T
             v = Gs[0, :]
-            for j in range(2):
+            for j in xrange(2):
                 v = np.any(Gs[v != 0, :], axis=0) + v
             if np.all(v):  # if subgraph weakly connected
                 G2 = np.dot(G, G) != 0
@@ -168,7 +168,7 @@ def make_motif34lib():
     dir = os.path.dirname(__file__)
     fname = os.path.join(dir, motiflib)
     if os.path.exists(fname):
-        print("motif34lib already exists")
+        print "motif34lib already exists"
         return
 
     m3, m3n, id3, n3 = motif3generate()
@@ -211,7 +211,7 @@ def motif3funct_bin(A):
     A = binarize(A, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 2):
+    for u in xrange(n - 2):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -234,7 +234,7 @@ def motif3funct_bin(A):
 
                 mu = len(idu)  # number of unique motifs
                 f2 = np.zeros((mu,))
-                for h in range(mu):  # for each unique motif
+                for h in xrange(mu):  # for each unique motif
                     f2[h] = jx[h + 1] - jx[h]  # and frequencies
 
                 # then add to a cumulative count
@@ -288,7 +288,7 @@ def motif3funct_wei(W):
     A = binarize(W, copy=True)  # create binary adjmat
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 2):
+    for u in xrange(n - 2):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -322,7 +322,7 @@ def motif3funct_wei(W):
                 mu = len(idu)  # number of unique motifs
                 i2, q2, f2 = np.zeros((3, mu))
 
-                for h in range(mu):
+                for h in xrange(mu):
                     i2[h] = np.sum(i[jx[h] + 1:jx[h + 1] + 1])
                     q2[h] = np.sum(q[jx[h] + 1:jx[h + 1] + 1])
                     f2[h] = jx[h + 1] - jx[h]
@@ -372,7 +372,7 @@ def motif3struct_bin(A):
     A = binarize(A, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 2):
+    for u in xrange(n - 2):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -436,7 +436,7 @@ def motif3struct_wei(W):
     A = binarize(W, copy=True)  # create binary adjmat
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 2):
+    for u in xrange(n - 2):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -510,7 +510,7 @@ def motif4funct_bin(A):
     A = binarize(A, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 3):
+    for u in xrange(n - 3):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -545,7 +545,7 @@ def motif4funct_bin(A):
                     jx = np.append((0,), jx)
                     mu = len(idu)  # number of unique motifs
                     f2 = np.zeros((mu,))
-                    for h in range(mu):
+                    for h in xrange(mu):
                         f2[h] = jx[h + 1] - jx[h]
 
                     # add to cumulative count
@@ -599,7 +599,7 @@ def motif4funct_wei(W):
     A = binarize(W, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 3):
+    for u in xrange(n - 3):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -648,7 +648,7 @@ def motif4funct_wei(W):
                     mu = len(idu)  # number of unique motifs
                     i2, q2, f2 = np.zeros((3, mu))
 
-                    for h in range(mu):
+                    for h in xrange(mu):
                         i2[h] = np.sum(i[jx[h] + 1:jx[h + 1] + 1])
                         q2[h] = np.sum(q[jx[h] + 1:jx[h + 1] + 1])
                         f2[h] = jx[h + 1] - jx[h]
@@ -701,7 +701,7 @@ def motif4struct_bin(A):
     A = binarize(A, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 3):
+    for u in xrange(n - 3):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:
@@ -782,7 +782,7 @@ def motif4struct_wei(W):
     A = binarize(W, copy=True)  # ensure A is binary
     As = np.logical_or(A, A.T)  # symmetrized adjmat
 
-    for u in range(n - 3):
+    for u in xrange(n - 3):
         # v1: neighbors of u (>u)
         V1 = np.append(np.zeros((u,), dtype=int), As[u, u + 1:n + 1])
         for v1 in np.where(V1)[0]:

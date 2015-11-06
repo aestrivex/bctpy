@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 
@@ -300,7 +300,7 @@ def rich_club_bd(CIJ, klevel=None):
     R = np.zeros((klevel,))
     Nk = np.zeros((klevel,))
     Ek = np.zeros((klevel,))
-    for k in range(klevel):
+    for k in xrange(klevel):
         SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
         subCIJ = np.delete(CIJ, SmallNodes, axis=0)
         subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
@@ -344,7 +344,7 @@ def rich_club_bu(CIJ, klevel=None):
     R = np.zeros((klevel,))
     Nk = np.zeros((klevel,))
     Ek = np.zeros((klevel,))
-    for k in range(klevel):
+    for k in xrange(klevel):
         SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
         subCIJ = np.delete(CIJ, SmallNodes, axis=0)
         subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
@@ -383,7 +383,7 @@ def rich_club_wd(CIJ, klevel=None):
     # sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in range(klevel):
+    for k in xrange(klevel):
         SmallNodes, = np.where(deg < k + 1)
         if np.size(SmallNodes) == 0:
             Rw[k] = np.nan
@@ -429,7 +429,7 @@ def rich_club_wu(CIJ, klevel=None):
     # sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in range(klevel):
+    for k in xrange(klevel):
         SmallNodes, = np.where(deg < k + 1)
         if np.size(SmallNodes) == 0:
             Rw[k] = np.nan

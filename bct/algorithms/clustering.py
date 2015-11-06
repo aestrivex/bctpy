@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
@@ -86,7 +86,7 @@ def agreement_weighted(ci, wts):
     wts = np.array(wts) / np.sum(wts)
 
     D = np.zeros((n, n))
-    for i in range(m):
+    for i in xrange(m):
         d = dummyvar(ci[i, :].reshape(1, n))
         D += np.dot(d, d.T) * wts[i]
     return D
@@ -148,7 +148,7 @@ def clustering_coef_bu(G):
     n = len(G)
     C = np.zeros((n,))
 
-    for u in range(n):
+    for u in xrange(n):
         V, = np.where(G[u, :])
         k = len(V)
         if k >= 2:  # degree must be at least 2
@@ -264,7 +264,7 @@ def consensus_und(D, tau, reps=1000):
         n, r = np.shape(cis)  # ci represents one vector for each rep
         ci_tmp = np.zeros(n)
 
-        for i in range(r):
+        for i in xrange(r):
             for j, u in enumerate(sorted(
                     np.unique(cis[:, i], return_index=True)[1])):
                 ci_tmp[np.where(cis[:, i] == cis[u, i])] = j

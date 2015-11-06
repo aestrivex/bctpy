@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from bct.utils import cuberoot, binarize, invert
 
@@ -33,7 +33,7 @@ def breadthdist(CIJ):
     n = len(CIJ)
 
     D = np.zeros((n, n))
-    for i in range(n):
+    for i in xrange(n):
         D[i, :], _ = breadth(CIJ, i)
 
     D[D == 0] = np.inf
@@ -145,7 +145,7 @@ def charpath(D, include_diagonal=False):
     lambda_ = np.sum(D[D != np.inf]) / len(np.where(D != np.inf)[0])
 
     # eccentricity for each vertex (ignore inf)
-    ecc = np.max(D * (D != np.inf), axis=1)
+    ecc = np.array(np.ma.masked_equal(D, np.inf).max(axis=1))
 
     # radius of graph
     radius = np.min(ecc)  # but what about zeros?
@@ -155,8 +155,8 @@ def charpath(D, include_diagonal=False):
 
     # efficiency: mean of inverse entries of D[G]
     n = len(D)
+    np.fill_diagonal(D, np.inf)  # so that the inverse is 0
     D = 1 / D  # invert distance
-    np.fill_diagonal(D, 0)  # set diagonal to 0
     efficiency = np.sum(D) / (n * (n - 1))  # compute global efficiency
 
     return lambda_, efficiency, ecc, radius, diameter
@@ -185,7 +185,7 @@ def cycprob(Pq):
 
     # note: fcyc[1] must be zero, as there cannot be cycles of length 1
     fcyc = np.zeros(np.size(Pq, axis=2))
-    for q in range(np.size(Pq, axis=2)):
+    for q in xrange(np.size(Pq, axis=2)):
         if np.sum(Pq[:, :, q]) > 0:
             fcyc[q] = np.sum(np.diag(Pq[:, :, q])) / np.sum(Pq[:, :, q])
         else:
@@ -195,7 +195,7 @@ def cycprob(Pq):
     # note: pcyc[2] is equal to the fraction of reciprocal connections
     # note: there are no non-cyclic paths of length N and no cycles of len N+1
     pcyc = np.zeros(np.size(Pq, axis=2))
-    for q in range(np.size(Pq, axis=2)):
+    for q in xrange(np.size(Pq, axis=2)):
         if np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])) > 0:
             pcyc[q] = (np.sum(np.diag(Pq[:, :, q - 1])) /
                        np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])))
@@ -287,7 +287,7 @@ def distance_wei(G):
     D[np.logical_not(np.eye(n))] = np.inf
     B = np.zeros((n, n))  # number of edges matrix
 
-    for u in range(n):
+    for u in xrange(n):
         # distance permanence (true is temporary)
         S = np.ones((n,), dtype=bool)
         G1 = G.copy()
@@ -363,7 +363,7 @@ def efficiency_bin(G, local=False):
     if local:
         E = np.zeros((n,))  # local efficiency
 
-        for u in range(n):
+        for u in xrange(n):
             # V,=np.where(G[u,:])			#neighbors
             # k=len(V)					#degree
             # if k>=2:					#degree must be at least 2
@@ -436,7 +436,7 @@ def efficiency_wei(Gw, local=False):
         D = np.zeros((n, n))  # distance matrix
         D[np.logical_not(np.eye(n))] = np.inf
 
-        for u in range(n):
+        for u in xrange(n):
             # distance permanence (true is temporary)
             S = np.ones((n,), dtype=bool)
             G1 = G.copy()
@@ -467,7 +467,7 @@ def efficiency_wei(Gw, local=False):
     A = np.array((Gw != 0), dtype=int)
     if local:
         E = np.zeros((n,))  # local efficiency
-        for u in range(n):
+        for u in xrange(n):
             # V,=np.where(Gw[u,:])		#neighbors
             # k=len(V)					#degree
             # if k>=2:					#degree must be at least 2
@@ -553,8 +553,8 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # this code is for pathlength=1
     # paths are seeded from sources
     q = 1
-    for j in range(n):
-        for i in range(len(sources)):
+    for j in xrange(n):
+        for i in xrange(len(sources)):
             i_s = sources[i]
             if CIJ[i_s, j] == 1:
                 pths.append([i_s, j])
@@ -563,7 +563,7 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # calculate the use index per vertex (for paths of length 1)
     util[:, q], _ = np.histogram(pths, bins=n)
     # now enter the found paths of length 1 into the pathmatrix Pq
-    for nrp in range(np.size(pths, axis=0)):
+    for nrp in xrange(np.size(pths, axis=0)):
         Pq[pths[nrp, 0], pths[nrp, q], q - 1] += 1
 
     # begin saving allpths
@@ -575,10 +575,10 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     npthscnt = k
 
     # big loop for all other pathlengths q
-    for q in range(2, qmax + 1):
+    for q in xrange(2, qmax + 1):
         # to keep track of time...
-        print((
-            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq))))
+        print (
+            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq)))
 
         # old paths are now in 'pths'
         # new paths are about to be collected in 'npths'
@@ -676,7 +676,7 @@ def findwalks(CIJ):
     Wq = np.zeros((n, n, n))
     CIJpwr = CIJ.copy()
     Wq[:, :, 1] = CIJ
-    for q in range(n):
+    for q in xrange(n):
         CIJpwr = np.dot(CIJpwr, CIJ)
         Wq[:, :, q] = CIJpwr
 
@@ -735,9 +735,9 @@ def reachdist(CIJ):
     id0, = np.where(id == 0)  # nothing goes in, so column(R) will be 0
     od0, = np.where(od == 0)  # nothing comes out, so row(R) will be 0
     # use these colums and rows to check for reachability
-    col = list(range(10))
+    col = range(10)
     col = np.delete(col, id0)
-    row = list(range(10))
+    row = range(10)
     row = np.delete(row, od0)
 
     R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)

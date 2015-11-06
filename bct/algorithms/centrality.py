@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from .core import kcore_bd, kcore_bu
 from .distance import reachdist
@@ -53,7 +53,7 @@ def betweenness_bin(G):
     diam = d - 1
 
     # calculate DP
-    for d in xrange(diam, 1, -1):
+    for d in range(diam, 1, -1):
         DPd1 = np.dot(((L == d) * (1 + DP) / NSP), G.T) * \
             ((L == (d - 1)) * NSP)
         DP += DPd1
@@ -90,7 +90,7 @@ def betweenness_wei(G):
     n = len(G)
     BC = np.zeros((n,))  # vertex betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D = np.tile(np.inf, (n,))
         D[u] = 0  # distance from u
         NP = np.zeros((n,))
@@ -165,7 +165,7 @@ def diversity_coef_sign(W, ci):
     def entropy(w_):
         S = np.sum(w_, axis=1)  # strength
         Snm = np.zeros((n, m))  # node-to-module degree
-        for i in xrange(m):
+        for i in range(m):
             Snm[:, i] = np.sum(w_[:, ci == i + 1], axis=1)
         pnm = Snm / (np.tile(S, (m, 1)).T)
         pnm[np.isnan(pnm)] = 0
@@ -206,7 +206,7 @@ def edge_betweenness_bin(G):
     BC = np.zeros((n,))  # vertex betweenness
     EBC = np.zeros((n, n))  # edge betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D = np.zeros((n,))
         D[u] = 1  # distance from u
         NP = np.zeros((n,))
@@ -279,7 +279,7 @@ def edge_betweenness_wei(G):
     BC = np.zeros((n,))  # vertex betweenness
     EBC = np.zeros((n, n))  # edge betweenness
 
-    for u in xrange(n):
+    for u in range(n):
         D = np.tile(np.inf, n)
         D[u] = 0  # distance from u
         NP = np.zeros((n,))
@@ -380,7 +380,7 @@ def erange(CIJ):
     Erange = np.zeros((N, N))
     i, j = np.where(CIJ)
 
-    for c in xrange(len(i)):
+    for c in range(len(i)):
         CIJcut = CIJ.copy()
         CIJcut[i[c], j[c]] = 0
         R, D = reachdist(CIJcut)
@@ -430,14 +430,14 @@ def flow_coef_bd(CIJ):
     max_flo = np.zeros((N,))
 
     # loop over nodes
-    for v in xrange(N):
+    for v in range(N):
         # find neighbors - note: both incoming and outgoing connections
         nb, = np.where(CIJ[v, :] + CIJ[:, v].T)
         fc[v] = 0
         if np.where(nb)[0].size:
             CIJflo = -CIJ[np.ix_(nb, nb)]
-            for i in xrange(len(nb)):
-                for j in xrange(len(nb)):
+            for i in range(len(nb)):
+                for j in range(len(nb)):
                     if CIJ[nb[i], v] and CIJ[v, nb[j]]:
                         CIJflo[i, j] += 1
             total_flo[v] = np.sum(
@@ -475,7 +475,7 @@ def kcoreness_centrality_bd(CIJ):
     coreness = np.zeros((N,))
     kn = np.zeros((N,))
 
-    for k in xrange(N):
+    for k in range(N):
         CIJkcore, kn[k] = kcore_bd(CIJ, k)
         ss = np.sum(CIJkcore, axis=0) > 0
         coreness[ss] = k
@@ -512,7 +512,7 @@ def kcoreness_centrality_bu(CIJ):
 
     coreness = np.zeros((N,))
     kn = np.zeros((N,))
-    for k in xrange(N):
+    for k in range(N):
         CIJkcore, kn[k] = kcore_bu(CIJ, k)
         ss = np.sum(CIJkcore, axis=0) > 0
         coreness[ss] = k
@@ -554,7 +554,7 @@ def module_degree_zscore(W, ci, flag=0):
 
     n = len(W)
     Z = np.zeros((n,))  # number of vertices
-    for i in xrange(1, int(np.max(ci) + 1)):
+    for i in range(1, int(np.max(ci) + 1)):
         Koi = np.sum(W[np.ix_(ci == i, ci == i)], axis=1)
         Z[np.where(ci == i)] = (Koi - np.mean(Koi)) / np.std(Koi)
 
@@ -649,7 +649,7 @@ def participation_coef(W, ci, degree='undirected'):
     Gc = np.dot((W != 0), np.diag(ci))  # neighbor community affiliation
     Kc2 = np.zeros((n,))  # community-specific neighbors
 
-    for i in xrange(1, int(np.max(ci)) + 1):
+    for i in range(1, int(np.max(ci)) + 1):
         Kc2 += np.square(np.sum(W * (Gc == i), axis=1))
 
     P = np.ones((n,)) - Kc2 / np.square(Ko)
@@ -689,7 +689,7 @@ def participation_coef_sign(W, ci):
         Gc = np.dot(np.logical_not(W_ == 0), np.diag(ci))
         Sc2 = np.zeros((n,))
 
-        for i in xrange(1, int(np.max(ci) + 1)):
+        for i in range(1, int(np.max(ci) + 1)):
             Sc2 += np.square(np.sum(W_ * (Gc == i), axis=1))
 
         P = np.ones((n,)) - Sc2 / np.square(S)

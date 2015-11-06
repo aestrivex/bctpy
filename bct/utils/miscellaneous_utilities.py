@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 
 
@@ -38,7 +38,7 @@ def dummyvar(cis, return_sparse=False):
     ix = np.argsort(cis, axis=0)
     # s_cis=np.sort(cis,axis=0)
     # FIXME use the sorted indices to sort by row efficiently
-    s_cis = cis[ix][:, xrange(m), xrange(m)]
+    s_cis = cis[ix][:, range(m), range(m)]
 
     mask = np.hstack((((True,),) * m, (s_cis[:-1, :] != s_cis[1:, :]).T))
     indptr, = np.where(mask.flat)

@@ -6,7 +6,7 @@ import numpy as np
 def test_threshold_proportional():
     x = load_sample()
     x = bct.threshold_proportional(x, .5, copy=True)
-    assert np.allclose(np.sum(x), 22548.51206965)
+    assert np.allclose(np.sum(x), 22544.8029284)
 
 
 def test_threshold_proportional_nocopy():

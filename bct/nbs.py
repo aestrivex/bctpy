@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 
 from .utils import BCTParamError
@@ -145,15 +145,15 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
     # vectorize connectivity matrices for speed
     xmat, ymat = np.zeros((m, nx)), np.zeros((m, ny))
 
-    for i in xrange(nx):
+    for i in range(nx):
         xmat[:, i] = x[:, :, i][ixes].squeeze()
-    for i in xrange(ny):
+    for i in range(ny):
         ymat[:, i] = y[:, :, i][ixes].squeeze()
     del x, y
 
     # perform t-test at each edge
     t_stat = np.zeros((m,))
-    for i in xrange(m):
+    for i in range(m):
         if paired:
             t_stat[i] = ttest_paired_stat_only(xmat[i, :], ymat[i, :], tail)
         else:
@@ -179,7 +179,7 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
     ind_sz += 1
     nr_components = np.size(ind_sz)
     sz_links = np.zeros((nr_components,))
-    for i in xrange(nr_components):
+    for i in range(nr_components):
         nodes, = np.where(ind_sz[i] == a)
         sz_links[i] = np.sum(adj[np.ix_(nodes, nodes)]) / 2
         adj[np.ix_(nodes, nodes)] *= (i + 2)
@@ -192,15 +192,15 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
     else:
         # max_sz=0
         raise BCTParamError('True matrix is degenerate')
-    print 'max component size is %i' % max_sz
+    print('max component size is %i' % max_sz)
 
     # estimate empirical null distribution of maximum component size by
     # generating k independent permutations
-    print 'estimating null distribution with %i permutations' % k
+    print('estimating null distribution with %i permutations' % k)
 
     null = np.zeros((k,))
     hit = 0
-    for u in xrange(k):
+    for u in range(k):
         # randomize
         if paired:
             indperm = np.sign(0.5 - np.random.rand(1, nx))
@@ -209,7 +209,7 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
             d = np.hstack((xmat, ymat))[:, np.random.permutation(nx + ny)]
 
         t_stat_perm = np.zeros((m,))
-        for i in xrange(m):
+        for i in range(m):
             if paired:
                 t_stat_perm[i] = ttest_paired_stat_only(
                     d[i, :nx], d[i, -nx:], tail)
@@ -228,7 +228,7 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
         ind_sz += 1
         nr_components_perm = np.size(ind_sz)
         sz_links_perm = np.zeros((nr_components_perm))
-        for i in xrange(nr_components_perm):
+        for i in range(nr_components_perm):
             nodes, = np.where(ind_sz[i] == a)
             sz_links_perm[i] = np.sum(adj_perm[np.ix_(nodes, nodes)]) / 2
 
@@ -242,16 +242,16 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
             hit += 1
 
         if verbose:
-            print ('permutation %i of %i.  Permutation max is %s.  Observed max'
+            print(('permutation %i of %i.  Permutation max is %s.  Observed max'
                    ' is %s.  P-val estimate is %.3f') % (
-                u, k, null[u], max_sz, hit / (u + 1))
+                u, k, null[u], max_sz, hit / (u + 1)))
         elif (u % (k / 10) == 0 or u == k - 1):
-            print 'permutation %i of %i.  p-value so far is %.3f' % (u, k,
-                                                                     hit / (u + 1))
+            print('permutation %i of %i.  p-value so far is %.3f' % (u, k,
+                                                                     hit / (u + 1)))
 
     pvals = np.zeros((nr_components,))
     # calculate p-vals
-    for i in xrange(nr_components):
+    for i in range(nr_components):
         pvals[i] = np.size(np.where(null >= sz_links[i])) / k
 
     return pvals, adj, null

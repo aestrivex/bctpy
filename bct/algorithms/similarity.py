@@ -1,4 +1,4 @@
-
+from __future__ import division
 import numpy as np
 from bct.utils import BCTParamError, binarize
 from .degree import degrees_dir, degrees_und
@@ -39,7 +39,7 @@ def edge_nei_overlap_bd(CIJ):
 
     ec = np.zeros((lel,))
     degij = np.zeros((2, lel))
-    for e in range(lel):
+    for e in xrange(lel):
         neiik = np.setdiff1d(np.union1d(
             np.where(CIJ[ik[e], :]), np.where(CIJ[:, ik[e]])), (ik[e], jk[e]))
         neijk = np.setdiff1d(np.union1d(
@@ -86,7 +86,7 @@ def edge_nei_overlap_bu(CIJ):
 
     ec = np.zeros((lel,))
     degij = np.zeros((2, lel))
-    for e in range(lel):
+    for e in xrange(lel):
         neiik = np.setdiff1d(np.union1d(
             np.where(CIJ[ik[e], :]), np.where(CIJ[:, ik[e]])), (ik[e], jk[e]))
         neijk = np.setdiff1d(np.union1d(
@@ -137,12 +137,12 @@ def gtom(adj, nr_steps):
     nr_nodes = len(adj)
 
     if nr_steps > nr_nodes:
-        print("Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes")
+        print "Warning: nr_steps exceeded nr_nodes. Setting nr_steps=nr_nodes"
     if nr_steps == 0:
         return bm
     else:
-        for steps in range(2, nr_steps):
-            for i in range(nr_nodes):
+        for steps in xrange(2, nr_steps):
+            for i in xrange(nr_nodes):
                 # neighbors of node i
                 ng_col, = np.where(bm_aux[i, :] == 1)
                 # neighbors of neighbors of node i
@@ -198,8 +198,8 @@ def matching_ind(CIJ):
     Mall = np.zeros((n, n))
 
     # compare incoming connections
-    for i in range(n - 1):
-        for j in range(i + 1, n):
+    for i in xrange(n - 1):
+        for j in xrange(i + 1, n):
             c1i = CIJ[:, i]
             c2i = CIJ[:, j]
             usei = np.logical_or(c1i, c2i)
@@ -271,7 +271,7 @@ def matching_ind_und(CIJ0):
     I = np.logical_not(np.eye(N))
     M = np.zeros((N, N))
 
-    for i in range(N):
+    for i in xrange(N):
         c1 = CIJ[i, :]
         use = np.logical_or(c1, CIJ)
         use[:, i] = 0
@@ -280,7 +280,7 @@ def matching_ind_und(CIJ0):
         ncon1 = c1 * use
         ncon2 = c1 * CIJ
         ncon = np.sum(ncon1 + ncon2, axis=1)
-        print(ncon)
+        print ncon
 
         M[:, i] = 2 * np.sum(np.logical_and(ncon1, ncon2), axis=1) / ncon
 
@@ -319,7 +319,7 @@ def dice_pairwise_und(a1, a2):
     d = np.zeros((n,))  # dice similarity
 
     # calculate the common neighbors for each vertex
-    for i in range(n):
+    for i in xrange(n):
         d[i] = 2 * (np.sum(np.logical_and(a1[:, i], a2[:, i])) /
                     (np.sum(a1[:, i]) + np.sum(a2[:, i])))
 

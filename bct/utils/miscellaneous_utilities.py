@@ -6,6 +6,17 @@ class BCTParamError(RuntimeError):
     pass
 
 
+def teachers_round(x):
+    '''
+    Do rounding such that .5 always rounds to 1, and not bankers rounding.
+    This is for compatibility with matlab functions, and ease of testing.
+    '''
+    if ((x > 0) and (x % 1 >= 0.5)) or ((x < 0) and (x % 1 > 0.5)):
+        return int(np.ceil(x))
+    else:
+        return int(np.floor(x))
+
+
 def cuberoot(x):
     '''
     Correctly handle the cube root for negative weights, instead of uselessly

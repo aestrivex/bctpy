@@ -96,7 +96,7 @@ def threshold_proportional(W, p, copy=True):
 
     I = np.argsort(W[ind])[::-1]		# sort indices by magnitude
 
-    en = int(round((n * n - n) * p / ud))		# number of links to be preserved
+    en = int(np.round((n * n - n) * p / ud))		# number of links to be preserved
 
     W[(ind[0][I][en:], ind[1][I][en:])] = 0  # apply threshold
     #W[np.ix_(ind[0][I][en:], ind[1][I][en:])]=0

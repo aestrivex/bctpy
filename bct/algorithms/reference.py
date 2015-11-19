@@ -1279,11 +1279,11 @@ def randmio_und_connected(R, iter):
                     PN[:, d] = 1
                     PN[:, a] = 1
                     while True:
-                        PN[0, :] = np.any(R[P[0, :] != 0, :], axis=0)
-                        PN[1, :] = np.any(R[P[1, :] != 0, :], axis=0)
+                        P[0, :] = np.any(R[P[0, :] != 0, :], axis=0)
+                        P[1, :] = np.any(R[P[1, :] != 0, :], axis=0)
                         P *= np.logical_not(PN)
                         if not np.all(np.any(P, axis=1)):
-                            rewire = 0
+                            rewire = False
                             break
                         elif np.any(P[:, (b, c)]):
                             break

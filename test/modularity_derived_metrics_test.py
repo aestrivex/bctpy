@@ -5,7 +5,7 @@ import bct
 
 def test_pc():
     x = load_sample(thres=.4)
-    #ci,q = bct.modularity_und(x)
+    # ci,q = bct.modularity_und(x)
     ci = np.load(mat_path('sample_partition.npy'))
 
     pc = np.load(mat_path('sample_pc.npy'))
@@ -65,7 +65,7 @@ def test_zi():
 def test_shannon_entropy():
     x = load_sample(thres=0.4)
     ci = np.load(mat_path('sample_partition.npy'))
-    #ci, q = bct.modularity_und(x)
+    # ci, q = bct.modularity_und(x)
     hpos, _ = bct.diversity_coef_sign(x, ci)
     print np.sum(hpos)
     print hpos[-1]

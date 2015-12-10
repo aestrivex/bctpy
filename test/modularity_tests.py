@@ -57,7 +57,7 @@ def test_modularity_finetune_und():
     ci, oq = bct.modularity_louvain_und(x, seed=seed)
     _, q = bct.modularity_finetune_und(x, ci=ci, seed=seed)
     print q, oq
-    #assert np.allclose(q, .25892588)
+    # assert np.allclose(q, .25892588)
     assert np.allclose(q, .25856714)
     assert q - oq >= -1e6
 
@@ -75,7 +75,7 @@ def test_modularity_finetune_und():
     # slightly larger increase dependent on order occurred in both matlab and
     # bctpy around ~0.6% of the time. Due to numerical instability arising
     # from something different between matlab and scipy, these values were not
-    # the same across languages, but both languages showed bistable transitions.
+    # the same across languages, but both languages showed bistable transitions
     # they were extremely stable. The values were about .0015 apart.
 
     # also the matlab and python versions of modularity_und return slightly
@@ -158,7 +158,8 @@ def test_modularity_louvain_dir_low_modularity():
 #	_,q = bct.modularity_finetune_dir(x, ci=ci, seed=seed)
 #	print q,oq
 #	assert q >= oq
-    # this does not pass. the matlab code appears to have no idea what to do with
+    # this does not pass. the matlab code appears to have no idea what to do
+    # with
     # the low modularity directed modules. this may be someone else's fault.
 
 
@@ -186,7 +187,7 @@ def test_modularity_louvain_dir():
     # the code occasionally returns lower modularity (but very very similar,
     # order .001) partitions despite returning
     # higher modularity partitions a slight majority of the time. i dont know
-    #what is wrong
+    # what is wrong
 
 
 def test_community_louvain():

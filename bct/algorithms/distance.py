@@ -688,7 +688,6 @@ def findwalks(CIJ):
 def reachdist(CIJ):
     '''
     The binary reachability matrix describes reachability between all pairs
-
     of nodes. An entry (u,v)=1 means that there exists a path from node u
     to node v; alternatively (u,v)=0.
 
@@ -717,7 +716,8 @@ def reachdist(CIJ):
         CIJpwr = np.dot(CIJpwr, CIJ)
         R = np.logical_or(R, CIJpwr != 0)
         D += R
-        if powr <= n and np.any(R[row, col] == 0):
+
+        if powr <= n and np.any(R[np.ix_(row, col)] == 0):
             powr += 1
             R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
         return R, D, powr
@@ -735,9 +735,9 @@ def reachdist(CIJ):
     id0, = np.where(id == 0)  # nothing goes in, so column(R) will be 0
     od0, = np.where(od == 0)  # nothing comes out, so row(R) will be 0
     # use these colums and rows to check for reachability
-    col = range(10)
+    col = range(n)
     col = np.delete(col, id0)
-    row = range(10)
+    row = range(n)
     row = np.delete(row, od0)
 
     R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)

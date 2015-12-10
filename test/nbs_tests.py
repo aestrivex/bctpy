@@ -24,7 +24,10 @@ def test_nbs_paired_dsi_fmri():
     pass
 
 
-def _nbs_helper(x, y, expected_pval, atol=.05, thresh=.1, ntrials=25, paired=False):
+def _nbs_helper(x, y, expected_pval, atol=.05, thresh=.1, ntrials=25,
+                paired=False):
+    # comment
+
     pval, _, _ = bct.nbs_bct(x, y, thresh, k=ntrials, paired=paired)
     print pval, expected_pval
     assert np.allclose(pval, expected_pval, atol=atol)

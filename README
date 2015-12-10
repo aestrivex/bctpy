@@ -40,7 +40,9 @@ bugs lurking in bctpy, the question is not whether but how many. If you locate
 bugs, please submit them to me at rlaplant@nmr.mgh.harvard.edu.
 
 Many thanks to Stefan Fuertinger for his assistance tracking down a number of
-bugs.
+bugs. Stefan Fuertinger has a similar software package dealing with brain
+network functionality at http://research.mssm.edu/simonyanlab/analytical-tools/
+
 
 Credit for writing BCT (the matlab version) goes to the following list of 
 authors, especially Olaf Sporns and Mika Rubinov.

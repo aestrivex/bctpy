@@ -685,7 +685,7 @@ def findwalks(CIJ):
     return Wq, twalk, wlq
 
 
-def reachdist(CIJ):
+def reachdist(CIJ, ensure_binary=True):
     '''
     The binary reachability matrix describes reachability between all pairs
     of nodes. An entry (u,v)=1 means that there exists a path from node u
@@ -700,6 +700,10 @@ def reachdist(CIJ):
     ----------
     CIJ : NxN np.ndarray
         binary directed/undirected connection matrix
+    ensure_binary : bool
+        Binarizes input. Defaults to true. No user who is not testing 
+        something will ever want to not use this, use distance_wei instead for 
+        unweighted matrices.
 
     Returns
     -------
@@ -721,6 +725,9 @@ def reachdist(CIJ):
             powr += 1
             R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
         return R, D, powr
+
+    if ensure_binary:
+        CIJ = binarize(CIJ)
 
     R = CIJ.copy()
     D = CIJ.copy()

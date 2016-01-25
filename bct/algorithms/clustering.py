@@ -321,6 +321,66 @@ def get_components(A, no_depend=False):
 
     Parameters
     ----------
+    A : NxN np.ndarray
+        binary undirected adjacency matrix
+    no_depend : Any
+        Does nothing, included for backwards compatibility
+
+    Returns
+    -------
+    comps : Nx1 np.ndarray
+        vector of component assignments for each node
+    comp_sizes : Mx1 np.ndarray
+        vector of component sizes
+
+    Notes
+    -----
+    Note: disconnected nodes will appear as components with a component
+    size of 1
+
+    Note: The identity of each component (i.e. its numerical value in the
+    result) is not guaranteed to be identical the value returned in BCT,
+    matlab code, although the component topology is.
+
+    Many thanks to Nick Cullen for providing this implementation
+    '''
+
+    if not np.all(A == A.T):  # ensure matrix is undirected
+        raise BCTParamError('get_components can only be computed for undirected'
+                            ' matrices.  If your matrix is noisy, correct it with np.around')
+    
+    A = binarize(A, copy=True)
+    n = len(A)
+    np.fill_diagonal(A, 1)
+
+    edge_map = [{u,v} for u in range(n) for v in range(n) if A[u,v] == 1]
+    union_sets = []
+    for item in edge_map:
+        temp = []
+        for s in union_sets:
+
+            if not s.isdisjoint(item):
+                item = s.union(item)
+            else:
+                temp.append(s)
+        temp.append(item)
+        union_sets = temp
+
+    comps = np.array([i+1 for v in range(n) for i in range(len(union_sets)) if v in union_sets[i]])
+    comp_sizes = np.array([len(s) for s in union_sets])
+
+    return comps, comp_sizes
+
+
+def get_components_old(A, no_depend=False):
+    '''
+    Returns the components of an undirected graph specified by the binary and
+    undirected adjacency matrix adj. Components and their constitutent nodes
+    are assigned the same index and stored in the vector, comps. The vector,
+    comp_sizes, contains the number of nodes beloning to each component.
+
+    Parameters
+    ----------
     adj : NxN np.ndarray
         binary undirected adjacency matrix
     no_depend : bool

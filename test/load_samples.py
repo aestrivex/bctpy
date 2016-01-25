@@ -73,14 +73,14 @@ def load_signed_sparse_sample(thres=.06):
 def load_sample_group_qball():
     q = np.load(mat_path('sample_group_qball.npy'))
     return np.transpose(
-        map(bct.normalize, (q[:, :, i] for i in xrange(q.shape[2]))),
+        list(map(bct.normalize, (q[:, :, i] for i in range(q.shape[2])))),
         (1, 2, 0))
 
 
 def load_sample_group_dsi():
     d = np.load(mat_path('sample_group_dsi.npy'))
     return np.transpose(
-        map(bct.normalize, (d[:, :, i] for i in xrange(d.shape[2]))),
+        list(map(bct.normalize, (d[:, :, i] for i in range(d.shape[2])))),
         (1, 2, 0))
 
 
@@ -91,6 +91,6 @@ def load_sample_group_fmri():
     def compose(*functions):
         return functools.reduce(lambda f, g: lambda x: f(g(x)), functions)
     thresh_fun = functools.partial(bct.threshold_proportional, p=.5)
-    return np.transpose(map(compose(bct.normalize, thresh_fun),
-                            (f[:, :, i] for i in xrange(f.shape[2]))),
+    return np.transpose(list(map(compose(bct.normalize, thresh_fun),
+                            (f[:, :, i] for i in range(f.shape[2])))),
                            (1, 2, 0))

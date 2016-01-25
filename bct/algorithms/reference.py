@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from bct.utils import BCTParamError, binarize
 from .clustering import number_of_components
@@ -43,11 +43,11 @@ def latmio_dir_connected(R, iter, D=None):
     # create distance to diagonal matrix if not specified by user
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
@@ -61,7 +61,7 @@ def latmio_dir_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -159,11 +159,11 @@ def latmio_dir(R, iter, D=None):
     # create distance to diagonal matrix if not specified by user
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
@@ -177,7 +177,7 @@ def latmio_dir(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -258,11 +258,11 @@ def latmio_und_connected(R, iter, D=None):
 
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
@@ -276,7 +276,7 @@ def latmio_und_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:
             rewire = True
@@ -381,11 +381,11 @@ def latmio_und(R, iter, D=None):
 
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
@@ -399,7 +399,7 @@ def latmio_und(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:
             while True:
@@ -483,15 +483,15 @@ def makeevenCIJ(n, k, sz_cl):
     # check n against the number of levels
     Nlvl = 2**mx_lvl
     if Nlvl != n:
-        print "Warning: n must be a power of 2"
+        print("Warning: n must be a power of 2")
     n = Nlvl
 
     # create hierarchical template
-    for lvl in xrange(1, mx_lvl):
+    for lvl in range(1, mx_lvl):
         s = 2**(lvl + 1)
         CIJ = np.ones((s, s))
-        grp1 = xrange(int(s / 2))
-        grp2 = xrange(int(s / 2), s)
+        grp1 = range(int(s / 2))
+        grp2 = range(int(s / 2), s)
         ix1 = np.add.outer(np.array(grp1) * s, grp1).flatten()
         ix2 = np.add.outer(np.array(grp2) * s, grp2).flatten()
         CIJ.flat[ix1] = t  # numpy indexing is teh sucks :(
@@ -507,7 +507,7 @@ def makeevenCIJ(n, k, sz_cl):
     # determine nr of non-cluster connections left and their possible positions
     rem_k = k - np.size(np.where(CIJp.flatten()))
     if rem_k < 0:
-        print "Warning: K is too small, output matrix contains clusters only"
+        print("Warning: K is too small, output matrix contains clusters only")
         return CIJp
     a, b = np.where(np.logical_not(CIJp + np.eye(n)))
 
@@ -550,11 +550,11 @@ def makefractalCIJ(mx_lvl, E, sz_cl):
     n = 2**mx_lvl
     sz_cl -= 1
 
-    for lvl in xrange(1, mx_lvl):
+    for lvl in range(1, mx_lvl):
         s = 2**(lvl + 1)
         CIJ = np.ones((s, s))
-        grp1 = xrange(int(s / 2))
-        grp2 = xrange(int(s / 2), s)
+        grp1 = range(int(s / 2))
+        grp2 = range(int(s / 2), s)
         ix1 = np.add.outer(np.array(grp1) * s, grp1).flatten()
         ix2 = np.add.outer(np.array(grp2) * s, grp2).flatten()
         CIJ.flat[ix1] = t  # numpy indexing is teh sucks :(
@@ -617,7 +617,7 @@ def makerandCIJdegreesfixed(inv, outv):
     i_in = 0
     i_out = 0
 
-    for i in xrange(n):
+    for i in range(n):
         in_inv[i_in:i_in + inv[i]] = i
         out_inv[i_out:i_out + outv[i]] = i
         i_in += inv[i]
@@ -627,7 +627,7 @@ def makerandCIJdegreesfixed(inv, outv):
     edges = np.array((out_inv, in_inv[np.random.permutation(k)]))
 
     # create CIJ and check for double edges and self connections
-    for i in xrange(k):
+    for i in range(k):
         if CIJ[edges[0, i], edges[1, i]]:
             tried = set()
             while True:
@@ -740,8 +740,8 @@ def makeringlatticeCIJ(n, k):
     CIJ1 = np.ones((n, n))
     kk = 0
     count = 0
-    seq = xrange(1, n)
-    seq2 = xrange(n - 1, 0, -1)
+    seq = range(1, n)
+    seq2 = range(n - 1, 0, -1)
 
     # fill in
     while kk < k:
@@ -757,7 +757,7 @@ def makeringlatticeCIJ(n, k):
     if overby:
         i, j = np.where(dCIJ)
         rp = np.random.permutation(np.size(i))
-        for ii in xrange(overby):
+        for ii in range(overby):
             CIJ[i[rp[ii]], j[rp[ii]]] = 0
 
     return CIJ
@@ -788,7 +788,7 @@ def maketoeplitzCIJ(n, k, s):
     no connections are placed on the main diagonal.
     '''
     from scipy import linalg, stats
-    pf = stats.norm.pdf(xrange(1, n), .5, s)
+    pf = stats.norm.pdf(range(1, n), .5, s)
     template = linalg.toeplitz(np.append((0,), pf), r=np.append((0,), pf))
     template *= (k / np.sum(template))
 
@@ -1081,7 +1081,7 @@ def randmio_dir_connected(R, iter):
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1168,7 +1168,7 @@ def randmio_dir(R, iter):
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1242,7 +1242,7 @@ def randmio_und_connected(R, iter):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1343,7 +1343,7 @@ def randmio_und(R, iter):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(iter):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1420,7 +1420,7 @@ def randmio_und_signed(R, iter):
     if not (k_p and k_m):
         return randmio_und(R, iter)[0]
 
-    for it in xrange(iter):  # while not rewired
+    for it in range(iter):  # while not rewired
         while True:
             while True:
                 # choose two edges to rewire but make sure they are either
@@ -1601,7 +1601,7 @@ def randomizer_bin_und(R, alpha):
     if k == 0 or k >= (nr_poss_edges - 1):
         raise BCTParamError("No possible randomization")
 
-    for it in xrange(k):
+    for it in range(k):
         if np.random.random() > alpha:
             continue  # rewire alpha% of edges
 
@@ -1641,7 +1641,7 @@ def randomizer_bin_und(R, alpha):
             R[d, b] = 1
 
             # update the edge index (this is inefficient)
-            for m in xrange(k):
+            for m in range(k):
                 if i[m] == d and j[m] == c:
                     i.setflags(write=True)
                     j.setflags(write=True)

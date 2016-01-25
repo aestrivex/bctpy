@@ -63,7 +63,7 @@ def test_consensus():
 def test_cluscoef_wd():
     x = load_directed_low_modularity_sample(thres=.45)
     cc = bct.clustering_coef_wd(x)
-    print np.sum(cc)
+    print(np.sum(cc))
     assert np.allclose(np.sum(cc), 289.30817909)
 
 

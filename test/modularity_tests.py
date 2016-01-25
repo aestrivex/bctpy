@@ -6,7 +6,7 @@ import bct
 def test_modularity_und():
     x = load_sample(thres=.4)
     _, q = bct.modularity_und(x)
-    print q
+    print(q)
     assert np.allclose(q, 0.24097717)
     # matlab and bctpy appear to return different results due to the cross-
     # package numerical instability of eigendecompositions
@@ -20,7 +20,7 @@ def test_modularity_louvain_und():
     assert np.allclose(q, 0.25892588)
 
     fails = 0
-    for i in xrange(100):
+    for i in range(100):
         ci, q = bct.modularity_louvain_und(x)
         try:
             assert np.allclose(q, .25, atol=0.01)
@@ -43,7 +43,7 @@ def test_modularity_finetune_und():
     assert np.allclose(q, .25879794)
 
     fails = 0
-    for i in xrange(100):
+    for i in range(100):
         _, q = bct.modularity_finetune_und(x)
         try:
             assert np.allclose(q, .25, atol=0.03)
@@ -56,13 +56,13 @@ def test_modularity_finetune_und():
     seed = 71040925
     ci, oq = bct.modularity_louvain_und(x, seed=seed)
     _, q = bct.modularity_finetune_und(x, ci=ci, seed=seed)
-    print q, oq
+    print(q, oq)
     # assert np.allclose(q, .25892588)
     assert np.allclose(q, .25856714)
     assert q - oq >= -1e6
 
     ci, oq = bct.modularity_und(x)
-    for i in xrange(100):
+    for i in range(100):
         _, q = bct.modularity_finetune_und(x, ci=ci)
         assert np.allclose(q, .25, atol=0.002)
         assert q - oq >= -1e6
@@ -88,7 +88,7 @@ def test_modularity_louvain_und_sign_seed():
     x = load_signed_sample()
     seed = 90772777
     _, q = bct.modularity_louvain_und_sign(x, seed=seed)
-    print q
+    print(q)
     assert np.allclose(q, .46605515)
 
 
@@ -97,7 +97,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
     seed = 34908314
     ci, oq = bct.modularity_louvain_und_sign(x, seed=seed)
     _, q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
-    print q
+    print(q)
     assert np.allclose(q, .47282924)
     assert q >= oq
 
@@ -108,9 +108,9 @@ def test_modularity_finetune_und_sign_actually_finetune():
     x[np.where(bct.threshold_proportional(randomized_sample, .2))] = 0
 
     ci, oq = bct.modularity_louvain_und_sign(x, seed=seed)
-    print oq
+    print(oq)
     assert np.allclose(oq, .45254522)
-    for i in xrange(100):
+    for i in range(100):
         _, q = bct.modularity_finetune_und_sign(x, ci=ci)
         assert q >= oq
 
@@ -119,7 +119,7 @@ def test_modularity_probtune_und_sign():
     x = load_signed_sample()
     seed = 59468096
     ci, q = bct.modularity_probtune_und_sign(x, seed=seed)
-    print q
+    print(q)
     assert np.allclose(q, .07885327)
 
     seed = 1742447
@@ -128,7 +128,7 @@ def test_modularity_probtune_und_sign():
 
     for i in np.arange(.05, .5, .02):
         fails = 0
-        for j in xrange(100):
+        for j in range(100):
             _, q = bct.modularity_probtune_und_sign(x, ci=ci, p=i)
             try:
                 assert q < oq
@@ -194,5 +194,5 @@ def test_community_louvain():
     x = load_sample(thres=0.4)
     seed = 39185
     ci, q = bct.community_louvain(x, seed=seed)
-    print q
+    print(q)
     assert np.allclose(q, 0.2583, atol=0.015)

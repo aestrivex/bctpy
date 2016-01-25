@@ -1,4 +1,4 @@
-from __future__ import division
+
 import numpy as np
 from bct.utils import binarize
 
@@ -99,7 +99,7 @@ def jdegree(CIJ):
     szJ = np.max((id, od)) + 1
     J = np.zeros((szJ, szJ))
 
-    for i in xrange(n):
+    for i in range(n):
         J[id[i], od[i]] += 1
 
     J_od = np.sum(np.triu(J, 1))

@@ -1,4 +1,4 @@
-
+from __future__ import division, print_statement
 import numpy as np
 from .core import kcore_bd, kcore_bu
 from .distance import reachdist

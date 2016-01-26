@@ -1,4 +1,4 @@
-
+from __future__ import division, print_statement
 import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
@@ -366,7 +366,8 @@ def get_components(A, no_depend=False):
         temp.append(item)
         union_sets = temp
 
-    comps = np.array([i+1 for v in range(n) for i in range(len(union_sets)) if v in union_sets[i]])
+    comps = np.array([i+1 for v in range(n) for i in 
+        range(len(union_sets)) if v in union_sets[i]])
     comp_sizes = np.array([len(s) for s in union_sets])
 
     return comps, comp_sizes

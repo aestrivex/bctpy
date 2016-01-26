@@ -1,4 +1,4 @@
-
+from __future__ import division, print_statement
 import numpy as np
 from bct.utils import BCTParamError, binarize
 from .degree import degrees_dir, degrees_und

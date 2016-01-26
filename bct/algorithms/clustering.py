@@ -1,4 +1,4 @@
-from __future__ import division, print_statement
+from __future__ import division, print_function
 import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize

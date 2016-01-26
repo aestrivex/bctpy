@@ -1,4 +1,4 @@
-from __future__ import division, print_statement
+from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, binarize
 from .clustering import number_of_components

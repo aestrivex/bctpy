@@ -1,4 +1,4 @@
-from __future__ import division, print_statement
+from __future__ import division, print_function
 import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 

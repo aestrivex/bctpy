@@ -664,6 +664,8 @@ def reorder_mod(A, ci):
         if ui == uj:
             i[ui] = 0
             j[uj] = 0
+            continue
+
         if not np.size(ui):
             ui = np.inf
         if not np.size(uj):

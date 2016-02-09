@@ -94,7 +94,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
                       axis=2) + epsilon
 
     def k_prod(K):
-        return np.outer(K, np.transpose(K)) + epsilon
+        return np.inner(K, np.transpose(K)) + epsilon
 
     def s_avg(K, sc):
         return (K+sc) / 2 + epsilon
@@ -106,12 +106,33 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         return np.where(K < sc, K + epsilon, sc + epsilon)
     
     def s_max(K, sc):
+        #return np.max((K, sc.T), axis=0)
         return np.where(K > sc, K + epsilon, sc + epsilon)
 
     def s_prod(K, sc):
         return K * sc + epsilon
 
-    def clu_gen(A, K, D, m, eta, gamma, model_var, k_fun):
+    def x_avg(K, ixes):
+        sc = np.transpose(K[:, np.zeros((len(ixes),))])
+        return s_avg(K[ixes,:], sc)
+
+    def x_diff(K, ixes):
+        sc = np.transpose(K[:, np.zeros((len(ixes),))])
+        return s_diff(K[ixes,:], sc)
+
+    def x_max(K, ixes):
+        sc = np.transpose(K[:, np.zeros((len(ixes),))])
+        return s_max(K[ixes,:], sc)
+
+    def x_min(K, ixes):
+        sc = np.transpose(K[:, np.zeros((len(ixes),))])
+        return s_min(K[ixes,:], sc)
+
+    def x_prod(K, ixes):
+        return np.inner(K[ixes,:], np.transpose(K)) + epsilon
+
+
+    def clu_gen(A, K, D, m, eta, gamma, model_var, x_fun):
         mseed = np.size(np.where(A.flat))//2
 
         A = A>0
@@ -161,7 +182,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             bth[uu] = 1
             bth[vv] = 1
     
-            K[bth,:] = k_fun(c)
+            k_result = x_fun(c, bth)
+
+            K[bth,:] = k_result
+            K[:,bth] = k_result.T
 
             if mv2 in ('powerlaw', 'power_law'):
                 Ff[bth,:] = Fd[bth,:] * K[bth,:]**gamma
@@ -238,27 +262,27 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     if model_type in ('clu-avg', 'clu_avg'):
         Kseed = k_avg(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, k_avg)
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_avg)
 
     elif model_type in ('clu-diff', 'clu_diff'):
         Kseed = k_diff(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, k_diff)
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_diff)
 
     elif model_type in ('clu-max', 'clu_max'):
         Kseed = k_max(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, k_max) 
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_max) 
 
     elif model_type in ('clu-min', 'clu_min'):
         Kseed = k_min(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, k_min) 
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_min) 
 
     elif model_type in ('clu-prod', 'clu_prod'):
         Kseed = k_prod(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, k_prod)
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_prod)
 
     elif model_type in ('deg-avg', 'deg_avg'):
         Kseed = k_avg(np.sum(A, axis=1))

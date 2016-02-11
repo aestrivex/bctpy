@@ -174,11 +174,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
         Ff = Fd * Fk * np.logical_not(A)
         u,v = np.where(np.triu(np.ones((n,n)), 1))
-        P = Ff[u,v]
 
         #print(mseed, m)
         for i in range(mseed+1, m):
-            C = np.append(0, np.cumsum(P))
+            C = np.append(0, np.cumsum(Ff[u,v]))
             r = np.sum(np.random.random()*C[-1] >= C)
             uu = u[r]
             vv = v[r]
@@ -217,7 +216,6 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
                 Ff[:,bth] = Fd[:,bth] * np.exp(K[:,bth])*gamma
 
             Ff = Ff * np.logical_not(A)
-            P = Ff[u,v]
 
         return A
 
@@ -246,17 +244,16 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
         b = np.zeros((m,), dtype=int)
 
-        print(mseed)
-        print(np.shape(u),np.shape(v))
-        #print(np.shape(A[np.ix_(u,v)]))
-        print(np.shape(b))
-        print(np.shape(A[u,v]))
-        print(np.shape(np.where(A[u,v])), 'sqishy')
-        print(np.shape(P), 'squnnaq')
+#        print(mseed)
+#        print(np.shape(u),np.shape(v))
+#        print(np.shape(b))
+#        print(np.shape(A[u,v]))
+#        print(np.shape(np.where(A[u,v])), 'sqishy')
+#        print(np.shape(P), 'squnnaq')
 
         #b[:mseed] = np.where(A[np.ix_(u,v)]) 
         b[:mseed] = np.squeeze(np.where(A[u,v]))
-        print(mseed, m)
+        #print(mseed, m)
         for i in range(mseed, m):
             C = np.append(0, np.cumsum(P[u,v]))
             r = np.sum(np.random.random()*C[-1] >= C)
@@ -278,10 +275,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
             P[u[b[:i]], v[b[:i]]] = P[v[b[:i]], u[b[:i]]] = 0
 
+            A[u[r], v[r]] = A[v[r], u[r]] = 1
             #P[b[u[:i]], b[v[:i]]] = P[b[v[:i]], b[u[:i]]] = 0
 
             #A[uu,vv] = A[vv,uu] = 1
-            A[u[b[i]], v[b[i]]] = A[v[b[i]], u[b[i]]] = 1
 
 
 #        indx = v*n + u
@@ -302,13 +299,160 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         return A
 
     def matching_gen(A, K, D, m, eta, gamma, model_var):
-        NotImplemented
+        K += epsilon
 
+        mseed = np.size(np.where(A.flat))//2
+
+        if type(model_var) == tuple:
+            mv1, mv2 = model_var
+        else:
+            mv1, mv2 = model_var, model_var
+
+        if mv1 in ('powerlaw', 'power_law'):
+            Fd = D**eta
+        elif mv1 in ('exponential',):
+            Fd = np.exp(eta*D) 
+
+        if mv2 in ('powerlaw', 'power_law'):
+            Fk = K**gamma
+        elif mv2 in ('exponential',):
+            Fk = np.exp(gamma*K) 
+
+        Ff = Fd * Fk * np.logical_not(A)
+        u,v = np.where(np.triu(np.ones((n,n)), 1))
+    
+        for ii in range(mseed, m):
+            C = np.append(0, np.cumsum(Ff[u,v]))
+            r = np.sum(np.random.random()*C[-1] >= C)
+            uu = u[r]
+            vv = v[r]
+            A[uu,vv] = A[vv,uu] = 1
+
+            updateuu, = np.where(np.inner(A, A[:,uu]))
+            np.delete(updateuu, np.where(updateuu == uu))
+            np.delete(updateuu, np.where(updateuu == vv))
+
+            c1 = np.append(A[:,uu], A[uu,:])
+            for i in range(len(updateuu)):
+                j = updateuu[i]
+                c2 = np.append(A[:,j], A[j,:])
+    
+                use = np.logical_or(c1, c2)
+                use[uu] = use[uu+n] = use[j] = use[j+n] = 0
+                ncon = np.sum(c1[use]) + np.sum(c2[use])
+                if ncon == 0:
+                    K[uu, j] = K[j, uu] = epsilon
+                else:
+                    K[uu, j] = K[j, uu] = (2 / ncon *
+                        np.sum(np.logical_and(c1[use], c2[use])) + epsilon)
+
+            updatevv, = np.where(np.inner(A, A[:,vv]))
+            np.delete(updatevv, np.where(updatevv == uu))
+            np.delete(updatevv, np.where(updatevv == vv))
+        
+            c1 = np.append(A[:,vv], A[vv,:])
+            for i in range(len(updatevv)):
+                j = updatevv[i]
+                c2 = np.append(A[:,j], A[j,:])
+    
+                use = np.logical_or(c1, c2)
+                use[vv] = use[vv+n] = use[j] = use[j+n] = 0
+                ncon = np.sum(c1[use]) + np.sum(c2[use])
+                if ncon == 0:
+                    K[vv, j] = K[j, vv] = epsilon
+                else:
+                    K[vv, j] = K[j, vv] = (2 / ncon *
+                        np.sum(np.logical_and(c1[use], c2[use])) + epsilon)
+
+            Ff = Fd * Fk * np.logical_not(A)
+
+        return A
+    
     def neighbors_gen(A, K, D, m, eta, gamma, model_var):
-        NotImplemented
+        K += epsilon
 
-    def euclidean_gen(A, K, D, m, eta, model_var):
-        NotImplemented
+        mseed = np.size(np.where(A.flat))//2
+
+        if type(model_var) == tuple:
+            mv1, mv2 = model_var
+        else:
+            mv1, mv2 = model_var, model_var
+
+        if mv1 in ('powerlaw', 'power_law'):
+            Fd = D**eta
+        elif mv1 in ('exponential',):
+            Fd = np.exp(eta*D) 
+
+        if mv2 in ('powerlaw', 'power_law'):
+            Fk = K**gamma
+        elif mv2 in ('exponential',):
+            Fk = np.exp(gamma*K) 
+
+        Ff = Fd * Fk * np.logical_not(A)
+        u,v = np.where(np.triu(np.ones((n,n)), 1))
+    
+        for ii in range(mseed, m):
+            C = np.append(0, np.cumsum(Ff[u,v]))
+            r = np.sum(np.random.random()*C[-1] >= C)
+            uu = u[r]
+            vv = v[r]
+            A[uu, vv] = A[vv, uu] = 1
+
+            x = A[uu, :].astype(int)
+            y = A[:, vv].astype(int)
+    
+            K[uu, y] += 1
+            K[y, uu] += 1
+            K[vv, x] += 1
+            K[x, vv] += 1
+
+            if mv2 in ('powerlaw', 'power_law'):
+                Fk = K**gamma
+            elif mv2 in ('exponential',):
+                Fk = np.exp(gamma*K) 
+
+            if mv2 in ('powerlaw', 'power_law'):
+                Ff[uu, y] = Ff[y, uu] = Fd[uu, y] * (K[uu, y] ** gamma)
+                Ff[vv, x] = Ff[x, vv] = Fd[vv, x] * (K[vv, x] ** gamma)
+            elif mv2 in ('exponential',):
+                Ff[uu, y] = Ff[y, uu] = Fd[uu, y] * np.exp(gamma * K[uu, y])
+                Ff[vv, x] = Ff[x, vv] = Fd[vv, x] * np.exp(gamma * K[vv, x])
+
+            Ff[np.where(A)] = 0
+
+        return A
+
+    def euclidean_gen(A, D, m, eta, model_var):
+        mseed = np.size(np.where(A.flat))//2
+
+        if type(model_var) == tuple:
+            mv1, mv2 = model_var
+        else:
+            mv1, mv2 = model_var, model_var
+
+        if mv1 != mv2:
+            raise BCTParamError('Too many hyperparameters specified')
+
+        if mv1 in ('powerlaw', 'power_law'):
+            Fd = D ** eta
+        elif mv1 in ('exponential',):
+            Fd = np.exp(eta ** D)
+
+        u,v = np.where(np.triu(np.ones((n,n)), 1))
+        P = Fd * np.logical_not(A)
+
+        b = np.zeros((m,), dtype=int)
+        b[:mseed] = np.squeeze(np.where(A[u, v]))
+        for i in range(mseed, m):
+            C = np.append(0, np.cumsum(P[u, v]))
+            r = np.sum(np.random.random()*C[-1] >= C)
+            b[i] = r
+            P = Fd
+            P[u[b[:i]], v[b[:i]]] = P[v[b[:i]], u[b[:i]]] = 0
+
+            A[u[r], v[r]] = A[v[r], u[r]] = 1
+
+        return A
 
     if model_type in ('clu-avg', 'clu_avg'):
         Kseed = k_avg(clustering_coef_bu(A))
@@ -361,19 +505,19 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             B[:,:,j] = deg_gen(A, Kseed, D, m, ep, gp, model_var, s_prod)
 
     elif model_type in ('neighbors',):
-        Kseed = np.outer(A, A)
+        Kseed = np.inner(A, A)
         np.fill_diagonal(Kseed, 0)
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
             B[:,:,j] = neighbors_gen(A, Kseed, D, m, ep, gp, model_var)
 
     elif model_type in ('matching', 'matching-ind', 'matching_ind'):
-        mi = matching_ind(A)
+        mi, _, _ = matching_ind(A)
         Kseed = mi + mi.T
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
             B[:,:,j] = matching_gen(A, Kseed, D, m, ep, gp, model_var)
 
     elif model_type in ('spatial', 'geometric', 'euclidean'):
         for j, ep in enumerate(eta):
-            B[:,:,j] = euclidean_gen(A, Kseed, D, m, ep, model_var) 
+            B[:,:,j] = euclidean_gen(A, D, m, ep, model_var) 
 
     return np.squeeze(B)

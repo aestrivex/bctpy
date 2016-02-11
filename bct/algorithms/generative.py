@@ -7,7 +7,7 @@ from .clustering import clustering_coef_bu
 
 
 def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
-    model_var='powerlaw', epsilon=1e-6):
+    model_var='powerlaw', epsilon=1e-6, copy=True):
     '''
     Generates synthetic networks using the models described in
     Betzel et al. (2016) Neuroimage. See this paper for more details.
@@ -60,7 +60,13 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         P(u,v) = exp(E(u,v)*eta) * exp(K(u,v)*gamma)
     epsilon : float
         A small positive value added to all P(u,v). The default value is 1e-6
+    copy : bool
+        Some algorithms add edges directly to the input matrix. Set this flag
+        to make a copy of the input matrix instead. Defaults to True.
     '''
+
+    if copy:
+        A = A.copy()
 
     n = len(D)
     
@@ -94,7 +100,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
                       axis=2) + epsilon
 
     def k_prod(K):
-        return np.inner(K, np.transpose(K)) + epsilon
+        return np.outer(K, np.transpose(K)) + epsilon
 
     def s_avg(K, sc):
         return (K+sc) / 2 + epsilon
@@ -113,23 +119,34 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         return K * sc + epsilon
 
     def x_avg(K, ixes):
-        sc = np.transpose(K[:, np.zeros((len(ixes),))])
-        return s_avg(K[ixes,:], sc)
+        nr_ixes = np.size(np.where(ixes))
+        Ksc = np.tile(K, (nr_ixes, 1))
+        Kix = np.transpose(np.tile(K[ixes], (n, 1)))
+        return s_avg(Ksc, Kix)
 
     def x_diff(K, ixes):
-        sc = np.transpose(K[:, np.zeros((len(ixes),))])
-        return s_diff(K[ixes,:], sc)
+        nr_ixes = np.size(np.where(ixes))
+        Ksc = np.tile(K, (nr_ixes, 1))
+        Kix = np.transpose(np.tile(K[ixes], (n, 1)))
+        return s_diff(Ksc, Kix)
 
     def x_max(K, ixes):
-        sc = np.transpose(K[:, np.zeros((len(ixes),))])
-        return s_max(K[ixes,:], sc)
+        nr_ixes = np.size(np.where(ixes))
+        Ksc = np.tile(K, (nr_ixes, 1))
+        Kix = np.transpose(np.tile(K[ixes], (n, 1)))
+        return s_max(Ksc, Kix)
 
     def x_min(K, ixes):
-        sc = np.transpose(K[:, np.zeros((len(ixes),))])
-        return s_min(K[ixes,:], sc)
+        nr_ixes = np.size(np.where(ixes))
+        Ksc = np.tile(K, (nr_ixes, 1))
+        Kix = np.transpose(np.tile(K[ixes], (n, 1)))
+        return s_min(Ksc, Kix)
 
     def x_prod(K, ixes):
-        return np.inner(K[ixes,:], np.transpose(K)) + epsilon
+        nr_ixes = np.size(np.where(ixes))
+        Ka = np.reshape(K[ixes], (nr_ixes, 1))
+        Kb = np.reshape(np.transpose(K), (1, n))
+        return np.outer(Ka, Kb) + epsilon
 
 
     def clu_gen(A, K, D, m, eta, gamma, model_var, x_fun):
@@ -159,7 +176,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         u,v = np.where(np.triu(np.ones((n,n)), 1))
         P = Ff[u,v]
 
-        print(mseed, m)
+        #print(mseed, m)
         for i in range(mseed+1, m):
             C = np.append(0, np.cumsum(P))
             r = np.sum(np.random.random()*C[-1] >= C)
@@ -184,6 +201,11 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     
             k_result = x_fun(c, bth)
 
+            #print(np.shape(k_result))
+            #print(np.shape(K))
+            #print(K)
+            #print(np.shape(K[bth,:]))
+
             K[bth,:] = k_result
             K[:,bth] = k_result.T
 
@@ -199,7 +221,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
         return A
 
-    def deg_gen(A, K, D, m, eta, gamma, model_var, k_fun):
+    def deg_gen(A, K, D, m, eta, gamma, model_var, s_fun):
         mseed = np.size(np.where(A.flat))//2
 
         k = np.sum(A, axis=1)
@@ -222,10 +244,20 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         P = Fd * Fk * np.logical_not(A)
         u,v = np.where(np.triu(np.ones((n,n)), 1))
 
-        b = np.zeros((m,))
-        b[:mseed] = np.where(A[np.ix_(u,v)]) 
+        b = np.zeros((m,), dtype=int)
+
+        print(mseed)
+        print(np.shape(u),np.shape(v))
+        #print(np.shape(A[np.ix_(u,v)]))
+        print(np.shape(b))
+        print(np.shape(A[u,v]))
+        print(np.shape(np.where(A[u,v])), 'sqishy')
+        print(np.shape(P), 'squnnaq')
+
+        #b[:mseed] = np.where(A[np.ix_(u,v)]) 
+        b[:mseed] = np.squeeze(np.where(A[u,v]))
         print(mseed, m)
-        for i in range(mseed+1, m):
+        for i in range(mseed, m):
             C = np.append(0, np.cumsum(P[u,v]))
             r = np.sum(np.random.random()*C[-1] >= C)
             uu = u[r]
@@ -243,10 +275,29 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             P = Fd * Fk
 
             b[i] = r
+
             P[u[b[:i]], v[b[:i]]] = P[v[b[:i]], u[b[:i]]] = 0
 
+            #P[b[u[:i]], b[v[:i]]] = P[b[v[:i]], b[u[:i]]] = 0
+
             #A[uu,vv] = A[vv,uu] = 1
-            A[u[b[i]], v[b[i]]] = A[v[b[i]], u[b[i]]] = r
+            A[u[b[i]], v[b[i]]] = A[v[b[i]], u[b[i]]] = 1
+
+
+#        indx = v*n + u
+#        indx[b]
+#
+#        nH = np.zeros((n,n))
+#        nH.ravel()[indx[b]]=1
+#
+#        nG = np.zeros((n,n))
+#        nG[ u[b], v[b] ]=1
+#        nG = nG + nG.T
+#
+#        print(np.shape(np.where(A != nG)))
+#
+#        import pdb
+#        pdb.set_trace()
 
         return A
 
@@ -325,4 +376,4 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         for j, ep in enumerate(eta):
             B[:,:,j] = euclidean_gen(A, Kseed, D, m, ep, model_var) 
 
-    return B
+    return np.squeeze(B)

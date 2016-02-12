@@ -4,6 +4,7 @@ import numpy as np
 from bct.utils import BCTParamError
 from .similarity import matching_ind
 from .clustering import clustering_coef_bu
+from .centrality import betweenness_bin
 
 
 def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
@@ -521,3 +522,72 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             B[:,:,j] = euclidean_gen(A, D, m, ep, model_var) 
 
     return np.squeeze(B)
+
+def evaluate_generative_model(A, Atgt, D, eta, gamma=None, 
+    model_type='matching', model_var='powerlaw', epsilon=1e-6):
+    '''
+    Generates synthetic networks with parameters provided and evaluates their
+    energy function. The energy function is defined as in Betzel et al. 2016.
+    Basically it takes the Kolmogorov-Smirnov statistics of 4 network
+    measures; comparing the degree distributions, clustering coefficients,
+    betweenness centrality, and Euclidean distances between connected regions.
+    
+    The energy is globally low if the synthetic network matches the target.
+    Energy is defined as the maximum difference across the four statistics.
+    '''
+    m = np.size(np.where(Atgt.flat))//2
+    n = len(Atgt)
+    xk = np.sum(Atgt, axis=1)
+    xc = clustering_coef_bu(Atgt)
+    xb = betweenness_bin(Atgt)
+    xe = D[np.triu(Atgt, 1) > 0]
+
+    B = generative_model(A, D, m, eta, gamma, model_type=model_type, 
+                         model_var=model_var, epsilon=epsilon, copy=True)
+
+    #if eta != gamma then an error is thrown within generative model
+    
+    nB = len(eta)
+
+    if nB == 1:
+        B = np.reshape(B, np.append(np.shape(B), 1))
+
+    K = np.zeros((nB, 4))
+
+    def kstats(x, y):
+        bin_edges = np.concatenate([[-np.inf],
+                                    np.sort(np.concatenate((x, y))), 
+                                    [np.inf]])
+
+        bin_x,_ = np.histogram(x, bin_edges)
+        bin_y,_ = np.histogram(y, bin_edges)
+
+        #print(np.shape(bin_x))
+
+        sum_x = np.cumsum(bin_x) / np.sum(bin_x)
+        sum_y = np.cumsum(bin_y) / np.sum(bin_y)
+
+        cdfsamp_x = sum_x[:-1]
+        cdfsamp_y = sum_y[:-1]
+
+        delta_cdf = np.abs(cdfsamp_x - cdfsamp_y)
+
+        print(np.shape(delta_cdf))
+        #print(delta_cdf)
+        print(np.argmax(delta_cdf), np.max(delta_cdf))
+
+        return np.max(delta_cdf)
+
+    for ib in range(nB):
+        Bc = B[:,:,ib]
+        yk = np.sum(Bc, axis=1)
+        yc = clustering_coef_bu(Bc)
+        yb = betweenness_bin(Bc)
+        ye = D[np.triu(Bc, 1) > 0]
+
+        K[ib, 0] = kstats(xk, yk)
+        K[ib, 1] = kstats(xc, yc)
+        K[ib, 2] = kstats(xb, yb)
+        K[ib, 3] = kstats(xe, ye)
+
+    return np.max(K, axis=1)

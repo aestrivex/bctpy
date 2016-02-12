@@ -130,6 +130,82 @@ def assortativity_wei(CIJ, flag):
     return r
 
 
+def core_periphery_dir(W, gamma=1, C0=None):
+    ''' 
+    The optimal core/periphery subdivision is a partition of the network 
+    into two nonoverlapping groups of nodes, a core group and a periphery
+    group. The number of core-group edges is maximized, and the number of
+    within periphery edges is minimized.
+
+    The core-ness is a statistic which quantifies the goodness of the
+    optimal core/periphery subdivision (with arbitrary relative value).
+
+    The algorithm uses a variation of the Kernighan-Lin graph partitioning
+    algorithm to optimize a core-structure objective described in
+    Borgatti & Everett (2000) Soc Networks 21:375-395
+
+    See Rubinov, Ypma et al. (2015) PNAS 112:10032-7
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        directed connection matrix
+    gamma : core-ness resolution parameter
+        Default value = 1
+        gamma > 1 detects small core, large periphery
+        0 < gamma < 1 detects large core, small periphery
+    C0 : NxN np.ndarray
+        Initial core structure
+    '''
+    n = len(W)
+    np.fill_diagonal(W, 0)
+
+    if C0 == None:
+        C = np.random.randint(2, size=(n,))
+    else:
+        C = C0.copy()
+
+    #methodological note, the core-detection null model is not corrected
+    #for degree cf community detection (to enable detection of hubs)
+
+    s = np.sum(W)
+    p = np.mean(W)
+    b = W - gamma * p
+    B = (b + b.T) / (2 * s)
+    q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C), np.logical_not(C)])
+    
+    flag = True
+    while flag:
+        flag = False
+        #initial node indices
+        ixes = range(n)    
+
+        Ct = C.copy()
+        while np.any(ixes):
+            Qt = np.zeros((n,), dtype=int)
+            q0 = np.sum(B[Ct, Ct]) - np.sum(B[np.logical_not(Ct),
+                                              np.logical_not(Ct)])
+            Qt[Ct] = q0 - 2 * np.sum(B[Ct, :], axis=1)
+            Qt[np.logical_not(Ct)] = q0 + 2 * np.sum(B[np.logical_not(Ct), :],
+                                                     axis=1)
+
+            max_Qt = np.max(Qt[ixes])
+            u, = np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10)
+            u = u[np.random.randint(len(u))]
+            Ct[ixes[u]] = np.logical_not(Ct[ixes[u]])
+
+            ixes = np.delete(ixes, u)
+            
+            if max_Qt - q > 1e-10
+                flag = True
+                C = Ct.copy()
+                q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C),
+                                               np.logical_not(C)])
+
+    q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C), np.logical_not(C)])
+    return C, q
+
+
 def kcore_bd(CIJ, k, peel=False):
     '''
     The k-core is the largest subnetwork comprising nodes of degree at

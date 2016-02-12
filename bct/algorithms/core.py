@@ -172,37 +172,62 @@ def core_periphery_dir(W, gamma=1, C0=None):
     p = np.mean(W)
     b = W - gamma * p
     B = (b + b.T) / (2 * s)
-    q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C), np.logical_not(C)])
-    
+    cix, = np.where(C)
+    ncix, = np.where(np.logical_not(C))
+    q = np.sum(B[np.ix_(cix, cix)]) - np.sum(B[np.ix_(ncix, ncix)])
+
+    print(q)
+    #sqish
+
     flag = True
+    it = 0
     while flag:
+        it += 1  
+        if it > 100:
+            raise BCTParamError('Infinite Loop aborted')
+
         flag = False
         #initial node indices
-        ixes = range(n)    
+        ixes = np.arange(n)    
 
         Ct = C.copy()
-        while np.any(ixes):
-            Qt = np.zeros((n,), dtype=int)
-            q0 = np.sum(B[Ct, Ct]) - np.sum(B[np.logical_not(Ct),
-                                              np.logical_not(Ct)])
-            Qt[Ct] = q0 - 2 * np.sum(B[Ct, :], axis=1)
-            Qt[np.logical_not(Ct)] = q0 + 2 * np.sum(B[np.logical_not(Ct), :],
-                                                     axis=1)
+        while len(ixes) > 0:
+            Qt = np.zeros((n,))
+            ctix, = np.where(Ct)
+            nctix, = np.where(np.logical_not(Ct))
+            q0 = (np.sum(B[np.ix_(ctix, ctix)]) - 
+                  np.sum(B[np.ix_(nctix, nctix)]))
+            Qt[ctix] = q0 - 2 * np.sum(B[ctix, :], axis=1)
+            Qt[nctix] = q0 + 2 * np.sum(B[nctix, :], axis=1)
 
             max_Qt = np.max(Qt[ixes])
             u, = np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10)
+            print(np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10))
+            print(Qt[ixes])
+            print(max_Qt)
+            #tunourn
             u = u[np.random.randint(len(u))]
+            print(np.sum(Ct))
             Ct[ixes[u]] = np.logical_not(Ct[ixes[u]])
+            print(np.sum(Ct))
+            #casga
 
             ixes = np.delete(ixes, u)
             
-            if max_Qt - q > 1e-10
+            print(max_Qt - q)
+            print(len(ixes))
+
+            if max_Qt - q > 1e-10:
                 flag = True
                 C = Ct.copy()
-                q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C),
-                                               np.logical_not(C)])
+                cix, = np.where(C)
+                ncix, = np.where(np.logical_not(C))
+                q = (np.sum(B[np.ix_(cix, cix)]) - 
+                     np.sum(B[np.ix_(ncix, ncix)]))
 
-    q = np.sum(B[C, C]) - np.sum(B[np.logical_not(C), np.logical_not(C)])
+    cix, = np.where(C)
+    ncix, = np.where(np.logical_not(C))
+    q = np.sum(B[np.ix_(cix, cix)]) - np.sum(B[np.ix_(ncix, ncix)])
     return C, q
 
 

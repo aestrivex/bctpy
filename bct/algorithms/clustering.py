@@ -217,6 +217,108 @@ def clustering_coef_wu(W):
     return C
 
 
+def clustering_coef_wu_sign(W, coef_type='default'):
+    '''
+    Returns the weighted clustering coefficient generalized or separated
+    for positive and negative weights.
+  
+    Three Algorithms are supported; herefore referred to as default, zhang,
+    and constantini.
+
+    1. Default (Onnela et al.), as in the traditional clustering coefficient
+       computation. Computed separately for positive and negative weights.
+    2. Zhang & Horvath. Similar to Onnela formula except weight information
+       incorporated in denominator. Reduces sensitivity of the measure to
+       weights directly connected to the node of interest. Computed
+       separately for positive and negative weights.
+    3. Constantini & Perugini generalization of Zhang & Horvath formula.
+       Takes both positive and negative weights into account simultaneously.
+       Particularly sensitive to non-redundancy in path information based on
+       sign. Returns only one value.
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        weighted undirected connection matrix
+    corr_type : enum
+        Allowed values are 'default', 'zhang', 'constantini'
+
+    Returns
+    -------
+    Cpos : Nx1 np.ndarray
+        Clustering coefficient vector for positive weights
+    Cneg : Nx1 np.ndarray
+        Clustering coefficient vector for negative weights, unless
+        coef_type == 'constantini'.
+
+    References:
+        Onnela et al. (2005) Phys Rev E 71:065103
+        Zhang & Horvath (2005) Stat Appl Genet Mol Biol 41:1544-6115
+        Costantini & Perugini (2014) PLOS ONE 9:e88669
+    '''
+    n = len(W)
+    np.fill_diagonal(W, 0)
+
+    if coef_type == 'default':
+        W_pos = W * (W > 0)
+        K_pos = np.array(np.sum(np.logical_not(W_pos == 0), axis=1),
+                         dtype=float)
+        ws_pos = cuberoot(W_pos)
+        cyc3_pos = np.diag(np.dot(ws_pos, np.dot(ws_pos, ws_pos)))
+        K_pos[np.where(cyc3_pos == 0)] = np.inf
+        C_pos = cyc3_pos / (K_pos * (K_pos - 1))
+
+        W_neg = -W * (W < 0)
+        K_neg = np.array(np.sum(np.logical_not(W_neg == 0), axis=1),
+                         dtype=float)
+        ws_neg = cuberoot(W_neg)
+        cyc3_neg = np.diag(np.dot(ws_neg, np.dot(ws_neg, ws_neg)))
+        K_neg[np.where(cyc3_neg == 0)] = np.inf
+        C_neg = cyc3_neg / (K_neg * (K_neg - 1))
+
+        return C_pos, C_neg
+
+    elif coef_type in ('zhang', 'Zhang'):
+        W_pos = W * (W > 0)
+        cyc3_pos = np.zeros((n,))
+        cyc2_pos = np.zeros((n,))
+
+        W_neg = -W * (W < 0)
+        cyc3_neg = np.zeros((n,))
+        cyc2_neg = np.zeros((n,))
+
+        for i in range(n):
+            for j in range(n):
+                for q in range(n):
+                    cyc3_pos[i] += W_pos[j, i] * W_pos[i, q] * W_pos[j, q]
+                    cyc3_neg[i] += W_neg[j, i] * W_neg[i, q] * W_neg[j, q]
+                    if j != q:
+                        cyc2_pos[i] += W_pos[j, i] * W_pos[i, q]
+                        cyc2_neg[i] += W_neg[j, i] * W_neg[i, q]
+
+        cyc2_pos[np.where(cyc3_pos == 0)] = np.inf
+        C_pos = cyc3_pos / cyc2_pos
+
+        cyc2_neg[np.where(cyc3_neg == 0)] = np.inf
+        C_neg = cyc3_neg / cyc2_neg
+
+        return C_pos, C_neg
+
+    elif coef_type in ('constantini', 'Constantini'):
+        cyc3 = np.zeros((n,))
+        cyc2 = np.zeros((n,))
+
+        for i in range(n):
+            for j in range(n):
+                for q in range(n):
+                    cyc3[i] += W[j, i] * W[i, q] * W[j, q]
+                    if j != q:
+                        cyc2[i] += W[j, i] * W[i, q]
+
+        cyc2[np.where(cyc3 == 0)] = np.inf
+        C = cyc3 / cyc2
+        return C
+
 def consensus_und(D, tau, reps=1000):
     '''
     This algorithm seeks a consensus partition of the

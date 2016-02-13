@@ -2,6 +2,7 @@ from __future__ import division, print_function
 import numpy as np
 from .core import kcore_bd, kcore_bu
 from .distance import reachdist
+from bct.utils import invert
 
 
 def betweenness_bin(G):
@@ -450,6 +451,88 @@ def flow_coef_bd(CIJ):
 
     return fc, FC, total_flo
 
+
+def gateway_coef_sign(W, ci, centrality_type='degree'):
+    '''
+    The gateway coefficient is a variant of participation coefficient.
+    It is weighted by how critical the connections are to intermodular
+    connectivity (e.g. if a node is the only connection between its
+    module and another module, it will have a higher gateway coefficient,
+    unlike participation coefficient).
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        undirected signed connection matrix
+    ci : Nx1 np.ndarray
+        community affiliation vector
+    centrality_type : enum
+        'degree' - uses the weighted degree (i.e, node strength)
+        'betweenness' - uses the betweenness centrality
+
+    Returns
+    -------
+    Gpos : Nx1 np.ndarray
+        gateway coefficient for positive weights
+    Gneg : Nx1 np.ndarray
+        gateway coefficient for negative weights
+
+    Reference:
+        Vargas ER, Wahl LM, Eur Phys J B (2014) 87:1-10
+    '''
+    _, ci = np.unique(ci, return_inverse=True)
+    ci += 1
+    n = len(W)
+    np.fill_diagonal(W, 0)
+
+    def gcoef(W):
+        #strength
+        s = np.sum(W, axis=1)   
+        #neighbor community affiliation
+        Gc = np.inner((W != 0), np.diag(ci))
+        #community specific neighbors
+        Sc2 = np.zeros((n,))
+        #extra modular weighting
+        ksm = np.zeros((n,))
+        #intra modular wieghting
+        centm = np.zeros((n,))
+
+        if centrality_type == 'degree':
+            cent = s.copy()
+        elif centrality_type == 'betweenness':
+            cent = betweenness_wei(invert(W))
+
+        nr_modules = int(np.max(ci))
+        for i in range(1, nr_modules+1):
+            ks = np.sum(W * (Gc == i), axis=1)
+            print(np.sum(ks))
+            Sc2 += ks ** 2
+            for j in range(1, nr_modules+1):
+                #calculate extramodular weights
+                ksm[ci == j] += ks[ci == j] / np.sum(ks[ci == j])
+
+            #calculate intramodular weights
+            centm[ci == i] = np.sum(cent[ci == i])
+
+        #print(Gc)
+        #print(centm)
+        #print(ksm)
+        #print(ks)
+
+        centm = centm / max(centm)
+        #calculate total weights
+        gs = (1 - ksm * centm) ** 2
+
+        Gw = 1 - Sc2 * gs / s ** 2
+        Gw[np.where(np.isnan(Gw))] = 0
+        Gw[np.where(np.logical_not(Gw))] = 0
+
+        return Gw
+
+    G_pos = gcoef(W * (W > 0))
+    G_neg = gcoef(-W * (W < 0))
+    return G_pos, G_neg
+        
 
 def kcoreness_centrality_bd(CIJ):
     '''

@@ -43,6 +43,16 @@ def participation_test():
     assert np.allclose(bct.participation_coef_sign(W, ci)[0], [0.,  0.5,  0.])
 
 
+def gateway_test():
+    x = load_sample(thres=.1)
+    ci = np.load(mat_path('sample_partition.npy'))
+
+    g_pos, _ = bct.gateway_coef_sign(x, ci)
+
+    print np.sum(g_pos), 43.4382
+    assert np.allclose(np.sum(g_pos), 43.4382, atol=.001)
+
+
 def test_zi():
     x = load_sample(thres=.4)
     ci = np.load(mat_path('sample_partition.npy'))

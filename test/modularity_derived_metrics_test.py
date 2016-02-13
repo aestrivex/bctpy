@@ -49,12 +49,12 @@ def gateway_test():
 
     g_pos, _ = bct.gateway_coef_sign(x, ci)
 
-    print np.sum(g_pos), 43.4382
+    print(np.sum(g_pos), 43.4382)
     assert np.allclose(np.sum(g_pos), 43.4382, atol=.001)
 
     g_pos_bet, _ = bct.gateway_coef_sign(x, ci, centrality_type='betweenness')
 
-    print np.sum(g_pos_bet), 43.4026
+    print(np.sum(g_pos_bet), 43.4026)
     assert np.allclose(np.sum(g_pos_bet), 43.4026, atol=.001)
     
 

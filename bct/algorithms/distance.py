@@ -102,7 +102,7 @@ def breadth(CIJ, source):
     return distance, branch
 
 
-def charpath(D, include_diagonal=False):
+def charpath(D, include_diagonal=False, include_infinite=True):
     '''
     The characteristic path length is the average shortest path length in
     the network. The global efficiency is the average inverse shortest path
@@ -114,6 +114,8 @@ def charpath(D, include_diagonal=False):
         distance matrix
     include_diagonal : bool
         If True, include the weights on the diagonal. Default value is False.
+    include_infinite : bool
+        If True, include infinite distances in calculation
 
     Returns
     -------
@@ -139,25 +141,27 @@ def charpath(D, include_diagonal=False):
     D = D.copy()
 
     if not include_diagonal:
-        np.fill_diagonal(D, 0)
+        np.fill_diagonal(D, np.nan)
+
+    if not include_infinite:
+        D[np.isinf(D)] = np.nan
+
+    Dv = D[np.logical_not(np.isnan(D))].ravel()
 
     # mean of finite entries of D[G]
-    lambda_ = np.sum(D[D != np.inf]) / len(np.where(D != np.inf)[0])
+    lambda_ = np.mean(Dv)
+
+    # efficiency: mean of inverse entries of D[G]
+    efficiency = np.mean(1 / Dv)
 
     # eccentricity for each vertex (ignore inf)
-    ecc = np.array(np.ma.masked_equal(D, np.inf).max(axis=1))
+    ecc = np.array(np.ma.masked_equal(D, np.nan).max(axis=1))
 
     # radius of graph
     radius = np.min(ecc)  # but what about zeros?
 
     # diameter of graph
     diameter = np.max(ecc)
-
-    # efficiency: mean of inverse entries of D[G]
-    n = len(D)
-    np.fill_diagonal(D, np.inf)  # so that the inverse is 0
-    D = 1 / D  # invert distance
-    efficiency = np.sum(D) / (n * (n - 1))  # compute global efficiency
 
     return lambda_, efficiency, ecc, radius, diameter
 

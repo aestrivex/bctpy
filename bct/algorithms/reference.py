@@ -4,7 +4,7 @@ from bct.utils import BCTParamError, binarize
 from .clustering import number_of_components
 
 
-def latmio_dir_connected(R, iter, D=None):
+def latmio_dir_connected(R, itr, D=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -17,8 +17,8 @@ def latmio_dir_connected(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -53,7 +53,7 @@ def latmio_dir_connected(R, iter, D=None):
 
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
@@ -61,7 +61,7 @@ def latmio_dir_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -123,7 +123,7 @@ def latmio_dir_connected(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_dir(R, iter, D=None):
+def latmio_dir(R, itr, D=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -133,8 +133,8 @@ def latmio_dir(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -169,7 +169,7 @@ def latmio_dir(R, iter, D=None):
 
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
@@ -177,7 +177,7 @@ def latmio_dir(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -214,7 +214,7 @@ def latmio_dir(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_und_connected(R, iter, D=None):
+def latmio_und_connected(R, itr, D=None):
     '''
     This function "latticizes" an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -227,8 +227,8 @@ def latmio_und_connected(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -268,7 +268,7 @@ def latmio_und_connected(R, iter, D=None):
 
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1) / 2))
@@ -276,7 +276,7 @@ def latmio_und_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:
             rewire = True
@@ -346,7 +346,7 @@ def latmio_und_connected(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_und(R, iter, D=None):
+def latmio_und(R, itr, D=None):
     '''
     This function "latticizes" an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -356,8 +356,8 @@ def latmio_und(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -391,7 +391,7 @@ def latmio_und(R, iter, D=None):
 
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1) / 2))
@@ -399,7 +399,7 @@ def latmio_und(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:
             while True:
@@ -1049,7 +1049,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     return W0, (rpos_in[0, 1], rpos_ou[0, 1], rneg_in[0, 1], rneg_ou[0, 1])
 
 
-def randmio_dir_connected(R, iter):
+def randmio_dir_connected(R, itr):
     '''
     This function randomizes a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -1062,8 +1062,8 @@ def randmio_dir_connected(R, iter):
     ----------
     W : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1076,12 +1076,12 @@ def randmio_dir_connected(R, iter):
     n = len(R)
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1139,7 +1139,7 @@ def randmio_dir_connected(R, iter):
     return R, eff
 
 
-def randmio_dir(R, iter):
+def randmio_dir(R, itr):
     '''
     This function randomizes a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -1149,8 +1149,8 @@ def randmio_dir(R, iter):
     ----------
     W : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1163,12 +1163,12 @@ def randmio_dir(R, iter):
     n = len(R)
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1202,7 +1202,7 @@ def randmio_dir(R, iter):
     return R, eff
 
 
-def randmio_und_connected(R, iter):
+def randmio_und_connected(R, itr):
     '''
     This function randomizes an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -1215,8 +1215,8 @@ def randmio_und_connected(R, iter):
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1235,14 +1235,14 @@ def randmio_und_connected(R, iter):
     n = len(R)
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximum number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1310,7 +1310,76 @@ def randmio_und_connected(R, iter):
     return R, eff
 
 
-def randmio_und(R, iter):
+def randmio_dir_signed(R, itr):
+    '''
+    This function randomizes a directed weighted network with positively
+    and negatively signed connections, while preserving the positive and
+    negative degree distributions. In weighted networks by default the
+    function preserves the out-degree strength but not the in-strength
+    distributions
+
+    Parameters
+    ---------
+    W : NxN np.ndarray
+        directed binary/weighted connection matrix
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
+
+    Returns
+    -------
+    R : NxN np.ndarray
+        randomized network
+    eff : int
+        number of actual rewirings carried out
+
+    This function is four times less time efficient than the MATLAB counterpart
+    and I'm confused why. Improvements to the algorithm are very welcome.
+    '''
+    R = R.copy()
+    n = len(R)
+
+    itr *= n * (n - 1)
+
+    #maximal number of rewiring attempts per iter
+    max_attempts = n
+    #actual number of successful rewirings
+    eff = 0
+
+    for it in range(itr):
+        #print(it)
+        att = 0
+        while att <= max_attempts:
+            #select four distinct vertices
+        
+            #a, b, c, d = np.random.permutation(n)[:4]
+            a, b, c, d = np.random.permutation(4)
+
+            r0_ab = R[a, b]
+            r0_cd = R[c, d]
+            r0_ad = R[a, d]
+            r0_cb = R[c, b]
+
+            #print(np.sign(r0_ab), np.sign(r0_ad))
+
+            #rewiring condition
+            if (    np.sign(r0_ab) == np.sign(r0_cd) and
+                    np.sign(r0_ad) == np.sign(r0_cb) and
+                    np.sign(r0_ab) != np.sign(r0_ad)):
+
+
+                R[a, d] = r0_ab
+                R[a, b] = r0_ad
+                R[c, b] = r0_cd
+                R[c, d] = r0_cb
+
+                eff += 1
+                break
+
+            att += 1
+
+    return R, eff
+
+def randmio_und(R, itr):
     '''
     This function randomizes an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -1320,8 +1389,8 @@ def randmio_und(R, iter):
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1336,14 +1405,14 @@ def randmio_und(R, iter):
     n = len(R)
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximum number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1387,7 +1456,7 @@ def randmio_und(R, iter):
     return R, eff
 
 
-def randmio_und_signed(R, iter):
+def randmio_und_signed(R, itr):
     '''
     This function randomizes an undirected weighted network with positive
     and negative weights, while simultaneously preserving the degree
@@ -1398,8 +1467,8 @@ def randmio_und_signed(R, iter):
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1415,12 +1484,12 @@ def randmio_und_signed(R, iter):
     k = len(i)
     k_p = len(i_p)
     k_m = len(i_m)
-    iter *= k
+    itr *= k
 
     if not (k_p and k_m):
-        return randmio_und(R, iter)[0]
+        return randmio_und(R, itr)[0]
 
-    for it in range(iter):  # while not rewired
+    for it in range(itr):  # while not rewired
         while True:
             while True:
                 # choose two edges to rewire but make sure they are either

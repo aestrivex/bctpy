@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
+from .degree import strengths_und_sign
 
 
 def assortativity_bin(CIJ, flag=0):
@@ -397,10 +398,11 @@ def local_assortativity_wu_sign(W):
     loc_assort_neg = np.zeros((n,))
 
     for curr_node in range(n):
-        _, jp = np.where(curr_node > 0)
+        jp = np.where(W[curr_node, :] > 0)
         loc_assort_pos[curr_node] = np.sum(np.abs(str_pos[jp] - 
             str_pos[curr_node])) / str_pos[curr_node]
-        loc_assort_neg[curr_node] = np.sum(np.abs(str_neg[jp] -
+        jn = np.where(W[curr_node, :] < 0)
+        loc_assort_neg[curr_node] = np.sum(np.abs(str_neg[jn] -
             str_neg[curr_node])) / str_neg[curr_node]
 
     loc_assort_pos = ((r_pos + 1) / n - 

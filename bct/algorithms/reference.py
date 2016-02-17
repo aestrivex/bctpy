@@ -1211,6 +1211,12 @@ def randmio_und_connected(R, itr):
     to reach every other node in the network. The input network for this
     function must be connected.
 
+    NOTE the changes to the BCT matlab function of the same name 
+    made in the Jan 2016 release 
+    have not been propagated to this function because of substantially
+    decreased time efficiency in the implementation. Expect these changes
+    to be merged eventually.
+
     Parameters
     ----------
     W : NxN np.ndarray

@@ -3,7 +3,7 @@ import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 
 
-def assortativity_bin(CIJ, flag):
+def assortativity_bin(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
     degrees of all nodes on two opposite ends of a link. A positive
@@ -67,7 +67,7 @@ def assortativity_bin(CIJ, flag):
     return r
 
 
-def assortativity_wei(CIJ, flag):
+def assortativity_wei(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
     strengths (weighted degrees) of all nodes on two opposite ends of a link.
@@ -366,6 +366,49 @@ def kcore_bu(CIJ, k, peel=False):
     else:
         return CIJkcore, kn
 
+
+def local_assortativity_wu_sign(W):
+    '''
+    Local assortativity measures the extent to which nodes are connected to
+    nodes of similar strength. Adapted from Thedchanamoorthy et al. 2014
+    formula to allowed weighted/signed networks.
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        undirected connection matrix with positive and negative weights
+    
+    Returns
+    -------
+    loc_assort_pos : Nx1 np.ndarray
+        local assortativity from positive weights
+    loc_assort_neg : Nx1 np.ndarray
+        local assortativity from negative weights
+    '''
+    n = len(W)
+
+    np.fill_diagonal(W, 0)
+    r_pos = assortativity_wei(W * (W > 0))
+    r_neg = assortativity_wei(W * (W < 0))
+
+    str_pos, str_neg, _, _ = strengths_und_sign(W)
+
+    loc_assort_pos = np.zeros((n,))
+    loc_assort_neg = np.zeros((n,))
+
+    for curr_node in range(n):
+        _, jp = np.where(curr_node > 0)
+        loc_assort_pos[curr_node] = np.sum(np.abs(str_pos[jp] - 
+            str_pos[curr_node])) / str_pos[curr_node]
+        loc_assort_neg[curr_node] = np.sum(np.abs(str_neg[jp] -
+            str_neg[curr_node])) / str_neg[curr_node]
+
+    loc_assort_pos = ((r_pos + 1) / n - 
+        loc_assort_pos / np.sum(loc_assort_pos))
+    loc_assort_neg = ((r_neg + 1) / n -
+        loc_assort_neg / np.sum(loc_assort_neg))
+
+    return loc_assort_pos, loc_assort_neg
 
 def rich_club_bd(CIJ, klevel=None):
     '''

@@ -21,4 +21,5 @@ before_install:
 # command to run tests
 script:
   - nosetests -V
-  - nosetests --ignore-files="very_long_tests|nbs_tests"
+  #- nosetests --ignore-files="very_long_tests|nbs_tests"
+  - nosetests --ignore-files="very_long_tests*" --ignore_files="nbs_tests*"

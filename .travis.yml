@@ -25,5 +25,9 @@ script:
   - cd test
   - pwd
   - ls
+<<<<<<< HEAD
   - nosetests --ignore-files="very_long_tests|nbs_tests|reference_tests" -v
+=======
+  - nosetests --ignore-files="very_long_tests|nbs_tests"
+>>>>>>> parent of 6dc379d... remove empty reference test
   #- nosetests --ignore-files="test/very_long_tests.py" --ignore-files="test/nbs_tests.py"

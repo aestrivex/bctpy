@@ -20,4 +20,5 @@ before_install:
   - export PATH=/home/travis/mc/bin:$PATH
 # command to run tests
 script:
+  - nosetests -V
   - nosetests --ignore-files="very_long_tests|nbs_tests"

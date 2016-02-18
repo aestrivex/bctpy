@@ -24,5 +24,6 @@ script:
   - pwd
   - cd test
   - pwd
+  - ls
   - nosetests --ignore-files="very_long_tests|nbs_tests"
   #- nosetests --ignore-files="test/very_long_tests.py" --ignore-files="test/nbs_tests.py"

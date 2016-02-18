@@ -22,4 +22,4 @@ before_install:
 script:
   - nosetests -V
   #- nosetests --ignore-files="very_long_tests|nbs_tests"
-  - nosetests --ignore-files="very_long_tests*" --ignore_files="nbs_tests*"
+  - nosetests --ignore-files="very_long_tests*" --ignore-files="nbs_tests*"

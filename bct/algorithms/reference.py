@@ -852,15 +852,14 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
-    if np.size(np.where(Ap.flat)) < (n * (n - 1)):  # if Ap not fully connected
-        Ap_r, _ = randmio_dir(Ap, bin_swaps)  # randomized Ap
-    else:
-        Ap_r = Ap.copy()
 
-    An = np.logical_not(Ap)  # negative adjmat
-    np.fill_diagonal(An, 0)
-    An_r = np.logical_not(Ap_r)  # randomized An
-    np.fill_diagonal(An_r, 0)
+    if np.size(np.where(Ap.flat)) < (n * (n - 1)):
+        W_r = randmio_und_signed(W, bin_swaps)
+        Ap_r = W_r > 0
+        An_r = W_r < 0
+    else:
+        Ap_r = Ap
+        An_r = An
 
     W0 = np.zeros((n, n))
     for s in (1, -1):
@@ -974,15 +973,14 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
-    if np.size(np.where(Ap.flat)) < (n * (n - 1)):  # if Ap not fully connected
-        Ap_r, _ = randmio_und(Ap, bin_swaps)  # randomized Ap
-    else:
-        Ap_r = Ap.copy()
 
-    An = np.logical_not(Ap)  # negative adjmat
-    np.fill_diagonal(An, 0)
-    An_r = np.logical_not(Ap_r)  # randomized An
-    np.fill_diagonal(An_r, 0)
+    if np.size(np.where(Ap.flat)) < (n * (n - 1)):
+        W_r = randmio_und_signed(W, bin_swaps)
+        Ap_r = W_r > 0
+        An_r = W_r < 0
+    else:
+        Ap_r = Ap
+        An_r = An
 
     W0 = np.zeros((n, n))
     for s in (1, -1):

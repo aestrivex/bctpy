@@ -87,9 +87,11 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         initial community affiliation vector. default value=None
     B : str | NxN np.arraylike
         string describing objective function type, or provides a custom
-        objective-function matrix. builtin values 'modularity' uses Q-metric
-        as objective function, or 'potts' uses Potts model Hamiltonian.
-        Default value 'modularity'.
+        NxN objective-function matrix. builtin values 
+            'modularity' uses Q-metric as objective function
+            'potts' uses Potts model Hamiltonian.
+            'negative_sym' symmetric treatment of negative weights
+            'negative_asym' asymmetric treatment of negative weights
     seed : int | None
         random seed. default value=None. if None, seeds from /dev/urandom.
 
@@ -117,10 +119,35 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         ci += 1
     Mb = ci.copy()
 
+    if B in ('negative_sym', 'negative_asym'):
+        W0 = W * (W > 0)
+        s0 = np.sum(W0)
+        B0 = W0 - gamma * np.outer(np.sum(W0, axis=1), np.sum(W, axis=0)) / s0
+
+        W1 = W * (W < 0)
+        s1 = np.sum(W1)
+        if s1:
+            B1 = (W1 - gamma * np.outer(np.sum(W1, axis=1), np.sum(W1, axis=0))
+                / s1)
+        else:
+            B1 = 0
+
+    elif np.min(W) < -1e-10:
+        raise BCTParamError("Input connection matrix contains negative "
+            'weights but objective function dealing with negative weights '
+            'was not selected')
+
+    if B == 'potts' and np.any(np.logical_not(np.logical_or(W == 0, W == 1))):
+        raise BCTParamError('Potts hamiltonian requires binary input matrix')
+
     if B == 'modularity':
         B = W - gamma * np.outer(np.sum(W, axis=1), np.sum(W, axis=0)) / s
     elif B == 'potts':
         B = W - gamma * np.logical_not(W)
+    elif B == 'negative_sym':
+        B = B0 / (s0 + s1) - B1 / (s0 + s1)
+    elif B == 'negative_asym':
+        B = B0 / s0 - B1 / (s0 + s1)
     else:
         try:
             B = np.array(B)
@@ -501,6 +528,8 @@ def modularity_dir(A, gamma=1, kci=None):
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
                 imax, = np.where(q_iter == qmax)
+                if len(imax) > 0:
+                    imax = imax[0]
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked
@@ -1486,6 +1515,8 @@ def modularity_und(A, gamma=1, kci=None):
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
                 imax, = np.where(q_iter == qmax)
+                if len(imax) > 1:
+                    imax = imax[0]
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked

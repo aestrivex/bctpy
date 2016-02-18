@@ -21,5 +21,6 @@ before_install:
 # command to run tests
 script:
   - nosetests -V
+  - pwd
   #- nosetests --ignore-files="very_long_tests|nbs_tests"
   - nosetests --ignore-files="test/very_long_tests.py" --ignore-files="test/nbs_tests.py"

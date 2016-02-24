@@ -527,9 +527,11 @@ def modularity_dir(A, gamma=1, kci=None):
                 q_iter = qmax - 4 * mod_asgn_iter * \
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
-                imax, = np.where(q_iter == qmax)
-                if len(imax) > 0:
-                    imax = imax[0]
+                imax = np.argmax(q_iter * it)
+                #imax, = np.where(q_iter == qmax)
+                #if len(imax) > 0:
+                #    imax = imax[0]
+                #    print(imax)
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked
@@ -1514,9 +1516,10 @@ def modularity_und(A, gamma=1, kci=None):
                 q_iter = qmax - 4 * mod_asgn_iter * \
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
-                imax, = np.where(q_iter == qmax)
-                if len(imax) > 1:
-                    imax = imax[0]
+                imax = np.argmax(q_iter * it)
+                #imax, = np.where(q_iter == qmax)
+                #if len(imax) > 1:
+                #    imax = imax[0]
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked

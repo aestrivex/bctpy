@@ -166,7 +166,8 @@ def test_modularity_louvain_dir_low_modularity():
 def test_modularity_dir():
     x = load_directed_sample()
     _, q = bct.modularity_dir(x)
-    assert np.allclose(q, .31446049)
+    print q, .32742787
+    assert np.allclose(q, .32742787)
 
 
 def test_modularity_louvain_dir():

@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, binarize
+from bct.utils import pick_four_unique_nodes_quickly
 from .clustering import number_of_components
 
 
@@ -1335,9 +1336,6 @@ def randmio_dir_signed(R, itr):
         randomized network
     eff : int
         number of actual rewirings carried out
-
-    This function is four times less time efficient than the MATLAB counterpart
-    and I'm confused why. Improvements to the algorithm are very welcome.
     '''
     R = R.copy()
     n = len(R)
@@ -1349,14 +1347,18 @@ def randmio_dir_signed(R, itr):
     #actual number of successful rewirings
     eff = 0
 
+    #print(itr)
+
     for it in range(itr):
         #print(it)
         att = 0
         while att <= max_attempts:
             #select four distinct vertices
         
-            #a, b, c, d = np.random.permutation(n)[:4]
-            a, b, c, d = np.random.permutation(4)
+            a, b, c, d = pick_four_unique_nodes_quickly(n)
+
+            #a, b, c, d = np.random.choice(n, 4)
+            #a, b, c, d = np.random.permutation(4)
 
             r0_ab = R[a, b]
             r0_cd = R[c, d]
@@ -1380,6 +1382,8 @@ def randmio_dir_signed(R, itr):
                 break
 
             att += 1
+
+    #print(eff)
 
     return R, eff
 
@@ -1479,70 +1483,42 @@ def randmio_und_signed(R, itr):
     R : NxN np.ndarray
         randomized network
     '''
-    if not np.all(R == R.T):
-        raise BCTParamError("Input must be undirected")
     R = R.copy()
-    i, j = np.where(np.tril(R))
-    i_p, j_p = np.where(np.tril(R) > 0)
-    i_m, j_m = np.where(np.tril(R) < 0)
-    k = len(i)
-    k_p = len(i_p)
-    k_m = len(i_m)
-    itr *= k
+    n = len(R)
 
-    if not (k_p and k_m):
-        return randmio_und(R, itr)[0]
+    itr *= int(n * (n -1) / 2)
 
-    for it in range(itr):  # while not rewired
-        while True:
-            while True:
-                # choose two edges to rewire but make sure they are either
-                # both positive or both negative
-                do_pos = np.random.random() > .5  # randomly rewires pos or neg
-                if do_pos:
-                    kcur = k_p
-                    icur = i_p
-                    jcur = j_p
-                else:
-                    kcur = k_m
-                    icur = i_m
-                    jcur = j_m
+    max_attempts = int(np.round(n / 2))
+    eff = 0
 
-                e1 = np.random.randint(kcur)
-                e2 = np.random.randint(kcur)
-                while e1 == e2:
-                    e2 = np.random.randint(kcur)
-                a = icur[e1]
-                b = jcur[e1]
-                c = icur[e2]
-                d = jcur[e2]
-                if a != c and a != d and b != c and b != d:
-                    break  # all 4 vertices must be different
+    for it in range(itr):
+        att = 0
+        while att <= max_attempts:
 
-            if np.random.random() > .5:
-                icur.setflags(write=True)
-                jcur.setflags(write=True)
-                icur[e2] = d
-                jcur[e2] = c  # flip edge c-d with 50% probability
-                c = icur[e2]
-                d = jcur[e2]  # to explore all potential rewirings
-            # rewiring condition
-            if not (R[a, d] or R[c, b]):
-                R[a, d] = R[a, b]
-                R[a, b] = 0
-                R[d, a] = R[b, a]
-                R[b, a] = 0
-                R[c, b] = R[c, d]
-                R[c, d] = 0
-                R[b, c] = R[d, c]
-                R[d, c] = 0
-                jcur.setflags(write=True)
-                jcur[e1] = d  # reassign edge indices
-                jcur[e2] = b
+            a, b, c, d = pick_four_unique_nodes_quickly(n)
+
+            r0_ab = R[a, b]
+            r0_cd = R[c, d]
+            r0_ad = R[a, d]
+            r0_cb = R[c, b]
+
+            #rewiring condition
+            if (    np.sign(r0_ab) == np.sign(r0_cd) and
+                    np.sign(r0_ad) == np.sign(r0_cb) and
+                    np.sign(r0_ab) != np.sign(r0_ad)):
+        
+                R[a, d] = R[d, a] = r0_ab
+                R[a, b] = R[b, a] = r0_ad
+
+                R[c, b] = R[b, c] = r0_cd
+                R[c, d] = R[d, c] = r0_cb
+
+                eff += 1
                 break
 
-    return R
+            att += 1
 
+    return R, eff
 
 def randomize_graph_partial_und(A, B, maxswap):
     '''

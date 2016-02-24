@@ -17,6 +17,30 @@ def teachers_round(x):
         return int(np.floor(x))
 
 
+def pick_four_unique_nodes_quickly(n):
+    '''
+    This is equivalent to np.random.choice(n, 4, replace=False)
+
+    Another fellow suggested np.random.random(n).argpartition(4) which is
+    clever but still substantially slower.
+    '''
+    k = np.random.randint(n**4)
+    a = k % n
+    b = k // n % n
+    c = k // n ** 2 % n
+    d = k // n ** 3 % n
+    if (a != b and a != c and a != d and b != c and b != d and c != d):
+        return (a, b, c, d)
+    else:
+        # the probability of finding a wrong configuration is extremely low
+        # unless for extremely small n. if n is extremely small the
+        # computational demand is not a problem.
+
+        # In my profiling it only took 0.4 seconds to include the uniqueness
+        # check in 1 million runs of this function so I think it is OK.
+        return pick_four_unique_nodes_quickly(n)
+
+
 def cuberoot(x):
     '''
     Correctly handle the cube root for negative weights, instead of uselessly

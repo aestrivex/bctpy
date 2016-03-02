@@ -43,6 +43,7 @@ Many thanks to Stefan Fuertinger for his assistance tracking down a number of
 bugs. Stefan Fuertinger has a similar software package dealing with brain
 network functionality at http://research.mssm.edu/simonyanlab/analytical-tools/
 
+Many thanks to Chris Barnes for his assistance in documenting a number of issues and facilitating a number of test cases.
 
 Credit for writing BCT (the matlab version) goes to the following list of 
 authors, especially Olaf Sporns and Mika Rubinov.

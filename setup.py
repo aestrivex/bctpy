@@ -26,5 +26,5 @@ setuptools.setup(
     url="https://github.com/aestrivex/bctpy",
     platforms=['any'],
     packages=['bct', 'bct.algorithms', 'bct.utils'],
-        requires=["numpy", "scipy"]
+    install_requires=["numpy", "scipy"]
 )

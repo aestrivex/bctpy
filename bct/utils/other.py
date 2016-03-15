@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from .miscellaneous_utilities import BCTParamError
 
@@ -77,6 +77,8 @@ def threshold_proportional(W, p, copy=True):
     elements in x_25 are aleady <=0. This behavior is the same as in BCT. Be
     careful with matrices that are both signed and sparse.
     '''
+    from .miscellaneous_utilities import teachers_round as round
+
     if p > 1 or p < 0:
         raise BCTParamError('Threshold must be in range [0,1]')
     if copy:

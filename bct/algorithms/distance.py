@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from bct.utils import cuberoot, binarize, invert
 
@@ -33,7 +33,7 @@ def breadthdist(CIJ):
     n = len(CIJ)
 
     D = np.zeros((n, n))
-    for i in xrange(n):
+    for i in range(n):
         D[i, :], _ = breadth(CIJ, i)
 
     D[D == 0] = np.inf
@@ -102,7 +102,7 @@ def breadth(CIJ, source):
     return distance, branch
 
 
-def charpath(D, include_diagonal=False):
+def charpath(D, include_diagonal=False, include_infinite=True):
     '''
     The characteristic path length is the average shortest path length in
     the network. The global efficiency is the average inverse shortest path
@@ -114,6 +114,8 @@ def charpath(D, include_diagonal=False):
         distance matrix
     include_diagonal : bool
         If True, include the weights on the diagonal. Default value is False.
+    include_infinite : bool
+        If True, include infinite distances in calculation
 
     Returns
     -------
@@ -139,25 +141,27 @@ def charpath(D, include_diagonal=False):
     D = D.copy()
 
     if not include_diagonal:
-        np.fill_diagonal(D, 0)
+        np.fill_diagonal(D, np.nan)
+
+    if not include_infinite:
+        D[np.isinf(D)] = np.nan
+
+    Dv = D[np.logical_not(np.isnan(D))].ravel()
 
     # mean of finite entries of D[G]
-    lambda_ = np.sum(D[D != np.inf]) / len(np.where(D != np.inf)[0])
+    lambda_ = np.mean(Dv)
+
+    # efficiency: mean of inverse entries of D[G]
+    efficiency = np.mean(1 / Dv)
 
     # eccentricity for each vertex (ignore inf)
-    ecc = np.array(np.ma.masked_equal(D, np.inf).max(axis=1))
+    ecc = np.array(np.ma.masked_equal(D, np.nan).max(axis=1))
 
     # radius of graph
     radius = np.min(ecc)  # but what about zeros?
 
     # diameter of graph
     diameter = np.max(ecc)
-
-    # efficiency: mean of inverse entries of D[G]
-    n = len(D)
-    np.fill_diagonal(D, np.inf)  # so that the inverse is 0
-    D = 1 / D  # invert distance
-    efficiency = np.sum(D) / (n * (n - 1))  # compute global efficiency
 
     return lambda_, efficiency, ecc, radius, diameter
 
@@ -185,7 +189,7 @@ def cycprob(Pq):
 
     # note: fcyc[1] must be zero, as there cannot be cycles of length 1
     fcyc = np.zeros(np.size(Pq, axis=2))
-    for q in xrange(np.size(Pq, axis=2)):
+    for q in range(np.size(Pq, axis=2)):
         if np.sum(Pq[:, :, q]) > 0:
             fcyc[q] = np.sum(np.diag(Pq[:, :, q])) / np.sum(Pq[:, :, q])
         else:
@@ -195,7 +199,7 @@ def cycprob(Pq):
     # note: pcyc[2] is equal to the fraction of reciprocal connections
     # note: there are no non-cyclic paths of length N and no cycles of len N+1
     pcyc = np.zeros(np.size(Pq, axis=2))
-    for q in xrange(np.size(Pq, axis=2)):
+    for q in range(np.size(Pq, axis=2)):
         if np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])) > 0:
             pcyc[q] = (np.sum(np.diag(Pq[:, :, q - 1])) /
                        np.sum(Pq[:, :, q - 1]) - np.sum(np.diag(Pq[:, :, q - 1])))
@@ -287,7 +291,7 @@ def distance_wei(G):
     D[np.logical_not(np.eye(n))] = np.inf
     B = np.zeros((n, n))  # number of edges matrix
 
-    for u in xrange(n):
+    for u in range(n):
         # distance permanence (true is temporary)
         S = np.ones((n,), dtype=bool)
         G1 = G.copy()
@@ -363,7 +367,7 @@ def efficiency_bin(G, local=False):
     if local:
         E = np.zeros((n,))  # local efficiency
 
-        for u in xrange(n):
+        for u in range(n):
             # V,=np.where(G[u,:])			#neighbors
             # k=len(V)					#degree
             # if k>=2:					#degree must be at least 2
@@ -436,7 +440,7 @@ def efficiency_wei(Gw, local=False):
         D = np.zeros((n, n))  # distance matrix
         D[np.logical_not(np.eye(n))] = np.inf
 
-        for u in xrange(n):
+        for u in range(n):
             # distance permanence (true is temporary)
             S = np.ones((n,), dtype=bool)
             G1 = G.copy()
@@ -467,7 +471,7 @@ def efficiency_wei(Gw, local=False):
     A = np.array((Gw != 0), dtype=int)
     if local:
         E = np.zeros((n,))  # local efficiency
-        for u in xrange(n):
+        for u in range(n):
             # V,=np.where(Gw[u,:])		#neighbors
             # k=len(V)					#degree
             # if k>=2:					#degree must be at least 2
@@ -553,8 +557,8 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # this code is for pathlength=1
     # paths are seeded from sources
     q = 1
-    for j in xrange(n):
-        for i in xrange(len(sources)):
+    for j in range(n):
+        for i in range(len(sources)):
             i_s = sources[i]
             if CIJ[i_s, j] == 1:
                 pths.append([i_s, j])
@@ -563,7 +567,7 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # calculate the use index per vertex (for paths of length 1)
     util[:, q], _ = np.histogram(pths, bins=n)
     # now enter the found paths of length 1 into the pathmatrix Pq
-    for nrp in xrange(np.size(pths, axis=0)):
+    for nrp in range(np.size(pths, axis=0)):
         Pq[pths[nrp, 0], pths[nrp, q], q - 1] += 1
 
     # begin saving allpths
@@ -575,10 +579,10 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     npthscnt = k
 
     # big loop for all other pathlengths q
-    for q in xrange(2, qmax + 1):
+    for q in range(2, qmax + 1):
         # to keep track of time...
-        print (
-            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq)))
+        print((
+            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq))))
 
         # old paths are now in 'pths'
         # new paths are about to be collected in 'npths'
@@ -676,7 +680,7 @@ def findwalks(CIJ):
     Wq = np.zeros((n, n, n))
     CIJpwr = CIJ.copy()
     Wq[:, :, 1] = CIJ
-    for q in xrange(n):
+    for q in range(n):
         CIJpwr = np.dot(CIJpwr, CIJ)
         Wq[:, :, q] = CIJpwr
 
@@ -685,10 +689,9 @@ def findwalks(CIJ):
     return Wq, twalk, wlq
 
 
-def reachdist(CIJ):
+def reachdist(CIJ, ensure_binary=True):
     '''
     The binary reachability matrix describes reachability between all pairs
-
     of nodes. An entry (u,v)=1 means that there exists a path from node u
     to node v; alternatively (u,v)=0.
 
@@ -701,6 +704,10 @@ def reachdist(CIJ):
     ----------
     CIJ : NxN np.ndarray
         binary directed/undirected connection matrix
+    ensure_binary : bool
+        Binarizes input. Defaults to true. No user who is not testing 
+        something will ever want to not use this, use distance_wei instead for 
+        unweighted matrices.
 
     Returns
     -------
@@ -717,10 +724,14 @@ def reachdist(CIJ):
         CIJpwr = np.dot(CIJpwr, CIJ)
         R = np.logical_or(R, CIJpwr != 0)
         D += R
-        if powr <= n and np.any(R[row, col] == 0):
+
+        if powr <= n and np.any(R[np.ix_(row, col)] == 0):
             powr += 1
             R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
         return R, D, powr
+
+    if ensure_binary:
+        CIJ = binarize(CIJ)
 
     R = CIJ.copy()
     D = CIJ.copy()
@@ -735,9 +746,9 @@ def reachdist(CIJ):
     id0, = np.where(id == 0)  # nothing goes in, so column(R) will be 0
     od0, = np.where(od == 0)  # nothing comes out, so row(R) will be 0
     # use these colums and rows to check for reachability
-    col = range(10)
+    col = list(range(n))
     col = np.delete(col, id0)
-    row = range(10)
+    row = list(range(n))
     row = np.delete(row, od0)
 
     R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)

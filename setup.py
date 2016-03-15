@@ -7,7 +7,7 @@ def read(fname):
 
 setuptools.setup(
     name="bctpy",
-    version="0.4.1",
+    version="0.5.0",
     maintainer="Roan LaPlante",
     maintainer_email="rlaplant@nmr.mgh.harvard.edu",
     description=("Brain Connectivity Toolbox for Python"),
@@ -20,11 +20,11 @@ setuptools.setup(
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Scientific/Engineering :: Information Analysis",
     ],
     url="https://github.com/aestrivex/bctpy",
     platforms=['any'],
     packages=['bct', 'bct.algorithms', 'bct.utils'],
-        requires=["numpy", "scipy"]
+    install_requires=["numpy", "scipy"]
 )

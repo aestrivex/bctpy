@@ -2,12 +2,12 @@ language: python
 sudo : false
 python:
   - "2.7"
-#  - "3.5"
+  - "3.5"
 # command to install dependencies
 install: #"pip install -r requirements.txt"
   - conda update --yes conda
   #- conda config --add channels soft-matter
-  - conda create -n testenv --yes numpy=1.9 scipy=0.16 networkx=1.9 nose setuptools python=${TRAVIS_PYTHON_VERSION}
+  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 
@@ -20,4 +20,10 @@ before_install:
   - export PATH=/home/travis/mc/bin:$PATH
 # command to run tests
 script:
-  - nosetests --ignore-files="very_long_tests|nbs_tests"
+  - nosetests -V
+  - pwd
+  - cd test
+  - pwd
+  - ls
+  - nosetests --ignore-files="very_long_tests|nbs_tests" -v
+  #- nosetests --ignore-files="test/very_long_tests.py" --ignore-files="test/nbs_tests.py"

@@ -7,7 +7,7 @@ python:
 install: #"pip install -r requirements.txt"
   - conda update --yes conda
   #- conda config --add channels soft-matter
-  - conda create -n testenv --yes numpy=1.10.0 scipy=0.17.9 nose setuptools python=${TRAVIS_PYTHON_VERSION}
+  - conda create -n testenv --yes numpy=1.10 scipy=0.17 nose setuptools python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 

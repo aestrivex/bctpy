@@ -7,12 +7,11 @@ python:
 install: #"pip install -r requirements.txt"
   - conda update --yes conda
   #- conda config --add channels soft-matter
-  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools python=${TRAVIS_PYTHON_VERSION}
+  - conda create -n testenv --yes numpy=1.9 scipy=0.16 libgfortran nose setuptools python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 
 before_install:
-  - sudo apt-get install libgfortran  # shouldn't be necessary if conda does its job properly
   - if [ ${TRAVIS_PYTHON_VERSION:O:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
   #- chmod +x miniconda.sh
   - echo "red phones"

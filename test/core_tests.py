@@ -10,10 +10,6 @@ def test_assortativity_wu_sign():
     print(ass_pos, .2939)
     assert np.allclose(np.sum(ass_pos), .2939, atol=.0001)
 
-def test_threshold_proportional_nocopy():
-    x = load_sample()
-    bct.threshold_proportional(x, .3, copy=False)
-    assert np.allclose(np.sum(x), 15253.75425406)
 
 def test_core_periphery_dir():
     x = load_sample(thres=.1)

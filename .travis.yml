@@ -6,7 +6,7 @@ python:
 # command to install dependencies
 install: 
   - conda update --yes conda
-  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools h5py python=${TRAVIS_PYTHON_VERSION}
+  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 

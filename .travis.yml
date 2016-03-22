@@ -4,26 +4,17 @@ python:
   - "2.7"
   - "3.5"
 # command to install dependencies
-install: #"pip install -r requirements.txt"
+install: 
   - conda update --yes conda
-  #- conda config --add channels soft-matter
-  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools python=${TRAVIS_PYTHON_VERSION}
+  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools h5py python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 
 before_install:
   - if [ ${TRAVIS_PYTHON_VERSION:O:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
-  #- chmod +x miniconda.sh
   - echo "red phones"
-  #- ./miniconda.sh -b -p /home/travis/mc
   - bash miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH
 # command to run tests
 script:
   - nosetests -V
-  - pwd
-  - cd test
-  - pwd
-  - ls
-  - nosetests --ignore-files="very_long_tests|nbs_tests" -v
-  #- nosetests --ignore-files="test/very_long_tests.py" --ignore-files="test/nbs_tests.py"

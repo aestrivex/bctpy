@@ -1080,7 +1080,7 @@ def randmio_dir_connected(R, itr):
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in range(itr):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1167,7 +1167,7 @@ def randmio_dir(R, itr):
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in range(itr):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1247,7 +1247,7 @@ def randmio_und_connected(R, itr):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(itr):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1349,7 +1349,7 @@ def randmio_dir_signed(R, itr):
 
     #print(itr)
 
-    for it in range(itr):
+    for it in range(int(itr)):
         #print(it)
         att = 0
         while att <= max_attempts:
@@ -1420,7 +1420,7 @@ def randmio_und(R, itr):
     # actual number of successful rewirings
     eff = 0
 
-    for it in range(itr):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1491,7 +1491,7 @@ def randmio_und_signed(R, itr):
     max_attempts = int(np.round(n / 2))
     eff = 0
 
-    for it in range(itr):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:
 

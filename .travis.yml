@@ -6,12 +6,14 @@ python:
 # command to install dependencies
 install: 
   - conda update --yes conda
-  - conda create -n testenv --yes numpy=1.9 scipy=0.16 nose setuptools python=${TRAVIS_PYTHON_VERSION}
+  #- conda config --add channels soft-matter
+  - conda create -n testenv --yes numpy=1.10 scipy=0.17 nose setuptools python=${TRAVIS_PYTHON_VERSION}
   - source activate testenv
   - python setup.py install
 
 before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:O:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda-3.5.5-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.5.5-Linux-x86_64.sh -O miniconda.sh; fi
+  - if [ ${TRAVIS_PYTHON_VERSION:O:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda2-3.19.0-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.19.0-Linux-x86_64.sh -O miniconda.sh; fi
+  #- chmod +x miniconda.sh
   - echo "red phones"
   - bash miniconda.sh -b -p /home/travis/mc
   - export PATH=/home/travis/mc/bin:$PATH

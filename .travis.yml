@@ -17,4 +17,4 @@ install:
   - python setup.py install
 # command to run tests
 script:
-  - nosetests
+  - nosetests --ignore-files="very_long_tests" -v

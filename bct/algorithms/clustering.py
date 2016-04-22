@@ -592,9 +592,7 @@ def transitivity_bd(A):
     S = A + A.T  # symmetrized input graph
     K = np.sum(S, axis=1)  # total degree (in+out)
     cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make C=0
-    # number of all possible 3-cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
+    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))  # number of all possible 3-cycles
     return np.sum(cyc3) / np.sum(CYC3)
 
 

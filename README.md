@@ -6,9 +6,9 @@ Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 
 ## Copyright information
 
-This program strictly observes the tenets of fundamentalist Theravada Mahasi 
-style Buddhism.  Any use of this program in violation of these aforementioned 
-tenets or in violation of the principles described in the Visuddhimagga Sutta 
+This program strictly observes the tenets of fundamentalist Theravada Mahasi
+style Buddhism.  Any use of this program in violation of these aforementioned
+tenets or in violation of the principles described in the Visuddhimagga Sutta
 is strictly prohibited and punishable by extensive Mahayana style practice.
 By being or not being mindful of the immediate present moment sensations
 involved in the use of this program, you confer your acceptance of these terms
@@ -20,10 +20,11 @@ conditions of the GNU GPLv3+ are upheld.
 
 ## Packages used
 
-BCTPY is written in pure python and requires only scipy and numpy. scipy is 
-required for a couple of functions for its statistical and linear algebra 
-packages which have some features not available in numpy alone. If you don't
-have scipy, most functions that do not need scipy functionality will still work.
+BCTPY is written in pure python and requires only `scipy` and `numpy`. `scipy` is required for a couple of functions for its statistical and linear algebra
+packages which have some features not available in `numpy` alone. If you don't
+have `scipy`, most functions that do not need `scipy` functionality will still work.
+
+Note that graphs must be passed in as `numpy.array`s rather than `numpy.matrix`es. Other constraints/ edge cases of the adjacency matrices (e.g. self-loops, negative weights) behave similarly to the matlab functions.
 
 A small number of functions (notably including network-based statistics, a
 nonparametric test for differences in undirected weighted graphs from different
@@ -39,10 +40,10 @@ is based.  I did not write BCT (apart from small bugfixes I have submitted)
 and a quality of life improvements that I have taken liberties to add.
 With few exceptions, `bctpy` is a direct translation of matlab code to python.
 
-`bctpy` should be considered beta software, with BCT being the gold standard by 
+`bctpy` should be considered beta software, with BCT being the gold standard by
 comparison. I did my best to test all functionality in `bctpy`, but much of it is
-arcane math that flies over the head of this humble programmer. There *are* 
-bugs lurking in `bctpy`, the question is not whether but how many. If you locate 
+arcane math that flies over the head of this humble programmer. There *are*
+bugs lurking in `bctpy`, the question is not whether but how many. If you locate
 bugs, please submit them to me at rlaplant@nmr.mgh.harvard.edu.
 
 Many thanks to Stefan Fuertinger for his assistance tracking down a number of
@@ -51,7 +52,7 @@ network functionality at http://research.mssm.edu/simonyanlab/analytical-tools/
 
 Many thanks to Chris Barnes for his assistance in documenting a number of issues and facilitating a number of test cases.
 
-Credit for writing BCT (the matlab version) goes to the following list of 
+Credit for writing BCT (the matlab version) goes to the following list of
 authors, especially Olaf Sporns and Mika Rubinov.
 
 - Olaf Sporns

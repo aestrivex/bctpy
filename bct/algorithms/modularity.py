@@ -506,8 +506,6 @@ def modularity_dir(A, gamma=1, kci=None):
         n = len(module)
         modmat = B[module][:, module]
 
-        np.save('latest_modmat.npy', modmat)
-
         vals, vecs = linalg.eig(modmat)  # biggest eigendecomposition
         rlvals = np.real(vals)
         max_eigvec = np.squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])

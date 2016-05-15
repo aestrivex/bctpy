@@ -12,8 +12,8 @@ setuptools.setup(
     maintainer_email="rlaplant@nmr.mgh.harvard.edu",
     description=("Brain Connectivity Toolbox for Python"),
     license="Visuddhimagga Sutta; GPLv3+",
-    long_description=read('README'),
-    datafiles=[('', ['README', 'LICENSE'])],
+    long_description=read('README.md'),
+    datafiles=[('', ['README.md', 'LICENSE'])],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: X11 Applications",

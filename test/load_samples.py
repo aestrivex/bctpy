@@ -3,7 +3,10 @@ import bct
 import os
 
 MAT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mats')
-mat_path = lambda fname: os.path.join(MAT_DIR, fname)
+
+
+def mat_path(fname):
+    return os.path.join(MAT_DIR, fname)
 
 
 def load_sample(thres=1):

@@ -574,8 +574,8 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # big loop for all other pathlengths q
     for q in range(2, qmax + 1):
         # to keep track of time...
-        print((
-            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq))))
+        print(('current pathlength (q=i, number of paths so far (up to q-1)=i'
+               % (q, np.sum(Pq))))
 
         # old paths are now in 'pths'
         # new paths are about to be collected in 'npths'

@@ -187,7 +187,8 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
     elif dfun == 'cosang':
         maxcost = np.pi / 2
         lowcost = np.arccos(np.dot(m1.flat, m2.flat) /
-                            np.sqrt(np.dot(m1.flat, m1.flat) * np.dot(m2.flat, m2.flat))) / maxcost
+                            np.sqrt(np.dot(m1.flat, m1.flat) *
+                                    np.dot(m2.flat, m2.flat))) / maxcost
     else:
         raise BCTParamError('dfun must be absdiff or sqrdiff or cosang')
 
@@ -286,7 +287,8 @@ def backbone_wu(CIJ, avgdeg):
     n = len(CIJ)
     if not np.all(CIJ == CIJ.T):
         raise BCTParamError('backbone_wu can only be computed for undirected '
-                            'matrices.  If your matrix is has noise, correct it with np.around')
+                            'matrices.  If your matrix is has noise, correct '
+                            'it with np.around')
     CIJtree = np.zeros((n, n))
 
     # find strongest edge (if multiple edges are tied, use only first one)
@@ -703,8 +705,8 @@ def reorder_mod(A, ci):
         # reverse mod_imp to sort by the first column first and so on
         # print ksmi
         # for i,sin in enumerate(signs):
-        #	if sin==-1:
-        #		ksmi[i,:]=ksmi[i,:][::-1]
+        #    if sin==-1:
+        #        ksmi[i,:]=ksmi[i,:][::-1]
         # print ksmi
         # print np.shape(ksmi)
 

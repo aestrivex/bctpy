@@ -399,16 +399,16 @@ def local_assortativity_wu_sign(W):
 
     for curr_node in range(n):
         jp = np.where(W[curr_node, :] > 0)
-        loc_assort_pos[curr_node] = np.sum(np.abs(str_pos[jp] - 
-            str_pos[curr_node])) / str_pos[curr_node]
+        loc_assort_pos[curr_node] = np.sum(np.abs(
+            str_pos[jp] - str_pos[curr_node])) / str_pos[curr_node]
         jn = np.where(W[curr_node, :] < 0)
-        loc_assort_neg[curr_node] = np.sum(np.abs(str_neg[jn] -
-            str_neg[curr_node])) / str_neg[curr_node]
+        loc_assort_neg[curr_node] = np.sum(np.abs(
+            str_neg[jn] - str_neg[curr_node])) / str_neg[curr_node]
 
-    loc_assort_pos = ((r_pos + 1) / n - 
-        loc_assort_pos / np.sum(loc_assort_pos))
+    loc_assort_pos = ((r_pos + 1) / n -
+                      loc_assort_pos / np.sum(loc_assort_pos))
     loc_assort_neg = ((r_neg + 1) / n -
-        loc_assort_neg / np.sum(loc_assort_neg))
+                      loc_assort_neg / np.sum(loc_assort_neg))
 
     return loc_assort_pos, loc_assort_neg
 

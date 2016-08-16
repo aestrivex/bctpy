@@ -83,26 +83,25 @@ def threshold_proportional(W, p, copy=True):
         raise BCTParamError('Threshold must be in range [0,1]')
     if copy:
         W = W.copy()
-    n = len(W)						# number of nodes
-    np.fill_diagonal(W, 0)			# clear diagonal
+    n = len(W)                             # number of nodes
+    np.fill_diagonal(W, 0)                 # clear diagonal
 
-    if np.allclose(W, W.T):				# if symmetric matrix
-        W[np.tril_indices(n)] = 0		# ensure symmetry is preserved
-        ud = 2						# halve number of removed links
+    if np.allclose(W, W.T):                # if symmetric matrix
+        W[np.tril_indices(n)] = 0          # ensure symmetry is preserved
+        ud = 2                             # halve number of removed links
     else:
         ud = 1
 
-    ind = np.where(W)					# find all links
+    ind = np.where(W)                      # find all links
 
-    I = np.argsort(W[ind])[::-1]		# sort indices by magnitude
+    I = np.argsort(W[ind])[::-1]           # sort indices by magnitude
 
-    en = int(round((n * n - n) * p / ud))		# number of links to be preserved
+    en = int(round((n * n - n) * p / ud))  # number of links to be preserved
 
     W[(ind[0][I][en:], ind[1][I][en:])] = 0  # apply threshold
-    #W[np.ix_(ind[0][I][en:], ind[1][I][en:])]=0
 
-    if ud == 2:						# if symmetric matrix
-        W[:, :] = W + W.T						# reconstruct symmetry
+    if ud == 2:                            # if symmetric matrix
+        W[:, :] = W + W.T                  # reconstruct symmetry
 
     return W
 

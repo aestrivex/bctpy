@@ -445,9 +445,10 @@ def get_components(A, no_depend=False):
     '''
 
     if not np.all(A == A.T):  # ensure matrix is undirected
-        raise BCTParamError('get_components can only be computed for undirected'
-                            ' matrices.  If your matrix is noisy, correct it with np.around')
-    
+        raise BCTParamError('get_components can only be computed for '
+                            'undirected matrices.  If your matrix is '
+                            'noisy, correct it with np.around')
+
     A = binarize(A, copy=True)
     n = len(A)
     np.fill_diagonal(A, 1)
@@ -465,8 +466,8 @@ def get_components(A, no_depend=False):
         temp.append(item)
         union_sets = temp
 
-    comps = np.array([i+1 for v in range(n) for i in 
-        range(len(union_sets)) if v in union_sets[i]])
+    comps = np.array([i+1 for v in range(n) for i in
+                      range(len(union_sets)) if v in union_sets[i]])
     comp_sizes = np.array([len(s) for s in union_sets])
 
     return comps, comp_sizes
@@ -514,8 +515,9 @@ def get_components_old(A, no_depend=False):
     # nonsquare matrices cannot be symmetric; no need to check
 
     if not np.all(A == A.T):  # ensure matrix is undirected
-        raise BCTParamError('get_components can only be computed for undirected'
-                            ' matrices.  If your matrix is noisy, correct it with np.around')
+        raise BCTParamError('get_components can only be computed for '
+                            'undirected matrices.  If your matrix is '
+                            'noisy, correct it with np.around')
 
     A = binarize(A, copy=True)
     n = len(A)
@@ -586,9 +588,9 @@ def transitivity_bd(A):
                         = 2 * (K(K-1)/2 - diag(A^2))
                         = K(K-1) - 2(diag(A^2))
     '''
-    S = A + A.T  # symmetrized input graph
-    K = np.sum(S, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
+    S = A + A.T                                     # symmetrized input graph
+    K = np.sum(S, axis=1)                           # total degree (in+out)
+    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2     # number of 3-cycles
     CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))  # number of all possible 3-cycles
     return np.sum(cyc3) / np.sum(CYC3)
 

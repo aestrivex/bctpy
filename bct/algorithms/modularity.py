@@ -128,14 +128,14 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         s1 = np.sum(W1)
         if s1:
             B1 = (W1 - gamma * np.outer(np.sum(W1, axis=1), np.sum(W1, axis=0))
-                / s1)
+                  / s1)
         else:
             B1 = 0
 
     elif np.min(W) < -1e-10:
-        raise BCTParamError("Input connection matrix contains negative "
-            'weights but objective function dealing with negative weights '
-            'was not selected')
+        raise BCTParamError('Input connection matrix contains negative '
+                            'weights but objective function dealing with '
+                            'negative weights was not selected')
 
     if B == 'potts' and np.any(np.logical_not(np.logical_or(W == 0, W == 1))):
         raise BCTParamError('Potts hamiltonian requires binary input matrix')
@@ -347,9 +347,9 @@ def link_communities(W, type_clustering='single'):
             nodulo = np.append(nodes[0], (nodes[1:])[nodes[1:] != nodes[:-1]])
             nc = len(nodulo)
             mc = np.sum(links)
-            min_mc = np.sum(links[:nc - 1])  # minimal weight
+            min_mc = np.sum(links[:nc - 1])       # minimal weight
             dc = (mc - min_mc) / (nc * (nc - 1) /
-                                  2 - min_mc)  # community density
+                                  2 - min_mc)     # community density
 
             if np.array(dc).shape is not ():
                 print(dc)
@@ -918,8 +918,9 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
         while flag:
             it += 1
             if it > 1000:
-                raise BCTParamError('Modularity Infinite Loop Style F.  Please '
-                                    'contact the developer with this error.')
+                raise BCTParamError('Modularity Infinite Loop Style F.  '
+                                    'Please contact the developer with '
+                                    'this error.')
             flag = False
 
             # loop over nodes in random order
@@ -1044,8 +1045,9 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
         while flag:
             it += 1
             if it > 1000:
-                raise BCTParamError('Modularity Infinite Loop Style C.  Please '
-                                    'contact the developer with this error.')
+                raise BCTParamError('Modularity Infinite Loop Style C.  '
+                                    'Please contact the developer with '
+                                    'this error.')
             flag = False
 
             # loop over nodes in random order
@@ -1204,7 +1206,8 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
             it += 1
             if it > 1000:
                 raise BCTParamError('Infinite Loop was detected and stopped. '
-                                    'This was probably caused by passing in a directed matrix.')
+                                    'This was probably caused by passing in a '
+                                    'directed matrix.')
             flag = False
             # loop over nodes in random order
             for u in np.random.permutation(nh):
@@ -1473,9 +1476,7 @@ def modularity_und(A, gamma=1, kci=None):
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
                 imax = np.argmax(q_iter * it)
-                #imax, = np.where(q_iter == qmax)
-                #if len(imax) > 1:
-                #    imax = imax[0]
+
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked

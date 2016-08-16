@@ -486,16 +486,11 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
     np.fill_diagonal(W, 0)
 
     def gcoef(W):
-        #strength
-        s = np.sum(W, axis=1)   
-        #neighbor community affiliation
-        Gc = np.inner((W != 0), np.diag(ci))
-        #community specific neighbors
-        Sc2 = np.zeros((n,))
-        #extra modular weighting
-        ksm = np.zeros((n,))
-        #intra modular wieghting
-        centm = np.zeros((n,))
+        s = np.sum(W, axis=1)                 # strength
+        Gc = np.inner((W != 0), np.diag(ci))  # neighbor community affiliation
+        Sc2 = np.zeros((n,))                  # community specific neighbors
+        ksm = np.zeros((n,))                  # extra modular weighting
+        centm = np.zeros((n,))                # intra modular wieghting
 
         if centrality_type == 'degree':
             cent = s.copy()

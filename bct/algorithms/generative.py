@@ -7,17 +7,17 @@ from .clustering import clustering_coef_bu
 from .centrality import betweenness_bin
 
 
-def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
-    model_var='powerlaw', epsilon=1e-6, copy=True):
+def generative_model(A, D, m, eta, gamma=None, model_type='matching',
+                     model_var='powerlaw', epsilon=1e-6, copy=True):
     '''
 
     Generates synthetic networks using the models described in
     Betzel et al. (2016) Neuroimage. See this paper for more details.
 
-    Succinctly, the probability of forming a connection between nodes u and v is
-    P(u,v) = E(u,v)**eta * K(u,v)**gamma
-    where eta and gamma are hyperparameters, E(u,v) is the euclidean or similar
-    distance measure, and K(u,v) is the algorithm that defines the model.
+    Succinctly, the probability of forming a connection between nodes u and
+    v is P(u,v) = E(u,v)**eta * K(u,v)**gamma where eta and gamma are
+    hyperparameters, E(u,v) is the euclidean or similar distance measure,
+    and K(u,v) is the algorithm that defines the model.
 
     This describes the power law formulation, an alternative formulation uses
     the exponential function
@@ -77,7 +77,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     # To try 3 eta and 3 gamma pairs, should use 9 list values.
     if len(eta) != len(gamma):
         raise BCTParamError('Eta and gamma hyperparameters must be lists of '
-            'the same size')
+                            'the same size')
 
     nparams = len(eta)
 
@@ -85,7 +85,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
     def k_avg(K):
         return ((np.tile(K, (n, 1)) + np.transpose(np.tile(K, (n, 1))))/2 +
-            epsilon)
+                epsilon)
 
     def k_diff(K):
         return np.abs(np.tile(K, (n, 1)) -
@@ -308,8 +308,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
                 if ncon == 0:
                     K[uu, j] = K[j, uu] = epsilon
                 else:
-                    K[uu, j] = K[j, uu] = (2 / ncon *
-                        np.sum(np.logical_and(c1[use], c2[use])) + epsilon)
+                    K[uu, j] = K[j, uu] = (
+                        2 / ncon *
+                        np.sum(np.logical_and(c1[use], c2[use])) +
+                        epsilon)
 
             updatevv, = np.where(np.inner(A, A[:, vv]))
             np.delete(updatevv, np.where(updatevv == uu))
@@ -326,8 +328,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
                 if ncon == 0:
                     K[vv, j] = K[j, vv] = epsilon
                 else:
-                    K[vv, j] = K[j, vv] = (2 / ncon *
-                        np.sum(np.logical_and(c1[use], c2[use])) + epsilon)
+                    K[vv, j] = K[j, vv] = (
+                        2 / ncon *
+                        np.sum(np.logical_and(c1[use], c2[use])) +
+                        epsilon)
 
             Ff = Fd * Fk * np.logical_not(A)
 
@@ -487,8 +491,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
     return np.squeeze(B)
 
-def evaluate_generative_model(A, Atgt, D, eta, gamma=None, 
-    model_type='matching', model_var='powerlaw', epsilon=1e-6):
+
+def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
+                              model_type='matching', model_var='powerlaw',
+                              epsilon=1e-6):
     '''
     Generates synthetic networks with parameters provided and evaluates their
     energy function. The energy function is defined as in Betzel et al. 2016.
@@ -521,10 +527,8 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
                                     np.sort(np.concatenate((x, y))),
                                     [np.inf]])
 
-        bin_x,_ = np.histogram(x, bin_edges)
-        bin_y,_ = np.histogram(y, bin_edges)
-
-        #print(np.shape(bin_x))
+        bin_x, _ = np.histogram(x, bin_edges)
+        bin_y, _ = np.histogram(y, bin_edges)
 
         sum_x = np.cumsum(bin_x) / np.sum(bin_x)
         sum_y = np.cumsum(bin_y) / np.sum(bin_y)

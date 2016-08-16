@@ -376,8 +376,10 @@ def efficiency_bin(G, local=False):
 
             # find pairs of neighbors
             V, = np.where(np.logical_or(G[u, :], G[u, :].T))
+
             # inverse distance matrix
             e = distance_inv(G[np.ix_(V, V)])
+
             # symmetrized inverse distance matrix
             se = e + e.T
 
@@ -480,10 +482,13 @@ def efficiency_wei(Gw, local=False):
 
             # find pairs of neighbors
             V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
+
             # symmetrized vector of weights
             sw = cuberoot(Gw[u, V]) + cuberoot(Gw[V, u].T)
+
             # inverse distance matrix
             e = distance_inv_wei(Gl[np.ix_(V, V)])
+
             # symmetrized inverse distance matrix
             se = cuberoot(e) + cuberoot(e.T)
 
@@ -705,8 +710,8 @@ def reachdist(CIJ, ensure_binary=True):
     CIJ : NxN np.ndarray
         binary directed/undirected connection matrix
     ensure_binary : bool
-        Binarizes input. Defaults to true. No user who is not testing 
-        something will ever want to not use this, use distance_wei instead for 
+        Binarizes input. Defaults to true. No user who is not testing
+        something will ever want to not use this, use distance_wei instead for
         unweighted matrices.
 
     Returns
@@ -753,7 +758,7 @@ def reachdist(CIJ, ensure_binary=True):
 
     R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
 
-    #'invert' CIJdist to get distances
+    # 'invert' CIJdist to get distances
     D = powr - D + 1
 
     # put inf if no path found

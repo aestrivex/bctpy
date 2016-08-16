@@ -1210,8 +1210,8 @@ def randmio_und_connected(R, itr):
     to reach every other node in the network. The input network for this
     function must be connected.
 
-    NOTE the changes to the BCT matlab function of the same name 
-    made in the Jan 2016 release 
+    NOTE the changes to the BCT matlab function of the same name
+    made in the Jan 2016 release
     have not been propagated to this function because of substantially
     decreased time efficiency in the implementation. Expect these changes
     to be merged eventually.
@@ -1342,9 +1342,9 @@ def randmio_dir_signed(R, itr):
 
     itr *= n * (n - 1)
 
-    #maximal number of rewiring attempts per iter
+    # maximal number of rewiring attempts per iter
     max_attempts = n
-    #actual number of successful rewirings
+    # actual number of successful rewirings
     eff = 0
 
     #print(itr)
@@ -1353,8 +1353,7 @@ def randmio_dir_signed(R, itr):
         #print(it)
         att = 0
         while att <= max_attempts:
-            #select four distinct vertices
-        
+            # select four distinct vertices
             a, b, c, d = pick_four_unique_nodes_quickly(n)
 
             #a, b, c, d = np.random.choice(n, 4)
@@ -1386,6 +1385,7 @@ def randmio_dir_signed(R, itr):
     #print(eff)
 
     return R, eff
+
 
 def randmio_und(R, itr):
     '''
@@ -1486,7 +1486,7 @@ def randmio_und_signed(R, itr):
     R = R.copy()
     n = len(R)
 
-    itr *= int(n * (n -1) / 2)
+    itr *= int(n * (n - 1) / 2)
 
     max_attempts = int(np.round(n / 2))
     eff = 0
@@ -1502,11 +1502,11 @@ def randmio_und_signed(R, itr):
             r0_ad = R[a, d]
             r0_cb = R[c, b]
 
-            #rewiring condition
-            if (    np.sign(r0_ab) == np.sign(r0_cd) and
-                    np.sign(r0_ad) == np.sign(r0_cb) and
-                    np.sign(r0_ab) != np.sign(r0_ad)):
-        
+            # rewiring condition
+            if (np.sign(r0_ab) == np.sign(r0_cd) and
+               np.sign(r0_ad) == np.sign(r0_cb) and
+               np.sign(r0_ab) != np.sign(r0_ad)):
+
                 R[a, d] = R[d, a] = r0_ab
                 R[a, b] = R[b, a] = r0_ad
 
@@ -1519,6 +1519,7 @@ def randmio_und_signed(R, itr):
             att += 1
 
     return R, eff
+
 
 def randomize_graph_partial_und(A, B, maxswap):
     '''

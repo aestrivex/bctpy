@@ -56,7 +56,7 @@ def gateway_test():
 
     print(np.sum(g_pos_bet), 43.4026)
     assert np.allclose(np.sum(g_pos_bet), 43.4026, atol=.001)
-    
+
 
 def test_zi():
     x = load_sample(thres=.4)

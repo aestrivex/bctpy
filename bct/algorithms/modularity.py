@@ -87,7 +87,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         initial community affiliation vector. default value=None
     B : str | NxN np.arraylike
         string describing objective function type, or provides a custom
-        NxN objective-function matrix. builtin values 
+        NxN objective-function matrix. builtin values
             'modularity' uses Q-metric as objective function
             'potts' uses Potts model Hamiltonian.
             'negative_sym' symmetric treatment of negative weights
@@ -158,8 +158,8 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             raise BCTParamError('objective function matrix does not match '
                                 'size of adjacency matrix')
         if not np.allclose(B, B.T):
-            print ('Warning: objective function matrix not symmetric, '
-                   'symmetrizing')
+            print('Warning: objective function matrix not symmetric, '
+                  'symmetrizing')
             B = (B + B.T) / 2
 
     Hnm = np.zeros((n, n))
@@ -342,7 +342,6 @@ def link_communities(W, type_clustering='single'):
 
         for j in range(len(U)):  # loop over communities
             ixes = C[i, :] == U[j]  # get link indices
-
             links = np.sort(Lw[ixes])
             #nodes = np.sort(Ln[ixes,:].flat)
 
@@ -400,6 +399,7 @@ def link_communities(W, type_clustering='single'):
         #ugl = np.array((u1,u2))
         ugl = np.sort((u1, u2), axis=1)
         ug_rows = ugl[np.argsort(ugl, axis=0)[:, 0]]
+
         # implementation of matlab unique(A, 'rows')
         unq_rows = np.vstack({tuple(row) for row in ug_rows})
         V = U[unq_rows]

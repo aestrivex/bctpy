@@ -24,7 +24,7 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
     thresh : float
         minimum t-value used as threshold
     k : int
-        number of permutations used to estimate the empirical null 
+        number of permutations used to estimate the empirical null
         distribution
     tail : {'left', 'right', 'both'}
         enables specification of particular alternative hypothesis
@@ -49,42 +49,42 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
         an adjacency matrix identifying the edges comprising each component.
         edges are assigned indexed values.
     null : Kx1 np.ndarray
-        A vector of K sampled from the null distribution of maximal component 
+        A vector of K sampled from the null distribution of maximal component
         size.
 
     Notes
     -----
-    ALGORITHM DESCRIPTION 
-    The NBS is a nonparametric statistical test used to isolate the 
-    components of an N x N undirected connectivity matrix that differ 
-    significantly between two distinct populations. Each element of the 
-    connectivity matrix stores a connectivity value and each member of 
-    the two populations possesses a distinct connectivity matrix. A 
-    component of a connectivity matrix is defined as a set of 
-    interconnected edges. 
+    ALGORITHM DESCRIPTION
+    The NBS is a nonparametric statistical test used to isolate the
+    components of an N x N undirected connectivity matrix that differ
+    significantly between two distinct populations. Each element of the
+    connectivity matrix stores a connectivity value and each member of
+    the two populations possesses a distinct connectivity matrix. A
+    component of a connectivity matrix is defined as a set of
+    interconnected edges.
 
-    The NBS is essentially a procedure to control the family-wise error 
-    rate, in the weak sense, when the null hypothesis is tested 
+    The NBS is essentially a procedure to control the family-wise error
+    rate, in the weak sense, when the null hypothesis is tested
     independently at each of the N(N-1)/2 edges comprising the undirected
-    connectivity matrix. The NBS can provide greater statistical power 
-    than conventional procedures for controlling the family-wise error 
+    connectivity matrix. The NBS can provide greater statistical power
+    than conventional procedures for controlling the family-wise error
     rate, such as the false discovery rate, if the set of edges at which
     the null hypothesis is rejected constitues a large component or
     components.
     The NBS comprises fours steps:
     1. Perform a two-sample T-test at each edge indepedently to test the
        hypothesis that the value of connectivity between the two
-       populations come from distributions with equal means. 
+       populations come from distributions with equal means.
     2. Threshold the T-statistic available at each edge to form a set of
-       suprathreshold edges. 
+       suprathreshold edges.
     3. Identify any components in the adjacency matrix defined by the set
-       of suprathreshold edges. These are referred to as observed 
-       components. Compute the size of each observed component 
-       identified; that is, the number of edges it comprises. 
+       of suprathreshold edges. These are referred to as observed
+       components. Compute the size of each observed component
+       identified; that is, the number of edges it comprises.
     4. Repeat K times steps 1-3, each time randomly permuting members of
-       the two populations and storing the size of the largest component 
+       the two populations and storing the size of the largest component
        identified for each permuation. This yields an empirical estimate
-       of the null distribution of maximal component size. A corrected 
+       of the null distribution of maximal component size. A corrected
        p-value for each observed component is then calculated using this
        null distribution.
 

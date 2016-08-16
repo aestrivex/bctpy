@@ -221,7 +221,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
     '''
     Returns the weighted clustering coefficient generalized or separated
     for positive and negative weights.
-  
+
     Three Algorithms are supported; herefore referred to as default, zhang,
     and constantini.
 
@@ -318,6 +318,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
         cyc2[np.where(cyc3 == 0)] = np.inf
         C = cyc3 / cyc2
         return C
+
 
 def consensus_und(D, tau, reps=1000):
     '''
@@ -455,7 +456,7 @@ def get_components(A, no_depend=False):
     n = len(A)
     np.fill_diagonal(A, 1)
 
-    edge_map = [{u,v} for u in range(n) for v in range(n) if A[u,v] == 1]
+    edge_map = [{u, v} for u in range(n) for v in range(n) if A[u, v] == 1]
     union_sets = []
     for item in edge_map:
         temp = []

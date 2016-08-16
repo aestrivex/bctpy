@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
+from bct.utils import BCTParamError
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 from .degree import strengths_und_sign
 

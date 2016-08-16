@@ -861,6 +861,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)            # positive adjmat
+    An = (W < 0)            # negative adjmat
 
     if np.size(np.where(Ap.flat)) < (n * (n - 1)):
         W_r = randmio_und_signed(W, bin_swaps)
@@ -981,7 +982,8 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     W = W.copy()
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
-    Ap = (W > 0)  # positive adjmat
+    Ap = (W > 0)            # positive adjmat
+    An = (W > 0)            # positive adjmat
 
     if np.size(np.where(Ap.flat)) < (n * (n - 1)):
         W_r = randmio_und_signed(W, bin_swaps)

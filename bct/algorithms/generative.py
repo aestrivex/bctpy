@@ -112,9 +112,8 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
     def s_min(K, sc):
         return np.where(K < sc, K + epsilon, sc + epsilon)
-    
+
     def s_max(K, sc):
-        #return np.max((K, sc.T), axis=0)
         return np.where(K > sc, K + epsilon, sc + epsilon)
 
     def s_prod(K, sc):
@@ -176,7 +175,6 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         Ff = Fd * Fk * np.logical_not(A)
         u, v = np.where(np.triu(np.ones((n, n)), 1))
 
-        #print(mseed, m)
         for i in range(mseed+1, m):
             C = np.append(0, np.cumsum(Ff[u, v]))
             r = np.sum(np.random.random()*C[-1] >= C)
@@ -198,13 +196,8 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             c[k <= 1] = 0
             bth[uu] = 1
             bth[vv] = 1
-    
-            k_result = x_fun(c, bth)
 
-            #print(np.shape(k_result))
-            #print(np.shape(K))
-            #print(K)
-            #print(np.shape(K[bth,:]))
+            k_result = x_fun(c, bth)
 
             K[bth, :] = k_result
             K[:, bth] = k_result.T
@@ -245,16 +238,8 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
         b = np.zeros((m,), dtype=int)
 
-#        print(mseed)
-#        print(np.shape(u),np.shape(v))
-#        print(np.shape(b))
-#        print(np.shape(A[u,v]))
-#        print(np.shape(np.where(A[u,v])), 'sqishy')
-#        print(np.shape(P), 'squnnaq')
+        b[:mseed] = np.squeeze(np.where(A[u, v]))
 
-        #b[:mseed] = np.where(A[np.ix_(u,v)]) 
-        b[:mseed] = np.squeeze(np.where(A[u,v]))
-        #print(mseed, m)
         for i in range(mseed, m):
             C = np.append(0, np.cumsum(P[u, v]))
             r = np.sum(np.random.random()*C[-1] >= C)
@@ -275,25 +260,6 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
             P[u[b[:i]], v[b[:i]]] = P[v[b[:i]], u[b[:i]]] = 0
             A[u[r], v[r]] = A[v[r], u[r]] = 1
-            #P[b[u[:i]], b[v[:i]]] = P[b[v[:i]], b[u[:i]]] = 0
-
-            #A[uu,vv] = A[vv,uu] = 1
-
-
-#        indx = v*n + u
-#        indx[b]
-#
-#        nH = np.zeros((n,n))
-#        nH.ravel()[indx[b]]=1
-#
-#        nG = np.zeros((n,n))
-#        nG[ u[b], v[b] ]=1
-#        nG = nG + nG.T
-#
-#        print(np.shape(np.where(A != nG)))
-#
-#        import pdb
-#        pdb.set_trace()
 
         return A
 
@@ -534,7 +500,6 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
     Energy is defined as the maximum difference across the four statistics.
     '''
     m = np.size(np.where(Atgt.flat))//2
-    n = len(Atgt)
     xk = np.sum(Atgt, axis=1)
     xc = clustering_coef_bu(Atgt)
     xb = betweenness_bin(Atgt)

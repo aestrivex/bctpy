@@ -519,7 +519,6 @@ def rich_club_wd(CIJ, klevel=None):
     Rw : Kx1 np.ndarray
         vector of rich-club coefficients for levels 1 to klevel
     '''
-    nr_nodes = len(CIJ)
     # degree of each node is defined here as in+out
     deg = np.sum((CIJ != 0), axis=0) + np.sum((CIJ.T != 0), axis=0)
 
@@ -566,7 +565,6 @@ def rich_club_wu(CIJ, klevel=None):
     Rw : Kx1 np.ndarray
         vector of rich-club coefficients for levels 1 to klevel
     '''
-    nr_nodes = len(CIJ)
     deg = np.sum((CIJ != 0), axis=0)
 
     if klevel is None:

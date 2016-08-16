@@ -30,7 +30,6 @@ def test_threshold_absolute():
 
 def test_strengths_und():
     x = load_sample()
-    s = bct.strengths_und(x)
     assert np.allclose(np.sum(x), 38967.38702018)
 
 

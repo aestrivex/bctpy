@@ -333,27 +333,19 @@ def link_communities(W, type_clustering='single'):
     U = np.arange(m)  # initial community assignments
     C[0, :] = np.arange(m)
 
-    import time
-
     for i in range(m - 1):
         print('hierarchy %i' % i)
 
-        #time1 = time.time()
-
-        for j in range(len(U)):  # loop over communities
+        for j in range(len(U)):     # loop over communities
             ixes = C[i, :] == U[j]  # get link indices
             links = np.sort(Lw[ixes])
-            #nodes = np.sort(Ln[ixes,:].flat)
 
             nodes = np.sort(np.reshape(
                 Ln[ixes, :], 2 * np.size(np.where(ixes))))
 
             # get unique nodes
             nodulo = np.append(nodes[0], (nodes[1:])[nodes[1:] != nodes[:-1]])
-            #nodulo = ((nodes[1:])[nodes[1:] != nodes[:-1]])
-
             nc = len(nodulo)
-            #nc = len(nodulo)+1
             mc = np.sum(links)
             min_mc = np.sum(links[:nc - 1])  # minimal weight
             dc = (mc - min_mc) / (nc * (nc - 1) /
@@ -367,14 +359,7 @@ def link_communities(W, type_clustering='single'):
             Mc[i, j] = mc
             Dc[i, j] = dc if not np.isnan(dc) else 0
 
-        #time2 = time.time()
-        #print('compute densities time', time2-time1)
-
-        C[i + 1, :] = C[i, :]  # copy current partition
-
-        #if i in (2693,):
-        #    import pdb
-        #    pdb.set_trace()
+        C[i + 1, :] = C[i, :]   # copy current partition
 
         # Profiling and debugging show that this line, finding
         # the max values in this matrix, take about 3x longer than the
@@ -392,20 +377,13 @@ def link_communities(W, type_clustering='single'):
             u1 = uc
             u2 = ud
 
-        #time25 = time.time()
-        #print('copy and max time', time25-time2)
-
         # get unique links (implementation of matlab sortrows)
-        #ugl = np.array((u1,u2))
         ugl = np.sort((u1, u2), axis=1)
         ug_rows = ugl[np.argsort(ugl, axis=0)[:, 0]]
 
         # implementation of matlab unique(A, 'rows')
         unq_rows = np.vstack({tuple(row) for row in ug_rows})
         V = U[unq_rows]
-
-        #time3 = time.time()
-        #print('sortrows time', time3-time25)
 
         for j in range(len(V)):
             if type_clustering == 'single':
@@ -427,23 +405,11 @@ def link_communities(W, type_clustering='single'):
             C[i + 1, C[i + 1, :] == V[j, 1]] = V[j, 0]
             V[V == V[j, 1]] = V[j, 0]
 
-        #time4 = time.time()
-        #print('get linkages time', time4-time3)
-
         U = np.unique(C[i + 1, :])
         if len(U) == 1:
             break
+    # ENDT HAIERARKIKL CLUSTRRINNG
 
-        #time5 = time.time()
-        #print('get unique communities time', time5-time4)
-
-    #ENDT HAIERARKIKL CLUSTRRINNG
-    #ENDT HAIERARKIKL CLUSTRRINNG
-    #ENDT HAIERARKIKL CLUSTRRINNG
-    #ENDT HAIERARKIKL CLUSTRRINNG
-    #ENDT HAIERARKIKL CLUSTRRINNG
-
-    #Dc[ np.where(np.isnan(Dc)) ]=0
     i = np.argmax(np.sum(Dc * Mc, axis=1))
 
     U = np.unique(C[i, :])
@@ -526,10 +492,7 @@ def modularity_dir(A, gamma=1, kci=None):
                     (np.dot(modmat, mod_asgn_iter))
                 qmax = np.max(q_iter * it)
                 imax = np.argmax(q_iter * it)
-                #imax, = np.where(q_iter == qmax)
-                #if len(imax) > 0:
-                #    imax = imax[0]
-                #    print(imax)
+
                 # does switching increase modularity?
                 mod_asgn_iter[imax] *= -1
                 it[imax] = np.ma.masked
@@ -696,7 +659,6 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     '''
     np.random.seed(seed)
 
-    #import time
     n = len(W)  # number of nodes
     if ci is None:
         ci = np.arange(n) + 1
@@ -1066,10 +1028,6 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
     q = []
     q.append(-1)  # hierarchical modularity values
     n0 = n
-
-    #knm = np.zeros((n,n))
-    # for j in np.xrange(n0+1):
-    #    knm[:,j] = np.sum(w[;,
 
     while True:
         if h > 300:
@@ -1591,8 +1549,6 @@ def modularity_und_sign(W, ci, qtype='sta'):
 
     Kn0 = np.sum(Knm0, axis=1)  # positive node degree
     Kn1 = np.sum(Knm1, axis=1)  # negative node degree
-    Km0 = np.sum(Knm0, axis=0)  # positive module degree
-    Km1 = np.sum(Knm1, axis=0)  # negaitve module degree
 
     if qtype == 'smp':
         d0 = 1 / s0

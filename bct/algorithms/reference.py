@@ -1347,17 +1347,11 @@ def randmio_dir_signed(R, itr):
     # actual number of successful rewirings
     eff = 0
 
-    #print(itr)
-
     for it in range(int(itr)):
-        #print(it)
         att = 0
         while att <= max_attempts:
             # select four distinct vertices
             a, b, c, d = pick_four_unique_nodes_quickly(n)
-
-            #a, b, c, d = np.random.choice(n, 4)
-            #a, b, c, d = np.random.permutation(4)
 
             r0_ab = R[a, b]
             r0_cd = R[c, d]
@@ -1381,8 +1375,6 @@ def randmio_dir_signed(R, itr):
                 break
 
             att += 1
-
-    #print(eff)
 
     return R, eff
 

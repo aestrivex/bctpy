@@ -37,11 +37,9 @@ def test_transitivity_signed():
 
 
 def test_component():
-    from scipy import stats
     x = load_sparse_sample()
     c1, cs1 = bct.get_components(x)
 
-    
     print(np.max(c1), 19)
     assert np.max(c1) == 19
 

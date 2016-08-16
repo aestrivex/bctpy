@@ -368,12 +368,6 @@ def efficiency_bin(G, local=False):
         E = np.zeros((n,))  # local efficiency
 
         for u in range(n):
-            # V,=np.where(G[u,:])			#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=distance_inv(G[V].T[V])
-            #	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
-
             # find pairs of neighbors
             V, = np.where(np.logical_or(G[u, :], G[u, :].T))
 
@@ -474,12 +468,6 @@ def efficiency_wei(Gw, local=False):
     if local:
         E = np.zeros((n,))  # local efficiency
         for u in range(n):
-            # V,=np.where(Gw[u,:])		#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
-            #	E[u]=np.sum(e)/(k*k-k)
-
             # find pairs of neighbors
             V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
 

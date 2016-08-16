@@ -386,11 +386,7 @@ def consensus_und(D, tau, reps=1000):
             dup = np.where(np.sum(np.abs(cis.T - cis[:, 0]), axis=1) == 0)
             cis = np.delete(cis, dup, axis=1)
             c = np.delete(c, dup)
-            # count+=1
-            # print count,c,dup
-            # if count>10:
-            #	class QualitativeError(): pass
-            #	raise QualitativeError()
+
         return np.transpose(ciu)
 
     n = len(D)

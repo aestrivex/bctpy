@@ -110,7 +110,6 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
 
     def ttest_paired_stat_only(A, B, tail):
         n = len(A - B)
-        df = n - 1
         sample_ss = np.sum((A - B)**2) - np.sum(A - B)**2 / n
         unbiased_std = np.sqrt(sample_ss / (n - 1))
         z = np.mean(A - B) / unbiased_std

@@ -57,21 +57,8 @@ def adjacency_plot_und(A, coor, tube=False):
     from mayavi import mlab
 
     n = len(A)
-    nr_edges = (n * n - 1) // 2
-
-    #starts = np.zeros((nr_edges,3))
-    #vecs = np.zeros((nr_edges,3))
-    #adjdat = np.zeros((nr_edges,))
 
     ixes, = np.where(np.triu(np.ones((n, n)), 1).flat)
-
-    # i=0
-    # for r2 in xrange(n):
-    #	for r1 in xrange(r2):
-    #		starts[i,:] = coor[r1,:]
-    #		vecs[i,:] = coor[r2,:] - coor[r1,:]
-    #		adjdat[i,:]
-    #		i+=1
 
     adjdat = A.flat[ixes]
 

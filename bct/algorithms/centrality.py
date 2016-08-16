@@ -347,7 +347,6 @@ def eigenvector_centrality_und(CIJ):
     '''
     from scipy import linalg
 
-    n = len(CIJ)
     vals, vecs = linalg.eig(CIJ)
     i = np.argmax(vals)
     return np.abs(vecs[:, i])
@@ -514,11 +513,6 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
 
             # calculate intramodular weights
             centm[ci == i] = np.sum(cent[ci == i])
-
-        #print(Gc)
-        #print(centm)
-        #print(ksm)
-        #print(ks)
 
         centm = centm / max(centm)
         # calculate total weights

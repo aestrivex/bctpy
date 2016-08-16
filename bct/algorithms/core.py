@@ -161,7 +161,7 @@ def core_periphery_dir(W, gamma=1, C0=None):
     n = len(W)
     np.fill_diagonal(W, 0)
 
-    if C0 == None:
+    if C0 is None:
         C = np.random.randint(2, size=(n,))
     else:
         C = C0.copy()
@@ -485,7 +485,7 @@ def rich_club_bu(CIJ, klevel=None):
     '''
     deg = degrees_und(CIJ)  # compute degree of each node
 
-    if klevel == None:
+    if klevel is None:
         klevel = int(np.max(deg))
 
     R = np.zeros((klevel,))

@@ -104,3 +104,42 @@ def test_transitivity_bd():
 def test_agreement_weighted():
     # this function is very hard to use or interpret results from
     pass
+
+def test_agreement():
+    # Case 1: nodes > partitions
+    input_1 = np.array([[1, 1, 1],
+                        [1, 2, 2]]).T
+    correct_1 = np.array([[0, 1, 1],
+                          [1, 0, 2],
+                          [1, 2, 0]])
+
+    # Case 2: partitions > nodes
+    input_2 = np.array([[1, 1, 1],
+                        [1, 2, 2],
+                        [2, 2, 1],
+                        [1, 2, 2]]).T
+    correct_2 = np.array([[0, 2, 1],
+                          [2, 0, 3],
+                          [1, 3, 0]])
+
+    print('correct:')
+    print(correct_1)
+    output_1 = bct.agreement(input_1)
+    print('outputs:')
+    print(output_1)
+    assert (output_1 == correct_1).all()
+    for buffsz in range(1, 3):
+        output_1_buffered = bct.agreement(input_1, buffsz=buffsz)
+        print(output_1_buffered)
+        assert (output_1_buffered == correct_1).all()
+
+    print('correct:')
+    print(correct_2)
+    output_2 = bct.agreement(input_2)
+    print('outputs:')
+    print(output_2)
+    assert (output_2 == correct_2).all()
+    for buffsz in range(1, 5):
+        output_2_buffered = bct.agreement(input_2, buffsz=buffsz)
+        print(output_2_buffered)
+        assert (output_2_buffered == correct_2).all()

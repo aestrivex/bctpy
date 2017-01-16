@@ -5,7 +5,7 @@ from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
 from .distance import breadthdist
 
 
-def agreement(ci, buffsz=None):
+def agreement(ci, buffsz=1000):
     '''
     Takes as input a set of vertex partitions CI of
     dimensions [vertex x partition]. Each column in CI contains the
@@ -22,7 +22,7 @@ def agreement(ci, buffsz=None):
 
     Parameters
     ----------
-    ci : MxN np.ndarray
+    ci : NxM np.ndarray
         set of M (possibly degenerate) partitions of N nodes
     buffsz : int | None
         sets buffer size. If not specified, defaults to 1000
@@ -33,22 +33,19 @@ def agreement(ci, buffsz=None):
         agreement matrix
     '''
     ci = np.array(ci)
-    m, n = ci.shape
+    n_nodes, n_partitions = ci.shape
 
-    if buffsz is None:
-        buffsz = 1000
-
-    if m <= buffsz:
+    if n_partitions <= buffsz: # Case 1: Use all partitions at once
         ind = dummyvar(ci)
         D = np.dot(ind, ind.T)
-    else:
-        a = np.arange(0, m, buffsz)
-        b = np.arange(buffsz, m, buffsz)
+    else: # Case 2: Add together results from subsets of partitions
+        a = np.arange(0, n_partitions, buffsz)
+        b = np.arange(buffsz, n_partitions, buffsz)
         if len(a) != len(b):
-            b = np.append(b, m)
-        D = np.zeros((n,))
+            b = np.append(b, n_partitions)
+        D = np.zeros((n_nodes, n_nodes))
         for i, j in zip(a, b):
-            y = ci[:, i:j + 1]
+            y = ci[:, i:j]
             ind = dummyvar(y)
             D += np.dot(ind, ind.T)
 

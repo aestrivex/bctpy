@@ -155,7 +155,7 @@ def charpath(D, include_diagonal=False, include_infinite=True):
     efficiency = np.mean(1 / Dv)
 
     # eccentricity for each vertex (ignore inf)
-    ecc = np.array(np.ma.masked_equal(D, np.nan).max(axis=1))
+    ecc = np.array(np.ma.masked_where(np.isnan(D), D).max(axis=1))
 
     # radius of graph
     radius = np.min(ecc)  # but what about zeros?

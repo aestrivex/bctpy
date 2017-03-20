@@ -974,9 +974,10 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
+    An = (W < 0)  # negative adjmat
 
     if np.size(np.where(Ap.flat)) < (n * (n - 1)):
-        W_r = randmio_und_signed(W, bin_swaps)
+        W_r, eff = randmio_und_signed(W, bin_swaps)
         Ap_r = W_r > 0
         An_r = W_r < 0
     else:

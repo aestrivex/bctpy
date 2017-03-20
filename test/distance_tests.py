@@ -44,3 +44,14 @@ def test_distance_wei():
 
     assert np.allclose(np.sum(d), 155650.1, atol=.01)
     assert np.sum(e) == 30570
+
+def test_charpath():
+    x = load_sample(thres=.02)
+    d, e = bct.distance_wei(x)
+    l, eff,ecc,radius,diameter = bct.charpath(d)
+
+    assert np.any(np.isinf(d))
+    assert not np.isnan(radius)
+    assert not np.isnan(diameter)
+
+

@@ -218,7 +218,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
     '''
     Returns the weighted clustering coefficient generalized or separated
     for positive and negative weights.
-  
+
     Three Algorithms are supported; herefore referred to as default, zhang,
     and constantini.
 
@@ -316,6 +316,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
         C = cyc3 / cyc2
         return C
 
+
 def consensus_und(D, tau, reps=1000):
     '''
     This algorithm seeks a consensus partition of the
@@ -382,11 +383,7 @@ def consensus_und(D, tau, reps=1000):
             dup = np.where(np.sum(np.abs(cis.T - cis[:, 0]), axis=1) == 0)
             cis = np.delete(cis, dup, axis=1)
             c = np.delete(c, dup)
-            # count+=1
-            # print count,c,dup
-            # if count>10:
-            #	class QualitativeError(): pass
-            #	raise QualitativeError()
+
         return np.transpose(ciu)
 
     n = len(D)
@@ -445,14 +442,15 @@ def get_components(A, no_depend=False):
     '''
 
     if not np.all(A == A.T):  # ensure matrix is undirected
-        raise BCTParamError('get_components can only be computed for undirected'
-                            ' matrices.  If your matrix is noisy, correct it with np.around')
-    
+        raise BCTParamError('get_components can only be computed for '
+                            'undirected matrices.  If your matrix is '
+                            'noisy, correct it with np.around')
+
     A = binarize(A, copy=True)
     n = len(A)
     np.fill_diagonal(A, 1)
 
-    edge_map = [{u,v} for u in range(n) for v in range(n) if A[u,v] == 1]
+    edge_map = [{u, v} for u in range(n) for v in range(n) if A[u, v] == 1]
     union_sets = []
     for item in edge_map:
         temp = []
@@ -465,8 +463,8 @@ def get_components(A, no_depend=False):
         temp.append(item)
         union_sets = temp
 
-    comps = np.array([i+1 for v in range(n) for i in 
-        range(len(union_sets)) if v in union_sets[i]])
+    comps = np.array([i+1 for v in range(n) for i in
+                      range(len(union_sets)) if v in union_sets[i]])
     comp_sizes = np.array([len(s) for s in union_sets])
 
     return comps, comp_sizes
@@ -514,8 +512,9 @@ def get_components_old(A, no_depend=False):
     # nonsquare matrices cannot be symmetric; no need to check
 
     if not np.all(A == A.T):  # ensure matrix is undirected
-        raise BCTParamError('get_components can only be computed for undirected'
-                            ' matrices.  If your matrix is noisy, correct it with np.around')
+        raise BCTParamError('get_components can only be computed for '
+                            'undirected matrices.  If your matrix is '
+                            'noisy, correct it with np.around')
 
     A = binarize(A, copy=True)
     n = len(A)
@@ -586,9 +585,9 @@ def transitivity_bd(A):
                         = 2 * (K(K-1)/2 - diag(A^2))
                         = K(K-1) - 2(diag(A^2))
     '''
-    S = A + A.T  # symmetrized input graph
-    K = np.sum(S, axis=1)  # total degree (in+out)
-    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
+    S = A + A.T                                     # symmetrized input graph
+    K = np.sum(S, axis=1)                           # total degree (in+out)
+    cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2     # number of 3-cycles
     CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))  # number of all possible 3-cycles
     return np.sum(cyc3) / np.sum(CYC3)
 

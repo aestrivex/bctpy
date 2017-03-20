@@ -724,10 +724,9 @@ def motif4struct_bin(A):
                     np.append(np.zeros((vz,)), As[u, vz + 1:n + 1]), V3)
                 for v3 in np.where(V3)[0]:
 
-                    a = np.array((A[v1, u], A[v2, u], A[v3, u], A[u, v1], A[v2, v1],
-                                  A[v3, v1], A[u, v2], A[v1, v2], A[
-                                      v3, v2], A[u, v3], A[v1, v3],
-                                  A[v2, v3]))
+                    a = np.array((A[v1, u], A[v2, u], A[v3, u], A[u, v1],
+                                  A[v2, v1], A[v3, v1], A[u, v2], A[v1, v2],
+                                  A[v3, v2], A[u, v3], A[v1, v3], A[v2, v3]))
 
                     s = np.uint64(
                         np.sum(np.power(10, np.arange(11, -1, -1)) * a))
@@ -804,19 +803,17 @@ def motif4struct_wei(W):
                 V3 = np.logical_or(
                     np.append(np.zeros((vz,)), As[u, vz + 1:n + 1]), V3)
                 for v3 in np.where(V3)[0]:
-                    a = np.array((A[v1, u], A[v2, u], A[v3, u], A[u, v1], A[v2, v1],
-                                  A[v3, v1], A[u, v2], A[v1, v2], A[
-                                      v3, v2], A[u, v3], A[v1, v3],
-                                  A[v2, v3]))
+                    a = np.array((A[v1, u], A[v2, u], A[v3, u], A[u, v1],
+                                  A[v2, v1], A[v3, v1], A[u, v2], A[v1, v2],
+                                  A[v3, v2], A[u, v3], A[v1, v3], A[v2, v3]))
                     s = np.uint64(
                         np.sum(np.power(10, np.arange(11, -1, -1)) * a))
                     # print np.shape(s),np.shape(m4n)
                     ix = np.squeeze(s == m4n)
 
-                    w = np.array((W[v1, u], W[v2, u], W[v3, u], W[u, v1], W[v2, v1],
-                                  W[v3, v1], W[u, v2], W[v1, v2], W[
-                                      v3, v2], W[u, v3], W[v1, v3],
-                                  W[v2, v3]))
+                    w = np.array((W[v1, u], W[v2, u], W[v3, u], W[u, v1],
+                                  W[v2, v1], W[v3, v1], W[u, v2], W[v1, v2],
+                                  W[v3, v2], W[u, v3], W[v1, v3], W[v2, v3]))
 
                     M = w * m4[ix, :]
                     id = id4[ix] - 1

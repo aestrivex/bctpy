@@ -368,16 +368,12 @@ def efficiency_bin(G, local=False):
         E = np.zeros((n,))  # local efficiency
 
         for u in range(n):
-            # V,=np.where(G[u,:])			#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=distance_inv(G[V].T[V])
-            #	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
-
             # find pairs of neighbors
             V, = np.where(np.logical_or(G[u, :], G[u, :].T))
+
             # inverse distance matrix
             e = distance_inv(G[np.ix_(V, V)])
+
             # symmetrized inverse distance matrix
             se = e + e.T
 
@@ -472,18 +468,15 @@ def efficiency_wei(Gw, local=False):
     if local:
         E = np.zeros((n,))  # local efficiency
         for u in range(n):
-            # V,=np.where(Gw[u,:])		#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
-            #	E[u]=np.sum(e)/(k*k-k)
-
             # find pairs of neighbors
             V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
+
             # symmetrized vector of weights
             sw = cuberoot(Gw[u, V]) + cuberoot(Gw[V, u].T)
+
             # inverse distance matrix
             e = distance_inv_wei(Gl[np.ix_(V, V)])
+
             # symmetrized inverse distance matrix
             se = cuberoot(e) + cuberoot(e.T)
 
@@ -581,8 +574,8 @@ def findpaths(CIJ, qmax, sources, savepths=False):
     # big loop for all other pathlengths q
     for q in range(2, qmax + 1):
         # to keep track of time...
-        print((
-            'current pathlength (q=i, number of paths so far (up to q-1)=i' % (q, np.sum(Pq))))
+        print(('current pathlength (q=i, number of paths so far (up to q-1)=i'
+               % (q, np.sum(Pq))))
 
         # old paths are now in 'pths'
         # new paths are about to be collected in 'npths'
@@ -705,8 +698,8 @@ def reachdist(CIJ, ensure_binary=True):
     CIJ : NxN np.ndarray
         binary directed/undirected connection matrix
     ensure_binary : bool
-        Binarizes input. Defaults to true. No user who is not testing 
-        something will ever want to not use this, use distance_wei instead for 
+        Binarizes input. Defaults to true. No user who is not testing
+        something will ever want to not use this, use distance_wei instead for
         unweighted matrices.
 
     Returns
@@ -753,7 +746,7 @@ def reachdist(CIJ, ensure_binary=True):
 
     R, D, powr = reachdist2(CIJ, CIJpwr, R, D, n, powr, col, row)
 
-    #'invert' CIJdist to get distances
+    # 'invert' CIJdist to get distances
     D = powr - D + 1
 
     # put inf if no path found

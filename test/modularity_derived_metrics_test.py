@@ -1,4 +1,4 @@
-from load_samples import *
+from load_samples import mat_path, load_sample
 import numpy as np
 import bct
 
@@ -56,7 +56,7 @@ def gateway_test():
 
     print(np.sum(g_pos_bet), 43.4026)
     assert np.allclose(np.sum(g_pos_bet), 43.4026, atol=.001)
-    
+
 
 def test_zi():
     x = load_sample(thres=.4)

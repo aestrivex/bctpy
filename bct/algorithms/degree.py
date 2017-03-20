@@ -175,11 +175,10 @@ def strengths_und_sign(W):
         total negative weight
     '''
     W = W.copy()
-    n = len(W)
-    np.fill_diagonal(W, 0)  # clear diagonal
+    np.fill_diagonal(W, 0)              # clear diagonal
     Spos = np.sum(W * (W > 0), axis=0)  # positive strengths
-    Sneg = np.sum(W * (W < 0), axis=0) # negative strengths
+    Sneg = np.sum(W * (W < 0), axis=0)  # negative strengths
 
-    vpos = np.sum(W[W > 0])  # positive weight
-    vneg = np.sum(W[W < 0])  # negative weight
+    vpos = np.sum(W[W > 0])             # positive weight
+    vneg = np.sum(W[W < 0])             # negative weight
     return Spos, Sneg, vpos, vneg

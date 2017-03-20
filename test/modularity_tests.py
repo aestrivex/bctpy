@@ -1,4 +1,5 @@
-from load_samples import *
+from load_samples import load_sample, load_signed_sample, \
+    load_directed_low_modularity_sample, load_directed_sample
 import numpy as np
 import bct
 
@@ -80,7 +81,7 @@ def test_modularity_finetune_und():
 
     # also the matlab and python versions of modularity_und return slightly
     # different modular structure, but the instability is present despite this
-    #(i.e. it is unstable both when the modular structure is identical and not)
+    # (ie. it is unstable both when the modular structure is identical and not)
 
 
 def test_modularity_louvain_und_sign_seed():
@@ -152,12 +153,12 @@ def test_modularity_louvain_dir_low_modularity():
     assert np.allclose(q, .06934894)
 
 # def test_modularity_finetune_dir_low_modularity():
-#	x = load_directed_low_modularity_sample(thres=.67)
-#	seed = 39602351
-#	ci,oq = bct.modularity_louvain_dir(x, seed=seed)
-#	_,q = bct.modularity_finetune_dir(x, ci=ci, seed=seed)
-#	print q,oq
-#	assert q >= oq
+#    x = load_directed_low_modularity_sample(thres=.67)
+#    seed = 39602351
+#    ci,oq = bct.modularity_louvain_dir(x, seed=seed)
+#    _,q = bct.modularity_finetune_dir(x, ci=ci, seed=seed)
+#    print q,oq
+#    assert q >= oq
     # this does not pass. the matlab code appears to have no idea what to do
     # with
     # the low modularity directed modules. this may be someone else's fault.
@@ -177,13 +178,13 @@ def test_modularity_louvain_dir():
     assert np.allclose(q, .32697921)
 
 # def test_modularity_finetune_dir():
-#	x = load_directed_sample()
-#	seed = 26080
-#	ci,oq = bct.modularity_louvain_dir(x, seed=seed)
-#	for i in xrange(100):
-#		_,q = bct.modularity_finetune_dir(x, ci=ci)
-#		print q,oq
-#		assert q >= oq
+#    x = load_directed_sample()
+#    seed = 26080
+#    ci,oq = bct.modularity_louvain_dir(x, seed=seed)
+#    for i in xrange(100):
+#        _,q = bct.modularity_finetune_dir(x, ci=ci)
+#        print q,oq
+#        assert q >= oq
     # this does not pass with similar behavior to low modularity.
     # the code occasionally returns lower modularity (but very very similar,
     # order .001) partitions despite returning

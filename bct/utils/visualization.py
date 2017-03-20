@@ -57,21 +57,8 @@ def adjacency_plot_und(A, coor, tube=False):
     from mayavi import mlab
 
     n = len(A)
-    nr_edges = (n * n - 1) // 2
-
-    #starts = np.zeros((nr_edges,3))
-    #vecs = np.zeros((nr_edges,3))
-    #adjdat = np.zeros((nr_edges,))
 
     ixes, = np.where(np.triu(np.ones((n, n)), 1).flat)
-
-    # i=0
-    # for r2 in xrange(n):
-    #	for r1 in xrange(r2):
-    #		starts[i,:] = coor[r1,:]
-    #		vecs[i,:] = coor[r2,:] - coor[r1,:]
-    #		adjdat[i,:]
-    #		i+=1
 
     adjdat = A.flat[ixes]
 
@@ -200,7 +187,8 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
     elif dfun == 'cosang':
         maxcost = np.pi / 2
         lowcost = np.arccos(np.dot(m1.flat, m2.flat) /
-                            np.sqrt(np.dot(m1.flat, m1.flat) * np.dot(m2.flat, m2.flat))) / maxcost
+                            np.sqrt(np.dot(m1.flat, m1.flat) *
+                                    np.dot(m2.flat, m2.flat))) / maxcost
     else:
         raise BCTParamError('dfun must be absdiff or sqrdiff or cosang')
 
@@ -299,7 +287,8 @@ def backbone_wu(CIJ, avgdeg):
     n = len(CIJ)
     if not np.all(CIJ == CIJ.T):
         raise BCTParamError('backbone_wu can only be computed for undirected '
-                            'matrices.  If your matrix is has noise, correct it with np.around')
+                            'matrices.  If your matrix is has noise, correct '
+                            'it with np.around')
     CIJtree = np.zeros((n, n))
 
     # find strongest edge (if multiple edges are tied, use only first one)
@@ -716,8 +705,8 @@ def reorder_mod(A, ci):
         # reverse mod_imp to sort by the first column first and so on
         # print ksmi
         # for i,sin in enumerate(signs):
-        #	if sin==-1:
-        #		ksmi[i,:]=ksmi[i,:][::-1]
+        #    if sin==-1:
+        #        ksmi[i,:]=ksmi[i,:][::-1]
         # print ksmi
         # print np.shape(ksmi)
 

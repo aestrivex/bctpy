@@ -1,4 +1,6 @@
-from load_samples import *
+from load_samples import load_sample, load_signed_sample, \
+    load_sparse_sample, load_directed_low_modularity_sample, \
+    load_binary_directed_low_modularity_sample
 import numpy as np
 import bct
 
@@ -37,11 +39,9 @@ def test_transitivity_signed():
 
 
 def test_component():
-    from scipy import stats
     x = load_sparse_sample()
     c1, cs1 = bct.get_components(x)
 
-    
     print(np.max(c1), 19)
     assert np.max(c1) == 19
 

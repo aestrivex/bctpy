@@ -173,12 +173,13 @@ def diversity_coef_sign(W, ci):
         pnm[np.logical_not(pnm)] = 1
         return -np.sum(pnm * np.log(pnm), axis=1) / np.log(m)
 
-    #explicitly ignore compiler warning for division by zero
+    # explicitly ignore compiler warning for division by zero
     with np.errstate(invalid='ignore'):
         Hpos = entropy(W * (W > 0))
         Hneg = entropy(-W * (W < 0))
 
     return Hpos, Hneg
+
 
 def edge_betweenness_bin(G):
     '''
@@ -346,7 +347,6 @@ def eigenvector_centrality_und(CIJ):
     '''
     from scipy import linalg
 
-    n = len(CIJ)
     vals, vecs = linalg.eig(CIJ)
     i = np.argmax(vals)
     return np.abs(vecs[:, i])
@@ -486,16 +486,11 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
     np.fill_diagonal(W, 0)
 
     def gcoef(W):
-        #strength
-        s = np.sum(W, axis=1)   
-        #neighbor community affiliation
-        Gc = np.inner((W != 0), np.diag(ci))
-        #community specific neighbors
-        Sc2 = np.zeros((n,))
-        #extra modular weighting
-        ksm = np.zeros((n,))
-        #intra modular wieghting
-        centm = np.zeros((n,))
+        s = np.sum(W, axis=1)                 # strength
+        Gc = np.inner((W != 0), np.diag(ci))  # neighbor community affiliation
+        Sc2 = np.zeros((n,))                  # community specific neighbors
+        ksm = np.zeros((n,))                  # extra modular weighting
+        centm = np.zeros((n,))                # intra modular wieghting
 
         if centrality_type == 'degree':
             cent = s.copy()
@@ -508,19 +503,14 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
             print(np.sum(ks))
             Sc2 += ks ** 2
             for j in range(1, nr_modules+1):
-                #calculate extramodular weights
+                # calculate extramodular weights
                 ksm[ci == j] += ks[ci == j] / np.sum(ks[ci == j])
 
-            #calculate intramodular weights
+            # calculate intramodular weights
             centm[ci == i] = np.sum(cent[ci == i])
 
-        #print(Gc)
-        #print(centm)
-        #print(ksm)
-        #print(ks)
-
         centm = centm / max(centm)
-        #calculate total weights
+        # calculate total weights
         gs = (1 - ksm * centm) ** 2
 
         Gw = 1 - Sc2 * gs / s ** 2
@@ -532,7 +522,7 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
     G_pos = gcoef(W * (W > 0))
     G_neg = gcoef(-W * (W < 0))
     return G_pos, G_neg
-        
+
 
 def kcoreness_centrality_bd(CIJ):
     '''
@@ -780,12 +770,13 @@ def participation_coef_sign(W, ci):
         P[np.where(np.logical_not(P))] = 0  # p_ind=0 if no (out)neighbors
         return P
 
-    #explicitly ignore compiler warning for division by zero
+    # explicitly ignore compiler warning for division by zero
     with np.errstate(invalid='ignore'):
         Ppos = pcoef(W * (W > 0))
         Pneg = pcoef(-W * (W < 0))
 
     return Ppos, Pneg
+
 
 def subgraph_centrality(CIJ):
     '''

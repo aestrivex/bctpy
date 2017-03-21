@@ -410,6 +410,101 @@ def consensus_und(D, tau, reps=1000):
 
     return np.squeeze(ciu + 1)
 
+def get_components_fast(A):
+    '''
+    Returns the components of an undirected graph specified by the binary and
+    undirected adjacency matrix adj. Components and their constitutent nodes
+    are assigned the same index and stored in the vector, comps. The vector,
+    comp_sizes, contains the number of nodes beloning to each component.
+
+    Parameters
+    ----------
+    adj : NxN np.ndarray
+        binary undirected adjacency matrix
+    no_depend : bool
+        If true, doesn't import networkx to do the calculation. Default value
+        is false.
+
+    Returns
+    -------
+    comps : Nx1 np.ndarray
+        vector of component assignments for each node
+    comp_sizes : Mx1 np.ndarray
+        vector of component sizes
+
+    Notes
+    -----
+    Note: disconnected nodes will appear as components with a component
+    size of 1
+
+    Note: The identity of each component (i.e. its numerical value in the
+    result) is not guaranteed to be identical the value returned in BCT,
+    although the component topology is.
+
+    Note: networkx is used to do the computation efficiently. If networkx is
+    not available a breadth-first search that does not depend on networkx is
+    used instead, but this is less efficient. The corresponding BCT function
+    does the computation by computing the Dulmage-Mendelsohn decomposition. I
+    don't know what a Dulmage-Mendelsohn decomposition is and there doesn't
+    appear to be a python equivalent. If you think of a way to implement this
+    better, let me know.
+
+    From Nick Cullen:
+        This is the union-find algorithm for finding connected components. It could 
+        definitely be sped up with a few tricks, but...
+
+        For sparse graph, this is closer in speed to networkx algo. than the other:
+
+                x = load_sparse_sample()
+
+                %timeit a1,a2 = get_components(x,no_depend=True)
+                10 loops, best of 3: 42 ms per loop
+
+                %timeit a1,a2 = get_components(x,no_depend=False)
+                100 loops, best of 3: 2 ms per loop
+
+                %timeit b1,b2 = get_components_fast(x)
+                100 loops, best of 3: 11 ms per loop
+
+        For dense graphs, this is better than/close to networkx
+
+                x = load_sample()
+
+                %timeit a1,a2 = get_components(x,no_depend=False)
+                10 loops, best of 3: 59 ms per loop
+
+                %timeit a1,a2 = get_components(x,no_depend=True)
+                1 loops, best of 3: 1.76 s per loop
+
+                %timeit b1,b2 = get_components_fast(x)
+                10 loops, best of 3: 52.8 ms per loop
+    '''
+
+    if not np.all(A == A.T):  # ensure matrix is undirected
+        raise BCTParamError('get_components can only be computed for undirected'
+                            ' matrices.  If your matrix is noisy, correct it with np.around')
+
+    A = binarize(A, copy=True)
+    n = len(A)
+    np.fill_diagonal(A, 1)
+
+    edge_map = [{u,v} for u in range(n) for v in range(n) if A[u][v]==1]
+    union_sets = []
+    for item in edge_map:
+        temp = []
+        for s in union_sets:
+            if not s.isdisjoint(item):
+                item = s.union(item)
+            else:
+                temp.append(s)
+        temp.append(item)
+        union_sets = temp
+
+    comps = np.array([i+1 for v in range(n) for i in range(len(union_sets)) if v in union_sets[i]])
+    comp_sizes = np.array([len(s) for s in union_sets])
+
+    return comps, comp_sizes
+    
 
 def get_components(A, no_depend=False):
     '''

@@ -98,7 +98,7 @@ def betweenness_wei(G):
         NP[u] = 1  # number of paths from u
         S = np.ones((n,), dtype=bool)  # distance permanence
         P = np.zeros((n, n))  # predecessors
-        Q = np.zeros((n,))
+        Q = np.zeros((n,), dtype=int)  # indices
         q = n - 1  # order of non-increasing distance
 
         G1 = G.copy()
@@ -213,7 +213,7 @@ def edge_betweenness_bin(G):
         NP = np.zeros((n,))
         NP[u] = 1  # number of paths from u
         P = np.zeros((n, n))  # predecessors
-        Q = np.zeros((n,))
+        Q = np.zeros((n,), dtype=int)  # indices
         q = n - 1  # order of non-increasing distance
 
         Gu = G.copy()
@@ -287,7 +287,7 @@ def edge_betweenness_wei(G):
         NP[u] = 1  # number of paths from u
         S = np.ones((n,), dtype=bool)  # distance permanence
         P = np.zeros((n, n))  # predecessors
-        Q = np.zeros((n,))
+        Q = np.zeros((n,), dtype=int)  # indices
         q = n - 1  # order of non-increasing distance
 
         G1 = G.copy()
@@ -487,7 +487,7 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
 
     def gcoef(W):
         #strength
-        s = np.sum(W, axis=1)   
+        s = np.sum(W, axis=1)
         #neighbor community affiliation
         Gc = np.inner((W != 0), np.diag(ci))
         #community specific neighbors
@@ -532,7 +532,7 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
     G_pos = gcoef(W * (W > 0))
     G_neg = gcoef(-W * (W < 0))
     return G_pos, G_neg
-        
+
 
 def kcoreness_centrality_bd(CIJ):
     '''

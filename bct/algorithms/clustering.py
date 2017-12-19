@@ -1,11 +1,11 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
 from .distance import breadthdist
 
 
-def agreement(ci, buffsz=None):
+def agreement(ci, buffsz=1000):
     '''
     Takes as input a set of vertex partitions CI of
     dimensions [vertex x partition]. Each column in CI contains the
@@ -22,7 +22,7 @@ def agreement(ci, buffsz=None):
 
     Parameters
     ----------
-    ci : MxN np.ndarray
+    ci : NxM np.ndarray
         set of M (possibly degenerate) partitions of N nodes
     buffsz : int | None
         sets buffer size. If not specified, defaults to 1000
@@ -33,22 +33,19 @@ def agreement(ci, buffsz=None):
         agreement matrix
     '''
     ci = np.array(ci)
-    m, n = ci.shape
+    n_nodes, n_partitions = ci.shape
 
-    if buffsz is None:
-        buffsz = 1000
-
-    if m <= buffsz:
+    if n_partitions <= buffsz: # Case 1: Use all partitions at once
         ind = dummyvar(ci)
         D = np.dot(ind, ind.T)
-    else:
-        a = np.arange(0, m, buffsz)
-        b = np.arange(buffsz, m, buffsz)
+    else: # Case 2: Add together results from subsets of partitions
+        a = np.arange(0, n_partitions, buffsz)
+        b = np.arange(buffsz, n_partitions, buffsz)
         if len(a) != len(b):
-            b = np.append(b, m)
-        D = np.zeros((n,))
+            b = np.append(b, n_partitions)
+        D = np.zeros((n_nodes, n_nodes))
         for i, j in zip(a, b):
-            y = ci[:, i:j + 1]
+            y = ci[:, i:j]
             ind = dummyvar(y)
             D += np.dot(ind, ind.T)
 
@@ -86,7 +83,7 @@ def agreement_weighted(ci, wts):
     wts = np.array(wts) / np.sum(wts)
 
     D = np.zeros((n, n))
-    for i in xrange(m):
+    for i in range(m):
         d = dummyvar(ci[i, :].reshape(1, n))
         D += np.dot(d, d.T) * wts[i]
     return D
@@ -148,7 +145,7 @@ def clustering_coef_bu(G):
     n = len(G)
     C = np.zeros((n,))
 
-    for u in xrange(n):
+    for u in range(n):
         V, = np.where(G[u, :])
         k = len(V)
         if k >= 2:  # degree must be at least 2
@@ -217,6 +214,108 @@ def clustering_coef_wu(W):
     return C
 
 
+def clustering_coef_wu_sign(W, coef_type='default'):
+    '''
+    Returns the weighted clustering coefficient generalized or separated
+    for positive and negative weights.
+  
+    Three Algorithms are supported; herefore referred to as default, zhang,
+    and constantini.
+
+    1. Default (Onnela et al.), as in the traditional clustering coefficient
+       computation. Computed separately for positive and negative weights.
+    2. Zhang & Horvath. Similar to Onnela formula except weight information
+       incorporated in denominator. Reduces sensitivity of the measure to
+       weights directly connected to the node of interest. Computed
+       separately for positive and negative weights.
+    3. Constantini & Perugini generalization of Zhang & Horvath formula.
+       Takes both positive and negative weights into account simultaneously.
+       Particularly sensitive to non-redundancy in path information based on
+       sign. Returns only one value.
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        weighted undirected connection matrix
+    corr_type : enum
+        Allowed values are 'default', 'zhang', 'constantini'
+
+    Returns
+    -------
+    Cpos : Nx1 np.ndarray
+        Clustering coefficient vector for positive weights
+    Cneg : Nx1 np.ndarray
+        Clustering coefficient vector for negative weights, unless
+        coef_type == 'constantini'.
+
+    References:
+        Onnela et al. (2005) Phys Rev E 71:065103
+        Zhang & Horvath (2005) Stat Appl Genet Mol Biol 41:1544-6115
+        Costantini & Perugini (2014) PLOS ONE 9:e88669
+    '''
+    n = len(W)
+    np.fill_diagonal(W, 0)
+
+    if coef_type == 'default':
+        W_pos = W * (W > 0)
+        K_pos = np.array(np.sum(np.logical_not(W_pos == 0), axis=1),
+                         dtype=float)
+        ws_pos = cuberoot(W_pos)
+        cyc3_pos = np.diag(np.dot(ws_pos, np.dot(ws_pos, ws_pos)))
+        K_pos[np.where(cyc3_pos == 0)] = np.inf
+        C_pos = cyc3_pos / (K_pos * (K_pos - 1))
+
+        W_neg = -W * (W < 0)
+        K_neg = np.array(np.sum(np.logical_not(W_neg == 0), axis=1),
+                         dtype=float)
+        ws_neg = cuberoot(W_neg)
+        cyc3_neg = np.diag(np.dot(ws_neg, np.dot(ws_neg, ws_neg)))
+        K_neg[np.where(cyc3_neg == 0)] = np.inf
+        C_neg = cyc3_neg / (K_neg * (K_neg - 1))
+
+        return C_pos, C_neg
+
+    elif coef_type in ('zhang', 'Zhang'):
+        W_pos = W * (W > 0)
+        cyc3_pos = np.zeros((n,))
+        cyc2_pos = np.zeros((n,))
+
+        W_neg = -W * (W < 0)
+        cyc3_neg = np.zeros((n,))
+        cyc2_neg = np.zeros((n,))
+
+        for i in range(n):
+            for j in range(n):
+                for q in range(n):
+                    cyc3_pos[i] += W_pos[j, i] * W_pos[i, q] * W_pos[j, q]
+                    cyc3_neg[i] += W_neg[j, i] * W_neg[i, q] * W_neg[j, q]
+                    if j != q:
+                        cyc2_pos[i] += W_pos[j, i] * W_pos[i, q]
+                        cyc2_neg[i] += W_neg[j, i] * W_neg[i, q]
+
+        cyc2_pos[np.where(cyc3_pos == 0)] = np.inf
+        C_pos = cyc3_pos / cyc2_pos
+
+        cyc2_neg[np.where(cyc3_neg == 0)] = np.inf
+        C_neg = cyc3_neg / cyc2_neg
+
+        return C_pos, C_neg
+
+    elif coef_type in ('constantini', 'Constantini'):
+        cyc3 = np.zeros((n,))
+        cyc2 = np.zeros((n,))
+
+        for i in range(n):
+            for j in range(n):
+                for q in range(n):
+                    cyc3[i] += W[j, i] * W[i, q] * W[j, q]
+                    if j != q:
+                        cyc2[i] += W[j, i] * W[i, q]
+
+        cyc2[np.where(cyc3 == 0)] = np.inf
+        C = cyc3 / cyc2
+        return C
+
 def consensus_und(D, tau, reps=1000):
     '''
     This algorithm seeks a consensus partition of the
@@ -264,7 +363,7 @@ def consensus_und(D, tau, reps=1000):
         n, r = np.shape(cis)  # ci represents one vector for each rep
         ci_tmp = np.zeros(n)
 
-        for i in xrange(r):
+        for i in range(r):
             for j, u in enumerate(sorted(
                     np.unique(cis[:, i], return_index=True)[1])):
                 ci_tmp[np.where(cis[:, i] == cis[u, i])] = j
@@ -313,6 +412,67 @@ def consensus_und(D, tau, reps=1000):
 
 
 def get_components(A, no_depend=False):
+    '''
+    Returns the components of an undirected graph specified by the binary and
+    undirected adjacency matrix adj. Components and their constitutent nodes
+    are assigned the same index and stored in the vector, comps. The vector,
+    comp_sizes, contains the number of nodes beloning to each component.
+
+    Parameters
+    ----------
+    A : NxN np.ndarray
+        binary undirected adjacency matrix
+    no_depend : Any
+        Does nothing, included for backwards compatibility
+
+    Returns
+    -------
+    comps : Nx1 np.ndarray
+        vector of component assignments for each node
+    comp_sizes : Mx1 np.ndarray
+        vector of component sizes
+
+    Notes
+    -----
+    Note: disconnected nodes will appear as components with a component
+    size of 1
+
+    Note: The identity of each component (i.e. its numerical value in the
+    result) is not guaranteed to be identical the value returned in BCT,
+    matlab code, although the component topology is.
+
+    Many thanks to Nick Cullen for providing this implementation
+    '''
+
+    if not np.all(A == A.T):  # ensure matrix is undirected
+        raise BCTParamError('get_components can only be computed for undirected'
+                            ' matrices.  If your matrix is noisy, correct it with np.around')
+    
+    A = binarize(A, copy=True)
+    n = len(A)
+    np.fill_diagonal(A, 1)
+
+    edge_map = [{u,v} for u in range(n) for v in range(n) if A[u,v] == 1]
+    union_sets = []
+    for item in edge_map:
+        temp = []
+        for s in union_sets:
+
+            if not s.isdisjoint(item):
+                item = s.union(item)
+            else:
+                temp.append(s)
+        temp.append(item)
+        union_sets = temp
+
+    comps = np.array([i+1 for v in range(n) for i in 
+        range(len(union_sets)) if v in union_sets[i]])
+    comp_sizes = np.array([len(s) for s in union_sets])
+
+    return comps, comp_sizes
+
+
+def get_components_old(A, no_depend=False):
     '''
     Returns the components of an undirected graph specified by the binary and
     undirected adjacency matrix adj. Components and their constitutent nodes
@@ -429,9 +589,7 @@ def transitivity_bd(A):
     S = A + A.T  # symmetrized input graph
     K = np.sum(S, axis=1)  # total degree (in+out)
     cyc3 = np.diag(np.dot(S, np.dot(S, S))) / 2  # number of 3-cycles
-    K[np.where(cyc3 == 0)] = np.inf  # if no 3-cycles exist, make C=0
-    # number of all possible 3-cycles
-    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))
+    CYC3 = K * (K - 1) - 2 * np.diag(np.dot(A, A))  # number of all possible 3-cycles
     return np.sum(cyc3) / np.sum(CYC3)
 
 

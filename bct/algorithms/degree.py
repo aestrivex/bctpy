@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from bct.utils import binarize
 
@@ -99,7 +99,7 @@ def jdegree(CIJ):
     szJ = np.max((id, od)) + 1
     J = np.zeros((szJ, szJ))
 
-    for i in xrange(n):
+    for i in range(n):
         J[id[i], od[i]] += 1
 
     J_od = np.sum(np.triu(J, 1))
@@ -177,8 +177,8 @@ def strengths_und_sign(W):
     W = W.copy()
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
-    Spos = W * (W > 0)  # positive strengths
-    Sneg = W * (W < 0)  # negative strengths
+    Spos = np.sum(W * (W > 0), axis=0)  # positive strengths
+    Sneg = np.sum(W * (W < 0), axis=0) # negative strengths
 
     vpos = np.sum(W[W > 0])  # positive weight
     vneg = np.sum(W[W < 0])  # negative weight

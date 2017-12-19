@@ -1,9 +1,10 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
+from .degree import strengths_und_sign
 
 
-def assortativity_bin(CIJ, flag):
+def assortativity_bin(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
     degrees of all nodes on two opposite ends of a link. A positive
@@ -67,7 +68,7 @@ def assortativity_bin(CIJ, flag):
     return r
 
 
-def assortativity_wei(CIJ, flag):
+def assortativity_wei(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
     strengths (weighted degrees) of all nodes on two opposite ends of a link.
@@ -128,6 +129,107 @@ def assortativity_wei(CIJ, flag):
     term3 = np.sum(.5 * (stri * stri + strj * strj)) / K
     r = (term1 - term2) / (term3 - term2)
     return r
+
+
+def core_periphery_dir(W, gamma=1, C0=None):
+    ''' 
+    The optimal core/periphery subdivision is a partition of the network 
+    into two nonoverlapping groups of nodes, a core group and a periphery
+    group. The number of core-group edges is maximized, and the number of
+    within periphery edges is minimized.
+
+    The core-ness is a statistic which quantifies the goodness of the
+    optimal core/periphery subdivision (with arbitrary relative value).
+
+    The algorithm uses a variation of the Kernighan-Lin graph partitioning
+    algorithm to optimize a core-structure objective described in
+    Borgatti & Everett (2000) Soc Networks 21:375-395
+
+    See Rubinov, Ypma et al. (2015) PNAS 112:10032-7
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        directed connection matrix
+    gamma : core-ness resolution parameter
+        Default value = 1
+        gamma > 1 detects small core, large periphery
+        0 < gamma < 1 detects large core, small periphery
+    C0 : NxN np.ndarray
+        Initial core structure
+    '''
+    n = len(W)
+    np.fill_diagonal(W, 0)
+
+    if C0 == None:
+        C = np.random.randint(2, size=(n,))
+    else:
+        C = C0.copy()
+
+    #methodological note, the core-detection null model is not corrected
+    #for degree cf community detection (to enable detection of hubs)
+
+    s = np.sum(W)
+    p = np.mean(W)
+    b = W - gamma * p
+    B = (b + b.T) / (2 * s)
+    cix, = np.where(C)
+    ncix, = np.where(np.logical_not(C))
+    q = np.sum(B[np.ix_(cix, cix)]) - np.sum(B[np.ix_(ncix, ncix)])
+
+    print(q)
+    #sqish
+
+    flag = True
+    it = 0
+    while flag:
+        it += 1  
+        if it > 100:
+            raise BCTParamError('Infinite Loop aborted')
+
+        flag = False
+        #initial node indices
+        ixes = np.arange(n)    
+
+        Ct = C.copy()
+        while len(ixes) > 0:
+            Qt = np.zeros((n,))
+            ctix, = np.where(Ct)
+            nctix, = np.where(np.logical_not(Ct))
+            q0 = (np.sum(B[np.ix_(ctix, ctix)]) - 
+                  np.sum(B[np.ix_(nctix, nctix)]))
+            Qt[ctix] = q0 - 2 * np.sum(B[ctix, :], axis=1)
+            Qt[nctix] = q0 + 2 * np.sum(B[nctix, :], axis=1)
+
+            max_Qt = np.max(Qt[ixes])
+            u, = np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10)
+            print(np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10))
+            print(Qt[ixes])
+            print(max_Qt)
+            #tunourn
+            u = u[np.random.randint(len(u))]
+            print(np.sum(Ct))
+            Ct[ixes[u]] = np.logical_not(Ct[ixes[u]])
+            print(np.sum(Ct))
+            #casga
+
+            ixes = np.delete(ixes, u)
+            
+            print(max_Qt - q)
+            print(len(ixes))
+
+            if max_Qt - q > 1e-10:
+                flag = True
+                C = Ct.copy()
+                cix, = np.where(C)
+                ncix, = np.where(np.logical_not(C))
+                q = (np.sum(B[np.ix_(cix, cix)]) - 
+                     np.sum(B[np.ix_(ncix, ncix)]))
+
+    cix, = np.where(C)
+    ncix, = np.where(np.logical_not(C))
+    q = np.sum(B[np.ix_(cix, cix)]) - np.sum(B[np.ix_(ncix, ncix)])
+    return C, q
 
 
 def kcore_bd(CIJ, k, peel=False):
@@ -266,6 +368,50 @@ def kcore_bu(CIJ, k, peel=False):
         return CIJkcore, kn
 
 
+def local_assortativity_wu_sign(W):
+    '''
+    Local assortativity measures the extent to which nodes are connected to
+    nodes of similar strength. Adapted from Thedchanamoorthy et al. 2014
+    formula to allowed weighted/signed networks.
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        undirected connection matrix with positive and negative weights
+    
+    Returns
+    -------
+    loc_assort_pos : Nx1 np.ndarray
+        local assortativity from positive weights
+    loc_assort_neg : Nx1 np.ndarray
+        local assortativity from negative weights
+    '''
+    n = len(W)
+
+    np.fill_diagonal(W, 0)
+    r_pos = assortativity_wei(W * (W > 0))
+    r_neg = assortativity_wei(W * (W < 0))
+
+    str_pos, str_neg, _, _ = strengths_und_sign(W)
+
+    loc_assort_pos = np.zeros((n,))
+    loc_assort_neg = np.zeros((n,))
+
+    for curr_node in range(n):
+        jp = np.where(W[curr_node, :] > 0)
+        loc_assort_pos[curr_node] = np.sum(np.abs(str_pos[jp] - 
+            str_pos[curr_node])) / str_pos[curr_node]
+        jn = np.where(W[curr_node, :] < 0)
+        loc_assort_neg[curr_node] = np.sum(np.abs(str_neg[jn] -
+            str_neg[curr_node])) / str_neg[curr_node]
+
+    loc_assort_pos = ((r_pos + 1) / n - 
+        loc_assort_pos / np.sum(loc_assort_pos))
+    loc_assort_neg = ((r_neg + 1) / n -
+        loc_assort_neg / np.sum(loc_assort_neg))
+
+    return loc_assort_pos, loc_assort_neg
+
 def rich_club_bd(CIJ, klevel=None):
     '''
     The rich club coefficient, R, at level k is the fraction of edges that
@@ -300,7 +446,7 @@ def rich_club_bd(CIJ, klevel=None):
     R = np.zeros((klevel,))
     Nk = np.zeros((klevel,))
     Ek = np.zeros((klevel,))
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
         subCIJ = np.delete(CIJ, SmallNodes, axis=0)
         subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
@@ -344,7 +490,7 @@ def rich_club_bu(CIJ, klevel=None):
     R = np.zeros((klevel,))
     Nk = np.zeros((klevel,))
     Ek = np.zeros((klevel,))
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes, = np.where(deg <= k + 1)  # get small nodes with degree <=k
         subCIJ = np.delete(CIJ, SmallNodes, axis=0)
         subCIJ = np.delete(subCIJ, SmallNodes, axis=1)
@@ -383,7 +529,7 @@ def rich_club_wd(CIJ, klevel=None):
     # sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes, = np.where(deg < k + 1)
         if np.size(SmallNodes) == 0:
             Rw[k] = np.nan
@@ -429,7 +575,7 @@ def rich_club_wu(CIJ, klevel=None):
     # sort the weights of the network, with the strongest connection first
     wrank = np.sort(CIJ.flat)[::-1]
 
-    for k in xrange(klevel):
+    for k in range(klevel):
         SmallNodes, = np.where(deg < k + 1)
         if np.size(SmallNodes) == 0:
             Rw[k] = np.nan

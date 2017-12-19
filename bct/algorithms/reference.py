@@ -1,10 +1,11 @@
-from __future__ import division
+from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, binarize
+from bct.utils import pick_four_unique_nodes_quickly
 from .clustering import number_of_components
 
 
-def latmio_dir_connected(R, iter, D=None):
+def latmio_dir_connected(R, itr, D=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -17,8 +18,8 @@ def latmio_dir_connected(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -43,17 +44,17 @@ def latmio_dir_connected(R, iter, D=None):
     # create distance to diagonal matrix if not specified by user
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
@@ -61,7 +62,7 @@ def latmio_dir_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -123,7 +124,7 @@ def latmio_dir_connected(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_dir(R, iter, D=None):
+def latmio_dir(R, itr, D=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -133,8 +134,8 @@ def latmio_dir(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -159,17 +160,17 @@ def latmio_dir(R, iter, D=None):
     # create distance to diagonal matrix if not specified by user
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
@@ -177,7 +178,7 @@ def latmio_dir(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -214,7 +215,7 @@ def latmio_dir(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_und_connected(R, iter, D=None):
+def latmio_und_connected(R, itr, D=None):
     '''
     This function "latticizes" an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -227,8 +228,8 @@ def latmio_und_connected(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -258,17 +259,17 @@ def latmio_und_connected(R, iter, D=None):
 
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1) / 2))
@@ -276,7 +277,7 @@ def latmio_und_connected(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:
             rewire = True
@@ -346,7 +347,7 @@ def latmio_und_connected(R, iter, D=None):
     return Rlatt, R, ind_rp, eff
 
 
-def latmio_und(R, iter, D=None):
+def latmio_und(R, itr, D=None):
     '''
     This function "latticizes" an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -356,8 +357,8 @@ def latmio_und(R, iter, D=None):
     ----------
     R : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
@@ -381,17 +382,17 @@ def latmio_und(R, iter, D=None):
 
     if D is None:
         D = np.zeros((n, n))
-        un = np.mod(xrange(1, n), n)
-        um = np.mod(xrange(n - 1, 0, -1), n)
+        un = np.mod(range(1, n), n)
+        um = np.mod(range(n - 1, 0, -1), n)
         u = np.append((0,), np.where(un < um, un, um))
 
-        for v in xrange(int(np.ceil(n / 2))):
+        for v in range(int(np.ceil(n / 2))):
             D[n - v - 1, :] = np.append(u[v + 1:], u[:v + 1])
             D[v, :] = D[n - v - 1, :][::-1]
 
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximal number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1) / 2))
@@ -399,7 +400,7 @@ def latmio_und(R, iter, D=None):
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(itr):
         att = 0
         while att <= max_attempts:
             while True:
@@ -483,15 +484,15 @@ def makeevenCIJ(n, k, sz_cl):
     # check n against the number of levels
     Nlvl = 2**mx_lvl
     if Nlvl != n:
-        print "Warning: n must be a power of 2"
+        print("Warning: n must be a power of 2")
     n = Nlvl
 
     # create hierarchical template
-    for lvl in xrange(1, mx_lvl):
+    for lvl in range(1, mx_lvl):
         s = 2**(lvl + 1)
         CIJ = np.ones((s, s))
-        grp1 = xrange(int(s / 2))
-        grp2 = xrange(int(s / 2), s)
+        grp1 = range(int(s / 2))
+        grp2 = range(int(s / 2), s)
         ix1 = np.add.outer(np.array(grp1) * s, grp1).flatten()
         ix2 = np.add.outer(np.array(grp2) * s, grp2).flatten()
         CIJ.flat[ix1] = t  # numpy indexing is teh sucks :(
@@ -507,7 +508,7 @@ def makeevenCIJ(n, k, sz_cl):
     # determine nr of non-cluster connections left and their possible positions
     rem_k = k - np.size(np.where(CIJp.flatten()))
     if rem_k < 0:
-        print "Warning: K is too small, output matrix contains clusters only"
+        print("Warning: K is too small, output matrix contains clusters only")
         return CIJp
     a, b = np.where(np.logical_not(CIJp + np.eye(n)))
 
@@ -550,11 +551,11 @@ def makefractalCIJ(mx_lvl, E, sz_cl):
     n = 2**mx_lvl
     sz_cl -= 1
 
-    for lvl in xrange(1, mx_lvl):
+    for lvl in range(1, mx_lvl):
         s = 2**(lvl + 1)
         CIJ = np.ones((s, s))
-        grp1 = xrange(int(s / 2))
-        grp2 = xrange(int(s / 2), s)
+        grp1 = range(int(s / 2))
+        grp2 = range(int(s / 2), s)
         ix1 = np.add.outer(np.array(grp1) * s, grp1).flatten()
         ix2 = np.add.outer(np.array(grp2) * s, grp2).flatten()
         CIJ.flat[ix1] = t  # numpy indexing is teh sucks :(
@@ -617,7 +618,7 @@ def makerandCIJdegreesfixed(inv, outv):
     i_in = 0
     i_out = 0
 
-    for i in xrange(n):
+    for i in range(n):
         in_inv[i_in:i_in + inv[i]] = i
         out_inv[i_out:i_out + outv[i]] = i
         i_in += inv[i]
@@ -627,7 +628,7 @@ def makerandCIJdegreesfixed(inv, outv):
     edges = np.array((out_inv, in_inv[np.random.permutation(k)]))
 
     # create CIJ and check for double edges and self connections
-    for i in xrange(k):
+    for i in range(k):
         if CIJ[edges[0, i], edges[1, i]]:
             tried = set()
             while True:
@@ -740,8 +741,8 @@ def makeringlatticeCIJ(n, k):
     CIJ1 = np.ones((n, n))
     kk = 0
     count = 0
-    seq = xrange(1, n)
-    seq2 = xrange(n - 1, 0, -1)
+    seq = range(1, n)
+    seq2 = range(n - 1, 0, -1)
 
     # fill in
     while kk < k:
@@ -757,7 +758,7 @@ def makeringlatticeCIJ(n, k):
     if overby:
         i, j = np.where(dCIJ)
         rp = np.random.permutation(np.size(i))
-        for ii in xrange(overby):
+        for ii in range(overby):
             CIJ[i[rp[ii]], j[rp[ii]]] = 0
 
     return CIJ
@@ -788,7 +789,7 @@ def maketoeplitzCIJ(n, k, s):
     no connections are placed on the main diagonal.
     '''
     from scipy import linalg, stats
-    pf = stats.norm.pdf(xrange(1, n), .5, s)
+    pf = stats.norm.pdf(range(1, n), .5, s)
     template = linalg.toeplitz(np.append((0,), pf), r=np.append((0,), pf))
     template *= (k / np.sum(template))
 
@@ -852,15 +853,14 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
-    if np.size(np.where(Ap.flat)) < (n * (n - 1)):  # if Ap not fully connected
-        Ap_r, _ = randmio_dir(Ap, bin_swaps)  # randomized Ap
-    else:
-        Ap_r = Ap.copy()
 
-    An = np.logical_not(Ap)  # negative adjmat
-    np.fill_diagonal(An, 0)
-    An_r = np.logical_not(Ap_r)  # randomized An
-    np.fill_diagonal(An_r, 0)
+    if np.size(np.where(Ap.flat)) < (n * (n - 1)):
+        W_r = randmio_und_signed(W, bin_swaps)
+        Ap_r = W_r > 0
+        An_r = W_r < 0
+    else:
+        Ap_r = Ap
+        An_r = An
 
     W0 = np.zeros((n, n))
     for s in (1, -1):
@@ -974,15 +974,15 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
-    if np.size(np.where(Ap.flat)) < (n * (n - 1)):  # if Ap not fully connected
-        Ap_r, _ = randmio_und(Ap, bin_swaps)  # randomized Ap
-    else:
-        Ap_r = Ap.copy()
+    An = (W < 0)  # negative adjmat
 
-    An = np.logical_not(Ap)  # negative adjmat
-    np.fill_diagonal(An, 0)
-    An_r = np.logical_not(Ap_r)  # randomized An
-    np.fill_diagonal(An_r, 0)
+    if np.size(np.where(Ap.flat)) < (n * (n - 1)):
+        W_r, eff = randmio_und_signed(W, bin_swaps)
+        Ap_r = W_r > 0
+        An_r = W_r < 0
+    else:
+        Ap_r = Ap
+        An_r = An
 
     W0 = np.zeros((n, n))
     for s in (1, -1):
@@ -1049,7 +1049,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1):
     return W0, (rpos_in[0, 1], rpos_ou[0, 1], rneg_in[0, 1], rneg_ou[0, 1])
 
 
-def randmio_dir_connected(R, iter):
+def randmio_dir_connected(R, itr):
     '''
     This function randomizes a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -1062,8 +1062,8 @@ def randmio_dir_connected(R, iter):
     ----------
     W : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1076,12 +1076,12 @@ def randmio_dir_connected(R, iter):
     n = len(R)
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1139,7 +1139,7 @@ def randmio_dir_connected(R, iter):
     return R, eff
 
 
-def randmio_dir(R, iter):
+def randmio_dir(R, itr):
     '''
     This function randomizes a directed network, while preserving the in-
     and out-degree distributions. In weighted networks, the function
@@ -1149,8 +1149,8 @@ def randmio_dir(R, iter):
     ----------
     W : NxN np.ndarray
         directed binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1163,12 +1163,12 @@ def randmio_dir(R, iter):
     n = len(R)
     i, j = np.where(R)
     k = len(i)
-    iter *= k
+    itr *= k
 
     max_attempts = np.round(n * k / (n * (n - 1)))
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1202,7 +1202,7 @@ def randmio_dir(R, iter):
     return R, eff
 
 
-def randmio_und_connected(R, iter):
+def randmio_und_connected(R, itr):
     '''
     This function randomizes an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -1211,12 +1211,18 @@ def randmio_und_connected(R, iter):
     to reach every other node in the network. The input network for this
     function must be connected.
 
+    NOTE the changes to the BCT matlab function of the same name 
+    made in the Jan 2016 release 
+    have not been propagated to this function because of substantially
+    decreased time efficiency in the implementation. Expect these changes
+    to be merged eventually.
+
     Parameters
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1235,14 +1241,14 @@ def randmio_und_connected(R, iter):
     n = len(R)
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximum number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             rewire = True
@@ -1310,7 +1316,79 @@ def randmio_und_connected(R, iter):
     return R, eff
 
 
-def randmio_und(R, iter):
+def randmio_dir_signed(R, itr):
+    '''
+    This function randomizes a directed weighted network with positively
+    and negatively signed connections, while preserving the positive and
+    negative degree distributions. In weighted networks by default the
+    function preserves the out-degree strength but not the in-strength
+    distributions
+
+    Parameters
+    ---------
+    W : NxN np.ndarray
+        directed binary/weighted connection matrix
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
+
+    Returns
+    -------
+    R : NxN np.ndarray
+        randomized network
+    eff : int
+        number of actual rewirings carried out
+    '''
+    R = R.copy()
+    n = len(R)
+
+    itr *= n * (n - 1)
+
+    #maximal number of rewiring attempts per iter
+    max_attempts = n
+    #actual number of successful rewirings
+    eff = 0
+
+    #print(itr)
+
+    for it in range(int(itr)):
+        #print(it)
+        att = 0
+        while att <= max_attempts:
+            #select four distinct vertices
+        
+            a, b, c, d = pick_four_unique_nodes_quickly(n)
+
+            #a, b, c, d = np.random.choice(n, 4)
+            #a, b, c, d = np.random.permutation(4)
+
+            r0_ab = R[a, b]
+            r0_cd = R[c, d]
+            r0_ad = R[a, d]
+            r0_cb = R[c, b]
+
+            #print(np.sign(r0_ab), np.sign(r0_ad))
+
+            #rewiring condition
+            if (    np.sign(r0_ab) == np.sign(r0_cd) and
+                    np.sign(r0_ad) == np.sign(r0_cb) and
+                    np.sign(r0_ab) != np.sign(r0_ad)):
+
+
+                R[a, d] = r0_ab
+                R[a, b] = r0_ad
+                R[c, b] = r0_cd
+                R[c, d] = r0_cb
+
+                eff += 1
+                break
+
+            att += 1
+
+    #print(eff)
+
+    return R, eff
+
+def randmio_und(R, itr):
     '''
     This function randomizes an undirected network, while preserving the
     degree distribution. The function does not preserve the strength
@@ -1320,8 +1398,8 @@ def randmio_und(R, iter):
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
@@ -1336,14 +1414,14 @@ def randmio_und(R, iter):
     n = len(R)
     i, j = np.where(np.tril(R))
     k = len(i)
-    iter *= k
+    itr *= k
 
     # maximum number of rewiring attempts per iteration
     max_attempts = np.round(n * k / (n * (n - 1)))
     # actual number of successful rewirings
     eff = 0
 
-    for it in xrange(iter):
+    for it in range(int(itr)):
         att = 0
         while att <= max_attempts:  # while not rewired
             while True:
@@ -1387,7 +1465,7 @@ def randmio_und(R, iter):
     return R, eff
 
 
-def randmio_und_signed(R, iter):
+def randmio_und_signed(R, itr):
     '''
     This function randomizes an undirected weighted network with positive
     and negative weights, while simultaneously preserving the degree
@@ -1398,78 +1476,50 @@ def randmio_und_signed(R, iter):
     ----------
     W : NxN np.ndarray
         undirected binary/weighted connection matrix
-    iter : int
-        rewiring parameter. Each edge is rewired approximately iter times.
+    itr : int
+        rewiring parameter. Each edge is rewired approximately itr times.
 
     Returns
     -------
     R : NxN np.ndarray
         randomized network
     '''
-    if not np.all(R == R.T):
-        raise BCTParamError("Input must be undirected")
     R = R.copy()
-    i, j = np.where(np.tril(R))
-    i_p, j_p = np.where(np.tril(R) > 0)
-    i_m, j_m = np.where(np.tril(R) < 0)
-    k = len(i)
-    k_p = len(i_p)
-    k_m = len(i_m)
-    iter *= k
+    n = len(R)
 
-    if not (k_p and k_m):
-        return randmio_und(R, iter)[0]
+    itr *= int(n * (n -1) / 2)
 
-    for it in xrange(iter):  # while not rewired
-        while True:
-            while True:
-                # choose two edges to rewire but make sure they are either
-                # both positive or both negative
-                do_pos = np.random.random() > .5  # randomly rewires pos or neg
-                if do_pos:
-                    kcur = k_p
-                    icur = i_p
-                    jcur = j_p
-                else:
-                    kcur = k_m
-                    icur = i_m
-                    jcur = j_m
+    max_attempts = int(np.round(n / 2))
+    eff = 0
 
-                e1 = np.random.randint(kcur)
-                e2 = np.random.randint(kcur)
-                while e1 == e2:
-                    e2 = np.random.randint(kcur)
-                a = icur[e1]
-                b = jcur[e1]
-                c = icur[e2]
-                d = jcur[e2]
-                if a != c and a != d and b != c and b != d:
-                    break  # all 4 vertices must be different
+    for it in range(int(itr)):
+        att = 0
+        while att <= max_attempts:
 
-            if np.random.random() > .5:
-                icur.setflags(write=True)
-                jcur.setflags(write=True)
-                icur[e2] = d
-                jcur[e2] = c  # flip edge c-d with 50% probability
-                c = icur[e2]
-                d = jcur[e2]  # to explore all potential rewirings
-            # rewiring condition
-            if not (R[a, d] or R[c, b]):
-                R[a, d] = R[a, b]
-                R[a, b] = 0
-                R[d, a] = R[b, a]
-                R[b, a] = 0
-                R[c, b] = R[c, d]
-                R[c, d] = 0
-                R[b, c] = R[d, c]
-                R[d, c] = 0
-                jcur.setflags(write=True)
-                jcur[e1] = d  # reassign edge indices
-                jcur[e2] = b
+            a, b, c, d = pick_four_unique_nodes_quickly(n)
+
+            r0_ab = R[a, b]
+            r0_cd = R[c, d]
+            r0_ad = R[a, d]
+            r0_cb = R[c, b]
+
+            #rewiring condition
+            if (    np.sign(r0_ab) == np.sign(r0_cd) and
+                    np.sign(r0_ad) == np.sign(r0_cb) and
+                    np.sign(r0_ab) != np.sign(r0_ad)):
+        
+                R[a, d] = R[d, a] = r0_ab
+                R[a, b] = R[b, a] = r0_ad
+
+                R[c, b] = R[b, c] = r0_cd
+                R[c, d] = R[d, c] = r0_cb
+
+                eff += 1
                 break
 
-    return R
+            att += 1
 
+    return R, eff
 
 def randomize_graph_partial_und(A, B, maxswap):
     '''
@@ -1601,7 +1651,7 @@ def randomizer_bin_und(R, alpha):
     if k == 0 or k >= (nr_poss_edges - 1):
         raise BCTParamError("No possible randomization")
 
-    for it in xrange(k):
+    for it in range(k):
         if np.random.random() > alpha:
             continue  # rewire alpha% of edges
 
@@ -1641,7 +1691,7 @@ def randomizer_bin_und(R, alpha):
             R[d, b] = 1
 
             # update the edge index (this is inefficient)
-            for m in xrange(k):
+            for m in range(k):
                 if i[m] == d and j[m] == c:
                     i.setflags(write=True)
                     j.setflags(write=True)

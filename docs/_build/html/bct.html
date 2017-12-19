@@ -48,8 +48,8 @@
 <dl class="function">
 <dt id="bct.betweenness_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">betweenness_bin</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.betweenness_bin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Node betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given node. Nodes with high values of 
+<dd><p>Node betweenness centrality is the fraction of all shortest paths in
+the network that contain a given node. Nodes with high values of
 betweenness centrality participate in a large number of shortest paths.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -75,8 +75,8 @@ BC/[(N-1)(N-2)], where N is the number of nodes in the network.</p>
 <dl class="function">
 <dt id="bct.betweenness_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">betweenness_wei</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.betweenness_wei" title="Permalink to this definition">¶</a></dt>
-<dd><p>Node betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given node. Nodes with high values of 
+<dd><p>Node betweenness centrality is the fraction of all shortest paths in
+the network that contain a given node. Nodes with high values of
 betweenness centrality participate in a large number of shortest paths.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -144,8 +144,8 @@ of intermodular connections of individual nodes and ranges from 0 to 1.</p>
 <dl class="function">
 <dt id="bct.edge_betweenness_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">edge_betweenness_bin</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.edge_betweenness_bin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Edge betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given edge. Edges with high values of 
+<dd><p>Edge betweenness centrality is the fraction of all shortest paths in
+the network that contain a given edge. Edges with high values of
 betweenness centrality participate in a large number of shortest paths.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -177,8 +177,8 @@ BC/[(N-1)(N-2)], where N is the number of nodes in the network.</p>
 <dl class="function">
 <dt id="bct.edge_betweenness_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">edge_betweenness_wei</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.edge_betweenness_wei" title="Permalink to this definition">¶</a></dt>
-<dd><p>Edge betweenness centrality is the fraction of all shortest paths in 
-the network that contain a given edge. Edges with high values of 
+<dd><p>Edge betweenness centrality is the fraction of all shortest paths in
+the network that contain a given edge. Edges with high values of
 betweenness centrality participate in a large number of shortest paths.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -220,7 +220,7 @@ consequently be some inverse of the connectivity matrix.</dd>
 <dd><p>Eigenector centrality is a self-referential measure of centrality:
 nodes have high eigenvector centrality if they connect to other nodes
 that have high eigenvector centrality. The eigenvector centrality of
-node i is equivalent to the ith element in the eigenvector 
+node i is equivalent to the ith element in the eigenvector
 corresponding to the largest eigenvalue of the adjacency matrix.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -541,9 +541,9 @@ BUFFSZ ~ 150 works well.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ci</strong> : NxM np.ndarray</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ci</strong> : MxN np.ndarray</p>
 <blockquote>
-<div><p>set of (possibly degenerate) partitions</p>
+<div><p>set of M (possibly degenerate) partitions of N nodes</p>
 </div></blockquote>
 <p><strong>buffsz</strong> : int | None</p>
 <blockquote>
@@ -564,12 +564,12 @@ BUFFSZ ~ 150 works well.</p>
 <dl class="function">
 <dt id="bct.agreement_weighted">
 <tt class="descclassname">bct.</tt><tt class="descname">agreement_weighted</tt><big>(</big><em>ci</em>, <em>wts</em><big>)</big><a class="headerlink" href="#bct.agreement_weighted" title="Permalink to this definition">¶</a></dt>
-<dd><p>D = AGREEMENT_WEIGHTED(CI,WTS) is identical to AGREEMENT, with the 
-exception that each partitions contribution is weighted according to 
+<dd><p>D = AGREEMENT_WEIGHTED(CI,WTS) is identical to AGREEMENT, with the
+exception that each partitions contribution is weighted according to
 the corresponding scalar value stored in the vector WTS. As an example,
-suppose CI contained partitions obtained using some heuristic for 
+suppose CI contained partitions obtained using some heuristic for
 maximizing modularity. A possible choice for WTS might be the Q metric
-(Newman&#8217;s modularity score). Such a choice would add more weight to 
+(Newman&#8217;s modularity score). Such a choice would add more weight to
 higher modularity partitions.</p>
 <p>NOTE: Unlike AGREEMENT, this script does not have the input argument
 BUFFSZ.</p>
@@ -577,9 +577,9 @@ BUFFSZ.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ci</strong> : NxM np.ndarray</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>ci</strong> : MxN np.ndarray</p>
 <blockquote>
-<div><p>set of (possibly degenerate) partitions</p>
+<div><p>set of M (possibly degenerate) partitions of N nodes</p>
 </div></blockquote>
 <p><strong>wts</strong> : Mx1 np.ndarray</p>
 <blockquote>
@@ -621,11 +621,11 @@ BUFFSZ.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Methodological note: In directed graphs, 3 nodes generate up to 8 
-triangles (2*2*2 edges). The number of existing triangles is the main 
-diagonal of S^3/2. The number of all (in or out) neighbour pairs is 
-K(K-1)/2. Each neighbour pair may generate two triangles. &#8220;False pairs&#8221; 
-are i&lt;-&gt;j edge pairs (these do not generate triangles). The number of 
+<p>Methodological note: In directed graphs, 3 nodes generate up to 8
+triangles (2*2*2 edges). The number of existing triangles is the main
+diagonal of S^3/2. The number of all (in or out) neighbour pairs is
+K(K-1)/2. Each neighbour pair may generate two triangles. &#8220;False pairs&#8221;
+are i&lt;-&gt;j edge pairs (these do not generate triangles). The number of
 false pairs is the main diagonal of A^2.
 Thus the maximum possible number of triangles =</p>
 <blockquote>
@@ -662,7 +662,7 @@ Thus the maximum possible number of triangles =</p>
 <dl class="function">
 <dt id="bct.clustering_coef_wd">
 <tt class="descclassname">bct.</tt><tt class="descname">clustering_coef_wd</tt><big>(</big><em>W</em><big>)</big><a class="headerlink" href="#bct.clustering_coef_wd" title="Permalink to this definition">¶</a></dt>
-<dd><p>The weighted clustering coefficient is the average &#8220;intensity&#8221; of 
+<dd><p>The weighted clustering coefficient is the average &#8220;intensity&#8221; of
 triangles around a node.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -687,14 +687,14 @@ triangles around a node.</p>
 The weighted modification is as follows:
 - The numerator: adjacency matrix is replaced with weights matrix ^ 1/3
 - The denominator: no changes from the binary version</p>
-<p>The above reduces to symmetric and/or binary versions of the clustering 
+<p>The above reduces to symmetric and/or binary versions of the clustering
 coefficient for respective graphs.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bct.clustering_coef_wu">
 <tt class="descclassname">bct.</tt><tt class="descname">clustering_coef_wu</tt><big>(</big><em>W</em><big>)</big><a class="headerlink" href="#bct.clustering_coef_wu" title="Permalink to this definition">¶</a></dt>
-<dd><p>The weighted clustering coefficient is the average &#8220;intensity&#8221; of 
+<dd><p>The weighted clustering coefficient is the average &#8220;intensity&#8221; of
 triangles around a node.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -719,7 +719,7 @@ triangles around a node.</p>
 <dl class="function">
 <dt id="bct.consensus_und">
 <tt class="descclassname">bct.</tt><tt class="descname">consensus_und</tt><big>(</big><em>D</em>, <em>tau</em>, <em>reps=1000</em><big>)</big><a class="headerlink" href="#bct.consensus_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>This algorithm seeks a consensus partition of the 
+<dd><p>This algorithm seeks a consensus partition of the
 agreement matrix D. The algorithm used here is almost identical to the
 one introduced in Lancichinetti &amp; Fortunato (2012): The agreement
 matrix D is thresholded at a level TAU to remove an weak elements. The
@@ -771,22 +771,21 @@ is 1000.</p>
 <dl class="function">
 <dt id="bct.get_components">
 <tt class="descclassname">bct.</tt><tt class="descname">get_components</tt><big>(</big><em>A</em>, <em>no_depend=False</em><big>)</big><a class="headerlink" href="#bct.get_components" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the components of an undirected graph specified by the binary and 
-undirected adjacency matrix adj. Components and their constitutent nodes 
-are assigned the same index and stored in the vector, comps. The vector, 
+<dd><p>Returns the components of an undirected graph specified by the binary and
+undirected adjacency matrix adj. Components and their constitutent nodes
+are assigned the same index and stored in the vector, comps. The vector,
 comp_sizes, contains the number of nodes beloning to each component.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>adj</strong> : NxN np.ndarray</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : NxN np.ndarray</p>
 <blockquote>
 <div><p>binary undirected adjacency matrix</p>
 </div></blockquote>
-<p><strong>no_depend</strong> : bool</p>
+<p><strong>no_depend</strong> : Any</p>
 <blockquote>
-<div><p>If true, doesn&#8217;t import networkx to do the calculation. Default value
-is false.</p>
+<div><p>Does nothing, included for backwards compatibility</p>
 </div></blockquote>
 </td>
 </tr>
@@ -805,16 +804,10 @@ is false.</p>
 <p class="rubric">Notes</p>
 <p>Note: disconnected nodes will appear as components with a component
 size of 1</p>
-<p>Note: The identity of each component (i.e. its numerical value in the 
-result) is not guaranteed to be identical the value returned in BCT, 
-although the component topology is.</p>
-<p>Note: networkx is used to do the computation efficiently. If networkx is 
-not available a breadth-first search that does not depend on networkx is 
-used instead, but this is less efficient. The corresponding BCT function 
-does the computation by computing the Dulmage-Mendelsohn decomposition. I 
-don&#8217;t know what a Dulmage-Mendelsohn decomposition is and there doesn&#8217;t 
-appear to be a python equivalent. If you think of a way to implement this 
-better, let me know.</p>
+<p>Note: The identity of each component (i.e. its numerical value in the
+result) is not guaranteed to be identical the value returned in BCT,
+matlab code, although the component topology is.</p>
+<p>Many thanks to Nick Cullen for providing this implementation</p>
 </dd></dl>
 
 <dl class="function">
@@ -841,12 +834,12 @@ better, let me know.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Methodological note: In directed graphs, 3 nodes generate up to 8 
-triangles (2*2*2 edges). The number of existing triangles is the main 
-diagonal of S^3/2. The number of all (in or out) neighbour pairs is 
+<p>Methodological note: In directed graphs, 3 nodes generate up to 8
+triangles (2*2*2 edges). The number of existing triangles is the main</p>
+<p>diagonal of S^3/2. The number of all (in or out) neighbour pairs is
 K(K-1)/2. Each neighbour pair may generate two triangles. &#8220;False pairs&#8221;
-are i&lt;-&gt;j edge pairs (these do not generate triangles). The number of 
-false pairs is the main diagonal of A^2. Thus the maximum possible 
+are i&lt;-&gt;j edge pairs (these do not generate triangles). The number of
+false pairs is the main diagonal of A^2. Thus the maximum possible
 number of triangles = (2 edges)*([ALL PAIRS] - [FALSE PAIRS])</p>
 <blockquote>
 <div>= 2 * (K(K-1)/2 - diag(A^2))
@@ -939,7 +932,7 @@ number of triangles = (2 edges)*([ALL PAIRS] - [FALSE PAIRS])</p>
 <h2>Core<a class="headerlink" href="#core" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="bct.assortativity_bin">
-<tt class="descclassname">bct.</tt><tt class="descname">assortativity_bin</tt><big>(</big><em>CIJ</em>, <em>flag</em><big>)</big><a class="headerlink" href="#bct.assortativity_bin" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">assortativity_bin</tt><big>(</big><em>CIJ</em>, <em>flag=0</em><big>)</big><a class="headerlink" href="#bct.assortativity_bin" title="Permalink to this definition">¶</a></dt>
 <dd><p>The assortativity coefficient is a correlation coefficient between the
 degrees of all nodes on two opposite ends of a link. A positive
 assortativity coefficient indicates that nodes tend to link to other
@@ -979,7 +972,7 @@ and Sporns (2010) NeuroImage.</p>
 
 <dl class="function">
 <dt id="bct.assortativity_wei">
-<tt class="descclassname">bct.</tt><tt class="descname">assortativity_wei</tt><big>(</big><em>CIJ</em>, <em>flag</em><big>)</big><a class="headerlink" href="#bct.assortativity_wei" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">assortativity_wei</tt><big>(</big><em>CIJ</em>, <em>flag=0</em><big>)</big><a class="headerlink" href="#bct.assortativity_wei" title="Permalink to this definition">¶</a></dt>
 <dd><p>The assortativity coefficient is a correlation coefficient between the
 strengths (weighted degrees) of all nodes on two opposite ends of a link.
 A positive assortativity coefficient indicates that nodes tend to link to
@@ -1307,8 +1300,8 @@ a strength of at least s.</p>
 <dl class="function">
 <dt id="bct.degrees_dir">
 <tt class="descclassname">bct.</tt><tt class="descname">degrees_dir</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.degrees_dir" title="Permalink to this definition">¶</a></dt>
-<dd><p>Node degree is the number of links connected to the node. The indegree 
-is the number of inward links and the outdegree is the number of 
+<dd><p>Node degree is the number of links connected to the node. The indegree
+is the number of inward links and the outdegree is the number of
 outward links.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1373,7 +1366,7 @@ outward links.</p>
 <dt id="bct.jdegree">
 <tt class="descclassname">bct.</tt><tt class="descname">jdegree</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.jdegree" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function returns a matrix in which the value of each element (u,v)
-corresponds to the number of nodes that have u outgoing connections 
+corresponds to the number of nodes that have u outgoing connections
 and v incoming connections.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1516,8 +1509,8 @@ sum of outward link weights.</p>
 of nodes. An entry (u,v)=1 means that there exists a path from node u
 to node v; alternatively (u,v)=0.</p>
 <p>The distance matrix contains lengths of shortest paths between all
-pairs of nodes. An entry (u,v) represents the length of shortest path 
-from node u to  node v. The average shortest path length is the 
+pairs of nodes. An entry (u,v) represents the length of shortest path
+from node u to  node v. The average shortest path length is the
 characteristic path length of the network.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1576,16 +1569,16 @@ characteristic path length of the network.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Breadth-first search tree does not contain all paths (or all 
+<p>Breadth-first search tree does not contain all paths (or all
 shortest paths), but allows the determination of at least one path with
-minimum distance. The entire graph is explored, starting from source 
+minimum distance. The entire graph is explored, starting from source
 vertex &#8216;source&#8217;.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="bct.charpath">
-<tt class="descclassname">bct.</tt><tt class="descname">charpath</tt><big>(</big><em>D</em>, <em>include_diagonal=False</em><big>)</big><a class="headerlink" href="#bct.charpath" title="Permalink to this definition">¶</a></dt>
-<dd><p>The characteristic path length is the average shortest path length in 
+<tt class="descclassname">bct.</tt><tt class="descname">charpath</tt><big>(</big><em>D</em>, <em>include_diagonal=False</em>, <em>include_infinite=True</em><big>)</big><a class="headerlink" href="#bct.charpath" title="Permalink to this definition">¶</a></dt>
+<dd><p>The characteristic path length is the average shortest path length in
 the network. The global efficiency is the average inverse shortest path
 length in the network.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1599,6 +1592,10 @@ length in the network.</p>
 <p><strong>include_diagonal</strong> : bool</p>
 <blockquote>
 <div><p>If True, include the weights on the diagonal. Default value is False.</p>
+</div></blockquote>
+<p><strong>include_infinite</strong> : bool</p>
+<blockquote>
+<div><p>If True, include infinite distances in calculation</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1629,7 +1626,7 @@ length in the network.</p>
 <p class="rubric">Notes</p>
 <p>The input distance matrix may be obtained with any of the distance
 functions, e.g. distance_bin, distance_wei.
-Characteristic path length is calculated as the global mean of 
+Characteristic path length is calculated as the global mean of
 the distance matrix D, excludings any &#8216;Infs&#8217; but including distances on
 the main diagonal.</p>
 </dd></dl>
@@ -1637,8 +1634,8 @@ the main diagonal.</p>
 <dl class="function">
 <dt id="bct.cycprob">
 <tt class="descclassname">bct.</tt><tt class="descname">cycprob</tt><big>(</big><em>Pq</em><big>)</big><a class="headerlink" href="#bct.cycprob" title="Permalink to this definition">¶</a></dt>
-<dd><p>Cycles are paths which begin and end at the same node. Cycle 
-probability for path length d, is the fraction of all paths of length 
+<dd><p>Cycles are paths which begin and end at the same node. Cycle
+probability for path length d, is the fraction of all paths of length
 d-1 that may be extended to form cycles of length d.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1670,8 +1667,8 @@ form a cycle of length q for each path length q</p>
 <dt id="bct.distance_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">distance_bin</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.distance_bin" title="Permalink to this definition">¶</a></dt>
 <dd><p>The distance matrix contains lengths of shortest paths between all
-pairs of nodes. An entry (u,v) represents the length of shortest path 
-from node u to node v. The average shortest path length is the 
+pairs of nodes. An entry (u,v) represents the length of shortest path
+from node u to node v. The average shortest path length is the
 characteristic path length of the network.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1701,8 +1698,8 @@ Algorithm: Algebraic shortest paths.</p>
 <dt id="bct.distance_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">distance_wei</tt><big>(</big><em>G</em><big>)</big><a class="headerlink" href="#bct.distance_wei" title="Permalink to this definition">¶</a></dt>
 <dd><p>The distance matrix contains lengths of shortest paths between all
-pairs of nodes. An entry (u,v) represents the length of shortest path 
-from node u to node v. The average shortest path length is the 
+pairs of nodes. An entry (u,v) represents the length of shortest path
+from node u to node v. The average shortest path length is the
 characteristic path length of the network.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1734,8 +1731,8 @@ consequently be some inverse of the connectivity matrix.</p>
 <blockquote>
 <div>The number of edges in shortest weighted paths may in general</div></blockquote>
 <p>exceed the number of edges in shortest binary paths (i.e. shortest
-paths computed on the binarized connectivity matrix), because shortest 
-weighted paths have the minimal weighted distance, but not necessarily 
+paths computed on the binarized connectivity matrix), because shortest
+weighted paths have the minimal weighted distance, but not necessarily
 the minimal number of edges.</p>
 <blockquote>
 <div>Lengths between disconnected nodes are set to Inf.
@@ -1746,7 +1743,7 @@ Lengths on the main diagonal are set to 0.</div></blockquote>
 <dl class="function">
 <dt id="bct.efficiency_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">efficiency_bin</tt><big>(</big><em>G</em>, <em>local=False</em><big>)</big><a class="headerlink" href="#bct.efficiency_bin" title="Permalink to this definition">¶</a></dt>
-<dd><p>The global efficiency is the average of inverse shortest path length, 
+<dd><p>The global efficiency is the average of inverse shortest path length,
 and is inversely related to the characteristic path length.</p>
 <p>The local efficiency is the global efficiency computed on the
 neighborhood of the node, and is related to the clustering coefficient.</p>
@@ -1782,7 +1779,7 @@ Default value = False.</p>
 <dl class="function">
 <dt id="bct.efficiency_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">efficiency_wei</tt><big>(</big><em>Gw</em>, <em>local=False</em><big>)</big><a class="headerlink" href="#bct.efficiency_wei" title="Permalink to this definition">¶</a></dt>
-<dd><p>The global efficiency is the average of inverse shortest path length, 
+<dd><p>The global efficiency is the average of inverse shortest path length,
 and is inversely related to the characteristic path length.</p>
 <p>The local efficiency is the global efficiency computed on the
 neighborhood of the node, and is related to the clustering coefficient.</p>
@@ -1833,7 +1830,7 @@ efficiency is hence not a strict generalization of the binary variant.</p>
 <dt id="bct.findpaths">
 <tt class="descclassname">bct.</tt><tt class="descname">findpaths</tt><big>(</big><em>CIJ</em>, <em>qmax</em>, <em>sources</em>, <em>savepths=False</em><big>)</big><a class="headerlink" href="#bct.findpaths" title="Permalink to this definition">¶</a></dt>
 <dd><p>Paths are sequences of linked nodes, that never visit a single node
-more than once. This function finds all paths that start at a set of 
+more than once. This function finds all paths that start at a set of
 source nodes, up to a specified length. Warning: very memory-intensive.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1901,7 +1898,7 @@ suggestions for improvements are welcome.</p>
 <dt id="bct.findwalks">
 <tt class="descclassname">bct.</tt><tt class="descname">findwalks</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.findwalks" title="Permalink to this definition">¶</a></dt>
 <dd><p>Walks are sequences of linked nodes, that may visit a single node more
-than once. This function finds the number of walks of a given length, 
+than once. This function finds the number of walks of a given length,
 between any two nodes.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1935,13 +1932,13 @@ between any two nodes.</p>
 
 <dl class="function">
 <dt id="bct.reachdist">
-<tt class="descclassname">bct.</tt><tt class="descname">reachdist</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.reachdist" title="Permalink to this definition">¶</a></dt>
-<dd><p>The binary reachability matrix describes reachability between all pairs</p>
-<p>of nodes. An entry (u,v)=1 means that there exists a path from node u
+<tt class="descclassname">bct.</tt><tt class="descname">reachdist</tt><big>(</big><em>CIJ</em>, <em>ensure_binary=True</em><big>)</big><a class="headerlink" href="#bct.reachdist" title="Permalink to this definition">¶</a></dt>
+<dd><p>The binary reachability matrix describes reachability between all pairs
+of nodes. An entry (u,v)=1 means that there exists a path from node u
 to node v; alternatively (u,v)=0.</p>
 <p>The distance matrix contains lengths of shortest paths between all
-pairs of nodes. An entry (u,v) represents the length of shortest path 
-from node u to  node v. The average shortest path length is the 
+pairs of nodes. An entry (u,v) represents the length of shortest path
+from node u to  node v. The average shortest path length is the
 characteristic path length of the network.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -1950,6 +1947,12 @@ characteristic path length of the network.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>CIJ</strong> : NxN np.ndarray</p>
 <blockquote>
 <div><p>binary directed/undirected connection matrix</p>
+</div></blockquote>
+<p><strong>ensure_binary</strong> : bool</p>
+<blockquote>
+<div><p>Binarizes input. Defaults to true. No user who is not testing 
+something will ever want to not use this, use distance_wei instead for 
+unweighted matrices.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -1993,7 +1996,7 @@ The list is a pure python list, not requiring numpy.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ls</strong> : listof(list)</p>
 <blockquote class="last">
-<div><p>pure python list with lowest value zero-indexed 
+<div><p>pure python list with lowest value zero-indexed
 (regardless of zero-indexing parameter)</p>
 </div></blockquote>
 </td>
@@ -2127,7 +2130,7 @@ weighted/directed/fully-connected networks</p>
 <tt class="descclassname">bct.</tt><tt class="descname">modularity_dir</tt><big>(</big><em>A</em>, <em>gamma=1</em>, <em>kci=None</em><big>)</big><a class="headerlink" href="#bct.modularity_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -2165,9 +2168,9 @@ algorithm.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>This algorithm is deterministic. The matlab function bearing this 
-name incorrectly disclaims that the outcome depends on heuristics 
-involving a random seed. The louvain method does depend on a random seed, 
+<p>This algorithm is deterministic. The matlab function bearing this
+name incorrectly disclaims that the outcome depends on heuristics
+involving a random seed. The louvain method does depend on a random seed,
 but this function uses a deterministic modularity maximization algorithm.</p>
 </dd></dl>
 
@@ -2214,9 +2217,9 @@ algorithm.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>This algorithm is deterministic. The matlab function bearing this 
-name incorrectly disclaims that the outcome depends on heuristics 
-involving a random seed. The louvain method does depend on a random seed, 
+<p>This algorithm is deterministic. The matlab function bearing this
+name incorrectly disclaims that the outcome depends on heuristics
+involving a random seed. The louvain method does depend on a random seed,
 but this function uses a deterministic modularity maximization algorithm.</p>
 </dd></dl>
 
@@ -2225,7 +2228,7 @@ but this function uses a deterministic modularity maximization algorithm.</p>
 <tt class="descclassname">bct.</tt><tt class="descname">modularity_finetune_und</tt><big>(</big><em>W</em>, <em>ci=None</em>, <em>gamma=1</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_finetune_und" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.</p>
 <p>This algorithm is inspired by the Kernighan-Lin fine-tuning algorithm
@@ -2272,10 +2275,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.</p>
 
 <dl class="function">
 <dt id="bct.modularity_finetune_und_sign">
-<tt class="descclassname">bct.</tt><tt class="descname">modularity_finetune_und_sign</tt><big>(</big><em>W</em>, <em>qtype='sta'</em>, <em>ci=None</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_finetune_und_sign" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">modularity_finetune_und_sign</tt><big>(</big><em>W</em>, <em>qtype='sta'</em>, <em>gamma=1</em>, <em>ci=None</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_finetune_und_sign" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.</p>
 <p>This algorithm is inspired by the Kernighan-Lin fine-tuning algorithm
@@ -2293,6 +2296,11 @@ negative weights.</p>
 <blockquote>
 <div><p>modularity type. Can be &#8216;sta&#8217; (default), &#8216;pos&#8217;, &#8216;smp&#8217;, &#8216;gja&#8217;, &#8216;neg&#8217;.
 See Rubinov and Sporns (2011) for a description.</p>
+</div></blockquote>
+<p><strong>gamma</strong> : float</p>
+<blockquote>
+<div><p>resolution parameter. default value=1. Values 0 &lt;= gamma &lt; 1 detect
+larger modules while gamma &gt; 1 detects smaller modules.</p>
 </div></blockquote>
 <p><strong>ci</strong> : Nx1 np.ndarray | None</p>
 <blockquote>
@@ -2379,10 +2387,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.</p>
 <tt class="descclassname">bct.</tt><tt class="descname">modularity_louvain_und</tt><big>(</big><em>W</em>, <em>gamma=1</em>, <em>hierarchy=False</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_louvain_und" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.</p>
-<p>The Louvain algorithm is a fast and accurate community detection 
+<p>The Louvain algorithm is a fast and accurate community detection
 algorithm (as of writing). The algorithm may also be used to detect
 hierarchical community structure.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -2429,13 +2437,13 @@ algorithm. Consequently, it may be worth to compare multiple runs.</p>
 
 <dl class="function">
 <dt id="bct.modularity_louvain_und_sign">
-<tt class="descclassname">bct.</tt><tt class="descname">modularity_louvain_und_sign</tt><big>(</big><em>W</em>, <em>qtype='sta'</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_louvain_und_sign" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">modularity_louvain_und_sign</tt><big>(</big><em>W</em>, <em>gamma=1</em>, <em>qtype='sta'</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_louvain_und_sign" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.</p>
-<p>The Louvain algorithm is a fast and accurate community detection 
+<p>The Louvain algorithm is a fast and accurate community detection
 algorithm (at the time of writing).</p>
 <p>Use this function as opposed to modularity_louvain_und() only if the
 network contains a mix of positive and negative weights.  If the network
@@ -2454,6 +2462,11 @@ negative weights</p>
 <blockquote>
 <div><p>modularity type. Can be &#8216;sta&#8217; (default), &#8216;pos&#8217;, &#8216;smp&#8217;, &#8216;gja&#8217;, &#8216;neg&#8217;.
 See Rubinov and Sporns (2011) for a description.</p>
+</div></blockquote>
+<p><strong>gamma</strong> : float</p>
+<blockquote>
+<div><p>resolution parameter. default value=1. Values 0 &lt;= gamma &lt; 1 detect
+larger modules while gamma &gt; 1 detects smaller modules.</p>
 </div></blockquote>
 <p><strong>seed</strong> : int | None</p>
 <blockquote>
@@ -2480,10 +2493,10 @@ algorithm. Consequently, it may be worth to compare multiple runs.</p>
 
 <dl class="function">
 <dt id="bct.modularity_probtune_und_sign">
-<tt class="descclassname">bct.</tt><tt class="descname">modularity_probtune_und_sign</tt><big>(</big><em>W</em>, <em>qtype='sta'</em>, <em>ci=None</em>, <em>p=0.45</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_probtune_und_sign" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">modularity_probtune_und_sign</tt><big>(</big><em>W</em>, <em>qtype='sta'</em>, <em>gamma=1</em>, <em>ci=None</em>, <em>p=0.45</em>, <em>seed=None</em><big>)</big><a class="headerlink" href="#bct.modularity_probtune_und_sign" title="Permalink to this definition">¶</a></dt>
 <dd><p>The optimal community structure is a subdivision of the network into
 nonoverlapping groups of nodes in a way that maximizes the number of
-within-group edges, and minimizes the number of between-group edges. 
+within-group edges, and minimizes the number of between-group edges.
 The modularity is a statistic that quantifies the degree to which the
 network may be subdivided into such clearly delineated groups.
 High-modularity degeneracy is the presence of many topologically
@@ -2505,6 +2518,11 @@ negative weights</p>
 <blockquote>
 <div><p>modularity type. Can be &#8216;sta&#8217; (default), &#8216;pos&#8217;, &#8216;smp&#8217;, &#8216;gja&#8217;, &#8216;neg&#8217;.
 See Rubinov and Sporns (2011) for a description.</p>
+</div></blockquote>
+<p><strong>gamma</strong> : float</p>
+<blockquote>
+<div><p>resolution parameter. default value=1. Values 0 &lt;= gamma &lt; 1 detect
+larger modules while gamma &gt; 1 detects smaller modules.</p>
 </div></blockquote>
 <p><strong>ci</strong> : Nx1 np.ndarray | None</p>
 <blockquote>
@@ -2583,7 +2601,7 @@ MIn = 2MI(X,Y)/[H(X)+H(Y)]</dd>
 <dl class="function">
 <dt id="bct.find_motif34">
 <tt class="descclassname">bct.</tt><tt class="descname">find_motif34</tt><big>(</big><em>m</em>, <em>n=None</em><big>)</big><a class="headerlink" href="#bct.find_motif34" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function returns all motif isomorphs for a given motif id and 
+<dd><p>This function returns all motif isomorphs for a given motif id and
 class (3 or 4). The function also returns the motif id for a given
 motif matrix</p>
 <ol class="arabic">
@@ -2604,7 +2622,7 @@ Output       Motif_id            e.g. 1 to 13, if class is 3</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>m</strong> : int | matrix</p>
 <blockquote>
 <div><p>In use case 1, a motif_id which is an integer.
-In use case 2, the entire matrix of the motif 
+In use case 2, the entire matrix of the motif
 (e.g. [0 1 0; 0 0 1; 1 0 0])</p>
 </div></blockquote>
 <p><strong>n</strong> : int | None</p>
@@ -2629,8 +2647,8 @@ In use case 2, returns the motif_id for the specified motif matrix</p>
 <dl class="function">
 <dt id="bct.motif3funct_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">motif3funct_bin</tt><big>(</big><em>A</em><big>)</big><a class="headerlink" href="#bct.motif3funct_bin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functional motifs are subsets of connection patterns embedded within 
-anatomical motifs. Motif frequency is the frequency of occurrence of 
+<dd><p>Functional motifs are subsets of connection patterns embedded within
+anatomical motifs. Motif frequency is the frequency of occurrence of
 motifs around a node.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2659,9 +2677,9 @@ motifs around a node.</p>
 <dl class="function">
 <dt id="bct.motif3funct_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">motif3funct_wei</tt><big>(</big><em>W</em><big>)</big><a class="headerlink" href="#bct.motif3funct_wei" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functional motifs are subsets of connection patterns embedded within 
-anatomical motifs. Motif frequency is the frequency of occurrence of 
-motifs around a node. Motif intensity and coherence are weighted 
+<dd><p>Functional motifs are subsets of connection patterns embedded within
+anatomical motifs. Motif frequency is the frequency of occurrence of
+motifs around a node. Motif intensity and coherence are weighted
 generalizations of motif frequency.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2761,8 +2779,8 @@ and coherence are weighted generalizations of motif frequency.</p>
 <dl class="function">
 <dt id="bct.motif4funct_bin">
 <tt class="descclassname">bct.</tt><tt class="descname">motif4funct_bin</tt><big>(</big><em>A</em><big>)</big><a class="headerlink" href="#bct.motif4funct_bin" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functional motifs are subsets of connection patterns embedded within 
-anatomical motifs. Motif frequency is the frequency of occurrence of 
+<dd><p>Functional motifs are subsets of connection patterns embedded within
+anatomical motifs. Motif frequency is the frequency of occurrence of
 motifs around a node.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2791,9 +2809,9 @@ motifs around a node.</p>
 <dl class="function">
 <dt id="bct.motif4funct_wei">
 <tt class="descclassname">bct.</tt><tt class="descname">motif4funct_wei</tt><big>(</big><em>W</em><big>)</big><a class="headerlink" href="#bct.motif4funct_wei" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functional motifs are subsets of connection patterns embedded within 
-anatomical motifs. Motif frequency is the frequency of occurrence of 
-motifs around a node. Motif intensity and coherence are weighted 
+<dd><p>Functional motifs are subsets of connection patterns embedded within
+anatomical motifs. Motif frequency is the frequency of occurrence of
+motifs around a node. Motif intensity and coherence are weighted
 generalizations of motif frequency.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2964,8 +2982,8 @@ in place. Default value=True.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The proportion of elements set to 0 is a fraction of all elements 
-in the matrix, whether or not they are already 0. That is, this function 
+<p>The proportion of elements set to 0 is a fraction of all elements
+in the matrix, whether or not they are already 0. That is, this function
 has the following behavior:</p>
 <p>&gt;&gt; x = np.random.random((10,10))
 &gt;&gt; x_25 = threshold_proportional(x, .25)
@@ -2977,8 +2995,8 @@ has the following behavior:</p>
 &gt;&gt; x_test = threshold_proportional(x_25, .5)
 &gt;&gt; np.size(np.where(x_test))
 46</p>
-<p>That is, the 50% thresholding of x_25 does nothing because &gt;=50% of the 
-elements in x_25 are aleady &lt;=0. This behavior is the same as in BCT. Be 
+<p>That is, the 50% thresholding of x_25 does nothing because &gt;=50% of the
+elements in x_25 are aleady &lt;=0. This behavior is the same as in BCT. Be
 careful with matrices that are both signed and sparse.</p>
 </dd></dl>
 
@@ -3101,8 +3119,8 @@ in place. Default value=True.</p>
 <dl class="function">
 <dt id="bct.invert">
 <tt class="descclassname">bct.</tt><tt class="descname">invert</tt><big>(</big><em>W</em>, <em>copy=True</em><big>)</big><a class="headerlink" href="#bct.invert" title="Permalink to this definition">¶</a></dt>
-<dd><p>Inverts elementwise the weights in an input connection matrix. 
-In other words, change the from the matrix of internode strengths to the 
+<dd><p>Inverts elementwise the weights in an input connection matrix.
+In other words, change the from the matrix of internode strengths to the
 matrix of internode distances.</p>
 <p>If copy is not set, this function will <em>modify W in place.</em></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -3195,7 +3213,7 @@ in place. Default value=True.</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>Assumes CIJ is directed and has no self-connections. 
+<p>Assumes CIJ is directed and has no self-connections.
 Weight information is discarded.</p>
 </dd></dl>
 
@@ -3239,23 +3257,23 @@ Weight information is discarded.</p>
 <dl class="function">
 <dt id="bct.rentian_scaling">
 <tt class="descclassname">bct.</tt><tt class="descname">rentian_scaling</tt><big>(</big><em>A</em>, <em>xyz</em>, <em>n</em><big>)</big><a class="headerlink" href="#bct.rentian_scaling" title="Permalink to this definition">¶</a></dt>
-<dd><p>Physical Rentian scaling (or more simply Rentian scaling) is a property 
-of systems that are cost-efficiently embedded into physical space. It is 
-what is called a &#8220;topo-physical&#8221; property because it combines information 
-regarding the topological organization of the graph with information 
-about the physical placement of connections. Rentian scaling is present 
-in very large scale integrated circuits, the C. elegans neuronal network, 
+<dd><p>Physical Rentian scaling (or more simply Rentian scaling) is a property
+of systems that are cost-efficiently embedded into physical space. It is
+what is called a &#8220;topo-physical&#8221; property because it combines information
+regarding the topological organization of the graph with information
+about the physical placement of connections. Rentian scaling is present
+in very large scale integrated circuits, the C. elegans neuronal network,
 and morphometric and diffusion-based graphs of human anatomical networks.
-Rentian scaling is determined by partitioning the system into cubes, 
-counting the number of nodes inside of each cube (N), and the number of 
-edges traversing the boundary of each cube (E). If the system displays 
-Rentian scaling, these two variables N and E will scale with one another 
-in loglog space. The Rent&#8217;s exponent is given by the slope of log10(E) 
-vs. log10(N), and can be reported alone or can be compared to the 
-theoretical minimum Rent&#8217;s exponent to determine how cost efficiently the 
-network has been embedded into physical space. Note: if a system displays 
-Rentian scaling, it does not automatically mean that the system is 
-cost-efficiently embedded (although it does suggest that). Validation 
+Rentian scaling is determined by partitioning the system into cubes,
+counting the number of nodes inside of each cube (N), and the number of
+edges traversing the boundary of each cube (E). If the system displays
+Rentian scaling, these two variables N and E will scale with one another
+in loglog space. The Rent&#8217;s exponent is given by the slope of log10(E)
+vs. log10(N), and can be reported alone or can be compared to the
+theoretical minimum Rent&#8217;s exponent to determine how cost efficiently the
+network has been embedded into physical space. Note: if a system displays
+Rentian scaling, it does not automatically mean that the system is
+cost-efficiently embedded (although it does suggest that). Validation
 occurs when comparing to the theoretical minimum Rent&#8217;s exponent for that
 system.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -3289,15 +3307,15 @@ want a large enough number to adequately compute Rent&#8217;s exponent.</p>
 <p class="rubric">Notes</p>
 <p>Subsequent Analysis:
 Rentian scaling plots are then created by: figure; loglog(E,N,&#8217;*&#8217;);
-To determine the Rent&#8217;s exponent, p, it is important not to use 
-partitions which may 
-be affected by boundary conditions. In Bassett et al. 2010 PLoS CB, only 
-partitions with N&lt;M/2 were used in the estimation of the Rent&#8217;s exponent. 
-Thus, we can define N_prime = N(find(N&lt;M/2)) and 
-E_prime = E(find(N&lt;M/2)). 
-Next we need to determine the slope of Eprime vs. Nprime in loglog space, 
-which is the Rent&#8217;s 
-exponent. There are many ways of doing this with more or less statistical 
+To determine the Rent&#8217;s exponent, p, it is important not to use
+partitions which may
+be affected by boundary conditions. In Bassett et al. 2010 PLoS CB, only
+partitions with N&lt;M/2 were used in the estimation of the Rent&#8217;s exponent.
+Thus, we can define N_prime = N(find(N&lt;M/2)) and
+E_prime = E(find(N&lt;M/2)).
+Next we need to determine the slope of Eprime vs. Nprime in loglog space,
+which is the Rent&#8217;s
+exponent. There are many ways of doing this with more or less statistical
 rigor. Robustfit in MATLAB is one such option:</p>
 <blockquote>
 <div>[b,stats] = robustfit(log10(N_prime),log10(E_prime))</div></blockquote>
@@ -3311,10 +3329,10 @@ estimation is given by stats.se(1,2).</p>
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="bct.latmio_dir_connected">
-<tt class="descclassname">bct.</tt><tt class="descname">latmio_dir_connected</tt><big>(</big><em>R</em>, <em>iter</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_dir_connected" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">latmio_dir_connected</tt><big>(</big><em>R</em>, <em>itr</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_dir_connected" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function &#8220;latticizes&#8221; a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
-preserves the out-strength but not the in-strength distributions. The 
+preserves the out-strength but not the in-strength distributions. The
 function also ensures that the randomized network maintains
 connectedness, the ability for every node to reach every other node in
 the network. The input network for this function must be connected.</p>
@@ -3326,9 +3344,9 @@ the network. The input network for this function must be connected.</p>
 <blockquote>
 <div><p>directed binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 <p><strong>D</strong> : np.ndarray | None</p>
 <blockquote>
@@ -3361,7 +3379,7 @@ if not specified.</p>
 
 <dl class="function">
 <dt id="bct.latmio_dir">
-<tt class="descclassname">bct.</tt><tt class="descname">latmio_dir</tt><big>(</big><em>R</em>, <em>iter</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_dir" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">latmio_dir</tt><big>(</big><em>R</em>, <em>itr</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function &#8220;latticizes&#8221; a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions.</p>
@@ -3373,9 +3391,9 @@ preserves the out-strength but not the in-strength distributions.</p>
 <blockquote>
 <div><p>directed binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 <p><strong>D</strong> : np.ndarray | None</p>
 <blockquote>
@@ -3408,12 +3426,12 @@ if not specified.</p>
 
 <dl class="function">
 <dt id="bct.latmio_und_connected">
-<tt class="descclassname">bct.</tt><tt class="descname">latmio_und_connected</tt><big>(</big><em>R</em>, <em>iter</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_und_connected" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function &#8220;latticizes&#8221; an undirected network, while preserving the 
-degree distribution. The function does not preserve the strength 
-distribution in weighted networks. The function also ensures that the 
-randomized network maintains connectedness, the ability for every node 
-to reach every other node in the network. The input network for this 
+<tt class="descclassname">bct.</tt><tt class="descname">latmio_und_connected</tt><big>(</big><em>R</em>, <em>itr</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_und_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function &#8220;latticizes&#8221; an undirected network, while preserving the
+degree distribution. The function does not preserve the strength
+distribution in weighted networks. The function also ensures that the
+randomized network maintains connectedness, the ability for every node
+to reach every other node in the network. The input network for this
 function must be connected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3423,9 +3441,9 @@ function must be connected.</p>
 <blockquote>
 <div><p>undirected binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 <p><strong>D</strong> : np.ndarray | None</p>
 <blockquote>
@@ -3458,9 +3476,9 @@ if not specified.</p>
 
 <dl class="function">
 <dt id="bct.latmio_und">
-<tt class="descclassname">bct.</tt><tt class="descname">latmio_und</tt><big>(</big><em>R</em>, <em>iter</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function &#8220;latticizes&#8221; an undirected network, while preserving the 
-degree distribution. The function does not preserve the strength 
+<tt class="descclassname">bct.</tt><tt class="descname">latmio_und</tt><big>(</big><em>R</em>, <em>itr</em>, <em>D=None</em><big>)</big><a class="headerlink" href="#bct.latmio_und" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function &#8220;latticizes&#8221; an undirected network, while preserving the
+degree distribution. The function does not preserve the strength
 distribution in weighted networks.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3470,9 +3488,9 @@ distribution in weighted networks.</p>
 <blockquote>
 <div><p>undirected binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 <p><strong>D</strong> : np.ndarray | None</p>
 <blockquote>
@@ -3506,7 +3524,7 @@ if not specified.</p>
 <dl class="function">
 <dt id="bct.makeevenCIJ">
 <tt class="descclassname">bct.</tt><tt class="descname">makeevenCIJ</tt><big>(</big><em>n</em>, <em>k</em>, <em>sz_cl</em><big>)</big><a class="headerlink" href="#bct.makeevenCIJ" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates a random, directed network with a specified 
+<dd><p>This function generates a random, directed network with a specified
 number of fully connected modules linked together by evenly distributed
 remaining random connections.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -3547,7 +3565,7 @@ Cluster size is 2^sz_cl;</dd>
 <dt id="bct.makefractalCIJ">
 <tt class="descclassname">bct.</tt><tt class="descname">makefractalCIJ</tt><big>(</big><em>mx_lvl</em>, <em>E</em>, <em>sz_cl</em><big>)</big><a class="headerlink" href="#bct.makefractalCIJ" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function generates a directed network with a hierarchical modular
-organization. All modules are fully connected and connection density 
+organization. All modules are fully connected and connection density
 decays as 1/(E^n), with n = index of hierarchical level.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3584,7 +3602,7 @@ decays as 1/(E^n), with n = index of hierarchical level.</p>
 <dl class="function">
 <dt id="bct.makerandCIJdegreesfixed">
 <tt class="descclassname">bct.</tt><tt class="descname">makerandCIJdegreesfixed</tt><big>(</big><em>inv</em>, <em>outv</em><big>)</big><a class="headerlink" href="#bct.makerandCIJdegreesfixed" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates a directed random network with a specified 
+<dd><p>This function generates a directed random network with a specified
 in-degree and out-degree sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3616,10 +3634,10 @@ in(i) + out(j) &lt; n+2
 in(i) + out(i) &lt; n</div></blockquote>
 <p>No connections are placed on the main diagonal</p>
 <p class="last">The algorithm used in this function is not, technically, guaranteed to
-terminate. If a valid distribution of in and out degrees is provided, 
-this function will find it in bounded time with probability 
-1-(1/(2*(k^2))). This turns out to be a serious problem when 
-computing infinite degree matrices, but offers good performance 
+terminate. If a valid distribution of in and out degrees is provided,
+this function will find it in bounded time with probability
+1-(1/(2*(k^2))). This turns out to be a serious problem when
+computing infinite degree matrices, but offers good performance
 otherwise.</p>
 </dd>
 </dl>
@@ -3688,7 +3706,7 @@ otherwise.</p>
 <dl class="function">
 <dt id="bct.makeringlatticeCIJ">
 <tt class="descclassname">bct.</tt><tt class="descname">makeringlatticeCIJ</tt><big>(</big><em>n</em>, <em>k</em><big>)</big><a class="headerlink" href="#bct.makeringlatticeCIJ" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates a directed lattice network with toroidal 
+<dd><p>This function generates a directed lattice network with toroidal
 boundary counditions (i.e. with ring-like &#8220;wrapping around&#8221;).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3713,8 +3731,8 @@ boundary counditions (i.e. with ring-like &#8220;wrapping around&#8221;).</p>
 </tbody>
 </table>
 <p class="rubric">Notes</p>
-<p>The lattice is made by placing connections as close as possible 
-to the main diagonal, with wrapping around. No connections are made 
+<p>The lattice is made by placing connections as close as possible
+to the main diagonal, with wrapping around. No connections are made
 on the main diagonal. In/Outdegree is kept approx. constant at K/N.</p>
 </dd></dl>
 
@@ -3864,13 +3882,13 @@ output connection matrices, rpos_in, rpos_out, rneg_in, rneg_out</p>
 <dt>The value of bin_swaps is ignored when binary topology is fully</dt>
 <dd>connected (e.g. when the network has no negative weights).</dd>
 <dt>Randomization may be better (and execution time will be slower) for</dt>
-<dd>higher values of bin_swaps and wei_freq. Higher values of bin_swaps 
-may enable a more random binary organization, and higher values of 
-wei_freq may enable a more accurate conservation of strength 
+<dd>higher values of bin_swaps and wei_freq. Higher values of bin_swaps
+may enable a more random binary organization, and higher values of
+wei_freq may enable a more accurate conservation of strength
 sequences.</dd>
 <dt>R are the correlation coefficients between positive and negative</dt>
 <dd>strength sequences of input and output connection matrices and are
-used to evaluate the accuracy with which strengths were preserved. 
+used to evaluate the accuracy with which strengths were preserved.
 Note that correlation coefficients may be a rough measure of
 strength-sequence accuracy and one could implement more formal tests
 (such as the Kolmogorov-Smirnov test) if desired.</dd>
@@ -3879,7 +3897,7 @@ strength-sequence accuracy and one could implement more formal tests
 
 <dl class="function">
 <dt id="bct.randmio_dir_connected">
-<tt class="descclassname">bct.</tt><tt class="descname">randmio_dir_connected</tt><big>(</big><em>R</em>, <em>iter</em><big>)</big><a class="headerlink" href="#bct.randmio_dir_connected" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">randmio_dir_connected</tt><big>(</big><em>R</em>, <em>itr</em><big>)</big><a class="headerlink" href="#bct.randmio_dir_connected" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function randomizes a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions. The
@@ -3894,9 +3912,9 @@ the network. The input network for this function must be connected.</p>
 <blockquote>
 <div><p>directed binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -3916,7 +3934,7 @@ the network. The input network for this function must be connected.</p>
 
 <dl class="function">
 <dt id="bct.randmio_dir">
-<tt class="descclassname">bct.</tt><tt class="descname">randmio_dir</tt><big>(</big><em>R</em>, <em>iter</em><big>)</big><a class="headerlink" href="#bct.randmio_dir" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">randmio_dir</tt><big>(</big><em>R</em>, <em>itr</em><big>)</big><a class="headerlink" href="#bct.randmio_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function randomizes a directed network, while preserving the in-
 and out-degree distributions. In weighted networks, the function
 preserves the out-strength but not the in-strength distributions.</p>
@@ -3928,9 +3946,9 @@ preserves the out-strength but not the in-strength distributions.</p>
 <blockquote>
 <div><p>directed binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -3950,13 +3968,18 @@ preserves the out-strength but not the in-strength distributions.</p>
 
 <dl class="function">
 <dt id="bct.randmio_und_connected">
-<tt class="descclassname">bct.</tt><tt class="descname">randmio_und_connected</tt><big>(</big><em>R</em>, <em>iter</em><big>)</big><a class="headerlink" href="#bct.randmio_und_connected" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function randomizes an undirected network, while preserving the 
-degree distribution. The function does not preserve the strength 
-distribution in weighted networks. The function also ensures that the 
-randomized network maintains connectedness, the ability for every node 
-to reach every other node in the network. The input network for this 
+<tt class="descclassname">bct.</tt><tt class="descname">randmio_und_connected</tt><big>(</big><em>R</em>, <em>itr</em><big>)</big><a class="headerlink" href="#bct.randmio_und_connected" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function randomizes an undirected network, while preserving the
+degree distribution. The function does not preserve the strength
+distribution in weighted networks. The function also ensures that the
+randomized network maintains connectedness, the ability for every node
+to reach every other node in the network. The input network for this
 function must be connected.</p>
+<p>NOTE the changes to the BCT matlab function of the same name 
+made in the Jan 2016 release 
+have not been propagated to this function because of substantially
+decreased time efficiency in the implementation. Expect these changes
+to be merged eventually.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3965,9 +3988,9 @@ function must be connected.</p>
 <blockquote>
 <div><p>undirected binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -3987,9 +4010,9 @@ function must be connected.</p>
 
 <dl class="function">
 <dt id="bct.randmio_und">
-<tt class="descclassname">bct.</tt><tt class="descname">randmio_und</tt><big>(</big><em>R</em>, <em>iter</em><big>)</big><a class="headerlink" href="#bct.randmio_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function randomizes an undirected network, while preserving the 
-degree distribution. The function does not preserve the strength 
+<tt class="descclassname">bct.</tt><tt class="descname">randmio_und</tt><big>(</big><em>R</em>, <em>itr</em><big>)</big><a class="headerlink" href="#bct.randmio_und" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function randomizes an undirected network, while preserving the
+degree distribution. The function does not preserve the strength
 distribution in weighted networks.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -3999,9 +4022,9 @@ distribution in weighted networks.</p>
 <blockquote>
 <div><p>undirected binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -4021,10 +4044,10 @@ distribution in weighted networks.</p>
 
 <dl class="function">
 <dt id="bct.randmio_und_signed">
-<tt class="descclassname">bct.</tt><tt class="descname">randmio_und_signed</tt><big>(</big><em>R</em>, <em>iter</em><big>)</big><a class="headerlink" href="#bct.randmio_und_signed" title="Permalink to this definition">¶</a></dt>
+<tt class="descclassname">bct.</tt><tt class="descname">randmio_und_signed</tt><big>(</big><em>R</em>, <em>itr</em><big>)</big><a class="headerlink" href="#bct.randmio_und_signed" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function randomizes an undirected weighted network with positive
-and negative weights, while simultaneously preserving the degree 
-distribution of positive and negative weights. The function does not 
+and negative weights, while simultaneously preserving the degree
+distribution of positive and negative weights. The function does not
 preserve the strength distribution in weighted networks.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4034,9 +4057,9 @@ preserve the strength distribution in weighted networks.</p>
 <blockquote>
 <div><p>undirected binary/weighted connection matrix</p>
 </div></blockquote>
-<p><strong>iter</strong> : int</p>
+<p><strong>itr</strong> : int</p>
 <blockquote>
-<div><p>rewiring parameter. Each edge is rewired approximately iter times.</p>
+<div><p>rewiring parameter. Each edge is rewired approximately itr times.</p>
 </div></blockquote>
 </td>
 </tr>
@@ -4053,9 +4076,9 @@ preserve the strength distribution in weighted networks.</p>
 <dl class="function">
 <dt id="bct.randomize_graph_partial_und">
 <tt class="descclassname">bct.</tt><tt class="descname">randomize_graph_partial_und</tt><big>(</big><em>A</em>, <em>B</em>, <em>maxswap</em><big>)</big><a class="headerlink" href="#bct.randomize_graph_partial_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>A = RANDOMIZE_GRAPH_PARTIAL_UND(A,B,MAXSWAP) takes adjacency matrices A 
-and B and attempts to randomize matrix A by performing MAXSWAP 
-rewirings. The rewirings will avoid any spots where matrix B is 
+<dd><p>A = RANDOMIZE_GRAPH_PARTIAL_UND(A,B,MAXSWAP) takes adjacency matrices A
+and B and attempts to randomize matrix A by performing MAXSWAP
+rewirings. The rewirings will avoid any spots where matrix B is
 nonzero.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4102,9 +4125,9 @@ nonzero.</p>
 <dl class="function">
 <dt id="bct.randomizer_bin_und">
 <tt class="descclassname">bct.</tt><tt class="descname">randomizer_bin_und</tt><big>(</big><em>R</em>, <em>alpha</em><big>)</big><a class="headerlink" href="#bct.randomizer_bin_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function randomizes a binary undirected network, while preserving 
-the degree distribution. The function directly searches for rewirable 
-edge pairs (rather than trying to rewire edge pairs at random), and 
+<dd><p>This function randomizes a binary undirected network, while preserving
+the degree distribution. The function directly searches for rewirable
+edge pairs (rather than trying to rewire edge pairs at random), and
 hence avoids long loops and works especially well in dense matrices.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4136,7 +4159,7 @@ hence avoids long loops and works especially well in dense matrices.</p>
 <dl class="function">
 <dt id="bct.edge_nei_overlap_bd">
 <tt class="descclassname">bct.</tt><tt class="descname">edge_nei_overlap_bd</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.edge_nei_overlap_bd" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function determines the neighbors of two nodes that are linked by 
+<dd><p>This function determines the neighbors of two nodes that are linked by
 an edge, and then computes their overlap.  Connection matrix must be
 binary and directed.  Entries of &#8216;EC&#8217; that are &#8216;inf&#8217; indicate that no
 edge is present.  Entries of &#8216;EC&#8217; that are 0 denote &#8220;local bridges&#8221;,
@@ -4175,7 +4198,7 @@ linked by incoming, outgoing, or reciprocal connections.</p>
 <dl class="function">
 <dt id="bct.edge_nei_overlap_bu">
 <tt class="descclassname">bct.</tt><tt class="descname">edge_nei_overlap_bu</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.edge_nei_overlap_bu" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function determines the neighbors of two nodes that are linked by 
+<dd><p>This function determines the neighbors of two nodes that are linked by
 an edge, and then computes their overlap.  Connection matrix must be
 binary and directed.  Entries of &#8216;EC&#8217; that are &#8216;inf&#8217; indicate that no
 edge is present.  Entries of &#8216;EC&#8217; that are 0 denote &#8220;local bridges&#8221;, i.e.
@@ -4256,7 +4279,7 @@ converted from a similarity to a distance matrix by taking 1-gt.</p>
 <tt class="descclassname">bct.</tt><tt class="descname">matching_ind</tt><big>(</big><em>CIJ</em><big>)</big><a class="headerlink" href="#bct.matching_ind" title="Permalink to this definition">¶</a></dt>
 <dd><p>For any two nodes u and v, the matching index computes the amount of
 overlap in the connection patterns of u and v. Self-connections and
-u-v connections are ignored. The matching index is a symmetric 
+u-v connections are ignored. The matching index is a symmetric
 quantity, similar to a correlation or a dot product.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4320,7 +4343,7 @@ mutual connection, should it exist).</p>
 <dl class="function">
 <dt id="bct.dice_pairwise_und">
 <tt class="descclassname">bct.</tt><tt class="descname">dice_pairwise_und</tt><big>(</big><em>a1</em>, <em>a2</em><big>)</big><a class="headerlink" href="#bct.dice_pairwise_und" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates pairwise dice similarity for each vertex between two 
+<dd><p>Calculates pairwise dice similarity for each vertex between two
 matrices. Treats the matrices as binary and undirected.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4410,11 +4433,11 @@ same way.</p>
 <p>Instead of doing this, I have included code that will plot the adjacency
 matrix onto nodes at the given spatial coordinates in mayavi</p>
 <p>This routine is basically a less featureful version of the 3D brain in
-cvu, the connectome visualization utility which I also maintain. cvu uses 
-freesurfer surfaces and annotations to get the node coordinates (rather     
-than leaving them up to the user) and has many other interactive 
+cvu, the connectome visualization utility which I also maintain. cvu uses
+freesurfer surfaces and annotations to get the node coordinates (rather
+than leaving them up to the user) and has many other interactive
 visualization features not included here for the sake of brevity.</p>
-<p>There are other similar visualizations in the ConnectomeViewer and the 
+<p>There are other similar visualizations in the ConnectomeViewer and the
 UCLA multimodal connectivity database.</p>
 <p>Note that unlike other bctpy functions, this function depends on mayavi.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -4476,7 +4499,7 @@ the nodes in M2.  The function uses a version of simulated annealing.</p>
 </div></blockquote>
 <p><strong>Texp</strong> : int</p>
 <blockquote>
-<div><p>annealing parameter, default value 1. Coefficient of H s.t. 
+<div><p>annealing parameter, default value 1. Coefficient of H s.t.
 Texp0=1-Texp/H</p>
 </div></blockquote>
 <p><strong>T0</strong> : float</p>
@@ -4511,11 +4534,11 @@ Hbrk0 = H/Hkbr</p>
 They must have the same number of nodes.  M1 can be entered in any
 node ordering.</p>
 <p>Note that in general, the outcome will depend on the initial condition
-(the setting of the random number seed).  Also, there is no good way to 
-determine optimal annealing parameters in advance - these parameters 
-will need to be adjusted &#8220;by hand&#8221; (particularly H, Texp, T0, and Hbrk).  
-For large and/or dense matrices, it is highly recommended to perform 
-exploratory runs varying the settings of &#8216;H&#8217; and &#8216;Texp&#8217; and then select 
+(the setting of the random number seed).  Also, there is no good way to
+determine optimal annealing parameters in advance - these parameters
+will need to be adjusted &#8220;by hand&#8221; (particularly H, Texp, T0, and Hbrk).
+For large and/or dense matrices, it is highly recommended to perform
+exploratory runs varying the settings of &#8216;H&#8217; and &#8216;Texp&#8217; and then select
 the best values.</p>
 <p>Based on extensive testing, it appears that T0 and Hbrk can remain
 unchanged in most cases.  Texp may be varied from 1-1/H to 1-10/H, for
@@ -4538,7 +4561,7 @@ instead.</p>
 <tt class="descclassname">bct.</tt><tt class="descname">backbone_wu</tt><big>(</big><em>CIJ</em>, <em>avgdeg</em><big>)</big><a class="headerlink" href="#bct.backbone_wu" title="Permalink to this definition">¶</a></dt>
 <dd><p>The network backbone contains the dominant connections in the network
 and may be used to aid network visualization. This function computes
-the backbone of a given weighted and undirected connection matrix CIJ, 
+the backbone of a given weighted and undirected connection matrix CIJ,
 using a minimum-spanning-tree based algorithm.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -4616,7 +4639,7 @@ matlab due to differences between matplotlib and matlab.  This function
 has been designed to work with matplotlib, as in the following example:</p>
 <p>ci,_=modularity_und(adj)
 bounds,ixes=grid_communities(ci)
-pylab.imshow(adj[np.ix_(ixes,ixes)],interpolation=&#8217;none&#8217;,cmap=&#8217;BuGn&#8217;)       
+pylab.imshow(adj[np.ix_(ixes,ixes)],interpolation=&#8217;none&#8217;,cmap=&#8217;BuGn&#8217;)
 for b in bounds:</p>
 <blockquote>
 <div>pylab.axvline(x=b,color=&#8217;red&#8217;)
@@ -4702,7 +4725,7 @@ Default is linear lattice.</p>
 </div></blockquote>
 <p><strong>Texp</strong> : int</p>
 <blockquote>
-<div><p>annealing parameter, default value 1. Coefficient of H s.t. 
+<div><p>annealing parameter, default value 1. Coefficient of H s.t.
 Texp0=1-Texp/H</p>
 </div></blockquote>
 <p><strong>T0</strong> : float</p>
@@ -4734,11 +4757,11 @@ Hbrk0 = H/Hkbr</p>
 </table>
 <p class="rubric">Notes</p>
 <p>Note that in general, the outcome will depend on the initial condition
-(the setting of the random number seed).  Also, there is no good way to 
-determine optimal annealing parameters in advance - these paramters 
-will need to be adjusted &#8220;by hand&#8221; (particularly H, Texp, and T0).  
-For large and/or dense matrices, it is highly recommended to perform 
-exploratory runs varying the settings of &#8216;H&#8217; and &#8216;Texp&#8217; and then select 
+(the setting of the random number seed).  Also, there is no good way to
+determine optimal annealing parameters in advance - these paramters
+will need to be adjusted &#8220;by hand&#8221; (particularly H, Texp, and T0).
+For large and/or dense matrices, it is highly recommended to perform
+exploratory runs varying the settings of &#8216;H&#8217; and &#8216;Texp&#8217; and then select
 the best values.</p>
 <p>Based on extensive testing, it appears that T0 and Hbrk can remain
 unchanged in most cases.  Texp may be varied from 1-1/H to 1-10/H, for
@@ -4814,117 +4837,6 @@ use directed as the default value.</p>
 </div>
 <div class="section" id="network-based-statistic">
 <h1>Network Based Statistic<a class="headerlink" href="#network-based-statistic" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="nbs.nbs_bct">
-<tt class="descclassname">nbs.</tt><tt class="descname">nbs_bct</tt><big>(</big><em>x</em>, <em>y</em>, <em>thresh</em>, <em>k=1000</em>, <em>tail='both'</em>, <em>paired=False</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#nbs.nbs_bct" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs the NBS for populations X and Y for a t-statistic threshold of
-alpha.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : NxNxP np.ndarray</p>
-<blockquote>
-<div><p>matrix representing the first population with P subjects. must be
-symmetric.</p>
-</div></blockquote>
-<p><strong>y</strong> : NxNxQ np.ndarray</p>
-<blockquote>
-<div><p>matrix representing the second population with Q subjects. Q need not
-equal P. must be symmetric.</p>
-</div></blockquote>
-<p><strong>thresh</strong> : float</p>
-<blockquote>
-<div><p>minimum t-value used as threshold</p>
-</div></blockquote>
-<p><strong>k</strong> : int</p>
-<blockquote>
-<div><p>number of permutations used to estimate the empirical null 
-distribution</p>
-</div></blockquote>
-<p><strong>tail</strong> : {&#8216;left&#8217;, &#8216;right&#8217;, &#8216;both&#8217;}</p>
-<blockquote>
-<div><p>enables specification of particular alternative hypothesis
-&#8216;left&#8217; : mean population of X &lt; mean population of Y
-&#8216;right&#8217; : mean population of Y &lt; mean population of X
-&#8216;both&#8217; : means are unequal (default)</p>
-</div></blockquote>
-<p><strong>paired</strong> : bool</p>
-<blockquote>
-<div><p>use paired sample t-test instead of population t-test. requires both
-subject populations to have equal N. default value = False</p>
-</div></blockquote>
-<p><strong>verbose</strong> : bool</p>
-<blockquote>
-<div><p>print some extra information each iteration. defaults value = False</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>pval</strong> : Cx1 np.ndarray</p>
-<blockquote>
-<div><p>A vector of corrected p-values for each component of the networks
-identified. If at least one p-value is less than alpha, the omnibus
-null hypothesis can be rejected at alpha significance. The null
-hypothesis is that the value of the connectivity from each edge has
-equal mean across the two populations.</p>
-</div></blockquote>
-<p><strong>adj</strong> : IxIxC np.ndarray</p>
-<blockquote>
-<div><p>an adjacency matrix identifying the edges comprising each component.
-edges are assigned indexed values.</p>
-</div></blockquote>
-<p><strong>null</strong> : Kx1 np.ndarray</p>
-<blockquote class="last">
-<div><p>A vector of K sampled from the null distribution of maximal component 
-size.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Notes</p>
-<p>ALGORITHM DESCRIPTION 
-The NBS is a nonparametric statistical test used to isolate the 
-components of an N x N undirected connectivity matrix that differ 
-significantly between two distinct populations. Each element of the 
-connectivity matrix stores a connectivity value and each member of 
-the two populations possesses a distinct connectivity matrix. A 
-component of a connectivity matrix is defined as a set of 
-interconnected edges.</p>
-<p>The NBS is essentially a procedure to control the family-wise error 
-rate, in the weak sense, when the null hypothesis is tested 
-independently at each of the N(N-1)/2 edges comprising the undirected
-connectivity matrix. The NBS can provide greater statistical power 
-than conventional procedures for controlling the family-wise error 
-rate, such as the false discovery rate, if the set of edges at which
-the null hypothesis is rejected constitues a large component or
-components.
-The NBS comprises fours steps:
-1. Perform a two-sample T-test at each edge indepedently to test the</p>
-<blockquote>
-<div>hypothesis that the value of connectivity between the two
-populations come from distributions with equal means.</div></blockquote>
-<ol class="arabic simple" start="2">
-<li>Threshold the T-statistic available at each edge to form a set of
-suprathreshold edges.</li>
-<li>Identify any components in the adjacency matrix defined by the set
-of suprathreshold edges. These are referred to as observed 
-components. Compute the size of each observed component 
-identified; that is, the number of edges it comprises.</li>
-<li>Repeat K times steps 1-3, each time randomly permuting members of
-the two populations and storing the size of the largest component 
-identified for each permuation. This yields an empirical estimate
-of the null distribution of maximal component size. A corrected 
-p-value for each observed component is then calculated using this
-null distribution.</li>
-</ol>
-<dl class="docutils">
-<dt>[1] Zalesky A, Fornito A, Bullmore ET (2010) Network-based statistic:</dt>
-<dd>Identifying differences in brain networks. NeuroImage.
-10.1016/j.neuroimage.2010.06.041</dd>
-</dl>
-</dd></dl>
-
 </div>
 
 
@@ -4986,7 +4898,7 @@ null distribution.</li>
     </div>
     <div class="footer">
         &copy; Copyright 2015, rlaplant.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.3.
     </div>
   </body>
 </html>

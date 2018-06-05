@@ -7,13 +7,13 @@ This file was last updated in 2014
 
 ADJACENCY_PLOT_UND
 	Richard Betzel			Indiana University		2013
-AGREEMENT 
+AGREEMENT
 (agreement agreement_weighted)
 	Richard Betzel			Indiana University		2013
 ALIGN_MATRICES
 	Yusuke Adachi			University of Tokyo		2010
 	Olaf Sporns				Indiana University		2010
-ASSORTATIVITY 
+ASSORTATIVITY
 (assortativity_bin assortativity_wei)
 	Olaf Sporns				Indiana University		2007/2008
 	Vassilis Tsiaras		University of Crete		2009
@@ -55,7 +55,7 @@ DENSITY
 	Olaf Sporns				Indiana University		2002/2007/2008
 	Tony Herdman			SFU						2009/2010
 DISTANCE
-(distance_bin distance_wei)
+(distance_bin distance_wei distance_wei_floyd)
 	Mika Rubinov			UNSW/Cambridge			2007-2012
 	Richard Betzel			Indiana University		2012
 	Andrea Avena			Indiana University		2012
@@ -73,7 +73,7 @@ EDGE_BETWEENNESS
 EDGE_NEI_OVERLAP
 (edge_nei_overlap_bd edge_nei_overlap_bu)
 	Olaf Sporns				Indiana University		2012
-		Easley and Kleinberg (2010) Networks, Crowds, and Markets. 
+		Easley and Kleinberg (2010) Networks, Crowds, and Markets.
 EFFICIENCY
 (efficiency_bin efficiency_wei)
 	Mika Rubinov			UNSW/Cambridge			2008-2013
@@ -124,6 +124,9 @@ MATCHING_IND
 (matching_ind matching_ind_und)
 	Olaf Sporns				Indiana University		2002/2007/2008
 	Richard Betzel			Indiana University		2013
+MEAN FIRST PASSAGE TIME
+(mean_first_passage_time)
+	Joaquin Goñi			Indiana University		2012
 MODULARITY
 (modularity_dir modularity_und)
 	Mika Rubinov			UNSW/Cambridge			2008-2013
@@ -145,7 +148,7 @@ MODULARITY_LOUVAIN
 (modularity_louvain_dir modularity_louvain_und modularity_louvain_und_sign)
 	Mika Rubinov			UNSW/Cambridge			2010/2011/2013
 		Blondel et al. (2008)  J. Stat. Mech. P10008.
-		Reichardt and Bornholdt (2006) Phys. Rev. E 74, 016110. 
+		Reichardt and Bornholdt (2006) Phys. Rev. E 74, 016110.
 		Rubinov and Sporns (2011) NeuroImage.
 MODULE_DEGREE_ZSCORE
 	Mika Rubinov			UNSW					2008-2010
@@ -195,12 +198,20 @@ REORDER_MAT
 	Yusuke Adachi			University of Tokyo		2010
 	Olaf Sporns				Indiana University		2010
 	Mika Rubinov			UNSW/Cambridge			2011
+RETRIEVE_SHORTEST_PATH
+(retrieve_shortest_path)
+	Andrea Avena			Indiana University		2012
+	Joaquin Goñi			Indiana University		2012
 RICH_CLUB
 (rich_club_bd rich_club_bu rich_club_wd rich_club_wu)
 	Martijn van den Heuvel	Univ. Med. Ctr. Utrecht	2011
 		Colizza et al. (2006) Nat. Phys. 2:110.
 		Opsahl et al. Phys Rev Lett, 2008, 101(16)
 		Martijn van den Heuvel, University Medical Center Utrecht, 2011
+SEARCH INFORMATION
+(search_information)
+	Andrea Avena			Indiana University		2014
+	Joaquin Goñi			Indiana University		2014
 SCORE
 	Olaf Sporns				Indiana University		2007/2008/2010/2012
 STRENGTHS

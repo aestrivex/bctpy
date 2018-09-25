@@ -741,6 +741,46 @@ def participation_coef(W, ci, degree='undirected'):
 
     return P
 
+def participation_coef_sparse(W, ci, degree='undirected'):
+	'''
+	Participation coefficient is a measure of diversity of intermodular
+	connections of individual nodes.
+	Parameters
+	----------
+	W : NxN np.ndarray
+		binary/weighted directed/undirected connection
+		must be as scipy.sparse.csr matrix
+	ci : Nx1 np.ndarray
+		community affiliation vector
+	degree : str
+		Flag to describe nature of graph 'undirected': For undirected graphs
+										 'in': Uses the in-degree
+										 'out': Uses the out-degree
+	Returns
+	-------
+	P : Nx1 np.ndarray
+		participation coefficient
+	'''
+	if degree == 'in':
+		W = W.T
+
+	_, ci = np.unique(ci, return_inverse=True)
+	ci += 1
+
+	n = W.shape[0]  # number of vertices
+	Ko = np.array(W.sum(axis=1)).flatten().astype(float)  # (out) degree
+	Gc = W.copy().astype('int16')
+	Gc[Gc!=0] = 1 
+	Gc = Gc * np.diag(ci)# neighbor community affiliation
+	
+	P = np.zeros((n))
+	for i in range(1, int(np.max(ci)) + 1):
+		P = P + (np.array((W.multiply(Gc == i).astype(int)).sum(axis=1)).flatten() / Ko)**2
+	P = 1 - P
+	# P=0 if for nodes with no (out) neighbors
+	P[np.where(np.logical_not(Ko))] = 0
+
+	return P
 
 def participation_coef_sign(W, ci):
     '''

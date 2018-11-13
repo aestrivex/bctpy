@@ -107,8 +107,8 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
     n = len(W)
     s = np.sum(W)
 
-    if np.min(W) < -1e-10:
-        raise BCTParamError('adjmat must not contain negative weights')
+    #if np.min(W) < -1e-10:
+    #    raise BCTParamError('adjmat must not contain negative weights')
 
     if ci is None:
         ci = np.arange(n) + 1
@@ -118,17 +118,17 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         _, ci = np.unique(ci, return_inverse=True)
         ci += 1
     Mb = ci.copy()
-
+    renormalize = False
     if B in ('negative_sym', 'negative_asym'):
+        renormalize = True
         W0 = W * (W > 0)
         s0 = np.sum(W0)
-        B0 = W0 - gamma * np.outer(np.sum(W0, axis=1), np.sum(W, axis=0)) / s0
+        B0 = W0 - gamma * np.outer(np.sum(W0, axis=1), np.sum(W0, axis=0)) / s0
 
-        W1 = W * (W < 0)
+        W1 = -W * (W < 0)
         s1 = np.sum(W1)
         if s1:
-            B1 = (W1 - gamma * np.outer(np.sum(W1, axis=1), np.sum(W1, axis=0))
-                / s1)
+            B1 = W1 - gamma * np.outer(np.sum(W1, axis=1), np.sum(W1, axis=0)) / s1
         else:
             B1 = 0
 
@@ -145,9 +145,9 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
     elif B == 'potts':
         B = W - gamma * np.logical_not(W)
     elif B == 'negative_sym':
-        B = B0 / (s0 + s1) - B1 / (s0 + s1)
+        B = (B0 / (s0 + s1)) - (B1 / (s0 + s1))
     elif B == 'negative_asym':
-        B = B0 / s0 - B1 / (s0 + s1)
+        B = (B0 / s0) - (B1 / (s0 + s1))
     else:
         try:
             B = np.array(B)
@@ -161,7 +161,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             print ('Warning: objective function matrix not symmetric, '
                    'symmetrizing')
             B = (B + B.T) / 2
-
+    
     Hnm = np.zeros((n, n))
     for m in range(1, n + 1):
         Hnm[:, m - 1] = np.sum(B[:, ci == m], axis=1)  # node to module degree
@@ -228,9 +228,14 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         Hm = H.copy()
 
         q0 = q
-        q = np.trace(B) / s  # compute modularity
 
-    return ci, q
+        q = np.trace(B)  # compute modularity
+    
+    # Workaround to normalize
+    if not renormalize:
+        return ci, q/s
+    else:
+        return ci, q
 
 
 def link_communities(W, type_clustering='single'):

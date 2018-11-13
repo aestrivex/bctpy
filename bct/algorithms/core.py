@@ -177,7 +177,6 @@ def core_periphery_dir(W, gamma=1, C0=None):
     ncix, = np.where(np.logical_not(C))
     q = np.sum(B[np.ix_(cix, cix)]) - np.sum(B[np.ix_(ncix, ncix)])
 
-    print(q)
     #sqish
 
     flag = True
@@ -203,21 +202,13 @@ def core_periphery_dir(W, gamma=1, C0=None):
 
             max_Qt = np.max(Qt[ixes])
             u, = np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10)
-            print(np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10))
-            print(Qt[ixes])
-            print(max_Qt)
             #tunourn
             u = u[np.random.randint(len(u))]
-            print(np.sum(Ct))
             Ct[ixes[u]] = np.logical_not(Ct[ixes[u]])
-            print(np.sum(Ct))
             #casga
 
             ixes = np.delete(ixes, u)
             
-            print(max_Qt - q)
-            print(len(ixes))
-
             if max_Qt - q > 1e-10:
                 flag = True
                 C = Ct.copy()

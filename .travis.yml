@@ -1,24 +1,16 @@
 language: python
 
-sudo : false
-
-python:
-  - "2.7"
-  - "3.5"
-
-# command to set up conda
-before_install:
-  - if [ ${TRAVIS_PYTHON_VERSION:O:1} == "2" ]; then wget http://repo.continuum.io/miniconda/Miniconda2-3.19.0-Linux-x86_64.sh -O miniconda.sh; else wget http://repo.continuum.io/miniconda/Miniconda3-3.19.0-Linux-x86_64.sh -O miniconda.sh; fi
-  - bash miniconda.sh -b -p /home/travis/mc
-  - export PATH=/home/travis/mc/bin:$PATH
+matrix:
+  include:
+    - python: 2.7
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+      dist: xenial
+      sudo: true
 
 # command to install dependencies
-install: 
-  - conda update --yes conda
-  - conda create -n testenv --yes numpy=1.10 scipy=0.17 nose setuptools python=${TRAVIS_PYTHON_VERSION}
-  - source activate testenv
-  - python setup.py install
+install: pip install tox-travis
 
 # command to run tests
-script:
-  - nosetests --ignore-files="very_long_tests" -v
+script: tox

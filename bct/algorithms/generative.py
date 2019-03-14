@@ -1,14 +1,14 @@
 from __future__ import division, print_function
 import numpy as np
 
-from bct.utils import BCTParamError
+from bct.utils import BCTParamError, get_rng
 from .similarity import matching_ind
 from .clustering import clustering_coef_bu
 from .centrality import betweenness_bin
 
 
 def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
-    model_var='powerlaw', epsilon=1e-6, copy=True):
+    model_var='powerlaw', epsilon=1e-6, copy=True, seed=None):
     '''
     Generates synthetic networks using the models described in
     Betzel et al. (2016) Neuroimage. See this paper for more details.
@@ -64,8 +64,11 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     copy : bool
         Some algorithms add edges directly to the input matrix. Set this flag
         to make a copy of the input matrix instead. Defaults to True.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
     '''
-
+    rng = get_rng(seed)
     if copy:
         A = A.copy()
 
@@ -179,7 +182,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         #print(mseed, m)
         for i in range(mseed+1, m):
             C = np.append(0, np.cumsum(Ff[u,v]))
-            r = np.sum(np.random.random()*C[-1] >= C)
+            r = np.sum(rng.random_sample()*C[-1] >= C)
             uu = u[r]
             vv = v[r]
             A[uu,vv] = A[vv,uu] = 1
@@ -257,7 +260,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         #print(mseed, m)
         for i in range(mseed, m):
             C = np.append(0, np.cumsum(P[u,v]))
-            r = np.sum(np.random.random()*C[-1] >= C)
+            r = np.sum(rng.random_sample()*C[-1] >= C)
             uu = u[r]
             vv = v[r]
             k[uu] += 1
@@ -324,7 +327,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     
         for ii in range(mseed, m):
             C = np.append(0, np.cumsum(Ff[u,v]))
-            r = np.sum(np.random.random()*C[-1] >= C)
+            r = np.sum(rng.random_sample()*C[-1] >= C)
             uu = u[r]
             vv = v[r]
             A[uu,vv] = A[vv,uu] = 1
@@ -394,7 +397,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     
         for ii in range(mseed, m):
             C = np.append(0, np.cumsum(Ff[u,v]))
-            r = np.sum(np.random.random()*C[-1] >= C)
+            r = np.sum(rng.random_sample()*C[-1] >= C)
             uu = u[r]
             vv = v[r]
             A[uu, vv] = A[vv, uu] = 1
@@ -446,7 +449,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         b[:mseed] = np.squeeze(np.where(A[u, v]))
         for i in range(mseed, m):
             C = np.append(0, np.cumsum(P[u, v]))
-            r = np.sum(np.random.random()*C[-1] >= C)
+            r = np.sum(rng.random_sample()*C[-1] >= C)
             b[i] = r
             P = Fd
             P[u[b[:i]], v[b[:i]]] = P[v[b[:i]], u[b[:i]]] = 0
@@ -524,7 +527,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     return np.squeeze(B)
 
 def evaluate_generative_model(A, Atgt, D, eta, gamma=None, 
-    model_type='matching', model_var='powerlaw', epsilon=1e-6):
+    model_type='matching', model_var='powerlaw', epsilon=1e-6, seed=None):
     '''
     Generates synthetic networks with parameters provided and evaluates their
     energy function. The energy function is defined as in Betzel et al. 2016.
@@ -543,7 +546,7 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
     xe = D[np.triu(Atgt, 1) > 0]
 
     B = generative_model(A, D, m, eta, gamma, model_type=model_type, 
-                         model_var=model_var, epsilon=epsilon, copy=True)
+                         model_var=model_var, epsilon=epsilon, copy=True, seed=seed)
 
     #if eta != gamma then an error is thrown within generative model
     

@@ -103,7 +103,7 @@ def test_modularity_finetune_und_sign_actually_finetune():
 
     seed = 88215881
     np.random.seed(seed)
-    randomized_sample = np.random.random(size=(len(x), len(x)))
+    randomized_sample = np.random.random_sample(size=(len(x), len(x)))
     randomized_sample = randomized_sample + randomized_sample.T
     x[np.where(bct.threshold_proportional(randomized_sample, .2))] = 0
 

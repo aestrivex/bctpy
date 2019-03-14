@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 
+from ..utils.miscellaneous_utilities import get_rng
+
 
 def density_dir(CIJ):
     '''
@@ -60,7 +62,7 @@ def density_und(CIJ):
     return kden, n, k
 
 
-def rentian_scaling(A, xyz, n):
+def rentian_scaling(A, xyz, n, seed=None):
     '''
     Physical Rentian scaling (or more simply Rentian scaling) is a property
     of systems that are cost-efficiently embedded into physical space. It is
@@ -91,6 +93,9 @@ def rentian_scaling(A, xyz, n):
     n : int
         Number of partitions to compute. Each partition is a data point; you
         want a large enough number to adequately compute Rent's exponent.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -118,6 +123,7 @@ def rentian_scaling(A, xyz, n):
 
     Note: n=5000 was used in Bassett et al. 2010 in PLoS CB.
     '''
+    rng = get_rng(seed)
     m = np.size(xyz, axis=0)  # find number of nodes in system
 
     # rescale coordinates so they are all greater than unity
@@ -135,7 +141,7 @@ def rentian_scaling(A, xyz, n):
     # and the number of edges traversing the boundary of the partition (e)
     while count < n:
         # define cube endpoints
-        randx = np.sort((1 + nmax - nmin) * np.random.random((2,)))
+        randx = np.sort((1 + nmax - nmin) * rng.random_sample((2,)))
 
         # find nodes in cube
         l1 = xyzn[:, 0] > randx[0]

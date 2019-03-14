@@ -4,6 +4,8 @@
 
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 
+Tested against python 2.7 and 3.5+.
+
 ## Copyright information
 
 This program strictly observes the tenets of fundamentalist Theravada Mahasi

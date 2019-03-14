@@ -1,14 +1,14 @@
 from __future__ import division, print_function
 import numpy as np
 
-from .utils import BCTParamError
+from .utils import BCTParamError, get_rng
 from .algorithms import get_components
 
 # FIXME considerable gains could be realized using vectorization, although
 # generating the null distribution will take a while
 
 
-def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
+def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False, seed=None):
     '''
     Performs the NBS for populations X and Y for a t-statistic threshold of
     alpha.
@@ -36,6 +36,9 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
         subject populations to have equal N. default value = False
     verbose : bool
         print some extra information each iteration. defaults value = False
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -92,6 +95,7 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
         Identifying differences in brain networks. NeuroImage.
         10.1016/j.neuroimage.2010.06.041
     '''
+    rng = get_rng(seed)
 
     def ttest2_stat_only(x, y, tail):
         t = np.mean(x) - np.mean(y)
@@ -203,10 +207,10 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False):
     for u in range(k):
         # randomize
         if paired:
-            indperm = np.sign(0.5 - np.random.rand(1, nx))
+            indperm = np.sign(0.5 - rng.rand(1, nx))
             d = np.hstack((xmat, ymat)) * np.hstack((indperm, indperm))
         else:
-            d = np.hstack((xmat, ymat))[:, np.random.permutation(nx + ny)]
+            d = np.hstack((xmat, ymat))[:, rng.permutation(nx + ny)]
 
         t_stat_perm = np.zeros((m,))
         for i in range(m):

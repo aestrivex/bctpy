@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import random
 import numpy as np
 
 
@@ -105,6 +106,9 @@ def get_rng(seed=None):
         return np.random.mtrand._rand
     elif isinstance(seed, np.random.RandomState):
         return seed
-    else:
-        return np.random.RandomState(seed)
+    try:
+        rstate =  np.random.RandomState(seed)
+    except ValueError:
+        rstate = np.random.RandomState(random.Random(seed).randint(0, 2**32-1))
+    return rstate
 

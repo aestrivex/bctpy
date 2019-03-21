@@ -62,7 +62,7 @@ def threshold_proportional(W, p, copy=True):
     in the matrix, whether or not they are already 0. That is, this function
     has the following behavior:
 
-    >> x = np.random.random((10,10))
+    >> x = np.random.random_sample((10,10))
     >> x_25 = threshold_proportional(x, .25)
     >> np.size(np.where(x_25)) #note this double counts each nonzero element
     46

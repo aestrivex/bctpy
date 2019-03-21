@@ -1,7 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
 from .modularity import modularity_louvain_und_sign
-from bct.utils import cuberoot, BCTParamError, dummyvar, binarize
+from bct.utils import cuberoot, BCTParamError, dummyvar, binarize, get_rng
 from .distance import breadthdist
 
 
@@ -316,7 +316,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
         C = cyc3 / cyc2
         return C
 
-def consensus_und(D, tau, reps=1000):
+def consensus_und(D, tau, reps=1000, seed=None):
     '''
     This algorithm seeks a consensus partition of the
     agreement matrix D. The algorithm used here is almost identical to the
@@ -350,12 +350,16 @@ def consensus_und(D, tau, reps=1000):
     reps : int
         number of times the clustering algorithm is reapplied. default value
         is 1000.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
     ciu : Nx1 np.ndarray
         consensus partition
     '''
+    rng = get_rng(seed)
     def unique_partitions(cis):
         # relabels the partitions to recognize different numbers on same
         # topology
@@ -401,7 +405,7 @@ def consensus_und(D, tau, reps=1000):
         else:
             cis = np.zeros((n, reps))
             for i in np.arange(reps):
-                cis[:, i], _ = modularity_louvain_und_sign(dt)
+                cis[:, i], _ = modularity_louvain_und_sign(dt, seed=rng)
             ciu = unique_partitions(cis)
             nu = np.size(ciu, axis=1)
             if nu > 1:

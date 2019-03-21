@@ -1,4 +1,5 @@
 from __future__ import division, print_function
+import random
 import numpy as np
 
 
@@ -17,14 +18,15 @@ def teachers_round(x):
         return int(np.floor(x))
 
 
-def pick_four_unique_nodes_quickly(n):
+def pick_four_unique_nodes_quickly(n, seed=None):
     '''
     This is equivalent to np.random.choice(n, 4, replace=False)
 
-    Another fellow suggested np.random.random(n).argpartition(4) which is
+    Another fellow suggested np.random.random_sample(n).argpartition(4) which is
     clever but still substantially slower.
     '''
-    k = np.random.randint(n**4)
+    rng = get_rng(seed)
+    k = rng.randint(n**4)
     a = k % n
     b = k // n % n
     c = k // n ** 2 % n
@@ -38,7 +40,7 @@ def pick_four_unique_nodes_quickly(n):
 
         # In my profiling it only took 0.4 seconds to include the uniqueness
         # check in 1 million runs of this function so I think it is OK.
-        return pick_four_unique_nodes_quickly(n)
+        return pick_four_unique_nodes_quickly(n, rng)
 
 
 def cuberoot(x):
@@ -82,3 +84,31 @@ def dummyvar(cis, return_sparse=False):
     import scipy.sparse as sp
     dv = sp.csc_matrix((np.repeat((1,), nnz), ix.T.flat, indptr), shape=(n, r))
     return dv.toarray()
+
+
+def get_rng(seed=None):
+    """
+    By default, or if `seed` is np.random, return the global RandomState
+    instance used by np.random.
+    If `seed` is a RandomState instance, return it unchanged.
+    Otherwise, use the passed (hashable) argument to seed a new instance
+    of RandomState and return it.
+
+    Parameters
+    ----------
+    seed : hashable or np.random.RandomState or np.random, optional
+
+    Returns
+    -------
+    np.random.RandomState
+    """
+    if seed is None or seed == np.random:
+        return np.random.mtrand._rand
+    elif isinstance(seed, np.random.RandomState):
+        return seed
+    try:
+        rstate =  np.random.RandomState(seed)
+    except ValueError:
+        rstate = np.random.RandomState(random.Random(seed).randint(0, 2**32-1))
+    return rstate
+

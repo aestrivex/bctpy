@@ -1,3 +1,12 @@
+# In progress
+
+- Make randomness-based functions seedable
+- Test against more python versions
+
+# BCT 0.5.0
+
+- to do
+
 # BCT 0.4.1
 
 - Refactor code into multiple files

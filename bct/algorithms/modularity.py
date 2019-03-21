@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
-from bct.utils import BCTParamError, normalize
+from bct.utils import BCTParamError, normalize, get_rng
 
 
 def ci2ls(ci):
@@ -92,8 +92,9 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             'potts' uses Potts model Hamiltonian.
             'negative_sym' symmetric treatment of negative weights
             'negative_asym' asymmetric treatment of negative weights
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -102,8 +103,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
     q : float
         optimized q-statistic (modularity only)
     '''
-    np.random.seed(seed)
-
+    rng = get_rng(seed)
     n = len(W)
     s = np.sum(W)
 
@@ -183,7 +183,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
                 raise BCTParamError('Modularity infinite loop style G. '
                                     'Please contact the developer.')
             flag = False
-            for u in np.random.permutation(n):
+            for u in rng.permutation(n):
                 ma = Mb[u] - 1
                 dQ = Hnm[u, :] - Hnm[u, ma] + B[u, u]  # algorithm condition
                 dQ[ma] = 0
@@ -583,8 +583,9 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -598,7 +599,7 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)  # number of nodes
     if ci is None:
@@ -623,7 +624,7 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     flag = True
     while flag:
         flag = False
-        for u in np.random.permutation(n):  # loop over nodes in random order
+        for u in rng.permutation(n):  # loop over nodes in random order
             ma = ci[u] - 1  # current module of u
             # algorithm condition
             dq_o = ((knm_o[u, :] - knm_o[u, ma] + W[u, u]) -
@@ -684,8 +685,9 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -699,7 +701,7 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     #import time
     n = len(W)  # number of nodes
@@ -720,7 +722,7 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     while flag:
         flag = False
 
-        for u in np.random.permutation(n):
+        for u in rng.permutation(n):
             # for u in np.arange(n):
             ma = ci[u] - 1
             # time.sleep(1)
@@ -785,8 +787,9 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     ci : Nx1 np.ndarray | None
         initial community affiliation vector
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -800,7 +803,7 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)  # number of nodes/modules
     if ci is None:
@@ -857,7 +860,7 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
         if h > 1000:
             raise BCTParamError('Modularity infinite loop style D')
         flag = False
-        for u in np.random.permutation(n):  # loop over nodes in random order
+        for u in rng.permutation(n):  # loop over nodes in random order
             ma = ci[u] - 1  # current module of u
             dq0 = ((Knm0[u, :] + W0[u, u] - Knm0[u, ma]) -
                    gamma * Kn0[u] * (Km0 + Kn0[u] - Km0[ma]) / s0)
@@ -915,8 +918,9 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     hierarchy : bool
         Enables hierarchical output. Defalut value=False
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -932,7 +936,7 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)  # number of nodes
     s = np.sum(W)  # total weight of edges
@@ -966,7 +970,7 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
             flag = False
 
             # loop over nodes in random order
-            for u in np.random.permutation(n):
+            for u in rng.permutation(n):
                 ma = m[u] - 1
                 # algorithm condition
                 dq_o = ((knm_o[u, :] - knm_o[u, ma] + W[u, u]) -
@@ -1044,8 +1048,9 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     hierarchy : bool
         Enables hierarchical output. Defalut value=False
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -1061,7 +1066,7 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)  # number of nodes
     s = np.sum(W)  # weight of edges
@@ -1096,7 +1101,7 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
             flag = False
 
             # loop over nodes in random order
-            for i in np.random.permutation(n):
+            for i in rng.permutation(n):
                 ma = m[i] - 1
                 # algorithm condition
                 dQ = ((Knm[i, :] - Knm[i, ma] + W[i, i]) -
@@ -1180,8 +1185,9 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -1195,7 +1201,7 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)  # number of nodes
 
@@ -1254,7 +1260,7 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
                                     'This was probably caused by passing in a directed matrix.')
             flag = False
             # loop over nodes in random order
-            for u in np.random.permutation(nh):
+            for u in rng.permutation(nh):
                 ma = m[u] - 1
                 dQ0 = ((knm0[u, :] + W0[u, u] - knm0[u, ma]) -
                        gamma * kn0[u] * (km0 + kn0[u] - km0[ma]) / s0)  # positive dQ
@@ -1347,8 +1353,9 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
         initial community affiliation vector
     p : float
         probability of random node moves. Default value = 0.45
-    seed : int | None
-        random seed. default value=None. if None, seeds from /dev/urandom.
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     Returns
     -------
@@ -1362,7 +1369,7 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
     Ci and Q may vary from run to run, due to heuristics in the
     algorithm. Consequently, it may be worth to compare multiple runs.
     '''
-    np.random.seed(seed)
+    rng = get_rng(seed)
 
     n = len(W)
     if ci is None:
@@ -1412,11 +1419,11 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
         s1 = 1
         d1 = 0
 
-    for u in np.random.permutation(n):  # loop over nodes in random order
+    for u in rng.permutation(n):  # loop over nodes in random order
         ma = ci[u] - 1  # current module
-        r = np.random.random() < p
+        r = rng.random_sample() < p
         if r:
-            mb = np.random.randint(n)  # select new module randomly
+            mb = rng.randint(n)  # select new module randomly
         else:
             dq0 = ((Knm0[u, :] + W0[u, u] - Knm0[u, ma]) -
                    gamma * Kn0[u] * (Km0 + Kn0[u] - Km0[ma]) / s0)

@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 import numpy as np
+
+from ..utils.miscellaneous_utilities import get_rng, BCTParamError
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 from .degree import strengths_und_sign
 
@@ -131,7 +133,7 @@ def assortativity_wei(CIJ, flag=0):
     return r
 
 
-def core_periphery_dir(W, gamma=1, C0=None):
+def core_periphery_dir(W, gamma=1, C0=None, seed=None):
     ''' 
     The optimal core/periphery subdivision is a partition of the network 
     into two nonoverlapping groups of nodes, a core group and a periphery
@@ -157,12 +159,16 @@ def core_periphery_dir(W, gamma=1, C0=None):
         0 < gamma < 1 detects large core, small periphery
     C0 : NxN np.ndarray
         Initial core structure
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
     '''
+    rng = get_rng(seed)
     n = len(W)
     np.fill_diagonal(W, 0)
 
     if C0 == None:
-        C = np.random.randint(2, size=(n,))
+        C = rng.randint(2, size=(n,))
     else:
         C = C0.copy()
 
@@ -203,7 +209,7 @@ def core_periphery_dir(W, gamma=1, C0=None):
             max_Qt = np.max(Qt[ixes])
             u, = np.where(np.abs(Qt[ixes]-max_Qt) < 1e-10)
             #tunourn
-            u = u[np.random.randint(len(u))]
+            u = u[rng.randint(len(u))]
             Ct[ixes[u]] = np.logical_not(Ct[ixes[u]])
             #casga
 

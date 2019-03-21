@@ -229,9 +229,9 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
 
         # choose two positions at random and flip them
         atmp = anew.copy()
-        r1, r2 = np.random.randint(n, size=(2,))
+        r1, r2 = rng.randint(n, size=(2,))
         while r1 == r2:
-            r2 = np.random.randint(n)
+            r2 = rng.randint(n)
         atmp[r1] = anew[r2]
         atmp[r2] = anew[r1]
         m2atmp = m2[np.ix_(atmp, atmp)]
@@ -243,7 +243,7 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
             costnew = np.arccos(np.dot(m1.flat, m2atmp.flat) / np.sqrt(
                 np.dot(m1.flat, m1.flat) * np.dot(m2.flat, m2.flat))) / maxcost
 
-        if costnew < lowcost or np.random.random() < np.exp(-(costnew - lowcost) / T):
+        if costnew < lowcost or rng.random_sample() < np.exp(-(costnew - lowcost) / T):
             anew = atmp
             lowcost = costnew
             # is this the absolute best?
@@ -454,7 +454,7 @@ def reorderMAT(m, H=5000, cost='line'):
     for h in range(H):
         a = np.arange(n)
         # choose two positions and flip them
-        r1, r2 = np.random.randint(n, size=(2,))
+        r1, r2 = rng.randint(n, size=(2,))
         a[r1] = r2
         a[r2] = r1
         costnew = np.sum((m[np.ix_(a, a)]) * costf)
@@ -572,14 +572,14 @@ def reorder_matrix(m1, cost='line', verbose=False, H=1e4, Texp=10, T0=1e-3, Hbrk
             break
         T = T0 * Texp**h
         atmp = anew.copy()
-        r1, r2 = np.random.randint(n, size=(2,))
+        r1, r2 = rng.randint(n, size=(2,))
         while r1 == r2:
-            r2 = np.random.randint(n)
+            r2 = rng.randint(n)
         atmp[r1] = anew[r2]
         atmp[r2] = anew[r1]
         costnew = np.sum((m1[np.ix_(atmp, atmp)]) * costf) / maxcost
         # annealing
-        if costnew < lowcost or np.random.random() < np.exp(-(costnew - lowcost) / T):
+        if costnew < lowcost or rng.random_sample() < np.exp(-(costnew - lowcost) / T):
             anew = atmp
             lowcost = costnew
             # is this a new absolute best?

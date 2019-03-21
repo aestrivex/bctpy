@@ -1,4 +1,4 @@
-from load_samples import *
+from .load_samples import load_sample, mat_path
 import numpy as np
 import bct
 
@@ -16,7 +16,7 @@ def test_pc():
     assert np.allclose(pc, pc_, atol=0.02)
 
 
-def participation_test():
+def test_participation():
     W = np.eye(3)
     ci = np.array([1, 1, 2])
 
@@ -43,7 +43,7 @@ def participation_test():
     assert np.allclose(bct.participation_coef_sign(W, ci)[0], [0.,  0.5,  0.])
 
 
-def gateway_test():
+def test_gateway():
     x = load_sample(thres=.1)
     ci = np.load(mat_path('sample_partition.npy'))
 

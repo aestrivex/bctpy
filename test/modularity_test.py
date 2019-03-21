@@ -1,4 +1,4 @@
-from load_samples import *
+from .load_samples import load_sample, load_directed_sample, load_signed_sample, load_directed_low_modularity_sample
 import numpy as np
 import bct
 

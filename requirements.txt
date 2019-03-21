@@ -1,5 +1,5 @@
 numpy
 scipy
-nose
+pytest
 setuptools
 tox

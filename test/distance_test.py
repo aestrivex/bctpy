@@ -1,4 +1,4 @@
-from load_samples import *
+from .load_samples import load_sample
 import numpy as np
 import bct
 
@@ -45,6 +45,7 @@ def test_distance_wei():
     assert np.allclose(np.sum(d), 155650.1, atol=.01)
     assert np.sum(e) == 30570
 
+
 def test_charpath():
     x = load_sample(thres=.02)
     d, e = bct.distance_wei(x)
@@ -53,5 +54,3 @@ def test_charpath():
     assert np.any(np.isinf(d))
     assert not np.isnan(radius)
     assert not np.isnan(diameter)
-
-

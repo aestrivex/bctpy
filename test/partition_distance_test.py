@@ -1,4 +1,4 @@
-from load_samples import *
+from .load_samples import load_sample_group_qball, load_sample_group_dsi
 import numpy as np
 import bct
 

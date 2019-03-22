@@ -1,6 +1,6 @@
-from unittest import skip
+import pytest
 
-from load_samples import *
+from .load_samples import *
 import numpy as np
 import bct
 
@@ -8,7 +8,7 @@ import bct
 SEED = 1
 
 
-@skip("unfixed bug #68")
+@pytest.mark.xfail(reason="unfixed bug #68")
 def test_null_model_und_sign():
     # Regression test for bug fixed in b02a306
     x = load_sample(thres=.4)
@@ -16,7 +16,7 @@ def test_null_model_und_sign():
     bct.null_model_und_sign(x)
 
 
-@skip("unfixed bug #68")
+@pytest.mark.xfail(reason="unfixed bug #68")
 def test_null_model_dir_sign():
     # Regression test for counterpart to the undirected bug
     x = load_directed_sample(thres=.4)

@@ -461,6 +461,19 @@ def link_communities(W, type_clustering='single'):
     return M
 
 
+def _safe_squeeze(arr, *args, **kwargs):
+    """
+    numpy.squeeze will reduce a 1-item array down to a zero-dimensional "array",
+    which is not necessarily desirable.
+    This function does the squeeze operation, but ensures that there is at least
+    1 dimension in the output.
+    """
+    out = np.squeeze(arr, *args, **kwargs)
+    if np.ndim(out) == 0:
+        out = out.reshape((1,))
+    return out
+
+
 def modularity_dir(A, gamma=1, kci=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -513,11 +526,11 @@ def modularity_dir(A, gamma=1, kci=None):
 
         vals, vecs = linalg.eig(modmat)  # biggest eigendecomposition
         rlvals = np.real(vals)
-        max_eigvec = np.squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
+        max_eigvec = _safe_squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
         if max_eigvec.ndim > 1:  # if multiple max eigenvalues, pick one
             max_eigvec = max_eigvec[:, 0]
         # initial module assignments
-        mod_asgn = np.squeeze((max_eigvec >= 0) * 2 - 1)
+        mod_asgn = _safe_squeeze((max_eigvec >= 0) * 2 - 1)
         q = np.dot(mod_asgn, np.dot(modmat, mod_asgn))  # modularity change
 
         if q > 0:  # change in modularity was positive
@@ -1509,11 +1522,11 @@ def modularity_und(A, gamma=1, kci=None):
 
         vals, vecs = linalg.eigh(modmat)  # biggest eigendecomposition
         rlvals = np.real(vals)
-        max_eigvec = np.squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
+        max_eigvec = _safe_squeeze(vecs[:, np.where(rlvals == np.max(rlvals))])
         if max_eigvec.ndim > 1:  # if multiple max eigenvalues, pick one
             max_eigvec = max_eigvec[:, 0]
         # initial module assignments
-        mod_asgn = np.squeeze((max_eigvec >= 0) * 2 - 1)
+        mod_asgn = _safe_squeeze((max_eigvec >= 0) * 2 - 1)
         q = np.dot(mod_asgn, np.dot(modmat, mod_asgn))  # modularity change
 
         if q > 0:  # change in modularity was positive

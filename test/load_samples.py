@@ -2,11 +2,15 @@ import numpy as np
 import bct
 import os
 
-MAT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'mats')
-mat_path = lambda fname: os.path.join(MAT_DIR, fname)
+TEST_DIR = os.path.dirname(os.path.realpath(__file__))
+MAT_DIR = os.path.join(TEST_DIR, 'mats')
 
 
-def load_sample(thres=1):
+def mat_path(fname):
+    return os.path.join(MAT_DIR, fname)
+
+
+def load_sample(thres=1.):
     return bct.threshold_proportional(np.load(mat_path('sample_data.npy')),
                                       thres, copy=False)
 
@@ -24,7 +28,7 @@ def load_binary_sample(thres=.35):
     return bct.binarize(load_sample(thres=thres), copy=False)
 
 
-def load_directed_sample(thres=1):
+def load_directed_sample(thres=1.):
     return bct.threshold_proportional(np.load(mat_path('sample_directed.npy')),
                                       thres, copy=False)
 
@@ -33,7 +37,7 @@ def load_binary_directed_sample(thres=.35):
     return bct.binarize(load_directed_sample(thres=thres))
 
 
-def load_directed_low_modularity_sample(thres=1):
+def load_directed_low_modularity_sample(thres=1.):
     return bct.threshold_proportional(np.load(
         mat_path('sample_directed_gc.npy')), thres, copy=False)
 

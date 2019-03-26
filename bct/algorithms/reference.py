@@ -1058,7 +1058,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
             W0.flat[Lij[Oind]] = s * Wv  # weight at this index
         else:
             wsize = np.size(Wv)
-            wei_period = np.round(1 / wei_freq)  # convert frequency to period
+            wei_period = np.round(1 / wei_freq).astype(int)  # convert frequency to period
             lq = np.arange(wsize, 0, -wei_period, dtype=int)
             for m in lq:  # iteratively explore at this period
                 # get indices of Lij that sort P

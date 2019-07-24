@@ -36,3 +36,5 @@ nosetests.xml
 
 # vim swap files
 *.swp
+
+.duecredit.p

@@ -3,6 +3,11 @@ import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize, get_rng
 from .distance import breadthdist
+from ..due import due, BibTeX
+from ..citations import (
+    WATTS1998, ONNELA2005, FAGIOLO2007, LANCICHINETTI2012,
+    RUBINOV2010, HUMPHRIES2008, COSTANTINI2014, ZHANG2005
+)
 
 
 def agreement(ci, buffsz=1000):
@@ -89,6 +94,9 @@ def agreement_weighted(ci, wts):
     return D
 
 
+@due.dcite(BibTeX(WATTS1998), description="Unweighted directed clustering coefficient")
+@due.dcite(BibTeX(ONNELA2005), description="Unweighted directed clustering coefficient")
+@due.dcite(BibTeX(FAGIOLO2007), description="Unweighted directed clustering coefficient")
 def clustering_coef_bd(A):
     '''
     The clustering coefficient is the fraction of triangles around a node
@@ -127,6 +135,9 @@ def clustering_coef_bd(A):
     return C
 
 
+@due.dcite(BibTeX(WATTS1998), description="Unweighted undirected clustering coefficient")
+@due.dcite(BibTeX(ONNELA2005), description="Unweighted undirected clustering coefficient")
+@due.dcite(BibTeX(FAGIOLO2007), description="Unweighted undirected clustering coefficient")
 def clustering_coef_bu(G):
     '''
     The clustering coefficient is the fraction of triangles around a node
@@ -155,6 +166,9 @@ def clustering_coef_bu(G):
     return C
 
 
+@due.dcite(BibTeX(WATTS1998), description="Weighted directed clustering coefficient")
+@due.dcite(BibTeX(ONNELA2005), description="Weighted directed clustering coefficient")
+@due.dcite(BibTeX(FAGIOLO2007), description="Weighted directed clustering coefficient")
 def clustering_coef_wd(W):
     '''
     The weighted clustering coefficient is the average "intensity" of
@@ -191,6 +205,9 @@ def clustering_coef_wd(W):
     return C
 
 
+@due.dcite(BibTeX(WATTS1998), description="Weighted undirected clustering coefficient")
+@due.dcite(BibTeX(ONNELA2005), description="Weighted undirected clustering coefficient")
+@due.dcite(BibTeX(FAGIOLO2007), description="Weighted undirected clustering coefficient")
 def clustering_coef_wu(W):
     '''
     The weighted clustering coefficient is the average "intensity" of
@@ -214,6 +231,21 @@ def clustering_coef_wu(W):
     return C
 
 
+@due.dcite(
+    BibTeX(ONNELA2005),
+    description="Weighted undirected signed clustering coefficient (Onnela)",
+    conditions={(1, "coef_type"): {"DC_DEFAULT", "default"}}
+)
+@due.dcite(
+    BibTeX(COSTANTINI2014),
+    description="Weighted undirected signed clustering coefficient (Costatini)",
+    conditions={(1, "coef_type"): {"costantini"}}
+)
+@due.dcite(
+    BibTeX(ZHANG2005),
+    description="Weighted undirected signed clustering coefficient (Zhang)",
+    conditions={(1, "coef_type"): {"zhang"}}
+)
 def clustering_coef_wu_sign(W, coef_type='default'):
     '''
     Returns the weighted clustering coefficient generalized or separated
@@ -316,6 +348,8 @@ def clustering_coef_wu_sign(W, coef_type='default'):
         C = cyc3 / cyc2
         return C
 
+
+@due.dcite(BibTeX(LANCICHINETTI2012), description="Undirected consensus partitioning")
 def consensus_und(D, tau, reps=1000, seed=None):
     '''
     This algorithm seeks a consensus partition of the
@@ -562,6 +596,10 @@ def number_of_components(A):
     return len(csizes)
 
 
+@due.dcite(BibTeX(RUBINOV2010), description="Transitivity, unweighted directed")
+@due.dcite(BibTeX(ONNELA2005), description="Transitivity, unweighted directed")
+@due.dcite(BibTeX(FAGIOLO2007), description="Transitivity, unweighted directed")
+@due.dcite(BibTeX(HUMPHRIES2008), description="Transitivity, unweighted directed")
 def transitivity_bd(A):
     '''
     Transitivity is the ratio of 'triangles to triplets' in the network.
@@ -597,6 +635,10 @@ def transitivity_bd(A):
     return np.sum(cyc3) / np.sum(CYC3)
 
 
+@due.dcite(BibTeX(RUBINOV2010), description="Transitivity, unweighted undirected")
+@due.dcite(BibTeX(ONNELA2005), description="Transitivity, unweighted undirected")
+@due.dcite(BibTeX(FAGIOLO2007), description="Transitivity, unweighted undirected")
+@due.dcite(BibTeX(HUMPHRIES2008), description="Transitivity, unweighted undirected")
 def transitivity_bu(A):
     '''
     Transitivity is the ratio of 'triangles to triplets' in the network.
@@ -617,6 +659,10 @@ def transitivity_bu(A):
     return tri3 / tri2
 
 
+@due.dcite(BibTeX(RUBINOV2010), description="Transitivity, weighted directed")
+@due.dcite(BibTeX(ONNELA2005), description="Transitivity, weighted directed")
+@due.dcite(BibTeX(FAGIOLO2007), description="Transitivity, weighted directed")
+@due.dcite(BibTeX(HUMPHRIES2008), description="Transitivity, weighted directed")
 def transitivity_wd(W):
     '''
     Transitivity is the ratio of 'triangles to triplets' in the network.
@@ -650,6 +696,10 @@ def transitivity_wd(W):
     return np.sum(cyc3) / np.sum(CYC3)  # transitivity
 
 
+@due.dcite(BibTeX(RUBINOV2010), description="Transitivity, weighted undirected")
+@due.dcite(BibTeX(ONNELA2005), description="Transitivity, weighted undirected")
+@due.dcite(BibTeX(FAGIOLO2007), description="Transitivity, weighted undirected")
+@due.dcite(BibTeX(HUMPHRIES2008), description="Transitivity, weighted undirected")
 def transitivity_wu(W):
     '''
     Transitivity is the ratio of 'triangles to triplets' in the network.

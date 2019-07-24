@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 from .miscellaneous_utilities import BCTParamError
+from ..due import BibTeX, due
+from ..citations import HIDALGO2007, HAGMANN2008
 
 
 def adjacency_plot_und(A, coor, tube=False):
@@ -265,6 +267,8 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
     return M_reordered, M_indices, cost
 
 
+@due.dcite(BibTeX(HIDALGO2007), "Weighted undirected network backbone")
+@due.dcite(BibTeX(HAGMANN2008), "Weighted undirected network backbone")
 def backbone_wu(CIJ, avgdeg):
     '''
     The network backbone contains the dominant connections in the network

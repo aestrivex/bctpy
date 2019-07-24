@@ -3,8 +3,15 @@ import numpy as np
 from .core import kcore_bd, kcore_bu
 from .distance import reachdist
 from bct.utils import invert
+from ..due import due, BibTeX
+from ..citations import (
+    BRANDES2001, KINTALI2008, SHANNON1948, RUBINOV2011, NEWMAN2016, HONEY2007,
+    HAGMANN2008, GUIMERA2005, MORRISON2005, BOLDI2009, ESTRADA2005, ESTRADA2010
+)
 
 
+@due.dcite(BibTeX(BRANDES2001), description="Unweighted betweenness centrality")
+@due.dcite(BibTeX(KINTALI2008), description="Unweighted betweenness centrality")
 def betweenness_bin(G):
     '''
     Node betweenness centrality is the fraction of all shortest paths in
@@ -62,6 +69,8 @@ def betweenness_bin(G):
     return np.sum(DP, axis=0)
 
 
+@due.dcite(BibTeX(BRANDES2001), description="Weighted betweenness centrality")
+@due.dcite(BibTeX(KINTALI2008), description="Weighted betweenness centrality")
 def betweenness_wei(G):
     '''
     Node betweenness centrality is the fraction of all shortest paths in
@@ -137,6 +146,8 @@ def betweenness_wei(G):
     return BC
 
 
+@due.dcite(BibTeX(RUBINOV2011), description="Entropy-based diversity coefficient")
+@due.dcite(BibTeX(SHANNON1948), description="Entropy-based diversity coefficient")
 def diversity_coef_sign(W, ci):
     '''
     The Shannon-entropy based diversity coefficient measures the diversity
@@ -180,6 +191,8 @@ def diversity_coef_sign(W, ci):
 
     return Hpos, Hneg
 
+
+@due.dcite(BibTeX(BRANDES2001), description="Unweighted edge betweenness centrality")
 def edge_betweenness_bin(G):
     '''
     Edge betweenness centrality is the fraction of all shortest paths in
@@ -248,6 +261,7 @@ def edge_betweenness_bin(G):
     return EBC, BC
 
 
+@due.dcite(BibTeX(BRANDES2001), description="Weighted edge betweenness centrality")
 def edge_betweenness_wei(G):
     '''
     Edge betweenness centrality is the fraction of all shortest paths in
@@ -328,6 +342,7 @@ def edge_betweenness_wei(G):
     return EBC, BC
 
 
+@due.dcite(BibTeX(NEWMAN2016), description="Eigenvector centrality")
 def eigenvector_centrality_und(CIJ):
     '''
     Eigenector centrality is a self-referential measure of centrality:
@@ -402,6 +417,7 @@ def erange(CIJ):
     return Erange, eta, Eshort, fs
 
 
+@due.dcite(BibTeX(HONEY2007), description="Flow coefficient")
 def flow_coef_bd(CIJ):
     '''
     Computes the flow coefficient for each node and averaged over the
@@ -534,6 +550,7 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
     return G_pos, G_neg
 
 
+@due.dcite(BibTeX(HAGMANN2008), description="Unweighted directed k-coreness centrality")
 def kcoreness_centrality_bd(CIJ):
     '''
     The k-core is the largest subgraph comprising nodes of degree at least
@@ -566,6 +583,7 @@ def kcoreness_centrality_bd(CIJ):
     return coreness, kn
 
 
+@due.dcite(BibTeX(HAGMANN2008), description="Unweighted undirected k-coreness centrality")
 def kcoreness_centrality_bu(CIJ):
     '''
     The k-core is the largest subgraph comprising nodes of degree at least
@@ -603,6 +621,7 @@ def kcoreness_centrality_bu(CIJ):
     return coreness, kn
 
 
+@due.dcite(BibTeX(GUIMERA2005), description="Within-module degree z-score")
 def module_degree_zscore(W, ci, flag=0):
     '''
     The within-module degree z-score is a within-module version of degree
@@ -645,6 +664,8 @@ def module_degree_zscore(W, ci, flag=0):
     return Z
 
 
+@due.dcite(BibTeX(MORRISON2005), description="PageRank centrality")
+@due.dcite(BibTeX(BOLDI2009), description="PageRank centrality")
 def pagerank_centrality(A, d, falff=None):
     '''
     The PageRank centrality is a variant of eigenvector centrality. This
@@ -700,6 +721,7 @@ def pagerank_centrality(A, d, falff=None):
     return r
 
 
+@due.dcite(BibTeX(GUIMERA2005), description="Participation coefficient")
 def participation_coef(W, ci, degree='undirected'):
     '''
     Participation coefficient is a measure of diversity of intermodular
@@ -827,6 +849,9 @@ def participation_coef_sign(W, ci):
 
     return Ppos, Pneg
 
+
+@due.dcite(BibTeX(ESTRADA2005), description="Subgraph centrality")
+@due.dcite(BibTeX(ESTRADA2010), description="Subgraph centrality")
 def subgraph_centrality(CIJ):
     '''
     The subgraph centrality of a node is a weighted sum of closed walks of

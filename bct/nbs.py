@@ -3,11 +3,14 @@ import numpy as np
 
 from .utils import BCTParamError, get_rng
 from .algorithms import get_components
+from .due import due, BibTeX
+from .citations import ZALESKY2010
 
 # FIXME considerable gains could be realized using vectorization, although
 # generating the null distribution will take a while
 
 
+@due.dcite(BibTeX(ZALESKY2010), description="Network-based statistic")
 def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False, seed=None):
     '''
     Performs the NBS for populations X and Y for a t-statistic threshold of

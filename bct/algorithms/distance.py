@@ -1,6 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
 from bct.utils import cuberoot, binarize, invert
+from ..due import due, BibTeX
+from ..citations import LATORA2001, ONNELA2005, FAGIOLO2007, RUBINOV2010
 
 
 def breadthdist(CIJ):
@@ -466,6 +468,10 @@ def retrieve_shortest_path(s, t, hops, Pmat):
     return path
 
 
+@due.dcite(BibTeX(LATORA2001), description="Unweighted global efficiency")
+@due.dcite(BibTeX(ONNELA2005), description="Unweighted global efficiency")
+@due.dcite(BibTeX(FAGIOLO2007), description="Unweighted global efficiency")
+@due.dcite(BibTeX(RUBINOV2010), description="Unweighted global efficiency")
 def efficiency_bin(G, local=False):
     '''
     The global efficiency is the average of inverse shortest path length,
@@ -537,6 +543,10 @@ def efficiency_bin(G, local=False):
     return E
 
 
+@due.dcite(BibTeX(LATORA2001), description="Weighted global efficiency")
+@due.dcite(BibTeX(ONNELA2005), description="Weighted global efficiency")
+@due.dcite(BibTeX(FAGIOLO2007), description="Weighted global efficiency")
+@due.dcite(BibTeX(RUBINOV2010), description="Weighted global efficiency")
 def efficiency_wei(Gw, local=False):
     '''
     The global efficiency is the average of inverse shortest path length,

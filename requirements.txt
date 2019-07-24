@@ -3,3 +3,4 @@ scipy
 pytest
 setuptools
 tox
+duecredit

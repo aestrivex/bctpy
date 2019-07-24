@@ -5,7 +5,12 @@ from ..utils.miscellaneous_utilities import get_rng, BCTParamError
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 from .degree import strengths_und_sign
 
+from ..due import due, BibTeX
+from ..citations import NEWMAN2002, FOSTER2010, HAGMANN2008, COLIZZA2006, OPSAHL2008, HEUVEL2011
 
+
+@due.dcite(BibTeX(NEWMAN2002), description="Unweighted assortativity coefficient")
+@due.dcite(BibTeX(FOSTER2010), description="Unweighted assortativity coefficient")
 def assortativity_bin(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
@@ -70,6 +75,8 @@ def assortativity_bin(CIJ, flag=0):
     return r
 
 
+@due.dcite(BibTeX(NEWMAN2002), description="Unweighted assortativity coefficient")
+@due.dcite(BibTeX(FOSTER2010), description="Unweighted assortativity coefficient")
 def assortativity_wei(CIJ, flag=0):
     '''
     The assortativity coefficient is a correlation coefficient between the
@@ -229,6 +236,7 @@ def core_periphery_dir(W, gamma=1, C0=None, seed=None):
     return C, q
 
 
+@due.dcite(BibTeX(HAGMANN2008), description="Unweighted directed k-core")
 def kcore_bd(CIJ, k, peel=False):
     '''
     The k-core is the largest subnetwork comprising nodes of degree at
@@ -297,6 +305,7 @@ def kcore_bd(CIJ, k, peel=False):
         return CIJkcore, kn
 
 
+@due.dcite(BibTeX(HAGMANN2008), description="Unweighted undirected k-core")
 def kcore_bu(CIJ, k, peel=False):
     '''
     The k-core is the largest subnetwork comprising nodes of degree at
@@ -409,6 +418,10 @@ def local_assortativity_wu_sign(W):
 
     return loc_assort_pos, loc_assort_neg
 
+
+@due.dcite(BibTeX(COLIZZA2006), description="Rich club; binary, directed")
+@due.dcite(BibTeX(OPSAHL2008), description="Rich club; binary, directed")
+@due.dcite(BibTeX(HEUVEL2011), description="Rich club; binary, directed")
 def rich_club_bd(CIJ, klevel=None):
     '''
     The rich club coefficient, R, at level k is the fraction of edges that
@@ -455,6 +468,9 @@ def rich_club_bd(CIJ, klevel=None):
     return R, Nk, Ek
 
 
+@due.dcite(BibTeX(COLIZZA2006), description="Rich club; binary, undirected")
+@due.dcite(BibTeX(OPSAHL2008), description="Rich club; binary, undirected")
+@due.dcite(BibTeX(HEUVEL2011), description="Rich club; binary, undirected")
 def rich_club_bu(CIJ, klevel=None):
     '''
     The rich club coefficient, R, at level k is the fraction of edges that
@@ -499,6 +515,9 @@ def rich_club_bu(CIJ, klevel=None):
     return R, Nk, Ek
 
 
+@due.dcite(BibTeX(COLIZZA2006), description="Rich club; weighted, directed")
+@due.dcite(BibTeX(OPSAHL2008), description="Rich club; weighted, directed")
+@due.dcite(BibTeX(HEUVEL2011), description="Rich club; weighted, directed")
 def rich_club_wd(CIJ, klevel=None):
     '''
     Parameters
@@ -546,6 +565,9 @@ def rich_club_wd(CIJ, klevel=None):
     return Rw
 
 
+@due.dcite(BibTeX(COLIZZA2006), description="Rich club; weighted, undirected")
+@due.dcite(BibTeX(OPSAHL2008), description="Rich club; weighted, undirected")
+@due.dcite(BibTeX(HEUVEL2011), description="Rich club; weighted, undirected")
 def rich_club_wu(CIJ, klevel=None):
     '''
     Parameters

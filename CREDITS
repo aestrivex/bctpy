@@ -142,7 +142,7 @@ MODULARITY_FINETUNE
 (modularity_finetune_dir modularity_finetune_und modularity_finetune_und_sign
 modularity_probtune_und_sign)
 	Mika Rubinov			UNSW/Cambridge			2011/2013
-		Sun et al. (2008)  Europhysics Lett 86, 28004.
+		Sun et al. (2009)  Europhysics Lett 86, 28004.
 		Rubinov and Sporns (2011) NeuroImage.
 MODULARITY_LOUVAIN
 (modularity_louvain_dir modularity_louvain_und modularity_louvain_und_sign)

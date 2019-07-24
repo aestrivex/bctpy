@@ -5,8 +5,11 @@ from bct.utils import BCTParamError, get_rng
 from .similarity import matching_ind
 from .clustering import clustering_coef_bu
 from .centrality import betweenness_bin
+from ..due import due, BibTeX
+from ..citations import BETZEL2016
 
 
+@due.dcite(BibTeX(BETZEL2016), description="Generative models")
 def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
     model_var='powerlaw', epsilon=1e-6, copy=True, seed=None):
     '''

@@ -8,5 +8,5 @@ from .due import due, BibTeX
 
 __citation__ = BCTPY
 
-due.cite(BibTeX(__citation__), description="Brain Connectivity Toolbox for Python", path="bctpy")
-due.cite(BibTeX(RUBINOV2010), description="Brain Connectivity Toolbox", path="bctpy")
+due.cite(BibTeX(__citation__), description="Brain Connectivity Toolbox for Python", path="bct")
+due.cite(BibTeX(RUBINOV2010), description="Brain Connectivity Toolbox", path="bct")

@@ -3,11 +3,11 @@ from .version import __version__
 from datetime import datetime
 
 BCTPY = """
-@misc{{{{bctpy,
+@misc{{bctpy,
     publisher = {{GitHub}},
-    title = {{bctpy v{version}}},
+    title = {{bctpy v{version}: Brain Connectivity Toolbox for Python}},
     url = {{https://github.com/aestrivex/bctpy}},
-    author = {{Roan LaPlante}},
+    author = {{LaPlante, Roan and others}},
     note = {{[Online; accessed {datestamp}]}},
 }}
 """.format(
@@ -527,3 +527,16 @@ COSTANTINI2014 = """
   publisher={Public Library of Science}
 }
 """.strip()
+
+BETZEL2016 = """
+@article{betzel2016generative,
+  title={Generative models of the human connectome},
+  author={Betzel, Richard F and Avena-Koenigsberger, Andrea and Go{\\~n}i, Joaqu{\\'\\i}n and He, Ye and De Reus, Marcel A and Griffa, Alessandra and V{\\'e}rtes, Petra E and Mi{\\v{s}}ic, Bratislav and Thiran, Jean-Philippe and Hagmann, Patric and others},
+  journal={Neuroimage},
+  volume={124},
+  pages={1054--1064},
+  year={2016},
+  publisher={Elsevier}
+}
+""".strip()
+

@@ -1,18 +1,18 @@
+from __future__ import unicode_literals
 from .version import __version__
+from datetime import datetime
 
 BCTPY = """
 @misc{{{{bctpy,
     publisher = {{GitHub}},
-    title = {{bctpy v{}}},
+    title = {{bctpy v{version}}},
     url = {{https://github.com/aestrivex/bctpy}},
     author = {{Roan LaPlante}},
-    note = {{[Online; accessed 2019-07-23]}},
-    date = {{2018-12-23}},
-    year = {{2018}},
-    month = {{12}},
-    day = {{23}},
+    note = {{[Online; accessed {datestamp}]}},
 }}
-""".format(__version__).strip()
+""".format(
+    version=__version__, datestamp=datetime.utcnow().strftime("%Y-%m-%d")
+).strip()
 
 NEWMAN2002 = """
 @article{newman2002spread,
@@ -95,7 +95,7 @@ KINTALI2008 = """
 
 WATTS1998 = """
 @article{watts1998collective,
-  title={Collective dynamics of ‘small-world’networks},
+  title={Collective dynamics of `small-world' networks},
   author={Watts, Duncan J and Strogatz, Steven H},
   journal={nature},
   volume={393},
@@ -492,7 +492,7 @@ ESTRADA2010 = """
 
 HUMPHRIES2008 = """
 @article{humphries2008network,
-  title={Network ‘small-world-ness’: a quantitative method for determining canonical network equivalence},
+  title={Network `small-world-ness': a quantitative method for determining canonical network equivalence},
   author={Humphries, Mark D and Gurney, Kevin},
   journal={PloS one},
   volume={3},

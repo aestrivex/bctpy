@@ -3,8 +3,12 @@ import numpy as np
 from bct.utils import BCTParamError, binarize, get_rng
 from bct.utils import pick_four_unique_nodes_quickly
 from .clustering import number_of_components
+from ..citations import MASLOV2002, SPORNS2004, RUBINOV2011
+from ..due import BibTeX, due
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Latticize directed connected network")
+@due.dcite(BibTeX(SPORNS2004), description="Latticize directed connected network")
 def latmio_dir_connected(R, itr, D=None, seed=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
@@ -128,6 +132,8 @@ def latmio_dir_connected(R, itr, D=None, seed=None):
     return Rlatt, R, ind_rp, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Latticize directed network")
+@due.dcite(BibTeX(SPORNS2004), description="Latticize directed network")
 def latmio_dir(R, itr, D=None, seed=None):
     '''
     This function "latticizes" a directed network, while preserving the in-
@@ -223,6 +229,8 @@ def latmio_dir(R, itr, D=None, seed=None):
     return Rlatt, R, ind_rp, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Latticize undirected connected network")
+@due.dcite(BibTeX(SPORNS2004), description="Latticize undirected connected network")
 def latmio_und_connected(R, itr, D=None, seed=None):
     '''
     This function "latticizes" an undirected network, while preserving the
@@ -359,6 +367,8 @@ def latmio_und_connected(R, itr, D=None, seed=None):
     return Rlatt, R, ind_rp, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Latticize undirected network")
+@due.dcite(BibTeX(SPORNS2004), description="Latticize undirected network")
 def latmio_und(R, itr, D=None, seed=None):
     '''
     This function "latticizes" an undirected network, while preserving the
@@ -851,6 +861,7 @@ def maketoeplitzCIJ(n, k, s, seed=None):
     return CIJ
 
 
+@due.dcite(BibTeX(RUBINOV2011), description="Directed signed null model")
 def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     '''
     This function randomizes an directed network with positive and
@@ -973,6 +984,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     return W0, (rpos_in[0, 1], rpos_ou[0, 1], rneg_in[0, 1], rneg_ou[0, 1])
 
 
+@due.dcite(BibTeX(RUBINOV2011), description="Undirected signed null model")
 def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     '''
     This function randomizes an undirected network with positive and
@@ -1102,6 +1114,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     return W0, (rpos_in[0, 1], rpos_ou[0, 1], rneg_in[0, 1], rneg_ou[0, 1])
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, directed and connected")
 def randmio_dir_connected(R, itr, seed=None):
     '''
     This function randomizes a directed network, while preserving the in-
@@ -1196,6 +1209,7 @@ def randmio_dir_connected(R, itr, seed=None):
     return R, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, directed")
 def randmio_dir(R, itr, seed=None):
     '''
     This function randomizes a directed network, while preserving the in-
@@ -1263,6 +1277,7 @@ def randmio_dir(R, itr, seed=None):
     return R, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, undirected and connected")
 def randmio_und_connected(R, itr, seed=None):
     '''
     This function randomizes an undirected network, while preserving the
@@ -1381,6 +1396,7 @@ def randmio_und_connected(R, itr, seed=None):
     return R, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, directed and signed")
 def randmio_dir_signed(R, itr, seed=None):
     '''
     This function randomizes a directed weighted network with positively
@@ -1457,6 +1473,8 @@ def randmio_dir_signed(R, itr, seed=None):
 
     return R, eff
 
+
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, undirected")
 def randmio_und(R, itr, seed=None):
     '''
     This function randomizes an undirected network, while preserving the
@@ -1538,6 +1556,7 @@ def randmio_und(R, itr, seed=None):
     return R, eff
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomisation, undirected and signed")
 def randmio_und_signed(R, itr, seed=None):
     '''
     This function randomizes an undirected weighted network with positive
@@ -1597,6 +1616,7 @@ def randmio_und_signed(R, itr, seed=None):
             att += 1
 
     return R, eff
+
 
 def randomize_graph_partial_und(A, B, maxswap, seed=None):
     '''
@@ -1674,6 +1694,7 @@ def randomize_graph_partial_und(A, B, maxswap, seed=None):
     return A
 
 
+@due.dcite(BibTeX(MASLOV2002), description="Randomize binary undirected")
 def randomizer_bin_und(R, alpha, seed=None):
     '''
     This function randomizes a binary undirected network, while preserving

@@ -2,6 +2,8 @@ from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, binarize
 from .degree import degrees_dir, degrees_und
+from ..due import BibTeX, due
+from ..citations import YIP2007, RAVASZ2002
 
 
 def edge_nei_overlap_bd(CIJ):
@@ -100,6 +102,8 @@ def edge_nei_overlap_bu(CIJ):
     return EC, ec, degij
 
 
+@due.dcite(BibTeX(YIP2007), description="Generalized topological overlap measure")
+@due.dcite(BibTeX(RAVASZ2002), description="Generalized topological overlap measure")
 def gtom(adj, nr_steps):
     '''
     The m-th step generalized topological overlap measure (GTOM) quantifies

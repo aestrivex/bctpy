@@ -217,6 +217,19 @@ NEWMAN2016 = """
 }
 """.strip()
 
+HONEY2007 = """
+@article{honey2007network,
+  title={Network structure of cerebral cortex shapes functional connectivity on multiple time scales},
+  author={Honey, Christopher J and K{\\"o}tter, Rolf and Breakspear, Michael and Sporns, Olaf},
+  journal={Proceedings of the National Academy of Sciences},
+  volume={104},
+  number={24},
+  pages={10240--10245},
+  year={2007},
+  publisher={National Acad Sciences}
+}
+"""
+
 YIP2007 = """
 @article{yip2007gene,
   title={Gene network interconnectedness and the generalized topological overlap measure},
@@ -256,7 +269,7 @@ MASLOV2002 = """
 }
 """.strip()
 
-SPOONS2004 = """
+SPORNS2004 = """
 @article{sporns2004small,
   title={The small world of the cerebral cortex},
   author={Sporns, Olaf and Zwi, Jonathan D},
@@ -486,6 +499,31 @@ HUMPHRIES2008 = """
   number={4},
   pages={e0002051},
   year={2008},
+  publisher={Public Library of Science}
+}
+""".strip()
+
+ZHANG2005 = """
+@article{zhang2005general,
+  title={A general framework for weighted gene co-expression network analysis},
+  author={Zhang, Bin and Horvath, Steve},
+  journal={Statistical applications in genetics and molecular biology},
+  volume={4},
+  number={1},
+  year={2005},
+  publisher={De Gruyter}
+}
+""".strip()
+
+COSTANTINI2014 = """
+@article{costantini2014generalization,
+  title={Generalization of clustering coefficients to signed correlation networks},
+  author={Costantini, Giulio and Perugini, Marco},
+  journal={PloS one},
+  volume={9},
+  number={2},
+  pages={e88669},
+  year={2014},
   publisher={Public Library of Science}
 }
 """.strip()

@@ -1,12 +1,15 @@
 from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, binarize
+from ..citations import ONNELA2005
+from ..due import BibTeX, due
 
 motiflib = 'motif34lib.mat'
 
 # FIXME there may be some subtle bugs here
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Motif isomorphs")
 def find_motif34(m, n=None):
     '''
     This function returns all motif isomorphs for a given motif id and
@@ -178,6 +181,7 @@ def make_motif34lib():
                              'm4': m4, 'm4n': m4n, 'id4': id4, 'n4': n4})
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Functional motif frequencies")
 def motif3funct_bin(A):
     '''
     Functional motifs are subsets of connection patterns embedded within
@@ -247,6 +251,7 @@ def motif3funct_bin(A):
     return f, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Functional motif intensity, coherence, frequency")
 def motif3funct_wei(W):
     '''
     Functional motifs are subsets of connection patterns embedded within
@@ -341,6 +346,7 @@ def motif3funct_wei(W):
     return I, Q, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Structural motif frequency")
 def motif3struct_bin(A):
     '''
     Structural motifs are patterns of local connectivity. Motif frequency
@@ -395,6 +401,7 @@ def motif3struct_bin(A):
     return f, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Structural motif intensity, coherence, frequency")
 def motif3struct_wei(W):
     '''
     Structural motifs are patterns of local connectivity. Motif frequency
@@ -477,6 +484,7 @@ def motif3struct_wei(W):
     return I, Q, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Unweighted functional motif frequency")
 def motif4funct_bin(A):
     '''
     Functional motifs are subsets of connection patterns embedded within
@@ -558,6 +566,7 @@ def motif4funct_bin(A):
     return f, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Weighted functional motif intensity, coherence, frequency")
 def motif4funct_wei(W):
     '''
     Functional motifs are subsets of connection patterns embedded within
@@ -670,6 +679,7 @@ def motif4funct_wei(W):
     return I, Q, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Unweighted structural motif frequency")
 def motif4struct_bin(A):
     '''
     Structural motifs are patterns of local connectivity. Motif frequency
@@ -741,6 +751,7 @@ def motif4struct_bin(A):
     return f, F
 
 
+@due.dcite(BibTeX(ONNELA2005), description="Weighted structural motif intensity, coherence, frequency")
 def motif4struct_wei(W):
     '''
     Structural motifs are patterns of local connectivity. Motif frequency

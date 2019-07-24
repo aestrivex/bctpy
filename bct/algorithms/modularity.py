@@ -1,6 +1,11 @@
 from __future__ import division, print_function
 import numpy as np
 from bct.utils import BCTParamError, normalize, get_rng
+from ..due import BibTeX, due
+from ..citations import (
+    LEICHT2008, REICHARDT2006, GOOD2010, SUN2008, RUBINOV2011,
+    BLONDEL2008, MEILA2007
+)
 
 
 def ci2ls(ci):
@@ -474,6 +479,9 @@ def _safe_squeeze(arr, *args, **kwargs):
     return out
 
 
+@due.dcite(BibTeX(LEICHT2008), description="Directed modularity")
+@due.dcite(BibTeX(REICHARDT2006), description="Directed modularity")
+@due.dcite(BibTeX(GOOD2010), description="Directed modularity")
 def modularity_dir(A, gamma=1, kci=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -576,6 +584,8 @@ def modularity_dir(A, gamma=1, kci=None):
     return ci, q
 
 
+@due.dcite(BibTeX(SUN2008), description="Finetuned directed modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Finetuned directed modularity")
 def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -678,6 +688,8 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     return ci, q
 
 
+@due.dcite(BibTeX(SUN2008), description="Finetuned undirected modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Finetuned undirected modularity")
 def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -776,6 +788,8 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     return ci, q
 
 
+@due.dcite(BibTeX(SUN2008), description="Finetuned directed signed modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Finetuned directed signed modularity")
 def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -910,6 +924,9 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
     return ci, q
 
 
+@due.dcite(BibTeX(BLONDEL2008), description="Louvain directed modularity")
+@due.dcite(BibTeX(REICHARDT2006), description="Louvain directed modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Louvain directed modularity")
 def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -1040,6 +1057,9 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
         return ci[h - 1], q[h - 1]
 
 
+@due.dcite(BibTeX(BLONDEL2008), description="Louvain undirected modularity")
+@due.dcite(BibTeX(REICHARDT2006), description="Louvain undirected modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Louvain undirected modularity")
 def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -1171,6 +1191,9 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
         return ci[h - 1], q[h - 1]
 
 
+@due.dcite(BibTeX(BLONDEL2008), description="Louvain undirected signed modularity")
+@due.dcite(BibTeX(REICHARDT2006), description="Louvain undirected signed modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Louvain undirected signed modularity")
 def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -1335,6 +1358,8 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     return ci_ret, q[-1]
 
 
+@due.dcite(BibTeX(SUN2008), description="Probabilistic finetuned undirected modularity")
+@due.dcite(BibTeX(RUBINOV2011), description="Probabilistic finetuned undirected modularity")
 def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
                                  seed=None):
     '''
@@ -1470,6 +1495,9 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
     return ci, q
 
 
+@due.dcite(BibTeX(LEICHT2008), description="Undirected modularity")
+@due.dcite(BibTeX(REICHARDT2006), description="Undirected modularity")
+@due.dcite(BibTeX(GOOD2010), description="Undirected modularity")
 def modularity_und(A, gamma=1, kci=None):
     '''
     The optimal community structure is a subdivision of the network into
@@ -1653,6 +1681,7 @@ def modularity_und_sign(W, ci, qtype='sta'):
     return ci, q
 
 
+@due.dcite(BibTeX(MEILA2007), description="Partition distance")
 def partition_distance(cx, cy):
     '''
     This function quantifies the distance between pairs of community

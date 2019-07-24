@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import unicode_literals
 from .version import __version__
 from datetime import datetime
@@ -401,7 +402,7 @@ BOLDI2009 = """
 
 MEILA2007 = """
 @article{meila2007comparing,
-  title={Comparing clusterings—an information based distance},
+  title={Comparing clusterings -- an information based distance},
   author={Meil{\\={a}}, Marina},
   journal={Journal of multivariate analysis},
   volume={98},

@@ -265,7 +265,7 @@ def latmio_und_connected(R, itr, D=None, seed=None):
         number of actual rewirings carried out
     '''
     rng = get_rng(seed)
-    if not np.all(R == R.T):
+    if not np.allclose(R == R.T):
         raise BCTParamError("Input must be undirected")
 
     if number_of_components(R) > 1:
@@ -1033,7 +1033,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
         (such as the Kolmogorov-Smirnov test) if desired.
     '''
     rng = get_rng(seed)
-    if not np.all(W == W.T):
+    if not np.allclose(W == W.T):
         raise BCTParamError("Input must be undirected")
     W = W.copy()
     n = len(W)
@@ -1287,8 +1287,8 @@ def randmio_und_connected(R, itr, seed=None):
     to reach every other node in the network. The input network for this
     function must be connected.
 
-    NOTE the changes to the BCT matlab function of the same name 
-    made in the Jan 2016 release 
+    NOTE the changes to the BCT matlab function of the same name
+    made in the Jan 2016 release
     have not been propagated to this function because of substantially
     decreased time efficiency in the implementation. Expect these changes
     to be merged eventually.
@@ -1310,7 +1310,7 @@ def randmio_und_connected(R, itr, seed=None):
     eff : int
         number of actual rewirings carried out
     '''
-    if not np.all(R == R.T):
+    if not np.allclose(R == R.T):
         raise BCTParamError("Input must be undirected")
 
     if number_of_components(R) > 1:
@@ -1440,7 +1440,7 @@ def randmio_dir_signed(R, itr, seed=None):
         att = 0
         while att <= max_attempts:
             #select four distinct vertices
-        
+
             a, b, c, d = pick_four_unique_nodes_quickly(n, rng)
 
             #a, b, c, d = rng.choice(n, 4)
@@ -1498,7 +1498,7 @@ def randmio_und(R, itr, seed=None):
     eff : int
         number of actual rewirings carried out
     '''
-    if not np.all(R == R.T):
+    if not np.allclose(R == R.T):
         raise BCTParamError("Input must be undirected")
     rng = get_rng(seed)
     R = R.copy()
@@ -1603,7 +1603,7 @@ def randmio_und_signed(R, itr, seed=None):
             if (    np.sign(r0_ab) == np.sign(r0_cd) and
                     np.sign(r0_ad) == np.sign(r0_cb) and
                     np.sign(r0_ab) != np.sign(r0_ad)):
-        
+
                 R[a, d] = R[d, a] = r0_ab
                 R[a, b] = R[b, a] = r0_ad
 
@@ -1719,7 +1719,7 @@ def randomizer_bin_und(R, alpha, seed=None):
     '''
     rng = get_rng(seed)
     R = binarize(R, copy=True)  # binarize
-    if not np.all(R == R.T):
+    if not np.allclose(R == R.T):
         raise BCTParamError(
             'randomizer_bin_und only takes undirected matrices')
 

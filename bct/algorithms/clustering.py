@@ -342,7 +342,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
                 for q in range(n):
                     cyc3[i] += W[j, i] * W[i, q] * W[j, q]
                     if j != q:
-                        cyc2[i] += W[j, i] * W[i, q]
+                        cyc2[i] += np.abs(W[j, i] * W[i, q])
 
         cyc2[np.where(cyc3 == 0)] = np.inf
         C = cyc3 / cyc2

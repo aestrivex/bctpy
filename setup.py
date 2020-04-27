@@ -7,7 +7,7 @@ def read(fname):
 
 setuptools.setup(
     name="bctpy",
-    version="0.5.0",
+    version="0.5.2",
     maintainer="Roan LaPlante",
     maintainer_email="rlaplant@nmr.mgh.harvard.edu",
     description=("Brain Connectivity Toolbox for Python"),

@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/aestrivex/bctpy.svg?branch=master)](https://travis-ci.org/aestrivex/bctpy)
 
-# Brain Connectivity Toolbox for Python version 0.5.0
+# Brain Connectivity Toolbox for Python version 0.5.2
 
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 

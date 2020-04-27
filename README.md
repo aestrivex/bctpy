@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/aestrivex/bctpy.svg?branch=master)](https://travis-ci.org/aestrivex/bctpy)
-
 # Brain Connectivity Toolbox for Python version 0.5.2
 
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
@@ -26,12 +24,9 @@ BCTPY is written in pure python and requires only `scipy` and `numpy`. `scipy` i
 packages which have some features not available in `numpy` alone. If you don't
 have `scipy`, most functions that do not need `scipy` functionality will still work.
 
-Note that graphs must be passed in as `numpy.array`s rather than `numpy.matrix`es. Other constraints/ edge cases of the adjacency matrices (e.g. self-loops, negative weights) behave similarly to the matlab functions.
+Note that graphs must be passed in as `numpy.array` rather than `numpy.matrix`. Other constraints/edge cases of the adjacency matrices (e.g. self-loops, negative weights) behave similarly to the matlab functions.
 
-A small number of functions (notably including network-based statistics, a
-nonparametric test for differences in undirected weighted graphs from different
-populations) currently require networkx, though this should be changed at some
-point in the future.
+A small number of functions also depend on networkx. This notably includes Network-Based Statistic, a nonparametric test for differences in undirected weighted graphs from different populations. Ideally this dependency should be removed in the future.
 
 Nosetests is used for the test suite. The test suite is not complete.
 
@@ -46,7 +41,7 @@ With few exceptions, `bctpy` is a direct translation of matlab code to python.
 comparison. I did my best to test all functionality in `bctpy`, but much of it is
 arcane math that flies over the head of this humble programmer. There *are*
 bugs lurking in `bctpy`, the question is not whether but how many. If you locate
-bugs, please submit them to me at rlaplant@nmr.mgh.harvard.edu.
+bugs, please consider submitting pull requests.
 
 Many thanks to Stefan Fuertinger for his assistance tracking down a number of
 bugs. Stefan Fuertinger has a similar software package dealing with brain

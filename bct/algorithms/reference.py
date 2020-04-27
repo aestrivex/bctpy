@@ -265,7 +265,7 @@ def latmio_und_connected(R, itr, D=None, seed=None):
         number of actual rewirings carried out
     '''
     rng = get_rng(seed)
-    if not np.allclose(R == R.T):
+    if not np.allclose(R, R.T):
         raise BCTParamError("Input must be undirected")
 
     if number_of_components(R) > 1:
@@ -1033,7 +1033,7 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
         (such as the Kolmogorov-Smirnov test) if desired.
     '''
     rng = get_rng(seed)
-    if not np.allclose(W == W.T):
+    if not np.allclose(W, W.T):
         raise BCTParamError("Input must be undirected")
     W = W.copy()
     n = len(W)
@@ -1310,7 +1310,7 @@ def randmio_und_connected(R, itr, seed=None):
     eff : int
         number of actual rewirings carried out
     '''
-    if not np.allclose(R == R.T):
+    if not np.allclose(R, R.T):
         raise BCTParamError("Input must be undirected")
 
     if number_of_components(R) > 1:
@@ -1498,7 +1498,7 @@ def randmio_und(R, itr, seed=None):
     eff : int
         number of actual rewirings carried out
     '''
-    if not np.allclose(R == R.T):
+    if not np.allclose(R, R.T):
         raise BCTParamError("Input must be undirected")
     rng = get_rng(seed)
     R = R.copy()
@@ -1719,7 +1719,7 @@ def randomizer_bin_und(R, alpha, seed=None):
     '''
     rng = get_rng(seed)
     R = binarize(R, copy=True)  # binarize
-    if not np.allclose(R == R.T):
+    if not np.allclose(R, R.T):
         raise BCTParamError(
             'randomizer_bin_und only takes undirected matrices')
 

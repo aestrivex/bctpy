@@ -252,7 +252,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
     for positive and negative weights.
   
     Three Algorithms are supported; herefore referred to as default, zhang,
-    and constantini.
+    and costantini.
 
     1. Default (Onnela et al.), as in the traditional clustering coefficient
        computation. Computed separately for positive and negative weights.
@@ -260,7 +260,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
        incorporated in denominator. Reduces sensitivity of the measure to
        weights directly connected to the node of interest. Computed
        separately for positive and negative weights.
-    3. Constantini & Perugini generalization of Zhang & Horvath formula.
+    3. Costantini & Perugini generalization of Zhang & Horvath formula.
        Takes both positive and negative weights into account simultaneously.
        Particularly sensitive to non-redundancy in path information based on
        sign. Returns only one value.
@@ -270,7 +270,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
     W : NxN np.ndarray
         weighted undirected connection matrix
     corr_type : enum
-        Allowed values are 'default', 'zhang', 'constantini'
+        Allowed values are 'default', 'zhang', 'costantini'
 
     Returns
     -------
@@ -278,7 +278,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
         Clustering coefficient vector for positive weights
     Cneg : Nx1 np.ndarray
         Clustering coefficient vector for negative weights, unless
-        coef_type == 'constantini'.
+        coef_type == 'costantini'.
 
     References:
         Onnela et al. (2005) Phys Rev E 71:065103
@@ -333,7 +333,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
 
         return C_pos, C_neg
 
-    elif coef_type in ('constantini', 'Constantini'):
+    elif coef_type in ('costantini', 'Costantini'):
         cyc3 = np.zeros((n,))
         cyc2 = np.zeros((n,))
 

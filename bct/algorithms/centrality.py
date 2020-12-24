@@ -327,7 +327,7 @@ def edge_betweenness_wei(G):
             if D[S].size == 0:
                 break  # all nodes reached, or
             if np.isinf(np.min(D[S])):  # some cannot be reached
-                Q[:q], = np.where(np.isinf(D))  # these are first in line
+                Q[:q + 1], = np.where(np.isinf(D)) # these are first in line.
                 break
             V, = np.where(D == np.min(D[S]))
 

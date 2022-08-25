@@ -755,7 +755,7 @@ def participation_coef(W, ci, degree='undirected'):
     Kc2 = np.zeros((n,))  # community-specific neighbors
 
     for i in range(1, int(np.max(ci)) + 1):
-        Kc2 += np.square(np.sum(W * (Gc == i), axis=1))
+        Kc2 = Kc2 + np.square(np.sum(W * (Gc == i), axis=1))
 
     P = np.ones((n,)) - Kc2 / np.square(Ko)
     # P=0 if for nodes with no (out) neighbors

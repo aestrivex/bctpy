@@ -915,7 +915,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     Ap = (W > 0)  # positive adjmat
 
     if np.size(np.where(Ap.flat)) < (n * (n - 1)):
-        W_r = randmio_und_signed(W, bin_swaps, seed=rng)
+        W_r, _ = randmio_und_signed(W, bin_swaps, seed=rng)
         Ap_r = W_r > 0
         An_r = W_r < 0
     else:
@@ -944,7 +944,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
             W0.flat[Lij[Oind]] = s * Wv  # weight at this index
         else:
             wsize = np.size(Wv)
-            wei_period = np.round(1 / wei_freq)  # convert frequency to period
+            wei_period = np.round(1 / wei_freq).astype(int)  # convert frequency to period
             lq = np.arange(wsize, 0, -wei_period, dtype=int)
             for m in lq:  # iteratively explore at this period
                 # get indices of Lij that sort P
@@ -1578,6 +1578,8 @@ def randmio_und_signed(R, itr, seed=None):
     -------
     R : NxN np.ndarray
         randomized network
+    eff : int
+        number of rewirings made
     '''
     rng = get_rng(seed)
     R = R.copy()

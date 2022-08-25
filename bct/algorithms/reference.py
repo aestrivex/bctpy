@@ -913,6 +913,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
     n = len(W)
     np.fill_diagonal(W, 0)  # clear diagonal
     Ap = (W > 0)  # positive adjmat
+    An = (W < 0)  # negative adjmat
 
     if np.size(np.where(Ap.flat)) < (n * (n - 1)):
         W_r, _ = randmio_und_signed(W, bin_swaps, seed=rng)
@@ -971,7 +972,7 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
                 Lij = np.delete(Lij, O)
                 i = np.delete(i, O)
                 j = np.delete(j, O)
-                Wv = np.delete(Wv, O)
+                Wv = np.delete(Wv, R)
 
     rpos_in = np.corrcoef(np.sum(W * (W > 0), axis=0),
                           np.sum(W0 * (W0 > 0), axis=0))

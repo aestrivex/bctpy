@@ -833,7 +833,7 @@ def findwalks(CIJ):
     Wq = np.zeros((n, n, n))
     CIJpwr = CIJ.copy()
     Wq[:, :, 1] = CIJ
-    for q in range(n):
+    for q in range(1, n):
         CIJpwr = np.dot(CIJpwr, CIJ)
         Wq[:, :, q] = CIJpwr
 

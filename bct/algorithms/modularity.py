@@ -97,6 +97,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             'potts' uses Potts model Hamiltonian.
             'negative_sym' symmetric treatment of negative weights
             'negative_asym' asymmetric treatment of negative weights
+        The default value is to use the Q-metric
     seed : hashable, optional
         If None (default), use the np.random's global random state to generate random numbers.
         Otherwise, use a new np.random.RandomState instance seeded with the given value.

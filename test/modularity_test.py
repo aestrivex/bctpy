@@ -15,12 +15,11 @@ def test_modularity_und():
     # package numerical instability of eigendecompositions
 
 
-def test_modularity_louvain_und():
+def test_modularity_louvain_und(stable_rng):
     x = load_sample(thres=.4)
 
-    seed = 38429004
-    _, q = bct.modularity_louvain_und(x, seed=seed)
-    assert np.allclose(q, 0.25892588)
+    _, q = bct.modularity_louvain_und(x, seed=stable_rng)
+    assert np.allclose(q, 0.253_148_271)
 
     fails = 0
     for i in range(100):
@@ -33,17 +32,15 @@ def test_modularity_louvain_und():
             else:
                 fails += 1
 
-    seed = 94885236
-    _, q = bct.modularity_finetune_und(x, seed=seed)
-    assert np.allclose(q, .25879794)
+    _, q = bct.modularity_finetune_und(x, seed=stable_rng)
+    assert np.allclose(q, 0.242_632_732)
 
 
-def test_modularity_finetune_und():
+def test_modularity_finetune_und(stable_rng):
     x = load_sample(thres=.4)
 
-    seed = 94885236
-    _, q = bct.modularity_finetune_und(x, seed=seed)
-    assert np.allclose(q, .25879794)
+    _, q = bct.modularity_finetune_und(x, seed=stable_rng)
+    assert np.allclose(q, 0.253_148_271)
 
     fails = 0
     for i in range(100):
@@ -56,9 +53,8 @@ def test_modularity_finetune_und():
             else:
                 fails += 1
 
-    seed = 71040925
-    ci, oq = bct.modularity_louvain_und(x, seed=seed)
-    _, q = bct.modularity_finetune_und(x, ci=ci, seed=seed)
+    ci, oq = bct.modularity_louvain_und(x, seed=stable_rng)
+    _, q = bct.modularity_finetune_und(x, ci=ci, seed=stable_rng)
     print(q, oq)
     # assert np.allclose(q, .25892588)
     assert np.allclose(q, .25856714)
@@ -86,48 +82,44 @@ def test_modularity_finetune_und():
     #(i.e. it is unstable both when the modular structure is identical and not)
 
 
-def test_modularity_louvain_und_sign_seed():
+def test_modularity_louvain_und_sign_seed(stable_rng):
     # performance is same as matlab if randomness is quashed
     x = load_signed_sample()
-    seed = 90772777
-    _, q = bct.modularity_louvain_und_sign(x, seed=seed)
+    _, q = bct.modularity_louvain_und_sign(x, seed=stable_rng)
     print(q)
-    assert np.allclose(q, .46605515)
+    assert np.allclose(q, 0.453_375_647)
 
 
-def test_modularity_finetune_und_sign_actually_finetune():
+def test_modularity_finetune_und_sign_actually_finetune(stable_rng):
     x = load_signed_sample()
-    seed = 34908314
-    ci, oq = bct.modularity_louvain_und_sign(x, seed=seed)
-    _, q = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
+    ci, oq = bct.modularity_louvain_und_sign(x, seed=stable_rng)
+    _, q = bct.modularity_finetune_und_sign(x, seed=stable_rng, ci=ci)
     print(q)
-    assert np.allclose(q, .47282924)
+    assert np.allclose(q, 0.462_292_161)
     assert q >= oq
 
-    seed = 88215881
-    np.random.seed(seed)
-    randomized_sample = np.random.random_sample(size=(len(x), len(x)))
+    randomized_sample = stable_rng.random(size=(len(x), len(x)))
     randomized_sample = randomized_sample + randomized_sample.T
     x[np.where(bct.threshold_proportional(randomized_sample, .2))] = 0
 
-    ci, oq = bct.modularity_louvain_und_sign(x, seed=seed)
+    ci, oq = bct.modularity_louvain_und_sign(x, seed=stable_rng)
     print(oq)
-    assert np.allclose(oq, .45254522)
+    assert np.allclose(oq, 0.458_063_807)
     for i in range(100):
         _, q = bct.modularity_finetune_und_sign(x, ci=ci)
         assert q >= oq
 
 
-def test_modularity_probtune_und_sign():
+def test_modularity_probtune_und_sign(stable_rng):
     x = load_signed_sample()
-    seed = 59468096
-    ci, q = bct.modularity_probtune_und_sign(x, seed=seed)
+    ci, q = bct.modularity_probtune_und_sign(x, seed=stable_rng)
     print(q)
-    assert np.allclose(q, .07885327)
+    # N.B. this result is quite different
+    # assert np.allclose(q, .07885327)  # legacy numpy.random.RandomState
+    assert np.allclose(q, 0.114_732_792)  # stable_rng
 
-    seed = 1742447
-    ci, _ = bct.modularity_louvain_und_sign(x, seed=seed)
-    _, oq = bct.modularity_finetune_und_sign(x, seed=seed, ci=ci)
+    ci, _ = bct.modularity_louvain_und_sign(x, seed=stable_rng)
+    _, oq = bct.modularity_finetune_und_sign(x, seed=stable_rng, ci=ci)
 
     for i in np.arange(.05, .5, .02):
         fails = 0
@@ -148,11 +140,10 @@ def test_modularity_dir_low_modularity():
     assert np.allclose(q, .06450290)
 
 
-def test_modularity_louvain_dir_low_modularity():
+def test_modularity_louvain_dir_low_modularity(stable_rng):
     x = load_directed_low_modularity_sample(thres=.67)
-    seed = 28917147
-    _, q = bct.modularity_louvain_dir(x, seed=seed)
-    assert np.allclose(q, .06934894)
+    _, q = bct.modularity_louvain_dir(x, seed=stable_rng)
+    assert np.allclose(q, 0.069_334_607)
 
 # def test_modularity_finetune_dir_low_modularity():
 #	x = load_directed_low_modularity_sample(thres=.67)
@@ -173,11 +164,11 @@ def test_modularity_dir():
     assert np.allclose(q, .32742787)
 
 
-def test_modularity_louvain_dir():
+def test_modularity_louvain_dir(stable_rng):
     x = load_directed_sample()
-    seed = 43938304
-    _, q = bct.modularity_louvain_dir(x, seed=seed)
-    assert np.allclose(q, .32697921)
+    _, q = bct.modularity_louvain_dir(x, seed=stable_rng)
+    # assert np.allclose(q, .32697921)  # legacy np.random.RandomState
+    assert np.allclose(q, 0.373_475_890)  # stable_rng
 
 # def test_modularity_finetune_dir():
 #	x = load_directed_sample()
@@ -194,10 +185,9 @@ def test_modularity_louvain_dir():
     # what is wrong
 
 
-def test_community_louvain():
+def test_community_louvain(stable_rng):
     x = load_sample(thres=0.4)
-    seed = 39185
-    ci, q = bct.community_louvain(x, seed=seed)
+    ci, q = bct.community_louvain(x, seed=stable_rng)
     print(q)
     assert np.allclose(q, 0.2583, atol=0.015)
 

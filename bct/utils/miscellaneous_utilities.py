@@ -1,5 +1,4 @@
 from __future__ import division, print_function
-import random
 import numpy as np
 
 
@@ -26,7 +25,7 @@ def pick_four_unique_nodes_quickly(n, seed=None):
     clever but still substantially slower.
     '''
     rng = get_rng(seed)
-    k = rng.randint(n**4)
+    k = rng.integers(n**4)
     a = k % n
     b = k // n % n
     c = k // n ** 2 % n
@@ -87,28 +86,18 @@ def dummyvar(cis, return_sparse=False):
 
 
 def get_rng(seed=None):
-    """
-    By default, or if `seed` is np.random, return the global RandomState
-    instance used by np.random.
-    If `seed` is a RandomState instance, return it unchanged.
-    Otherwise, use the passed (hashable) argument to seed a new instance
-    of RandomState and return it.
+    """Return a random number generator.
+
+    This method is a simple wrapper over ``numpy.random.default_rng``,
+    used for legacy compatibility purposes;
+    see that function's docs for more information.
 
     Parameters
     ----------
-    seed : hashable or np.random.RandomState or np.random, optional
+    seed : None, int, array_like[ints], SeedSequence, BitGenerator, Generator
 
     Returns
     -------
-    np.random.RandomState
+    np.random.Generator
     """
-    if seed is None or seed == np.random:
-        return np.random.mtrand._rand
-    elif isinstance(seed, np.random.RandomState):
-        return seed
-    try:
-        rstate =  np.random.RandomState(seed)
-    except ValueError:
-        rstate = np.random.RandomState(random.Random(seed).randint(0, 2**32-1))
-    return rstate
-
+    return np.random.default_rng(seed)

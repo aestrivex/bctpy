@@ -250,7 +250,7 @@ def clustering_coef_wu_sign(W, coef_type='default'):
     '''
     Returns the weighted clustering coefficient generalized or separated
     for positive and negative weights.
-  
+
     Three Algorithms are supported; herefore referred to as default, zhang,
     and costantini.
 
@@ -384,9 +384,8 @@ def consensus_und(D, tau, reps=1000, seed=None):
     reps : int
         number of times the clustering algorithm is reapplied. default value
         is 1000.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -485,7 +484,7 @@ def get_components(A, no_depend=False):
     if not np.all(A == A.T):  # ensure matrix is undirected
         raise BCTParamError('get_components can only be computed for undirected'
                             ' matrices.  If your matrix is noisy, correct it with np.around')
-    
+
     A = binarize(A, copy=True)
     n = len(A)
     np.fill_diagonal(A, 1)
@@ -503,7 +502,7 @@ def get_components(A, no_depend=False):
         temp.append(item)
         union_sets = temp
 
-    comps = np.array([i+1 for v in range(n) for i in 
+    comps = np.array([i+1 for v in range(n) for i in
         range(len(union_sets)) if v in union_sets[i]])
     comp_sizes = np.array([len(s) for s in union_sets])
 

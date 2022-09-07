@@ -10,7 +10,7 @@ from ..citations import BETZEL2016
 
 
 @due.dcite(BibTeX(BETZEL2016), description="Generative models")
-def generative_model(A, D, m, eta, gamma=None, model_type='matching', 
+def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     model_var='powerlaw', epsilon=1e-6, copy=True, seed=None):
     '''
     Generates synthetic networks using the models described in
@@ -32,10 +32,10 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     D : np.ndarray
         Matrix of euclidean distances or other distances between nodes
     m : int
-        Number of connections that should be present in the final synthetic 
+        Number of connections that should be present in the final synthetic
         network
     eta : np.ndarray
-        A vector describing a range of values to estimate for eta, the 
+        A vector describing a range of values to estimate for eta, the
         hyperparameter describing exponential weighting of the euclidean
         distance.
     gamma : np.ndarray
@@ -44,7 +44,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         algorithm. If model_type='euclidean' or another distance metric,
         this can be None.
     model_type : Enum(str)
-        euclidean : Uses only euclidean distances to generate connection 
+        euclidean : Uses only euclidean distances to generate connection
             probabilities
         neighbors : count of common neighbors
         matching : matching index, the normalized overlap in neighborhoods
@@ -67,16 +67,15 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     copy : bool
         Some algorithms add edges directly to the input matrix. Set this flag
         to make a copy of the input matrix instead. Defaults to True.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
     '''
     rng = get_rng(seed)
     if copy:
         A = A.copy()
 
     n = len(D)
-    
+
     #These parameters don't do any of the voronoi narrowing.
     #Its a list of eta values paired with gamma values.
     #To try 3 eta and 3 gamma pairs, should use 9 list values.
@@ -93,7 +92,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             epsilon)
 
     def k_diff(K):
-        return np.abs(np.tile(K, (n, 1)) - 
+        return np.abs(np.tile(K, (n, 1)) -
                       np.transpose(np.tile(K, (n, 1)))) + epsilon
 
     def k_max(K):
@@ -117,7 +116,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
     def s_min(K, sc):
         return np.where(K < sc, K + epsilon, sc + epsilon)
-    
+
     def s_max(K, sc):
         #return np.max((K, sc.T), axis=0)
         return np.where(K > sc, K + epsilon, sc + epsilon)
@@ -169,12 +168,12 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         if mv1 in ('powerlaw', 'power_law'):
             Fd = D**eta
         elif mv1 in ('exponential',):
-            Fd = np.exp(eta*D) 
+            Fd = np.exp(eta*D)
 
         if mv2 in ('powerlaw', 'power_law'):
             Fk = K**gamma
         elif mv2 in ('exponential',):
-            Fk = np.exp(gamma*K) 
+            Fk = np.exp(gamma*K)
 
         c = clustering_coef_bu(A)
         k = np.sum(A, axis=1)
@@ -204,7 +203,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             c[k<=1] = 0
             bth[uu] = 1
             bth[vv] = 1
-    
+
             k_result = x_fun(c, bth)
 
             #print(np.shape(k_result))
@@ -239,12 +238,12 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         if mv1 in ('powerlaw', 'power_law'):
             Fd = D**eta
         elif mv1 in ('exponential',):
-            Fd = np.exp(eta*D) 
+            Fd = np.exp(eta*D)
 
         if mv2 in ('powerlaw', 'power_law'):
             Fk = K**gamma
         elif mv2 in ('exponential',):
-            Fk = np.exp(gamma*K) 
+            Fk = np.exp(gamma*K)
 
         P = Fd * Fk * np.logical_not(A)
         u,v = np.where(np.triu(np.ones((n,n)), 1))
@@ -258,7 +257,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 #        print(np.shape(np.where(A[u,v])), 'sqishy')
 #        print(np.shape(P), 'squnnaq')
 
-        #b[:mseed] = np.where(A[np.ix_(u,v)]) 
+        #b[:mseed] = np.where(A[np.ix_(u,v)])
         b[:mseed] = np.squeeze(np.where(A[u,v]))
         #print(mseed, m)
         for i in range(mseed, m):
@@ -318,16 +317,16 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         if mv1 in ('powerlaw', 'power_law'):
             Fd = D**eta
         elif mv1 in ('exponential',):
-            Fd = np.exp(eta*D) 
+            Fd = np.exp(eta*D)
 
         if mv2 in ('powerlaw', 'power_law'):
             Fk = K**gamma
         elif mv2 in ('exponential',):
-            Fk = np.exp(gamma*K) 
+            Fk = np.exp(gamma*K)
 
         Ff = Fd * Fk * np.logical_not(A)
         u,v = np.where(np.triu(np.ones((n,n)), 1))
-    
+
         for ii in range(mseed, m):
             C = np.append(0, np.cumsum(Ff[u,v]))
             r = np.sum(rng.random_sample()*C[-1] >= C)
@@ -343,7 +342,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             for i in range(len(updateuu)):
                 j = updateuu[i]
                 c2 = np.append(A[:,j], A[j,:])
-    
+
                 use = np.logical_or(c1, c2)
                 use[uu] = use[uu+n] = use[j] = use[j+n] = 0
                 ncon = np.sum(c1[use]) + np.sum(c2[use])
@@ -356,12 +355,12 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             updatevv, = np.where(np.inner(A, A[:,vv]))
             np.delete(updatevv, np.where(updatevv == uu))
             np.delete(updatevv, np.where(updatevv == vv))
-        
+
             c1 = np.append(A[:,vv], A[vv,:])
             for i in range(len(updatevv)):
                 j = updatevv[i]
                 c2 = np.append(A[:,j], A[j,:])
-    
+
                 use = np.logical_or(c1, c2)
                 use[vv] = use[vv+n] = use[j] = use[j+n] = 0
                 ncon = np.sum(c1[use]) + np.sum(c2[use])
@@ -374,7 +373,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             Ff = Fd * Fk * np.logical_not(A)
 
         return A
-    
+
     def neighbors_gen(A, K, D, m, eta, gamma, model_var):
         K += epsilon
 
@@ -388,16 +387,16 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         if mv1 in ('powerlaw', 'power_law'):
             Fd = D**eta
         elif mv1 in ('exponential',):
-            Fd = np.exp(eta*D) 
+            Fd = np.exp(eta*D)
 
         if mv2 in ('powerlaw', 'power_law'):
             Fk = K**gamma
         elif mv2 in ('exponential',):
-            Fk = np.exp(gamma*K) 
+            Fk = np.exp(gamma*K)
 
         Ff = Fd * Fk * np.logical_not(A)
         u,v = np.where(np.triu(np.ones((n,n)), 1))
-    
+
         for ii in range(mseed, m):
             C = np.append(0, np.cumsum(Ff[u,v]))
             r = np.sum(rng.random_sample()*C[-1] >= C)
@@ -407,7 +406,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
             x = A[uu, :].astype(int)
             y = A[:, vv].astype(int)
-    
+
             K[uu, y] += 1
             K[y, uu] += 1
             K[vv, x] += 1
@@ -416,7 +415,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
             if mv2 in ('powerlaw', 'power_law'):
                 Fk = K**gamma
             elif mv2 in ('exponential',):
-                Fk = np.exp(gamma*K) 
+                Fk = np.exp(gamma*K)
 
             if mv2 in ('powerlaw', 'power_law'):
                 Ff[uu, y] = Ff[y, uu] = Fd[uu, y] * (K[uu, y] ** gamma)
@@ -474,12 +473,12 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
     elif model_type in ('clu-max', 'clu_max'):
         Kseed = k_max(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_max) 
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_max)
 
     elif model_type in ('clu-min', 'clu_min'):
         Kseed = k_min(clustering_coef_bu(A))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
-            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_min) 
+            B[:,:,j] = clu_gen(A, Kseed, D, m, ep, gp, model_var, x_min)
 
     elif model_type in ('clu-prod', 'clu_prod'):
         Kseed = k_prod(clustering_coef_bu(A))
@@ -495,7 +494,7 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
         Kseed = k_diff(np.sum(A, axis=1))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
             B[:,:,j] = deg_gen(A, Kseed, D, m, ep, gp, model_var, s_diff)
-    
+
     elif model_type in ('deg-max', 'deg_max'):
         Kseed = k_max(np.sum(A, axis=1))
         for j, (ep, gp) in enumerate(zip(eta, gamma)):
@@ -525,11 +524,11 @@ def generative_model(A, D, m, eta, gamma=None, model_type='matching',
 
     elif model_type in ('spatial', 'geometric', 'euclidean'):
         for j, ep in enumerate(eta):
-            B[:,:,j] = euclidean_gen(A, D, m, ep, model_var) 
+            B[:,:,j] = euclidean_gen(A, D, m, ep, model_var)
 
     return np.squeeze(B)
 
-def evaluate_generative_model(A, Atgt, D, eta, gamma=None, 
+def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
     model_type='matching', model_var='powerlaw', epsilon=1e-6, seed=None):
     '''
     Generates synthetic networks with parameters provided and evaluates their
@@ -537,7 +536,7 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
     Basically it takes the Kolmogorov-Smirnov statistics of 4 network
     measures; comparing the degree distributions, clustering coefficients,
     betweenness centrality, and Euclidean distances between connected regions.
-    
+
     The energy is globally low if the synthetic network matches the target.
     Energy is defined as the maximum difference across the four statistics.
     '''
@@ -548,11 +547,11 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
     xb = betweenness_bin(Atgt)
     xe = D[np.triu(Atgt, 1) > 0]
 
-    B = generative_model(A, D, m, eta, gamma, model_type=model_type, 
+    B = generative_model(A, D, m, eta, gamma, model_type=model_type,
                          model_var=model_var, epsilon=epsilon, copy=True, seed=seed)
 
     #if eta != gamma then an error is thrown within generative model
-    
+
     nB = len(eta)
 
     if nB == 1:
@@ -562,7 +561,7 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
 
     def kstats(x, y):
         bin_edges = np.concatenate([[-np.inf],
-                                    np.sort(np.concatenate((x, y))), 
+                                    np.sort(np.concatenate((x, y))),
                                     [np.inf]])
 
         bin_x,_ = np.histogram(x, bin_edges)

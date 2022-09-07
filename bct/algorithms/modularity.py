@@ -98,9 +98,8 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             'negative_sym' symmetric treatment of negative weights
             'negative_asym' asymmetric treatment of negative weights
         The default value is to use the Q-metric
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -607,9 +606,8 @@ def modularity_finetune_dir(W, ci=None, gamma=1, seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -711,9 +709,8 @@ def modularity_finetune_und(W, ci=None, gamma=1, seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -815,9 +812,8 @@ def modularity_finetune_und_sign(W, qtype='sta', gamma=1, ci=None, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     ci : Nx1 np.ndarray | None
         initial community affiliation vector
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -949,9 +945,8 @@ def modularity_louvain_dir(W, gamma=1, hierarchy=False, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     hierarchy : bool
         Enables hierarchical output. Defalut value=False
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1082,9 +1077,8 @@ def modularity_louvain_und(W, gamma=1, hierarchy=False, seed=None):
         larger modules while gamma > 1 detects smaller modules.
     hierarchy : bool
         Enables hierarchical output. Defalut value=False
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1222,9 +1216,8 @@ def modularity_louvain_und_sign(W, gamma=1, qtype='sta', seed=None):
     gamma : float
         resolution parameter. default value=1. Values 0 <= gamma < 1 detect
         larger modules while gamma > 1 detects smaller modules.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1392,9 +1385,8 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
         initial community affiliation vector
     p : float
         probability of random node moves. Default value = 0.45
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------

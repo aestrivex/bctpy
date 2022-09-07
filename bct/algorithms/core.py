@@ -166,9 +166,8 @@ def core_periphery_dir(W, gamma=1, C0=None, seed=None):
         0 < gamma < 1 detects large core, small periphery
     C0 : NxN np.ndarray
         Initial core structure
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
     '''
     rng = get_rng(seed)
     n = len(W)

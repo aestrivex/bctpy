@@ -27,9 +27,8 @@ def latmio_dir_connected(R, itr, D=None, seed=None):
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -149,9 +148,8 @@ def latmio_dir(R, itr, D=None, seed=None):
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -249,9 +247,8 @@ def latmio_und_connected(R, itr, D=None, seed=None):
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -384,9 +381,8 @@ def latmio_und(R, itr, D=None, seed=None):
     D : np.ndarray | None
         distance-to-diagonal matrix. Defaults to the actual distance matrix
         if not specified.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -488,9 +484,8 @@ def makeevenCIJ(n, k, sz_cl, seed=None):
         number of edges
     sz_cl : int
         size of clusters (must be power of 2)
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -566,9 +561,8 @@ def makefractalCIJ(mx_lvl, E, sz_cl, seed=None):
         connection density fall off per level
     sz_cl : int
         size of clusters (must be power of 2)
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -622,9 +616,8 @@ def makerandCIJdegreesfixed(inv, outv, seed=None):
         in-degree vector
     outv : Nx1 np.ndarray
         out-degree vector
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -706,9 +699,8 @@ def makerandCIJ_dir(n, k, seed=None):
         number of vertices
     K : int
         number of edges
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -738,9 +730,8 @@ def makerandCIJ_und(n, k, seed=None):
         number of vertices
     K : int
         number of edges
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -771,9 +762,8 @@ def makeringlatticeCIJ(n, k, seed=None):
         number of vertices
     K : int
         number of edges
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -829,9 +819,8 @@ def maketoeplitzCIJ(n, k, s, seed=None):
         number of edges
     s : float
         standard deviation of toeplitz
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -881,9 +870,8 @@ def null_model_dir_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
         wei_freq == 0.1 implies that weights sorted each 10th step (faster,
             default value)
         wei_freq == 0 implies no sorting of weights (not recommended)
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1005,9 +993,8 @@ def null_model_und_sign(W, bin_swaps=5, wei_freq=.1, seed=None):
         wei_freq == 0.1 implies that weights sorted each 10th step (faster,
             default value)
         wei_freq == 0 implies no sorting of weights (not recommended)
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1131,9 +1118,8 @@ def randmio_dir_connected(R, itr, seed=None):
         directed binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1223,9 +1209,8 @@ def randmio_dir(R, itr, seed=None):
         directed binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1300,9 +1285,8 @@ def randmio_und_connected(R, itr, seed=None):
         undirected binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1412,9 +1396,8 @@ def randmio_dir_signed(R, itr, seed=None):
         directed binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1488,9 +1471,8 @@ def randmio_und(R, itr, seed=None):
         undirected binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1571,9 +1553,8 @@ def randmio_und_signed(R, itr, seed=None):
         undirected binary/weighted connection matrix
     itr : int
         rewiring parameter. Each edge is rewired approximately itr times.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1636,9 +1617,8 @@ def randomize_graph_partial_und(A, B, maxswap, seed=None):
         mask; edges to avoid
     maxswap : int
         number of rewirings
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -1711,9 +1691,8 @@ def randomizer_bin_und(R, alpha, seed=None):
         binary undirected connection matrix
     alpha : float
         fraction of edges to rewire
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------

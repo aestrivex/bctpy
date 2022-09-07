@@ -92,7 +92,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         initial community affiliation vector. default value=None
     B : str | NxN np.arraylike
         string describing objective function type, or provides a custom
-        NxN objective-function matrix. builtin values 
+        NxN objective-function matrix. builtin values
             'modularity' uses Q-metric as objective function
             'potts' uses Potts model Hamiltonian.
             'negative_sym' symmetric treatment of negative weights
@@ -167,7 +167,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
             print ('Warning: objective function matrix not symmetric, '
                    'symmetrizing')
             B = (B + B.T) / 2
-    
+
     Hnm = np.zeros((n, n))
     for m in range(1, n + 1):
         Hnm[:, m - 1] = np.sum(B[:, ci == m], axis=1)  # node to module degree
@@ -236,7 +236,7 @@ def community_louvain(W, gamma=1, ci=None, B='modularity', seed=None):
         q0 = q
 
         q = np.trace(B)  # compute modularity
-    
+
     # Workaround to normalize
     if not renormalize:
         return ci, q/s
@@ -1460,9 +1460,9 @@ def modularity_probtune_und_sign(W, qtype='sta', gamma=1, ci=None, p=.45,
 
     for u in rng.permutation(n):  # loop over nodes in random order
         ma = ci[u] - 1  # current module
-        r = rng.random_sample() < p
+        r = rng.random() < p
         if r:
-            mb = rng.randint(n)  # select new module randomly
+            mb = rng.integers(n)  # select new module randomly
         else:
             dq0 = ((Knm0[u, :] + W0[u, u] - Knm0[u, ma]) -
                    gamma * Kn0[u] * (Km0 + Kn0[u] - Km0[ma]) / s0)

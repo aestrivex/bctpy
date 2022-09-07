@@ -141,7 +141,7 @@ def rentian_scaling(A, xyz, n, seed=None):
     # and the number of edges traversing the boundary of the partition (e)
     while count < n:
         # define cube endpoints
-        randx = np.sort((1 + nmax - nmin) * rng.random_sample((2,)))
+        randx = np.sort((1 + nmax - nmin) * rng.random((2,)))
 
         # find nodes in cube
         l1 = xyzn[:, 0] > randx[0]

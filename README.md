@@ -2,7 +2,7 @@
 
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 
-Tested against python 2.7 and 3.9.
+Tested against python 3.7+.
 
 ## Copyright information
 

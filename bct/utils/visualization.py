@@ -307,29 +307,27 @@ def backbone_wu(CIJ, avgdeg):
     CIJtree = np.zeros((n, n))
 
     # find strongest edge (if multiple edges are tied, use only first one)
-    i, j = np.where(np.max(CIJ) == CIJ)
-    im = [i[0], j[0]]
-    jm = [j[0], i[0]]
+    im, jm = np.unravel_index(np.argmax(CIJ, axis=None), CIJ.shape)
 
     # copy into tree graph
     CIJtree[im, jm] = CIJ[im, jm]
-    in_ = im
-    out = np.setdiff1d(range(n), in_)
+    CIJtree[jm, im] = CIJ[jm, im]
+    in_ = np.array([im, jm])
+    out = np.setdiff1d(np.arange(n), in_)
 
     # repeat n-2 times
     for ix in range(n - 2):
         CIJ_io = CIJ[np.ix_(in_, out)]
-        i, j = np.where(np.max(CIJ_io) == CIJ_io)
-        # i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-        print(i, j)
-        im = in_[i[0]]
-        jm = out[j[0]]
+        im, jm = np.unravel_index(np.argmax(CIJ_io, axis=None), CIJ_io.shape)
+        print(im, jm)
+        im = in_[im]
+        jm = out[jm]
 
         # copy into tree graph
         CIJtree[im, jm] = CIJ[im, jm]
         CIJtree[jm, im] = CIJ[jm, im]
         in_ = np.append(in_, jm)
-        out = np.setdiff1d(range(n), in_)
+        out = np.setdiff1d(np.arange(n), in_)
 
     # now add connections back with the total number of added connections
     # determined by the desired avgdeg

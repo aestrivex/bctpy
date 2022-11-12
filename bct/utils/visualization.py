@@ -269,7 +269,7 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
 
 @due.dcite(BibTeX(HIDALGO2007), "Weighted undirected network backbone")
 @due.dcite(BibTeX(HAGMANN2008), "Weighted undirected network backbone")
-def backbone_wu(CIJ, avgdeg):
+def backbone_wu(CIJ, avgdeg, verbose=False):
     '''
     The network backbone contains the dominant connections in the network
     and may be used to aid network visualization. This function computes
@@ -282,6 +282,8 @@ def backbone_wu(CIJ, avgdeg):
         weighted undirected connection matrix
     avgdeg : int
         desired average degree of backbone
+    verbose : bool
+        print out edges whilst building spanning tree. Default False.
 
     Returns
     -------
@@ -308,6 +310,8 @@ def backbone_wu(CIJ, avgdeg):
 
     # find strongest edge (if multiple edges are tied, use only first one)
     im, jm = np.unravel_index(np.argmax(CIJ, axis=None), CIJ.shape)
+    if verbose:
+        print(im, jm)
 
     # copy into tree graph
     CIJtree[im, jm] = CIJ[im, jm]
@@ -319,9 +323,10 @@ def backbone_wu(CIJ, avgdeg):
     for ix in range(n - 2):
         CIJ_io = CIJ[np.ix_(in_, out)]
         im, jm = np.unravel_index(np.argmax(CIJ_io, axis=None), CIJ_io.shape)
-        print(im, jm)
         im = in_[im]
         jm = out[jm]
+        if verbose:
+            print(im, jm)
 
         # copy into tree graph
         CIJtree[im, jm] = CIJ[im, jm]

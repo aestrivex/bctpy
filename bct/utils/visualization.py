@@ -280,7 +280,7 @@ def backbone_wu(CIJ, avgdeg, verbose=False):
     ----------
     CIJ : NxN np.ndarray
         weighted undirected connection matrix
-    avgdeg : int
+    avgdeg : float
         desired average degree of backbone
     verbose : bool
         print out edges whilst building spanning tree. Default False.
@@ -340,7 +340,8 @@ def backbone_wu(CIJ, avgdeg, verbose=False):
     CIJnotintree = CIJ * np.logical_not(CIJtree)
     ix, = np.where(CIJnotintree.flat)
     a = np.sort(CIJnotintree.flat[ix])[::-1]
-    cutoff = avgdeg * n - 2 * (n - 1) - 1
+    # make sure that cutoff is an integer
+    cutoff = int(avgdeg * n - 2 * (n - 1) - 1)
     if cutoff >= np.size(a):
         # if the avgdeg requirement is too large, raise error
         raise BCTParamError('backbone_wu is given an avgdeg which is larger than true '

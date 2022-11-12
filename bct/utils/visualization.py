@@ -308,8 +308,8 @@ def backbone_wu(CIJ, avgdeg):
 
     # find strongest edge (if multiple edges are tied, use only first one)
     i, j = np.where(np.max(CIJ) == CIJ)
-    im = [i[0], i[1]]  # what?  why take two values?  doesnt that mess up multiples?
-    jm = [j[0], j[1]]
+    im = [i[0], j[0]]
+    jm = [j[0], i[0]]
 
     # copy into tree graph
     CIJtree[im, jm] = CIJ[im, jm]
@@ -338,8 +338,12 @@ def backbone_wu(CIJ, avgdeg):
     ix, = np.where(CIJnotintree.flat)
     a = np.sort(CIJnotintree.flat[ix])[::-1]
     cutoff = avgdeg * n - 2 * (n - 1) - 1
-    # if the avgdeg req is already satisfied, skip this
     if cutoff >= np.size(a):
+        # if the avgdeg requirement is too large, raise error
+        raise BCTParamError('backbone_wu is given an avgdeg which is larger than true '
+                            'avgdeg in the input matrix.')
+    elif cutoff < 0:
+        # if the avgdeg requirement is already satisfied, return backbone
         CIJclus = CIJtree.copy()
     else:
         thr = a[cutoff]

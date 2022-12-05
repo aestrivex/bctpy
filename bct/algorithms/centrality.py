@@ -2,8 +2,7 @@ from __future__ import division, print_function
 import numpy as np
 from .core import kcore_bd, kcore_bu
 from .distance import reachdist
-from bct.utils import invert
-from ..utils.miscellaneous_utilities import BCTParamError
+from bct.utils import invert, BCTParamError
 from ..due import due, BibTeX
 from ..citations import (
     BRANDES2001, KINTALI2008, SHANNON1948, RUBINOV2011, NEWMAN2016, HONEY2007,

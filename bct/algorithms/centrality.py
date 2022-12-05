@@ -567,8 +567,8 @@ def kcoreness_centrality_bd(CIJ):
     -------
     coreness : Nx1 np.ndarray
         node coreness
-    kn : int
-        size of k-core
+    kn : Nx1 np.ndarray
+        size of k-core for all values of K between 1 and N
     '''
     N = len(CIJ)
 
@@ -600,8 +600,8 @@ def kcoreness_centrality_bu(CIJ):
     -------
     coreness : Nx1 np.ndarray
         node coreness
-    kn : int
-        size of k-core
+    kn : Nx1 np.ndarray
+        size of k-core for all values of K between 1 and N
     '''
     N = len(CIJ)
 

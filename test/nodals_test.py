@@ -12,9 +12,13 @@ def test_glob_eff():
 
 def test_loc_eff():
     x = load_sample(thres=.4)
+    leff_o = bct.efficiency_wei(x, local='original')
+    print(np.sum(leff_o), 315.6225)
+    assert np.allclose(np.sum(leff_o), 315.6225, atol=0.1)
+
     leff = bct.efficiency_wei(x, local=True)
-    print(np.sum(leff), 315.6225)
-    assert np.allclose(np.sum(leff), 315.6225, atol=0.1)
+    print(np.sum(leff), 268.5581)
+    assert np.allclose(np.sum(leff), 268.5581, atol=0.1)
 
 
 def test_glob_eff_bin():

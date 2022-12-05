@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
-from bct.utils import cuberoot, binarize, invert
+from bct.utils import cuberoot, binarize, invert, BCTParamError
 from ..due import due, BibTeX
 from ..citations import LATORA2001, ONNELA2005, FAGIOLO2007, RUBINOV2010
 
@@ -560,16 +560,20 @@ def efficiency_wei(Gw, local=False):
     W : NxN np.ndarray
         undirected weighted connection matrix
         (all weights in W must be between 0 and 1)
-    local : bool
-        If True, computes local efficiency instead of global efficiency.
-        Default value = False.
-
+    local = bool or enum
+        If True or 'local', computes local efficiency instead of global efficiency.
+        If False or 'global', uses the global efficiency
+        If 'original', will use the original algorithm provided by (Rubinov
+        & Sporns 2010). This version is not recommended. The local efficiency
+        calculation was improved in (Wang et al. 2016) as a true generalization
+        of the binary variant.
+        
     Returns
     -------
     Eglob : float
-        global efficiency, only if local=False
+        global efficiency, only if local in (False, 'global')
     Eloc : Nx1 np.ndarray
-        local efficiency, only if local=True
+        local efficiency, only if local in (True, 'local', 'original')
 
     Notes
     -----
@@ -588,6 +592,10 @@ def efficiency_wei(Gw, local=False):
 
     Algorithm:  Dijkstra's algorithm
     '''
+    if local not in (True, False, 'local', 'global', 'original'):
+        raise BCTParamError("local param must be any of True, False, "
+            "'local', 'global', or 'original'")
+
     def distance_inv_wei(G):
         n = len(G)
         D = np.zeros((n, n))  # distance matrix
@@ -622,8 +630,9 @@ def efficiency_wei(Gw, local=False):
     n = len(Gw)
     Gl = invert(Gw, copy=True)  # connection length matrix
     A = np.array((Gw != 0), dtype=int)
-    if local:
-        E = np.zeros((n,))  # local efficiency
+    #local efficiency algorithm described by Rubinov and Sporns 2010, not recommended
+    if local == 'original':
+        E = np.zeros((n,))
         for u in range(n):
             # V,=np.where(Gw[u,:])		#neighbors
             # k=len(V)					#degree
@@ -648,7 +657,24 @@ def efficiency_wei(Gw, local=False):
                 # print numer,denom
                 E[u] = numer / denom  # local efficiency
 
-    else:
+    #local efficiency algorithm described by Wang et al 2016, recommended
+    elif local in (True, 'local'):
+        E = np.zeros((n,))
+        for u in range(n):
+            V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
+            sw = cuberoot(Gw[u, V]) + cuberoot(Gw[V, u].T)
+            e = distance_inv_wei(cuberoot(Gl)[np.ix_(V, V)])
+            se = e+e.T
+         
+            numer = np.sum(np.outer(sw.T, sw) * se) / 2
+            if numer != 0:
+                # symmetrized adjacency vector
+                sa = A[u, V] + A[V, u].T
+                denom = np.sum(sa)**2 - np.sum(sa * sa)
+                # print numer,denom
+                E[u] = numer / denom  # local efficiency
+
+    elif local in (False, 'global'):
         e = distance_inv_wei(Gl)
         E = np.sum(e) / (n * n - n)
     return E

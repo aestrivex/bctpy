@@ -269,7 +269,7 @@ def align_matrices(m1, m2, dfun='sqrdiff', verbose=False, H=1e6, Texp=1,
 
 @due.dcite(BibTeX(HIDALGO2007), "Weighted undirected network backbone")
 @due.dcite(BibTeX(HAGMANN2008), "Weighted undirected network backbone")
-def backbone_wu(CIJ, avgdeg):
+def backbone_wu(CIJ, avgdeg, verbose=False):
     '''
     The network backbone contains the dominant connections in the network
     and may be used to aid network visualization. This function computes
@@ -280,8 +280,10 @@ def backbone_wu(CIJ, avgdeg):
     ----------
     CIJ : NxN np.ndarray
         weighted undirected connection matrix
-    avgdeg : int
+    avgdeg : float
         desired average degree of backbone
+    verbose : bool
+        print out edges whilst building spanning tree. Default False.
 
     Returns
     -------
@@ -307,29 +309,30 @@ def backbone_wu(CIJ, avgdeg):
     CIJtree = np.zeros((n, n))
 
     # find strongest edge (if multiple edges are tied, use only first one)
-    i, j = np.where(np.max(CIJ) == CIJ)
-    im = [i[0], i[1]]  # what?  why take two values?  doesnt that mess up multiples?
-    jm = [j[0], j[1]]
+    im, jm = np.unravel_index(np.argmax(CIJ, axis=None), CIJ.shape)
+    if verbose:
+        print(im, jm)
 
     # copy into tree graph
     CIJtree[im, jm] = CIJ[im, jm]
-    in_ = im
-    out = np.setdiff1d(range(n), in_)
+    CIJtree[jm, im] = CIJ[jm, im]
+    in_ = np.array([im, jm])
+    out = np.setdiff1d(np.arange(n), in_)
 
     # repeat n-2 times
     for ix in range(n - 2):
         CIJ_io = CIJ[np.ix_(in_, out)]
-        i, j = np.where(np.max(CIJ_io) == CIJ_io)
-        # i,j=np.where(np.max(CIJ[in_,out])==CIJ[in_,out])
-        print(i, j)
-        im = in_[i[0]]
-        jm = out[j[0]]
+        im, jm = np.unravel_index(np.argmax(CIJ_io, axis=None), CIJ_io.shape)
+        im = in_[im]
+        jm = out[jm]
+        if verbose:
+            print(im, jm)
 
         # copy into tree graph
         CIJtree[im, jm] = CIJ[im, jm]
         CIJtree[jm, im] = CIJ[jm, im]
         in_ = np.append(in_, jm)
-        out = np.setdiff1d(range(n), in_)
+        out = np.setdiff1d(np.arange(n), in_)
 
     # now add connections back with the total number of added connections
     # determined by the desired avgdeg
@@ -337,9 +340,14 @@ def backbone_wu(CIJ, avgdeg):
     CIJnotintree = CIJ * np.logical_not(CIJtree)
     ix, = np.where(CIJnotintree.flat)
     a = np.sort(CIJnotintree.flat[ix])[::-1]
-    cutoff = avgdeg * n - 2 * (n - 1) - 1
-    # if the avgdeg req is already satisfied, skip this
+    # make sure that cutoff is an integer
+    cutoff = int(avgdeg * n - 2 * (n - 1) - 1)
     if cutoff >= np.size(a):
+        # if the avgdeg requirement is too large, raise error
+        raise BCTParamError('backbone_wu is given an avgdeg which is larger than true '
+                            'avgdeg in the input matrix.')
+    elif cutoff < 0:
+        # if the avgdeg requirement is already satisfied, return backbone
         CIJclus = CIJtree.copy()
     else:
         thr = a[cutoff]

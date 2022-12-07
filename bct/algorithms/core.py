@@ -2,8 +2,10 @@ from __future__ import division, print_function
 import numpy as np
 
 from ..utils.miscellaneous_utilities import get_rng, BCTParamError
+from ..utils.other import binarize
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 from .degree import strengths_und_sign
+from .clustering import get_components
 
 from ..due import due, BibTeX
 from ..citations import NEWMAN2002, FOSTER2010, HAGMANN2008, COLIZZA2006, OPSAHL2008, HEUVEL2011
@@ -682,44 +684,67 @@ def clique_communities(A, cq_thr):
     '''
     if not np.all(A == A.T):
         raise BCTParamError('Input must be undirected')
-    elif not a.ndim == 2:
+    elif not A.ndim == 2:
         raise BCTParamError('Input must be 2 dimensional NxN matrix')
-    elif a.shape[0] != a.shape[1]:
+    elif A.shape[0] != A.shape[1]:
         raise BCTParamError('Input must be square')
 
-    def maximal_cliques(A, n):
+    n = len(A)
+    A = binarize(A, copy=True)
+    np.fill_diagonal(A, 0)
+
+    def maximal_cliques(A):
         #Bron-Kerbosch algorithm
-        q = 0
         R = np.zeros((n, 1))        #current
         P = np.ones((n, 1))         #prospective
         X = np.zeros((n, 1))        #processed
 
-        MQ = np.zeros((n, 1000*n))
+        MQ = []
 
-        def bk(R, P, X):
+        def bk(R, P, X, nrec):
+            #print(nrec)
+            nrec += 1
             if not (np.sum(P) or np.sum(X)):
-                MQ[:, q] = R
-                q += 1
+                MQ.append(R)
             else:
-                U_p = np.where()
+                U_p, = np.where(np.any(np.hstack((P, X)), axis=1))
+                ix = np.argmax(np.dot(A[:, U_p].T, P))
+                u_p = U_p[ix]
 
-    n = len(a)
-    A = A.copy()
-    np.fill_diagonal(A, 0)
-    cq = maximal_cliques(A, n)
+                Aup = np.reshape(np.logical_not(A[:,u_p]), (n, 1))
+                U, = np.where(np.all(np.hstack((P.astype(bool), Aup)), axis=1))
+                for u in U:
+                    Nu = np.reshape(A[:, u], (n, 1))
+                    P[u] = 0
+                    Rnew = R.copy()
+                    Rnew[u] = 1
+
+                    Pnew = np.reshape(np.all(np.hstack((P, Nu)), axis=1), (n, 1))
+                    Xnew = np.reshape(np.all(np.hstack((X, Nu)), axis=1), (n, 1))
+
+                    bk(Rnew, Pnew, Xnew, nrec)
+                    X[u] = 1
+
+        bk(R, P, X, 0)
+        return np.squeeze(MQ)
+
+    cq = maximal_cliques(A)
+    print(np.shape(cq))
     #remove subthreshold cliques
-    cq = mq[np.where(np.sum(mq, axis=1) >= cq_thr), :]
+    ix, = np.where(np.sum(cq, axis=1) >= cq_thr)
+    cq = cq[ix, :]
     #compute clique overlap
-    ov = np.matmul(cq, cq.T)
+    ov = np.dot(cq, cq.T)
+    print(ov)
     #keep percolating cliques
     ov_thr = (ov >= cq_thr - 1)
+    print(ov_thr.shape)
 
-    cq_components = get_components(ov_thr)
+    cq_components, _ = get_components(ov_thr)
     #get number of components
-    nr_comopnents = np.max(cq_components)
+    nr_components = np.max(cq_components)
     M = np.zeros((nr_components, n))
     for i in range(nr_components):
-        M[i, np.where(cq[cq_components==i, :])] = 1
+        M[i, np.where(np.any(cq[cq_components==i+1, :], axis=0))] = 1
 
     return M
-    

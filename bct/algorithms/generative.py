@@ -598,7 +598,7 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
 
     return np.max(K, axis=1)
 
-def generate_fc(sc, beta, ed=None, pred_var, model):
+def generate_fc(sc, beta, ed=None, pred_var=(), model='linear'):
     '''
     Uses a vector beta of regression coefficients from the model
     FC = pred_var*beta to predict functional connectivity.
@@ -654,4 +654,5 @@ def generate_fc(sc, beta, ed=None, pred_var, model):
     pred_data : np.ndarray
         KxM array of predictors
     ''' 
+    rng = get_rng(seed)
     raise NotImplementedError()

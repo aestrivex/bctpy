@@ -1091,3 +1091,31 @@ def mean_first_passage_time(adjacency):
     mfpt = (np.repeat(np.atleast_2d(np.diag(Z)), n, 0) - Z) / W
 
     return mfpt
+
+def diffusion_efficiency(adj):
+    '''
+    The diffusion efficiency between nodes i and j is the inverse of the
+    mean first passage time from i to j, that is the expected number of
+    steps it takes a random walker starting at node i to arrive for the
+    first time at node j. Note that the mean first passage time is not a
+    symmetric measure -- mfpt(i,j) may be different from mfpt(j,i) -- and
+    the pair-wise diffusion efficiency matrix is hence also not symmetric.
+
+    Parameters
+    ----------
+    adj : np.ndarray
+        weighted/unweighted, directed/undirected adjacency matrix
+
+    Returns
+    -------
+    gediff : float
+        mean global diffusion efficiency
+    ediff : np.ndarray
+        pairwise NxN diffusion efficiency matrix
+    '''
+    n = len(adj)
+    mfpt = mean_first_passage_time(adj)
+    ediff = 1 / mpft
+    np.fill_diagonal(ediff, 0)
+    gediff = np.sum(ediff) / (n ** 2 - n)
+    return gediff, ediff

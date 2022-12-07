@@ -1114,8 +1114,9 @@ def diffusion_efficiency(adj):
         pairwise NxN diffusion efficiency matrix
     '''
     n = len(adj)
+    adj = adj.copy()
     mfpt = mean_first_passage_time(adj)
-    ediff = 1 / mpft
+    ediff = 1 / mfpt
     np.fill_diagonal(ediff, 0)
     gediff = np.sum(ediff) / (n ** 2 - n)
     return gediff, ediff

@@ -653,3 +653,73 @@ def score_wu(CIJ, s):
 
     sn = np.sum(str > 0)
     return CIJscore, sn
+
+def clique_communities(A, cq_thr):
+    '''
+    The optimal community structure is a subdivision of the network into
+    groups of nodes which have a high number of within-group connections
+    and a low number of between group connections.
+ 
+    This algorithm uncovers overlapping community structure in binary
+    undirected networks via the clique percolation method.
+
+    Parameters
+    ----------
+    A : np.ndaray
+        binary undirected connection matrix
+    cq_thr : int
+        Clique size threshold. Larger clique size thresholds potentially result
+        in larger communities
+
+    Returns
+    -------
+    M : np.ndarray
+        MxN Overlapping community affiliation matrix, each node can participate
+        in arbitrarily many of the M communities
+    
+    Note: This algorithm can be slow and memory intensive in large matrices.
+    Requires get_components
+    '''
+    if not np.all(A == A.T):
+        raise BCTParamError('Input must be undirected')
+    elif not a.ndim == 2:
+        raise BCTParamError('Input must be 2 dimensional NxN matrix')
+    elif a.shape[0] != a.shape[1]:
+        raise BCTParamError('Input must be square')
+
+    def maximal_cliques(A, n):
+        #Bron-Kerbosch algorithm
+        q = 0
+        R = np.zeros((n, 1))        #current
+        P = np.ones((n, 1))         #prospective
+        X = np.zeros((n, 1))        #processed
+
+        MQ = np.zeros((n, 1000*n))
+
+        def bk(R, P, X):
+            if not (np.sum(P) or np.sum(X)):
+                MQ[:, q] = R
+                q += 1
+            else:
+                U_p = np.where()
+
+    n = len(a)
+    A = A.copy()
+    np.fill_diagonal(A, 0)
+    cq = maximal_cliques(A, n)
+    #remove subthreshold cliques
+    cq = mq[np.where(np.sum(mq, axis=1) >= cq_thr), :]
+    #compute clique overlap
+    ov = np.matmul(cq, cq.T)
+    #keep percolating cliques
+    ov_thr = (ov >= cq_thr - 1)
+
+    cq_components = get_components(ov_thr)
+    #get number of components
+    nr_comopnents = np.max(cq_components)
+    M = np.zeros((nr_components, n))
+    for i in range(nr_components):
+        M[i, np.where(cq[cq_components==i, :])] = 1
+
+    return M
+    

@@ -597,3 +597,61 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
         K[ib, 3] = kstats(xe, ye)
 
     return np.max(K, axis=1)
+
+def generate_fc(sc, beta, ed=None, pred_var, model):
+    '''
+    Uses a vector beta of regression coefficients from the model
+    FC = pred_var*beta to predict functional connectivity.
+    pred_var are structural-based network measures derived from the structural
+    connectivity network
+
+    Parameters
+    ----------
+    sc : np.ndarray
+        Weight or unweighted undirected NxN structural connectivity network
+    beta : np.ndarray
+        Vector of regression coefficients. May be obtained as an output from
+        predict_fc() 
+    ed : np.ndarray 
+        Euclidean distance matrix or upper triangular vector of the matrix.
+        This parameter is optional and can be None
+        E = np.zeros((n,))
+    pred_var : np.ndarray
+        Set of M predictors. These can be given as a KxM array where 
+        K=((N*(N-1))/2) and M is the number of predictors.
+        Alternately, pred_var can be an iterable with the names of network
+        measures to be used as predictors. Acceptable network measure names
+        include:
+            SPLbin      - binary shortest path length
+            SPLwei_inv  - shoterst path length computed with an inv transform
+            SPLwei_log  - shortest path length computed with a log transform
+            SPLdist     - shortest path length with no transform
+            SIbin       - search information of binary shortest paths
+            SIwei_inv   - search information of shortest paths computed with an
+                            inv transform
+            SIwei_log   - search information of shortest paths computed with a
+                            log transform
+            SIdist      - search information of shortest paths with no xform
+            T           - path transitivity
+            deltaMFPT   - columwise z-scored mean first passage time
+            neigh_overlap - neighborhood overlap
+            MI          - matching index
+    model : enum
+        Specifies the order of the regression model. Can be 'linear',
+            'quadratic'. Depends on some matlab calls and 
+            #TODO figure out what implementations exist
+            The default value is 'linear'
+
+    In the matlab function there is an additional parameter for inserting a
+    real functional connectivity matrix. If supplied, the function calculates
+    and returns a correlation between the predicted fc and empirical fc.
+    To do this, run the correlation function #TODO provide this
+
+    Returns
+    -------    
+    fcpre : np.ndarray
+        NxN predicted functional connectivity matrix
+    pred_data : np.ndarray
+        KxM array of predictors
+    ''' 
+    raise NotImplementedError()

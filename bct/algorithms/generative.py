@@ -598,7 +598,8 @@ def evaluate_generative_model(A, Atgt, D, eta, gamma=None,
 
     return np.max(K, axis=1)
 
-def generate_fc(sc, beta, ed=None, pred_var=(), model='linear'):
+def generate_fc(sc, beta, ed=None, pred_var=(), model='linear', seed=None):
+
     '''
     Uses a vector beta of regression coefficients from the model
     FC = pred_var*beta to predict functional connectivity.
@@ -641,6 +642,9 @@ def generate_fc(sc, beta, ed=None, pred_var=(), model='linear'):
             'quadratic'. Depends on some matlab calls and 
             #TODO figure out what implementations exist
             The default value is 'linear'
+    seed : hashable, optional
+        If None (default), use the np.random's global random state to generate random numbers.
+        Otherwise, use a new np.random.RandomState instance seeded with the given value.
 
     In the matlab function there is an additional parameter for inserting a
     real functional connectivity matrix. If supplied, the function calculates

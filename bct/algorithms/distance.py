@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
-from bct.utils import cuberoot, binarize, invert, BCTParamError
+from bct.utils import cuberoot, binarize, invert, BCTParamError, logtransform
 from ..due import due, BibTeX
 from ..citations import LATORA2001, ONNELA2005, FAGIOLO2007, RUBINOV2010
 
@@ -381,44 +381,43 @@ def distance_wei_floyd(adjacency, transform=None):
     .. [4] https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
     """
 
+    #it is important not to do these transformations safely, to allow infinity
     if transform is not None:
-        if transform == 'log':
-            if np.logical_or(adjacency > 1, adjacency < 0).any():
-                raise ValueError("Connection strengths must be in the " +
-                                 "interval [0,1) to use the transform " +
-                                 "-log(w_ij).")
-            SPL = -np.log(adjacency)
-        elif transform == 'inv':
-            SPL = 1. / adjacency
-        else:
-            raise ValueError("Unexpected transform type. Only 'log' and " +
-                             "'inv' are accepted")
+        with np.errstate(divide='ignore'):
+            if transform == 'log':
+                #SPL = logtransform(adjacency)
+                SPL = -np.log(adjacency)
+            elif transform == 'inv':
+                #SPL = invert(adjacency)
+                SPL = 1 / adjacency
+            else:
+                raise ValueError("Unexpected transform type. Only 'log' and " +
+                                 "'inv' are accepted")
     else:
         SPL = adjacency.copy().astype('float')
         SPL[SPL == 0] = np.inf
 
     n = adjacency.shape[1]
 
-    flag_find_paths = True
     hops = np.array(adjacency != 0).astype('float')
     Pmat = np.repeat(np.atleast_2d(np.arange(0, n)), n, 0)
+
+    #print(SPL)
 
     for k in range(n):
         i2k_k2j = np.repeat(SPL[:, [k]], n, 1) + np.repeat(SPL[[k], :], n, 0)
 
-        if flag_find_paths:
-            path = SPL > i2k_k2j
-            i, j = np.where(path)
-            hops[path] = hops[i, k] + hops[k, j]
-            Pmat[path] = Pmat[i, k]
+        path = SPL > i2k_k2j
+        i, j = np.where(path)
+        hops[path] = hops[i, k] + hops[k, j]
+        Pmat[path] = Pmat[i, k]
 
         SPL = np.min(np.stack([SPL, i2k_k2j], 2), 2)
 
     I = np.eye(n) > 0
     SPL[I] = 0
 
-    if flag_find_paths:
-        hops[I], Pmat[I] = 0, 0
+    hops[I], Pmat[I] = 0, 0
 
     return SPL, hops, Pmat
 

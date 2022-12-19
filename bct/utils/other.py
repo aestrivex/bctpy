@@ -241,6 +241,33 @@ def invert(W, copy=True):
     W[E] = 1. / W[E]
     return W
 
+def logtransform(W, copy=True):
+    '''
+    Makes a log transformation of the weights of an input matrix, such that each
+    value W[i,j] will be -log(W[i,l])
+
+    If copy is not set, this function will *modify W in place.*
+
+    Parameters
+    ----------
+    W : np.ndarray
+        weighted connectivity matrix
+    copy : bool
+        if True, returns a copy of the matrix. Otherwise, modifies the matrix
+        in place. Default value=True
+
+    Returns
+    -------
+    W : np.ndarray
+        Log transformed connectivity matrix
+    '''
+    if copy:
+        W = W.copy()
+    if np.logical_or(W > 1, W <= 0).any():
+        raise ValueError("Connection strengths must be in the interval (0,1] "
+                         "to use the transform -log(w_ij)")
+    W = -np.log(W)
+    return W
 
 def autofix(W, copy=True):
     '''

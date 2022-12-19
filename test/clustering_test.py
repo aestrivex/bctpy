@@ -146,3 +146,13 @@ def test_agreement():
         output_2_buffered = bct.agreement(input_2, buffsz=buffsz)
         print(output_2_buffered)
         assert (output_2_buffered == correct_2).all()
+
+def test_path_transitivity():
+    x = load_sample(thres=.31)
+    xn = bct.normalize(x)
+    Ti = bct.path_transitivity(x, transform='inv')
+    Tl = bct.path_transitivity(xn, transform='log')
+
+    print(np.sum(Ti), np.sum(Tl))
+    assert np.allclose(np.sum(Ti), 8340.8, atol=.01)
+    assert np.allclose(np.sum(Tl), 8621.1, atol=.01)

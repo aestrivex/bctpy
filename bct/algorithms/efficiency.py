@@ -241,7 +241,8 @@ def diffusion_efficiency(adj):
     n = len(adj)
     adj = adj.copy()
     mfpt = mean_first_passage_time(adj)
-    ediff = 1 / mfpt
+    with np.errstate(divide='ignore'):
+        ediff = 1 / mfpt
     np.fill_diagonal(ediff, 0)
     gediff = np.sum(ediff) / (n ** 2 - n)
     return gediff, ediff
@@ -318,7 +319,9 @@ def resource_efficiency_bin(adj, lamb, spl=None, m=None):
             prob[:, h] = 1-term
 
             if not np.isnan(lamb):
-                resources[:, h] = np.repeat( np.log(1 - lamb), n, 0) / np.log(term)
+                with np.errstate(divide='ignore'):
+                    resources[:, h] = (np.repeat( np.log(1 - lamb), n, 0) / 
+                                       np.log(term))
 
         return prob, resources
 
@@ -359,3 +362,53 @@ def resource_efficiency_bin(adj, lamb, spl=None, m=None):
         Eres = np.nan
 
     return Eres, prob_spl
+
+def rout_efficiency(D, transform=None):
+    '''
+    The routing efficiency is the average of inverse shortest path length.
+ 
+    The local routing efficiency of a node u is the routing efficiency
+    computed on the subgraph formed by the neighborhood of node u
+    (excluding node u).
+
+    Parameters
+    ----------
+    D : NxN np.ndarray
+        Weighted/unweighted directed/undirected connection weight or length
+        matrix
+    transform : str or None, optional
+        If `adjacency` is a connection weight array, specify a transform to map
+        input connection weights to connection lengths. Options include ['log',
+        'inv'], where 'log' is `-np.log(adjacency)` and 'inv' is `1/adjacency`.
+        Default: None
+
+    Returns
+    -------
+    GErout : float
+        Mean global routing efficiency
+    Erout : NxN np.ndarray
+        Pairwise routing efficiency matrix
+    Eloc : Nx1 np.ndarray
+        Local efficiency vector
+    '''
+    n = len(D)
+    Erout, _, _ = distance_wei_floyd(D, transform=transform)
+    with np.errstate(divide='ignore'):
+        Erout = 1 / Erout
+    np.fill_diagonal(Erout, 0)
+    GErout = (np.sum(Erout[np.where(np.logical_not(np.isnan(Erout)))]) / 
+              (n ** 2 - n))
+
+    Eloc = np.zeros((n,))
+    for u in range(n):
+        Gu, = np.where(np.logical_or(D[u, :], D[:, u].T))
+        nGu = len(Gu)
+        e, _, _ = distance_wei_floyd(D[Gu, :][:, Gu], transform=transform)
+        with np.errstate(divide='ignore'):
+            e = 1 / e
+        np.fill_diagonal(e, 0)
+        Eloc[u] = np.sum(e) / nGu
+
+    return GErout, Erout, Eloc
+
+    

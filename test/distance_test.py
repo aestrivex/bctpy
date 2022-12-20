@@ -55,13 +55,6 @@ def test_charpath():
     assert not np.isnan(radius)
     assert not np.isnan(diameter)
 
-def test_diffusion_efficiency():
-    x = load_sample(thres=.23)
-    gde, ed = bct.diffusion_efficiency(x)
-    print(gde, np.sum(ed)) 
-    assert np.allclose(gde, .0069472)
-    assert np.allclose(np.sum(ed), 131.34, atol=.01)
-
 def test_distance_floyd():
     x = load_sample(thres=.31)
     print('guomish')

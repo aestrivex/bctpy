@@ -269,12 +269,13 @@ def autofix(W, copy=True):
     np.fill_diagonal(W, 0)
 
     # remove np.inf and np.nan
-    W[np.logical_or(np.where(np.isinf(W)), np.where(np.isnan(W)))] = 0
+    W[np.where(np.isinf(W))] = 0
+    W[np.where(np.isnan(W))] = 0
 
     # ensure exact binarity
     u = np.unique(W)
     if np.all(np.logical_or(np.abs(u) < 1e-8, np.abs(u - 1) < 1e-8)):
-        W = np.around(W, decimal=5)
+        W = np.around(W, decimals=5)
 
     # ensure exact symmetry
     if np.allclose(W, W.T):

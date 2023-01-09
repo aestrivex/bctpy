@@ -45,6 +45,10 @@ def test_binarize():
     s = bct.binarize(bct.threshold_proportional(x, .41))
     assert np.sum(s) == 7752
 
+def test_autofix():
+    x = load_sample()
+    s = bct.autofix(bct.binarize(bct.threshold_proportional(x, .41)))
+    assert np.sum(s) == 7752
 
 def test_normalize():
     x = load_sample()

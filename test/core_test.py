@@ -27,4 +27,3 @@ def test_clique_communities():
     print(cis.shape, np.max(np.sum(cis, axis=0)))
     print(np.sum(cis, axis=1))
     assert np.sum(cis) == 199
-    assert 4 == 8

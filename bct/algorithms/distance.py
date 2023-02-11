@@ -880,3 +880,124 @@ def mean_first_passage_time(adjacency):
 
     return mfpt
 
+
+def navigation_wu(L, D, max_hops=None):
+    '''
+    Navigation of connectivity length matrix L guided by nodal distance D
+   
+    % Navigation
+    [sr, PL_bin, PL_wei] = navigation_wu(L,D);
+    % Binary shortest path length
+    sp_PL_bin = distance_bin(L);
+    % Weighted shortest path length
+    sp_PL_wei = distance_wei_floyd(L);
+    % Binary efficiency ratio
+    er_bin = mean(mean(sp_PL_bin./PL_bin));
+    % Weighted efficiency ratio
+    er_wei = mean(mean(sp_PL_wei./PL_wei));
+   
+    Parameters
+    ----------
+    L : NxN np.ndarray
+        Weighted/unweighted directed/undirected NxN SC matrix of connection
+        *lengths*, L(i,j) is the strength-to-length remapping of the connection
+        weight between i and j. L(i,j) = 0 denotes the lack of a connection 
+        between i and j.
+   
+    D : NxN np.ndarray
+        Symmetric NxN nodal distance matrix (e.g., Euclidean distance between 
+        node centroids)
+
+    max_hops : int | None
+        Limits the maximum number of hops of navigation paths
+   
+    Returns
+    ------- 
+    sr : int
+        Success ratio scalar, proportion of node pairs successfully reached by
+        navigation
+    
+    PL_bin : NxN np.ndarray
+        NxN matrix of binary navigation path length (i.e., number of hops in 
+        navigation paths). Infinite values indicate failed navigation paths
+    
+    PL_wei : NxN np.ndarray
+        NxN matrix of weighted navigation path length (i.e., sum of connection
+        weights as defined by C along navigation path). Infinite values
+        indicate failed paths.
+   
+    PL_dis : NxN np.ndarray
+        NxN matrix of distance-based navigation path length (i.e., sum of
+        connection distances as defined by D along navigation paths. Infinite 
+        values indicate failed paths.
+   
+    paths - dict(tuple -> list)
+        array of nodes comprising navigation paths. The key (i,j) specifies
+        the path from i to j, and the value is a list of all nodes traveled
+        between i and j.
+    '''
+
+    n = len(L)
+    PL_bin = np.zeros((n, n))
+    PL_wei = np.zeros((n, n))
+    PL_dis = np.zeros((n, n))
+    paths = {}
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            
+            curr_node = i
+            last_node = curr_node
+            target = j
+            curr_paths = [curr_node]
+
+            pl_bin = 0
+            pl_wei = 0
+            pl_dis = 0
+
+            while curr_node != target:
+                #print(curr_node, "WHEEF")
+                #print(np.where(L[curr_node, :] != 0))         
+                #print(np.shape(np.where(L[curr_node, :] != 0)))
+
+                neighbors, = np.where(L[curr_node, :] != 0)
+                if len(neighbors) == 0:
+                    pl_bin = np.inf
+                    pl_wei = np.inf
+                    pl_dis = np.inf
+                    break
+
+                min_ix = np.argmin(D[target, neighbors])
+                next_node = neighbors[min_ix]
+
+                if (next_node == last_node or 
+                    (max_hops is not None and pl_bin > max_hops)):
+
+                    pl_bin = np.inf
+                    pl_wei = np.inf
+                    pl_dis = np.inf
+                    break
+
+                curr_paths.append(next_node)
+                pl_bin += 1
+                pl_wei += L[curr_node, next_node]
+                pl_dis += D[curr_node, next_node]
+
+                last_node = curr_node
+                curr_node = next_node
+                
+            PL_bin[i, j] = pl_bin
+            PL_wei[i, j] = pl_wei
+            PL_dis[i, j] = pl_dis
+            paths[(i, j)] = curr_paths
+
+    np.fill_diagonal(PL_bin, np.inf)
+    np.fill_diagonal(PL_wei, np.inf)
+    np.fill_diagonal(PL_dis, np.inf)
+
+    inf_ixes, = np.where(PL_bin.flat == np.inf)
+    sr = 1 - (len(inf_ixes) - n)/(n**2 - n)
+
+    return sr, PL_bin, PL_wei, PL_dis, paths

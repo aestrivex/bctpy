@@ -57,7 +57,7 @@ def ls2ci(ls, zeroindexed=False):
     ci : Nx1 np.ndarray
         community index vector
     '''
-    if ls is None or np.size(ls) == 0:
+    if ls is None or len(ls) == 0:
         return ()  # list is empty
     nr_indices = sum(map(len, ls))
     ci = np.zeros((nr_indices,), dtype=int)

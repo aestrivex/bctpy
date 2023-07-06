@@ -84,9 +84,8 @@ def _permutation(args):
         hit += 1
 
     if verbose:
-        print(('permutation %i of %i.  Permutation max is %s.  Observed max'
-               ' is %s.) % (
-            u + 1, k, null[u], max_sz))
+        print(('permutation %i of %i.  Permutation max is %s.  Observed max is %s.') % 
+               (u + 1, k, null[u], max_sz))
     elif (u % (k / 10) == 0 or u == k - 1):
         print('permutation %i of %i.' % (u + 1, k))
     return null

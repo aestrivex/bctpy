@@ -251,12 +251,13 @@ def nbs_bct(x, y, thresh, k=1000, tail='both', paired=False, verbose=False, seed
         if verbose:
             print(('permutation %i of %i.  Permutation max is %s.  Observed max'
                    ' is %s.  P-val estimate is %.3f') % (
-                u, k, null[u], max_sz, hit / (u + 1)))
+                u + 1, k, null[u], max_sz, hit / (u + 1)))
         elif (u % (k / 10) == 0 or u == k - 1):
-            print('permutation %i of %i.  p-value so far is %.3f' % (u, k,
+            print('permutation %i of %i.  p-value so far is %.3f' % (u + 1, k,
                                                                      hit / (u + 1)))
 
     pvals = np.zeros((nr_components,))
+    print("nr_components: ", nr_components)
     # calculate p-vals
     for i in range(nr_components):
         pvals[i] = np.size(np.where(null >= sz_links[i])) / k

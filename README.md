@@ -1,4 +1,4 @@
-# Brain Connectivity Toolbox for Python version 0.6.0
+# Brain Connectivity Toolbox for Python version 0.6.1
 
 Author: Roan LaPlante <rlaplant@nmr.mgh.harvard.edu>
 

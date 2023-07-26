@@ -2,7 +2,7 @@ from __future__ import division, print_function
 import numpy as np
 from .modularity import modularity_louvain_und_sign
 from bct.utils import cuberoot, BCTParamError, dummyvar, binarize, get_rng
-from .distance import breadthdist
+from .distance import breadthdist, distance_wei_floyd, retrieve_shortest_path
 from ..due import due, BibTeX
 from ..citations import (
     WATTS1998, ONNELA2005, FAGIOLO2007, LANCICHINETTI2012,
@@ -719,3 +719,66 @@ def transitivity_wu(W):
     ws = cuberoot(W)
     cyc3 = np.diag(np.dot(ws, np.dot(ws, ws)))
     return np.sum(cyc3, axis=0) / np.sum(K * (K - 1), axis=0)
+
+def path_transitivity(W, transform=None):
+    '''
+    This function computes the density of local detours (triangles) that
+    are available along the shortest-paths between all pairs of nodes.
+
+    Parameters
+    ----------
+    W : NxN np.ndarray
+        weighted or unweighted undirected connection weight or length matrix
+    transform : None or enum
+        if the input is a connection length matrix, no transform is needed
+        if the input is a connection weight matrix, use 'log' for
+        log transform l_ij = -log(w_ij)
+        or 'inv' for inversion l_ij = 1/w_ij
+        The default value is None
+
+    Returns
+    -------
+    T : NxN
+        matrix of pairwise path transitivity
+    '''
+    n = len(W)
+    m = np.zeros((n, n))
+    T = np.zeros((n, n))
+
+    for i in range(n-1):
+        for j in range(i+1, n):
+            x = 0
+            y = 0
+            z = 0
+            
+            for k in range(n):
+                if W[i, k] != 0 and W[j, k] != 0 and k not in (i, j):
+                    x += W[i, k] + W[j, k]
+                if k != j:
+                    y += W[i, k]
+                if k != i:
+                    z += W[j, k]
+
+            m[i,j] = x/(y+z)
+
+    m = m + m.T
+
+    _, hops, pmat = distance_wei_floyd(W, transform=transform)
+
+    for i in range(n-1):
+        for j in range(i+1, n):
+
+            x = 0
+            path = retrieve_shortest_path(i, j, hops, pmat)
+            k = len(path)
+            print(path)
+            print(k)
+
+            for t in range(k-1):
+                for l in range(t+1, k):
+                    x += m[path[t], path[l]]
+
+            T[i, j] = 2 * x / (k * (k - 1))
+
+    T = T + T.T
+    return T

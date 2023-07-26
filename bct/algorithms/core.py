@@ -2,8 +2,10 @@ from __future__ import division, print_function
 import numpy as np
 
 from ..utils.miscellaneous_utilities import get_rng, BCTParamError
+from ..utils.other import binarize
 from .degree import degrees_dir, degrees_und, strengths_dir, strengths_und
 from .degree import strengths_und_sign
+from .clustering import get_components
 
 from ..due import due, BibTeX
 from ..citations import NEWMAN2002, FOSTER2010, HAGMANN2008, COLIZZA2006, OPSAHL2008, HEUVEL2011
@@ -653,3 +655,96 @@ def score_wu(CIJ, s):
 
     sn = np.sum(str > 0)
     return CIJscore, sn
+
+def clique_communities(A, cq_thr):
+    '''
+    The optimal community structure is a subdivision of the network into
+    groups of nodes which have a high number of within-group connections
+    and a low number of between group connections.
+ 
+    This algorithm uncovers overlapping community structure in binary
+    undirected networks via the clique percolation method.
+
+    Parameters
+    ----------
+    A : np.ndaray
+        binary undirected connection matrix
+    cq_thr : int
+        Clique size threshold. Larger clique size thresholds potentially result
+        in larger communities
+
+    Returns
+    -------
+    M : np.ndarray
+        MxN Overlapping community affiliation matrix, each node can participate
+        in arbitrarily many of the M communities
+    
+    Note: This algorithm can be slow and memory intensive in large matrices.
+    Requires get_components
+    '''
+    if not np.all(A == A.T):
+        raise BCTParamError('Input must be undirected')
+    elif not A.ndim == 2:
+        raise BCTParamError('Input must be 2 dimensional NxN matrix')
+    elif A.shape[0] != A.shape[1]:
+        raise BCTParamError('Input must be square')
+
+    n = len(A)
+    A = binarize(A, copy=True)
+    np.fill_diagonal(A, 0)
+
+    def maximal_cliques(A):
+        #Bron-Kerbosch algorithm
+        R = np.zeros((n, 1))        #current
+        P = np.ones((n, 1))         #prospective
+        X = np.zeros((n, 1))        #processed
+
+        MQ = []
+
+        def bk(R, P, X, nrec):
+            #print(nrec)
+            nrec += 1
+            if not (np.sum(P) or np.sum(X)):
+                MQ.append(R)
+            else:
+                U_p, = np.where(np.any(np.hstack((P, X)), axis=1))
+                ix = np.argmax(np.dot(A[:, U_p].T, P))
+                u_p = U_p[ix]
+
+                Aup = np.reshape(np.logical_not(A[:,u_p]), (n, 1))
+                U, = np.where(np.all(np.hstack((P.astype(bool), Aup)), axis=1))
+                for u in U:
+                    Nu = np.reshape(A[:, u], (n, 1))
+                    P[u] = 0
+                    Rnew = R.copy()
+                    Rnew[u] = 1
+
+                    Pnew = np.reshape(np.all(np.hstack((P, Nu)), axis=1), (n, 1))
+                    Xnew = np.reshape(np.all(np.hstack((X, Nu)), axis=1), (n, 1))
+
+                    bk(Rnew, Pnew, Xnew, nrec)
+                    X[u] = 1
+
+        bk(R, P, X, 0)
+        return np.squeeze(MQ)
+
+    cq = maximal_cliques(A)
+    print(np.shape(cq))
+    #remove subthreshold cliques
+    ix, = np.where(np.sum(cq, axis=1) >= cq_thr)
+    cq = cq[ix, :]
+    #compute clique overlap
+    ov = np.dot(cq, cq.T)
+    print(ov)
+    #keep percolating cliques
+    ov_thr = (ov >= cq_thr - 1)
+    print(ov_thr.shape)
+
+    cq_components, _ = get_components(ov_thr)
+    #get number of components
+    nr_components = np.max(cq_components)
+    M = np.zeros((nr_components, n))
+    for i in range(nr_components):
+        M[i, np.where(np.any(cq[cq_components==i+1, :], axis=0))] = 1
+
+    return M

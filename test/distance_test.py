@@ -54,3 +54,36 @@ def test_charpath():
     assert np.any(np.isinf(d))
     assert not np.isnan(radius)
     assert not np.isnan(diameter)
+
+def test_distance_floyd():
+    x = load_sample(thres=.31)
+    spli, hopsi, pmati = bct.distance_wei_floyd(x, transform='inv')
+    print(np.sum(spli))
+    assert np.allclose(np.sum(spli), 11536.1, atol=.01)
+    
+def test_navigation_wu():
+    x = load_sample(thres=.24)
+    x_len = bct.invert(x)
+
+    #randomly generate distances for testing purposes
+    n = len(x)
+    while True:
+        centroids = np.random.randint(512, size=(n, 3))
+        #make sure every centroid is unique
+        if len(np.unique(centroids, axis=0)) == n:
+            break
+
+    d = np.zeros((n, n))
+    for i in range(n):
+        for j in range(n):
+            d[i, j] = np.linalg.norm(centroids[i, :] - centroids[j, :])
+            
+        
+    sr, plbin, plwei, pldis, paths = bct.navigation_wu(x_len, d, max_hops=14)
+
+    sr2, plbin2, plwei2, pldis2, paths2 = bct.navigation_wu(x_len, d, max_hops=None)
+
+    #TODO create the centroids for an actual bit of sample data and converge the matlab algorithm
+    #this procedure of random centroid generation generates a random reachability which is usually around 45-60%
+    #but not guaranteed
+

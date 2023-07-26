@@ -17,3 +17,13 @@ def test_core_periphery_dir():
     assert np.sum(c) == 57
     assert np.sum(np.cumsum(c)) == 4170
     assert np.allclose(q, .3086, atol=.0001)
+
+def test_clique_communities():
+    x = load_sample(thres=.23)
+
+    print(np.sum(bct.binarize(x)))
+
+    cis = bct.clique_communities(x, 9)
+    print(cis.shape, np.max(np.sum(cis, axis=0)))
+    print(np.sum(cis, axis=1))
+    assert np.sum(cis) == 199

@@ -1,6 +1,6 @@
 from __future__ import division, print_function
 import numpy as np
-from bct.utils import cuberoot, binarize, invert, BCTParamError
+from bct.utils import binarize, BCTParamError, invert, logtransform
 from ..due import due, BibTeX
 from ..citations import LATORA2001, ONNELA2005, FAGIOLO2007, RUBINOV2010
 
@@ -381,44 +381,43 @@ def distance_wei_floyd(adjacency, transform=None):
     .. [4] https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
     """
 
+    #it is important not to do these transformations safely, to allow infinity
     if transform is not None:
-        if transform == 'log':
-            if np.logical_or(adjacency > 1, adjacency < 0).any():
-                raise ValueError("Connection strengths must be in the " +
-                                 "interval [0,1) to use the transform " +
-                                 "-log(w_ij).")
-            SPL = -np.log(adjacency)
-        elif transform == 'inv':
-            SPL = 1. / adjacency
-        else:
-            raise ValueError("Unexpected transform type. Only 'log' and " +
-                             "'inv' are accepted")
+        with np.errstate(divide='ignore'):
+            if transform == 'log':
+                #SPL = logtransform(adjacency)
+                SPL = -np.log(adjacency)
+            elif transform == 'inv':
+                #SPL = invert(adjacency)
+                SPL = 1 / adjacency
+            else:
+                raise ValueError("Unexpected transform type. Only 'log' and " +
+                                 "'inv' are accepted")
     else:
         SPL = adjacency.copy().astype('float')
         SPL[SPL == 0] = np.inf
 
     n = adjacency.shape[1]
 
-    flag_find_paths = True
     hops = np.array(adjacency != 0).astype('float')
     Pmat = np.repeat(np.atleast_2d(np.arange(0, n)), n, 0)
+
+    #print(SPL)
 
     for k in range(n):
         i2k_k2j = np.repeat(SPL[:, [k]], n, 1) + np.repeat(SPL[[k], :], n, 0)
 
-        if flag_find_paths:
-            path = SPL > i2k_k2j
-            i, j = np.where(path)
-            hops[path] = hops[i, k] + hops[k, j]
-            Pmat[path] = Pmat[i, k]
+        path = SPL > i2k_k2j
+        i, j = np.where(path)
+        hops[path] = hops[i, k] + hops[k, j]
+        Pmat[path] = Pmat[i, k]
 
         SPL = np.min(np.stack([SPL, i2k_k2j], 2), 2)
 
     I = np.eye(n) > 0
     SPL[I] = 0
 
-    if flag_find_paths:
-        hops[I], Pmat[I] = 0, 0
+    hops[I], Pmat[I] = 0, 0
 
     return SPL, hops, Pmat
 
@@ -467,217 +466,6 @@ def retrieve_shortest_path(s, t, hops, Pmat):
 
     return path
 
-
-@due.dcite(BibTeX(LATORA2001), description="Unweighted global efficiency")
-@due.dcite(BibTeX(ONNELA2005), description="Unweighted global efficiency")
-@due.dcite(BibTeX(FAGIOLO2007), description="Unweighted global efficiency")
-@due.dcite(BibTeX(RUBINOV2010), description="Unweighted global efficiency")
-def efficiency_bin(G, local=False):
-    '''
-    The global efficiency is the average of inverse shortest path length,
-    and is inversely related to the characteristic path length.
-
-    The local efficiency is the global efficiency computed on the
-    neighborhood of the node, and is related to the clustering coefficient.
-
-    Parameters
-    ----------
-    A : NxN np.ndarray
-        binary undirected connection matrix
-    local : bool
-        If True, computes local efficiency instead of global efficiency.
-        Default value = False.
-
-    Returns
-    -------
-    Eglob : float
-        global efficiency, only if local=False
-    Eloc : Nx1 np.ndarray
-        local efficiency, only if local=True
-    '''
-    def distance_inv(g):
-        D = np.eye(len(g))
-        n = 1
-        nPATH = g.copy()
-        L = (nPATH != 0)
-
-        while np.any(L):
-            D += n * L
-            n += 1
-            nPATH = np.dot(nPATH, g)
-            L = (nPATH != 0) * (D == 0)
-        D[np.logical_not(D)] = np.inf
-        D = 1 / D
-        np.fill_diagonal(D, 0)
-        return D
-
-    G = binarize(G)
-    n = len(G)  # number of nodes
-    if local:
-        E = np.zeros((n,))  # local efficiency
-
-        for u in range(n):
-            # V,=np.where(G[u,:])			#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=distance_inv(G[V].T[V])
-            #	E[u]=np.sum(e)/(k*k-k)	#local efficiency computation
-
-            # find pairs of neighbors
-            V, = np.where(np.logical_or(G[u, :], G[u, :].T))
-            # inverse distance matrix
-            e = distance_inv(G[np.ix_(V, V)])
-            # symmetrized inverse distance matrix
-            se = e + e.T
-
-            # symmetrized adjacency vector
-            sa = G[u, V] + G[V, u].T
-            numer = np.sum(np.outer(sa.T, sa) * se) / 2
-            if numer != 0:
-                denom = np.sum(sa)**2 - np.sum(sa * sa)
-                E[u] = numer / denom  # local efficiency
-
-    else:
-        e = distance_inv(G)
-        E = np.sum(e) / (n * n - n)  # global efficiency
-    return E
-
-
-@due.dcite(BibTeX(LATORA2001), description="Weighted global efficiency")
-@due.dcite(BibTeX(ONNELA2005), description="Weighted global efficiency")
-@due.dcite(BibTeX(FAGIOLO2007), description="Weighted global efficiency")
-@due.dcite(BibTeX(RUBINOV2010), description="Weighted global efficiency")
-def efficiency_wei(Gw, local=False):
-    '''
-    The global efficiency is the average of inverse shortest path length,
-    and is inversely related to the characteristic path length.
-
-    The local efficiency is the global efficiency computed on the
-    neighborhood of the node, and is related to the clustering coefficient.
-
-    Parameters
-    ----------
-    W : NxN np.ndarray
-        undirected weighted connection matrix
-        (all weights in W must be between 0 and 1)
-    local = bool or enum
-        If True or 'local', computes local efficiency instead of global efficiency.
-        If False or 'global', uses the global efficiency
-        If 'original', will use the original algorithm provided by (Rubinov
-        & Sporns 2010). This version is not recommended. The local efficiency
-        calculation was improved in (Wang et al. 2016) as a true generalization
-        of the binary variant.
-        
-    Returns
-    -------
-    Eglob : float
-        global efficiency, only if local in (False, 'global')
-    Eloc : Nx1 np.ndarray
-        local efficiency, only if local in (True, 'local', 'original')
-
-    Notes
-    -----
-       The  efficiency is computed using an auxiliary connection-length
-    matrix L, defined as L_ij = 1/W_ij for all nonzero L_ij; This has an
-    intuitive interpretation, as higher connection weights intuitively
-    correspond to shorter lengths.
-       The weighted local efficiency broadly parallels the weighted
-    clustering coefficient of Onnela et al. (2005) and distinguishes the
-    influence of different paths based on connection weights of the
-    corresponding neighbors to the node in question. In other words, a path
-    between two neighbors with strong connections to the node in question
-    contributes more to the local efficiency than a path between two weakly
-    connected neighbors. Note that this weighted variant of the local
-    efficiency is hence not a strict generalization of the binary variant.
-
-    Algorithm:  Dijkstra's algorithm
-    '''
-    if local not in (True, False, 'local', 'global', 'original'):
-        raise BCTParamError("local param must be any of True, False, "
-            "'local', 'global', or 'original'")
-
-    def distance_inv_wei(G):
-        n = len(G)
-        D = np.zeros((n, n))  # distance matrix
-        D[np.logical_not(np.eye(n))] = np.inf
-
-        for u in range(n):
-            # distance permanence (true is temporary)
-            S = np.ones((n,), dtype=bool)
-            G1 = G.copy()
-            V = [u]
-            while True:
-                S[V] = 0  # distance u->V is now permanent
-                G1[:, V] = 0  # no in-edges as already shortest
-                for v in V:
-                    W, = np.where(G1[v, :])  # neighbors of smallest nodes
-                    td = np.array(
-                        [D[u, W].flatten(), (D[u, v] + G1[v, W]).flatten()])
-                    D[u, W] = np.min(td, axis=0)
-
-                if D[u, S].size == 0:  # all nodes reached
-                    break
-                minD = np.min(D[u, S])
-                if np.isinf(minD):  # some nodes cannot be reached
-                    break
-                V, = np.where(D[u, :] == minD)
-
-        np.fill_diagonal(D, 1)
-        D = 1 / D
-        np.fill_diagonal(D, 0)
-        return D
-
-    n = len(Gw)
-    Gl = invert(Gw, copy=True)  # connection length matrix
-    A = np.array((Gw != 0), dtype=int)
-    #local efficiency algorithm described by Rubinov and Sporns 2010, not recommended
-    if local == 'original':
-        E = np.zeros((n,))
-        for u in range(n):
-            # V,=np.where(Gw[u,:])		#neighbors
-            # k=len(V)					#degree
-            # if k>=2:					#degree must be at least 2
-            #	e=(distance_inv_wei(Gl[V].T[V])*np.outer(Gw[V,u],Gw[u,V]))**1/3
-            #	E[u]=np.sum(e)/(k*k-k)
-
-            # find pairs of neighbors
-            V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
-            # symmetrized vector of weights
-            sw = cuberoot(Gw[u, V]) + cuberoot(Gw[V, u].T)
-            # inverse distance matrix
-            e = distance_inv_wei(Gl[np.ix_(V, V)])
-            # symmetrized inverse distance matrix
-            se = cuberoot(e) + cuberoot(e.T)
-
-            numer = np.sum(np.outer(sw.T, sw) * se) / 2
-            if numer != 0:
-                # symmetrized adjacency vector
-                sa = A[u, V] + A[V, u].T
-                denom = np.sum(sa)**2 - np.sum(sa * sa)
-                # print numer,denom
-                E[u] = numer / denom  # local efficiency
-
-    #local efficiency algorithm described by Wang et al 2016, recommended
-    elif local in (True, 'local'):
-        E = np.zeros((n,))
-        for u in range(n):
-            V, = np.where(np.logical_or(Gw[u, :], Gw[:, u].T))
-            sw = cuberoot(Gw[u, V]) + cuberoot(Gw[V, u].T)
-            e = distance_inv_wei(cuberoot(Gl)[np.ix_(V, V)])
-            se = e+e.T
-         
-            numer = np.sum(np.outer(sw.T, sw) * se) / 2
-            if numer != 0:
-                # symmetrized adjacency vector
-                sa = A[u, V] + A[V, u].T
-                denom = np.sum(sa)**2 - np.sum(sa * sa)
-                # print numer,denom
-                E[u] = numer / denom  # local efficiency
-
-    elif local in (False, 'global'):
-        e = distance_inv_wei(Gl)
-        E = np.sum(e) / (n * n - n)
-    return E
 
 
 def findpaths(CIJ, qmax, sources, savepths=False):
@@ -1091,3 +879,125 @@ def mean_first_passage_time(adjacency):
     mfpt = (np.repeat(np.atleast_2d(np.diag(Z)), n, 0) - Z) / W
 
     return mfpt
+
+
+def navigation_wu(L, D, max_hops=None):
+    '''
+    Navigation of connectivity length matrix L guided by nodal distance D
+   
+    % Navigation
+    [sr, PL_bin, PL_wei] = navigation_wu(L,D);
+    % Binary shortest path length
+    sp_PL_bin = distance_bin(L);
+    % Weighted shortest path length
+    sp_PL_wei = distance_wei_floyd(L);
+    % Binary efficiency ratio
+    er_bin = mean(mean(sp_PL_bin./PL_bin));
+    % Weighted efficiency ratio
+    er_wei = mean(mean(sp_PL_wei./PL_wei));
+   
+    Parameters
+    ----------
+    L : NxN np.ndarray
+        Weighted/unweighted directed/undirected NxN SC matrix of connection
+        *lengths*, L(i,j) is the strength-to-length remapping of the connection
+        weight between i and j. L(i,j) = 0 denotes the lack of a connection 
+        between i and j.
+   
+    D : NxN np.ndarray
+        Symmetric NxN nodal distance matrix (e.g., Euclidean distance between 
+        node centroids)
+
+    max_hops : int | None
+        Limits the maximum number of hops of navigation paths
+   
+    Returns
+    ------- 
+    sr : int
+        Success ratio scalar, proportion of node pairs successfully reached by
+        navigation
+    
+    PL_bin : NxN np.ndarray
+        NxN matrix of binary navigation path length (i.e., number of hops in 
+        navigation paths). Infinite values indicate failed navigation paths
+    
+    PL_wei : NxN np.ndarray
+        NxN matrix of weighted navigation path length (i.e., sum of connection
+        weights as defined by C along navigation path). Infinite values
+        indicate failed paths.
+   
+    PL_dis : NxN np.ndarray
+        NxN matrix of distance-based navigation path length (i.e., sum of
+        connection distances as defined by D along navigation paths. Infinite 
+        values indicate failed paths.
+   
+    paths - dict(tuple -> list)
+        array of nodes comprising navigation paths. The key (i,j) specifies
+        the path from i to j, and the value is a list of all nodes traveled
+        between i and j.
+    '''
+
+    n = len(L)
+    PL_bin = np.zeros((n, n))
+    PL_wei = np.zeros((n, n))
+    PL_dis = np.zeros((n, n))
+    paths = {}
+
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                continue
+            
+            curr_node = i
+            last_node = curr_node
+            target = j
+            curr_paths = [curr_node]
+
+            pl_bin = 0
+            pl_wei = 0
+            pl_dis = 0
+
+            while curr_node != target:
+                #print(curr_node, "WHEEF")
+                #print(np.where(L[curr_node, :] != 0))         
+                #print(np.shape(np.where(L[curr_node, :] != 0)))
+
+                neighbors, = np.where(L[curr_node, :] != 0)
+                if len(neighbors) == 0:
+                    pl_bin = np.inf
+                    pl_wei = np.inf
+                    pl_dis = np.inf
+                    break
+
+                min_ix = np.argmin(D[target, neighbors])
+                next_node = neighbors[min_ix]
+
+                if (next_node == last_node or 
+                    (max_hops is not None and pl_bin > max_hops)):
+
+                    pl_bin = np.inf
+                    pl_wei = np.inf
+                    pl_dis = np.inf
+                    break
+
+                curr_paths.append(next_node)
+                pl_bin += 1
+                pl_wei += L[curr_node, next_node]
+                pl_dis += D[curr_node, next_node]
+
+                last_node = curr_node
+                curr_node = next_node
+                
+            PL_bin[i, j] = pl_bin
+            PL_wei[i, j] = pl_wei
+            PL_dis[i, j] = pl_dis
+            paths[(i, j)] = curr_paths
+
+    np.fill_diagonal(PL_bin, np.inf)
+    np.fill_diagonal(PL_wei, np.inf)
+    np.fill_diagonal(PL_dis, np.inf)
+
+    inf_ixes, = np.where(PL_bin.flat == np.inf)
+    sr = 1 - (len(inf_ixes) - n)/(n**2 - n)
+
+    return sr, PL_bin, PL_wei, PL_dis, paths

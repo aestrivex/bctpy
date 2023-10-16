@@ -93,9 +93,8 @@ def rentian_scaling(A, xyz, n, seed=None):
     n : int
         Number of partitions to compute. Each partition is a data point; you
         want a large enough number to adequately compute Rent's exponent.
-    seed : hashable, optional
-        If None (default), use the np.random's global random state to generate random numbers.
-        Otherwise, use a new np.random.RandomState instance seeded with the given value.
+    seed : None, int, or numpy.random.Generator
+        Seed (or RNG itself) used to generate random numbers.
 
     Returns
     -------
@@ -141,7 +140,7 @@ def rentian_scaling(A, xyz, n, seed=None):
     # and the number of edges traversing the boundary of the partition (e)
     while count < n:
         # define cube endpoints
-        randx = np.sort((1 + nmax - nmin) * rng.random_sample((2,)))
+        randx = np.sort((1 + nmax - nmin) * rng.random((2,)))
 
         # find nodes in cube
         l1 = xyzn[:, 0] > randx[0]

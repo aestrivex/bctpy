@@ -371,7 +371,7 @@ def link_communities(W, type_clustering='single'):
             dc = (mc - min_mc) / (nc * (nc - 1) /
                                   2 - min_mc)  # community density
 
-            if np.array(dc).shape is not ():
+            if np.array(dc).shape != ():
                 print(dc)
                 print(dc.shape)
 

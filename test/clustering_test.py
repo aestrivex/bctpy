@@ -105,8 +105,26 @@ def test_transitivity_bd():
 
 
 def test_agreement_weighted():
-    # this function is very hard to use or interpret results from
-    pass
+    # Test whether agreement gives the same results as 
+    # agreement_weighted when the weights are all the same
+    ci = np.array([[1, 1, 2, 2, 3],
+                   [1, 2, 2, 3, 3],
+                   [1, 1, 2, 3, 3]]).T
+    wts = np.ones(ci.shape[1])
+    
+    D_agreement = bct.agreement(ci)
+    D_weighted = bct.agreement_weighted(ci, wts)
+    
+    # Undo the normalization and fill the diagonal with zeros 
+    # in D_weighted to get the same result as D_agreement
+    D_weighted = D_weighted * ci.shape[1]
+    np.fill_diagonal(D_weighted, 0)
+
+    print('agreement matrix:')
+    print(D_agreement)
+    print('weighted agreement matrix:')
+    print(D_weighted)
+    assert (D_agreement == D_weighted).all()
 
 def test_agreement():
     # Case 1: nodes > partitions

@@ -112,8 +112,8 @@ def test_agreement_weighted():
                    [1, 1, 2, 3, 3]]).T
     wts = np.ones(ci.shape[1])
     
-    D_agreement = agreement(ci)
-    D_weighted = agreement_weighted(ci, wts)
+    D_agreement = bct.agreement(ci)
+    D_weighted = bct.agreement_weighted(ci, wts)
     
     # Undo the normalization and fill the diagonal with zeros 
     # in D_weighted to get the same result as D_agreement

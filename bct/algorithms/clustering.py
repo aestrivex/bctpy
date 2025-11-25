@@ -73,7 +73,7 @@ def agreement_weighted(ci, wts):
 
     Parameters
     ----------
-    ci : MxN np.ndarray
+    ci : NxM np.ndarray
         set of M (possibly degenerate) partitions of N nodes
     wts : Mx1 np.ndarray
         relative weight of each partition
@@ -84,12 +84,12 @@ def agreement_weighted(ci, wts):
         weighted agreement matrix
     '''
     ci = np.array(ci)
-    m, n = ci.shape
+    n, m = ci.shape
     wts = np.array(wts) / np.sum(wts)
 
     D = np.zeros((n, n))
     for i in range(m):
-        d = dummyvar(ci[i, :].reshape(1, n))
+        d = dummyvar(ci[:, i].reshape(n, 1))
         D += np.dot(d, d.T) * wts[i]
     return D
 

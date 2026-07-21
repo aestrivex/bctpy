@@ -500,7 +500,7 @@ def modularity_dir(A, gamma=1, kci=None):
         larger modules while gamma > 1 detects smaller modules.
     kci : Nx1 np.ndarray | None
         starting community structure. If specified, calculates the Q-metric
-        on the community structure giving, without doing any optimzation.
+        on the community structure giving, without doing any optimization.
         Otherwise, if not specified, uses a spectral modularity maximization
         algorithm.
 
@@ -1516,7 +1516,7 @@ def modularity_und(A, gamma=1, kci=None):
         larger modules while gamma > 1 detects smaller modules.
     kci : Nx1 np.ndarray | None
         starting community structure. If specified, calculates the Q-metric
-        on the community structure giving, without doing any optimzation.
+        on the community structure giving, without doing any optimization.
         Otherwise, if not specified, uses a spectral modularity maximization
         algorithm.
 

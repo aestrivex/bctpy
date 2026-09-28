@@ -538,8 +538,9 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
         for i in range(nr_modules):
             #if more than 1 node in the module
             if np.sum(ci == i+1) > 1:         
-                kj = np.ones((np.sum(ci == i+1), 1)) * np.sum(ks[ci == i+1, :])
-                kj[i] /= 2
+                kj = np.ones((np.sum(ci == i+1), 1)) * np.sum(
+                    ks[ci == i+1, :], axis=0)
+                kj[:, i] /= 2
                 
                 kjs[ci == i+1, :] = kj
                         
@@ -550,7 +551,7 @@ def gateway_coef_sign(W, ci, centrality_type='degree'):
                     #sum of centralities of neighbors of node within a module
                     in_mod_nodes, = np.where(ci == j+1)
                     neighbs, = np.where(W[in_mod_nodes, i] > 0)
-                    cs[i, j] = np.sum(cent[neighbs])
+                    cs[i, j] = np.sum(cent[in_mod_nodes[neighbs]])
 
         #normalize by total connections
         ksm = ks / kjs
